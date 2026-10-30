@@ -41,6 +41,12 @@ namespace Assets.Scripts.Heroes.UI
             public Sprite Icon;
 
             /// <summary>
+            /// Optional small mark in the corner of an <see cref="Icon"/> - an upgrade node shows the
+            /// art of what it upgrades with its "▲" or "+" here, so it still reads as an upgrade.
+            /// </summary>
+            public string Badge;
+
+            /// <summary>
             /// Optional text drawn under the node. <b>Opt-in, and only the campaign map sets it</b>
             /// (the run's name - playtest 2026-09-28, finding 11): a sphere grid node is identified
             /// by its glyph and the detail panel, and a caption under every one of dozens of nodes
@@ -220,6 +226,12 @@ namespace Assets.Scripts.Heroes.UI
                 var icon = new Image { sprite = node.Icon, scaleMode = ScaleMode.ScaleToFit, pickingMode = PickingMode.Ignore };
                 icon.AddToClassList("sg-node__icon");
                 button.Add(icon);
+                if (!string.IsNullOrEmpty(node.Badge))
+                {
+                    var badge = new Label(node.Badge) { pickingMode = PickingMode.Ignore };
+                    badge.AddToClassList("sg-node__badge");
+                    button.Add(badge);
+                }
             }
             else
             {

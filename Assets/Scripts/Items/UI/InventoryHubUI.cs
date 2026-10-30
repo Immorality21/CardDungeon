@@ -892,9 +892,9 @@ namespace Assets.Scripts.Items.UI
             foreach (var slot in kit)
             {
                 var magic = Magic(slot.Key);
-                string caption = slot.InRun ? Loc.Format("items.abilities.charges-left", ("charges", slot.Charges), ("max", slot.MaxCharges))
-                               : runEntry != null ? Loc.Format("items.abilities.charges-next-floor", ("max", slot.MaxCharges))
-                               : Loc.Format("items.abilities.charges-a-run", ("max", slot.MaxCharges));
+                // The town never shows the state of a run underway (playtest 2026-10-30: "1 of 2 charges
+                // left this run" read as a bug in town) - only what the ability carries into a run.
+                string caption = Loc.Format("items.abilities.charges-a-run", ("max", slot.MaxCharges));
                 var row = BuildRow(magic != null ? magic.Icon : null, magic != null ? magic.DisplayName : slot.Key,
                     caption, string.Empty, null, out _);
                 row.AddToClassList("cd-inv-row--static");

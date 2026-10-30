@@ -549,11 +549,21 @@ namespace Assets.Scripts.Hub
             if (rank > 0)
             {
                 row.AddToClassList("cm-fear-row--on");
+                // Each rank its own colour and numeral, so rank 2 does not read like rank 1 with a
+                // different word (playtest 2026-10-30). Ranks past 3 share rank 3's red.
+                row.AddToClassList("cm-fear-row--rank-" + Mathf.Min(rank, 3));
             }
 
             var head = new VisualElement { pickingMode = PickingMode.Ignore };
             head.AddToClassList("cm-fear-row__head");
-            head.Add(MakeLabel(modifier.DisplayName, "cm-fear-row__name"));
+            var title = new VisualElement { pickingMode = PickingMode.Ignore };
+            title.AddToClassList("cm-fear-row__title");
+            if (rank > 0)
+            {
+                title.Add(MakeLabel(RankNumeral(rank), "cm-fear-row__badge"));
+            }
+            title.Add(MakeLabel(modifier.DisplayName, "cm-fear-row__name"));
+            head.Add(title);
             string pips = new string('●', rank) + new string('○', Mathf.Max(0, modifier.MaxRank - rank));
             head.Add(MakeLabel($"{pips}  +{modifier.FearPerRank * Mathf.Max(1, rank)}", "cm-fear-row__rank"));
             row.Add(head);
@@ -567,6 +577,21 @@ namespace Assets.Scripts.Hub
                 RefreshDetail();
             };
             return row;
+        }
+
+        private static string RankNumeral(int rank)
+        {
+            switch (rank)
+            {
+                case 1:
+                    return "I";
+                case 2:
+                    return "II";
+                case 3:
+                    return "III";
+                default:
+                    return rank.ToString();
+            }
         }
 
         private void MarkFearCursor()

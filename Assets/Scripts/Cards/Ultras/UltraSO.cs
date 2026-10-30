@@ -131,6 +131,10 @@ namespace Assets.Scripts.Cards
         [Tooltip("The form's art. Empty keeps the hero's own.")]
         public Sprite[] FormFrames;
 
+        [Tooltip("Shown on the sphere grid node that teaches this Ultra. Empty falls back to the first " +
+                 "FormFrames sprite, then to the node's glyph.")]
+        public Sprite Icon;
+
         [Min(1f)] public float FormFps = 4f;
 
         public string Label => string.IsNullOrEmpty(DisplayName) ? name : DisplayName;

@@ -407,3 +407,13 @@ Up now use their namesake files. Mend, Slash, War Cry and Water Splash keep thei
 icons. Enemy-only abilities still share. Weaker ones to redo some day: the three elemental cloaks
 (all a hooded figure), Aegis vs Sacred Shield (both gold discs), Watcher Gaze vs Mesmerize (both eyes),
 Ward, Mug, Hamstring vs Maim, Twin Strike (swords, not daggers).
+
+## Ultra icons (2026-10-30)
+
+24 new 32x32 icons, one per Ultra that had no art (`UltraSO.Icon`, `Sprites/Ultras/<UltraSO.Key>.png`),
+shown on the sphere grid node that teaches it; an Ultra with form frames and no icon still falls back
+to its first frame. Pixen, seed 9001 for the set, `no_background`, `single color black outline`,
+`medium detail`, prompt *"<what it shows>, dark fantasy RPG special attack skill icon, single symbol
+centered, clean readable silhouette"* (mechs and bags: "single object"). Metas copied from
+`Abilities/AimedShot.png.meta` with fresh GUIDs. 24 generations, no rerolls. Weaker ones to redo some
+day: Earthsplitter and the Flamethrower Mech (figures, not symbols), Pack Hunt (one wolf, not three).

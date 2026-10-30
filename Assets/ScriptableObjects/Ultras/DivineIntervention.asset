@@ -54,4 +54,5 @@ MonoBehaviour:
   AttackDamageType: 0
   Abilities: []
   FormFrames: []
+  Icon: {fileID: 21300000, guid: 6b47230f4947443a97dee8f287914097, type: 3}
   FormFps: 4

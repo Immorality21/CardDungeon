@@ -475,8 +475,8 @@ namespace Assets.Scripts.Hub
             {
                 var magic = MagicCatalog.HasInstance ? MagicCatalog.Instance.GetMagic(slot.Key) : null;
                 string name = magic != null ? magic.DisplayName : slot.Key;
-                string charges = slot.InRun ? Loc.Format("hub.camp.charges-left", ("charges", slot.Charges), ("max", slot.MaxCharges))
-                               : Loc.Format("hub.camp.charges", ("max", slot.MaxCharges));
+                // The town never shows a run's spent charges (playtest 2026-10-30), only the allowance.
+                string charges = Loc.Format("hub.camp.charges", ("max", slot.MaxCharges));
                 _detailBody.Add(MakeLabel(Loc.Format("hub.camp.carried-line", ("name", name), ("charges", charges)), "cd-inv-detail__line"));
             }
 

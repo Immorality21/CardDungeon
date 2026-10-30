@@ -1726,7 +1726,7 @@ MonoBehaviour:
     Note: 
   - Key: item.gild-leaf.name
     Values:
-    - Gild Leaf
+    - Gilded Leaf
     Reviewed: 0
     Note: 
   - Key: item.gild-leaf.description
@@ -3496,12 +3496,12 @@ MonoBehaviour:
     Note: 
   - Key: tutorial.retry-first-floor.text
     Values:
-    - The dungeon is still waiting. Take The Story to go back down.
+    - The dungeon is still waiting. Choose The Story to go back down.
     Reviewed: 0
     Note: 
   - Key: tutorial.build-hall-in-town.text
     Values:
-    - You came home with timber. Click the Hall of Progression's foundation to raise
+    - You brought back timber. Click the Hall of Progression's foundation to build
       it.
     Reviewed: 0
     Note: 
@@ -3512,17 +3512,17 @@ MonoBehaviour:
     Note: 
   - Key: tutorial.open-hall-in-town.text
     Values:
-    - The hall stands. Step inside to spend the XP your hero gained.
+    - The hall is built. Go inside to spend the XP your hero earned.
     Reviewed: 0
     Note: 
   - Key: tutorial.enter-hall-on-panel.text
     Values:
-    - The hall stands. Enter it to spend the XP your hero gained.
+    - The hall is built. Enter it to spend the XP your hero earned.
     Reviewed: 0
     Note: 
   - Key: tutorial.pick-node.text
     Values:
-    - Every fight gave your hero XP. Click the glowing node - you can afford it.
+    - Your hero earned XP from every fight. Click the glowing node to buy it.
     Reviewed: 0
     Note: 
   - Key: tutorial.activate-node.text
@@ -3532,24 +3532,23 @@ MonoBehaviour:
     Note: 
   - Key: tutorial.node-learned.text
     Values:
-    - Your hero grew stronger. Head back to town - the road down is open again.
+    - 'Your hero is stronger. Head back to town: the way down is open again.'
     Reviewed: 0
     Note: 
   - Key: tutorial.take-the-road.text
     Values:
-    - The town is yours now. When you are ready, take The Story to continue The Threshold.
+    - When you are ready, choose The Story to continue The Threshold.
     Reviewed: 0
     Note: 
   - Key: tutorial.first-death.text
     Values:
-    - Every party falls, and falling is how you get stronger. What you earned on
-      earlier floors is safe - spend it in town, then go back down.
+    - Every party falls sometimes, and that is how you get stronger. What you earned
+      on earlier floors is kept. Spend it in town, then go back down.
     Reviewed: 0
     Note: 
   - Key: tutorial.open-storehouse-in-town.text
     Values:
-    - The floor paid out a sword. Gear is vital to survival down there - open the
-      Storehouse and put it on.
+    - You found a sword. Open the Storehouse and equip it.
     Reviewed: 0
     Note: 
   - Key: tutorial.enter-storehouse-on-panel.text
@@ -3559,25 +3558,24 @@ MonoBehaviour:
     Note: 
   - Key: tutorial.equip-gear.text
     Values:
-    - Pick the Main Hand slot, then the sword, and equip it. A party without gear
-      does not last long.
+    - Select the Main Hand slot, then the sword, and equip it.
     Reviewed: 0
     Note: 
   - Key: tutorial.gear-equipped.text
     Values:
-    - Equipped. Check here after every run - better gear turns up the deeper you
-      go. Back to town when ready.
+    - 'Equipped. Check back after each run: better gear drops deeper down. Return
+      to town when you are ready.'
     Reviewed: 0
     Note: 
   - Key: tutorial.go-on.text
     Values:
-    - Your party is armed. When you are ready, take The Story to continue The Threshold.
+    - Your party is equipped. When you are ready, choose The Story to continue The
+      Threshold.
     Reviewed: 0
     Note: 
   - Key: tutorial.challenge-ahead.text
     Values:
-    - Not every open road is meant for you yet. {run} is built for a far stronger
-      party - most go elsewhere first.
+    - '{run} is meant for a much stronger party. Try other runs first.'
     Reviewed: 0
     Note: 
   - Key: tutorial.revisit-hall-in-town.text
@@ -3588,8 +3586,8 @@ MonoBehaviour:
     Note: 
   - Key: tutorial.revisit-hall-on-grid.text
     Values:
-    - The Paladin has XP to spend as well. Spend it on either hero, or go back when
-      you are ready.
+    - The Paladin has XP to spend too. Spend it on either hero, or go back when you
+      are ready.
     Reviewed: 0
     Note: 
   - Key: node.mage-multicast.name
@@ -4986,8 +4984,7 @@ MonoBehaviour:
     Note: 'Combat log: party-replacing summon arrives'
   - Key: combat.log.summon-replaces-party-allies-leave
     Values:
-    - '{caster} summons {summon}! The party steps back, and their allies are sent
-      away.'
+    - '{caster} summons {summon}! The party steps back and their allies leave.'
     Reviewed: 0
     Note: 'Combat log: party-replacing summon arrives while allies were out'
   - Key: combat.log.summon-swaps-ally
@@ -5023,7 +5020,7 @@ MonoBehaviour:
       {ability} = ability name'
   - Key: combat.log.sacrifice-self
     Values:
-    - '{cultist} gives himself to the rite, and {horror} rises in his place!'
+    - '{cultist} sacrifices himself, and {horror} rises in his place!'
     Reviewed: 0
     Note: 'Combat log: the Cultist sacrifices himself; {horror} = creature name'
   - Key: combat.log.sacrifice-other
@@ -5178,12 +5175,12 @@ MonoBehaviour:
     Note: 'Combat log: enemy telegraphs a heavy blow'
   - Key: combat.log.enemy-channels
     Values:
-    - '{enemy} is channeling a devastating attack!'
+    - '{enemy} is charging a powerful attack!'
     Reviewed: 0
     Note: 'Combat log: boss telegraphs a party-wide attack'
   - Key: combat.log.enemy-aoe
     Values:
-    - '{enemy} unleashes a devastating blow on the whole party!'
+    - '{enemy} attacks the whole party!'
     Reviewed: 0
     Note: 'Combat log: boss party-wide attack lands'
   - Key: combat.log.enemy-no-one-to-heal
@@ -5335,17 +5332,17 @@ MonoBehaviour:
     Note: Verb inside combat.log.attack-* (boss party-wide blow, per target)
   - Key: room.map.hint.enemies
     Values:
-    - Enemies hold this room - clear them or flee before travelling.
+    - Enemies are in this room. Defeat them or flee before you travel.
     Reviewed: 0
     Note: Dungeon map, line under the map when travel is blocked by enemies
   - Key: room.map.hint.nowhere
     Values:
-    - Nowhere to travel yet - the floor beyond this room is unexplored.
+    - Nowhere to travel yet. Explore more of the floor first.
     Reviewed: 0
     Note: Dungeon map, line under the map when no room can be travelled to
   - Key: room.map.hint.travel
     Values:
-    - Click an explored room, or arrows then Enter, to travel there instantly.
+    - Click an explored room (or use the arrows and Enter) to travel there.
     Reviewed: 0
     Note: Dungeon map, line under the map when travel is possible
   - Key: room.map.status.rooms.one
@@ -5445,12 +5442,12 @@ MonoBehaviour:
     Note: Map window waiting line, exit part
   - Key: room.map.waiting.none
     Values:
-    - "{exit} \xB7 nothing left waiting"
+    - "{exit} \xB7 nothing left to do"
     Reviewed: 0
     Note: Map window line; {exit} = exit part
   - Key: room.map.waiting.some
     Values:
-    - "{exit} \xB7 still waiting: {things}"
+    - "{exit} \xB7 left to do: {things}"
     Reviewed: 0
     Note: Map window line; {exit} = exit part, {things} = counts joined by the separator
   - Key: room.map.waiting.separator
@@ -5490,7 +5487,7 @@ MonoBehaviour:
     Note: Room event odds line (clear read)
   - Key: event-text.odds.vague.safe
     Values:
-    - It looks safe enough, though you could not say how safe.
+    - It looks fairly safe.
     Reviewed: 0
     Note: Room event odds line (vague read)
   - Key: event-text.odds.vague.risky
@@ -5500,7 +5497,7 @@ MonoBehaviour:
     Note: Room event odds line (vague read)
   - Key: event-text.odds.vague.dangerous
     Values:
-    - It looks dangerous, though you could not say how dangerous.
+    - It looks dangerous.
     Reviewed: 0
     Note: Room event odds line (vague read)
   - Key: event-text.affliction.minus
@@ -5809,13 +5806,13 @@ MonoBehaviour:
     Note: Room event choice tag, clear read; {stat} = short stat name
   - Key: room.event.odds
     Values:
-    - Anything you chance here turns on {stat}. {reading}
+    - This depends on {stat}. {reading}
     Reviewed: 0
     Note: Room event window odds line; {stat} = stat name, {reading} = event-text.odds.*
       sentence
   - Key: room.event.odds-hero
     Values:
-    - Anything you chance here turns on {stat} - {hero} has the best of it. {reading}
+    - This depends on {stat}. {hero} has the most. {reading}
     Reviewed: 0
     Note: Room event window odds line; {stat} = stat name, {hero} = acting hero,
       {reading} = event-text.odds.* sentence
@@ -5829,7 +5826,7 @@ MonoBehaviour:
     - '{text}
 
 
-      It will still be here if you change your mind.'
+      You can come back to it later.'
     Reviewed: 0
     Note: Room event, walking away dialog; {text} = the option's decline text
   - Key: room.event.result.nothing
@@ -5888,12 +5885,12 @@ MonoBehaviour:
     Note: Stairs confirm title on the last floor
   - Key: room.descend.message
     Values:
-    - The stairs drop away into the dark below.
+    - Stairs lead down to the next level.
     Reviewed: 0
     Note: Stairs confirm text
   - Key: room.descend.message.last
     Values:
-    - The way is clear. Nothing lies deeper - this is the end of the run.
+    - The way is clear. This is the last level of the run.
     Reviewed: 0
     Note: Stairs confirm text on the last floor
   - Key: room.descend.confirm
@@ -5918,8 +5915,8 @@ MonoBehaviour:
     Note: Captive freed dialog title; {hero} = hero name
   - Key: room.captive.message
     Values:
-    - '{hero} was held captive here. {blurb}They are yours for good once this level
-      is cleared - fall here and they are lost with the rest of the run.'
+    - '{hero} was held captive here. {blurb}They join you for good once you clear
+      this level. If you fall before that, they are lost.'
     Reviewed: 0
     Note: Captive freed dialog; {hero} = hero name, {blurb} = hero blurb followed
       by a blank line, or empty
@@ -5935,12 +5932,12 @@ MonoBehaviour:
     Note: Cache dialog title
   - Key: room.cache.message-gold
     Values:
-    - Coin and oddments, stashed here and forgotten. +{amount} gold.
+    - A hidden stash. +{amount} gold.
     Reviewed: 0
     Note: Cache dialog; {amount} = gold
   - Key: room.cache.message
     Values:
-    - Coin and oddments, stashed here and forgotten.
+    - A hidden stash.
     Reviewed: 0
     Note: Cache dialog when it held no gold
   - Key: room.cache.nothing-else
@@ -5954,27 +5951,26 @@ MonoBehaviour:
       a blank line)
   - Key: room.refuge.state.hurt
     Values:
-    - The party is down {missing} health between them.
+    - The party is missing {missing} health in total.
     Reviewed: 0
     Note: Refuge prompt, party state; {missing} = total missing health
   - Key: room.refuge.state.whole
     Values:
-    - Nobody here is hurt - resting now wastes the place.
+    - Nobody is hurt. Resting now would waste it.
     Reviewed: 0
     Note: Refuge prompt, party state when nobody is hurt
   - Key: room.refuge.title
     Values:
-    - A Refuge
+    - Refuge
     Reviewed: 0
     Note: Refuge dialog title (prompt and result)
   - Key: room.refuge.prompt
     Values:
-    - 'Dry ground, and nothing watching. {state}
+    - 'A safe place to rest. {state}
 
 
-      Resting restores {percent}%
-      of each hero''s health and refills every ability charge. It can only be done
-      once.'
+      Resting restores {percent}% of each
+      hero''s health and refills all ability charges. You can only rest here once.'
     Reviewed: 0
     Note: Refuge confirm text; {state} = room.refuge.state.* sentence, {percent}
       = share of health restored
@@ -5990,7 +5986,7 @@ MonoBehaviour:
     Note: Refuge result line; {hero} = hero name, {amount} = health
   - Key: room.refuge.already-whole
     Values:
-    - '{hero} was already whole.'
+    - '{hero} is already at full health.'
     Reviewed: 0
     Note: Refuge result line; {hero} = hero name
   - Key: room.refuge.ability-charges
@@ -6010,7 +6006,7 @@ MonoBehaviour:
     Note: Floating text over the party after resting
   - Key: room.refuge.result
     Values:
-    - 'You make camp long enough to bind what can be bound.
+    - 'The party rests.
 
 
       {lines}'
@@ -6139,8 +6135,8 @@ MonoBehaviour:
     Note: Pause menu note under the leave button
   - Key: room.pause.note-armed
     Values:
-    - You will start this floor again, from the entrance, with every enemy back -
-      and just as hurt as you are now. What this floor has given you so far is lost.
+    - You will restart this floor from the entrance with every enemy back, and your
+      party as hurt as it is now. Everything found on this floor so far is lost.
     Reviewed: 0
     Note: Pause menu note once leaving is armed
   - Key: room.keys.combat-bar
@@ -6187,12 +6183,12 @@ MonoBehaviour:
       {where})
   - Key: room.death.summary-run
     Values:
-    - Somewhere in {where}, the last of them goes down. The run ends here.
+    - Your party has fallen in {where}. The run is over.
     Reviewed: 0
     Note: Death screen text during a run; {where} = level name
   - Key: room.death.summary
     Values:
-    - Somewhere in {where}, the last of them goes down.
+    - Your party has fallen in {where}.
     Reviewed: 0
     Note: Death screen text outside a run; {where} = level name
   - Key: room.death.row.level-gold
@@ -6346,7 +6342,7 @@ MonoBehaviour:
       double spaces)
   - Key: room.hud.gold-teaching
     Values:
-    - Gold found  +{amount}   (yours when you take the stairs)
+    - Gold found  +{amount}   (kept when you take the stairs)
     Reviewed: 0
     Note: Dungeon HUD gold during the tutorial; {amount} = pending gold (keep the
       spacing)
@@ -6377,12 +6373,12 @@ MonoBehaviour:
     Note: Level-clear window, what comes next
   - Key: room.level-clear.next.continue
     Values:
-    - 'Next: {level} - continue now, or rest in town first.'
+    - 'Next: {level}. Continue now, or rest in town first.'
     Reviewed: 0
     Note: Level-clear window, what comes next; {level} = next level name
   - Key: room.level-clear.next.from-map
     Values:
-    - 'Next: {level} - continue it from the story map.'
+    - 'Next: {level}. Continue from the story map.'
     Reviewed: 0
     Note: Level-clear window, what comes next; {level} = next level name
   - Key: room.level-clear.subtitle.level
@@ -6458,22 +6454,22 @@ MonoBehaviour:
   - Key: abilities.describe.crit-chance
     Values:
     - '{line}, {chance}% crit'
-    Reviewed: 0
+    Reviewed: 1
     Note: ability effect line + crit; line = damage line, chance = crit percent
   - Key: abilities.describe.can-crit
     Values:
     - '{line}, can crit'
-    Reviewed: 0
+    Reviewed: 1
     Note: ability effect line, no caster; line = damage line
   - Key: abilities.describe.forge-preview
     Values:
     - "{now} \u2192 {next}"
-    Reviewed: 0
+    Reviewed: 1
     Note: Forge effect line with next-level preview; now/next = effect lines
   - Key: abilities.describe.forge-scales
     Values:
     - '{line} + {stat}'
-    Reviewed: 0
+    Reviewed: 1
     Note: Forge effect line; stat = scaling stat short name
   - Key: abilities.target.random-shots
     Values:
@@ -6513,23 +6509,23 @@ MonoBehaviour:
   - Key: abilities.describe.first-line
     Values:
     - '{target}: {effect}'
-    Reviewed: 0
+    Reviewed: 1
     Note: ability description first line; target = target label, effect = first effect
       line
   - Key: abilities.describe.more-line
     Values:
     - + {effect}
-    Reviewed: 0
+    Reviewed: 1
     Note: ability description further effect line
   - Key: abilities.describe.heal-percent
     Values:
     - heals {percent}% of max HP
-    Reviewed: 0
+    Reviewed: 1
     Note: ability effect line
   - Key: abilities.describe.heal
     Values:
     - heals {amount} HP
-    Reviewed: 0
+    Reviewed: 1
     Note: ability effect line
   - Key: abilities.describe.turn-delay
     Values:
@@ -6539,17 +6535,17 @@ MonoBehaviour:
   - Key: abilities.describe.drain-party
     Values:
     - heals the whole party {percent}% of the damage dealt
-    Reviewed: 0
+    Reviewed: 1
     Note: ability effect line
   - Key: abilities.describe.drain-caster
     Values:
     - heals the caster {percent}% of the damage dealt
-    Reviewed: 0
+    Reviewed: 1
     Note: ability effect line
   - Key: abilities.describe.restore-charge-one
     Values:
     - restores 1 charge to an ability
-    Reviewed: 0
+    Reviewed: 1
     Note: ability effect line
   - Key: abilities.describe.restore-charges
     Values:
@@ -6558,8 +6554,8 @@ MonoBehaviour:
     Note: ability effect line
   - Key: abilities.describe.disassemble
     Values:
-    - takes a machine apart outright - likelier the more of its kind you have defeated
-    Reviewed: 0
+    - instantly destroy a machine - likelier the more of its kind you have defeated
+    Reviewed: 1
     Note: ability effect line
   - Key: abilities.describe.revive
     Values:
@@ -6569,23 +6565,23 @@ MonoBehaviour:
   - Key: abilities.describe.cure-all
     Values:
     - clears every debuff
-    Reviewed: 0
+    Reviewed: 1
     Note: ability effect line
   - Key: abilities.describe.cure-one
     Values:
     - clears one debuff
-    Reviewed: 0
+    Reviewed: 1
     Note: ability effect line
   - Key: abilities.describe.cure-many
     Values:
     - clears {count} debuffs
-    Reviewed: 0
+    Reviewed: 1
     Note: ability effect line
   - Key: abilities.describe.intercept
     Values:
     - takes the single-target blows aimed at them until your next turn, at {percent}%
       less damage
-    Reviewed: 0
+    Reviewed: 1
     Note: ability effect line
   - Key: abilities.describe.retaliate
     Values:
@@ -6610,12 +6606,12 @@ MonoBehaviour:
   - Key: abilities.describe.execute
     Values:
     - destroys {target} under {percent}% health outright (not bosses)
-    Reviewed: 0
+    Reviewed: 1
     Note: ability effect line; target = trait name or abilities.describe.execute-any-foe
   - Key: abilities.describe.execute-any-foe
     Values:
     - a foe
-    Reviewed: 0
+    Reviewed: 1
     Note: 'ability effect line: Execute with no trait'
   - Key: abilities.describe.steal-certain
     Values:
@@ -6630,47 +6626,47 @@ MonoBehaviour:
   - Key: abilities.describe.fight-gold
     Values:
     - +{percent}% gold from this fight's kills and steals
-    Reviewed: 0
+    Reviewed: 1
     Note: ability effect line
   - Key: abilities.describe.refund-charge
     Values:
     - the cast costs no charge
-    Reviewed: 0
+    Reviewed: 1
     Note: ability effect line
   - Key: abilities.describe.damage-percent
     Values:
     - '{percent}% of max HP damage'
-    Reviewed: 0
+    Reviewed: 1
     Note: ability effect line
   - Key: abilities.describe.damage-percent-element
     Values:
     - '{percent}% of max HP {element} damage'
-    Reviewed: 0
+    Reviewed: 1
     Note: ability effect line; element = damage type name
   - Key: abilities.describe.damage
     Values:
     - '{amount} damage'
-    Reviewed: 0
+    Reviewed: 1
     Note: ability effect line
   - Key: abilities.describe.damage-element
     Values:
     - '{amount} {element} damage'
-    Reviewed: 0
+    Reviewed: 1
     Note: ability effect line; element = damage type name
   - Key: abilities.describe.bonus-double
     Values:
     - '{line}, double vs {versus}'
-    Reviewed: 0
+    Reviewed: 1
     Note: ability damage line bonus; versus = trait name or lowercase status
   - Key: abilities.describe.bonus-percent
     Values:
     - '{line}, +{percent}% vs {versus}'
-    Reviewed: 0
+    Reviewed: 1
     Note: ability damage line bonus; versus = trait name or lowercase status
   - Key: abilities.describe.bonus-per-debuff
     Values:
     - '{line}, +{percent}% per debuff on the target (up to {max})'
-    Reviewed: 0
+    Reviewed: 1
     Note: ability damage line bonus
   - Key: abilities.describe.with-attack
     Values:
@@ -7490,7 +7486,7 @@ MonoBehaviour:
       = item'
   - Key: abilities.forge.base-worn
     Values:
-    - <color={colour}>{name} 1/1</color> (worn - the new piece goes on in its place)
+    - <color={colour}>{name} 1/1</color> (equipped, the new item replaces it)
     Reviewed: 0
     Note: 'Forge recipe needs: base item worn by a hero'
   - Key: abilities.forge.base-held
@@ -7525,12 +7521,12 @@ MonoBehaviour:
     Note: Forge ability detail subtitle
   - Key: abilities.forge.ability-note
     Values:
-    - Before the target's defense. A hero adds the stat after the +.
+    - Before the target's defence. The hero's stat is added on top.
     Reviewed: 0
     Note: Forge ability detail note under the effect lines
   - Key: abilities.forge.reason-ceiling
     Values:
-    - The Forge allows Lv {level}. Raise the Forge to go further.
+    - The Forge allows up to Lv {level}. Upgrade the Forge to go higher.
     Reviewed: 0
     Note: 'Forge: why combo upgrade is dimmed'
   - Key: abilities.forge.reason-essence
@@ -7565,7 +7561,7 @@ MonoBehaviour:
     Note: Forge undiscovered row caption, Combos tab
   - Key: abilities.forge.empty-recipes
     Values:
-    - No recipes known yet. Monsters and cleared floors give them up.
+    - No recipes known yet. Monsters and cleared floors can drop them.
     Reviewed: 0
     Note: Forge empty list, Craft tab
   - Key: abilities.forge.empty-abilities
@@ -7661,12 +7657,13 @@ MonoBehaviour:
     Note: campfire XP split mode name
   - Key: hub.campfire.mode.mentor.desc
     Values:
-    - A hero you name takes a double share. The rest split what is left.
+    - The hero you choose gets a double share. The rest split what is left.
     Reviewed: 0
     Note: campfire mode description
   - Key: hub.campfire.mode.catch-up.desc
     Values:
-    - Whoever is furthest behind takes the double share, chosen fresh each time.
+    - The hero with the least XP gets the double share. This is checked every time
+      XP is given.
     Reviewed: 0
     Note: campfire mode description
   - Key: hub.campfire.mode.even.desc
@@ -7716,12 +7713,12 @@ MonoBehaviour:
     Note: Options screen mute toggle while not muted
   - Key: menu.options.note-muted
     Values:
-    - Everything is silenced. The dials keep their settings.
+    - All sound is muted. Your volume settings are kept.
     Reviewed: 0
     Note: Options screen note under the dials while muted
   - Key: menu.options.note
     Values:
-    - Master scales everything; the other two scale their own kind on top of it.
+    - Master sets the overall volume. Music and Sound Effects are set on top of it.
     Reviewed: 0
     Note: Options screen note under the dials
   - Key: items.slot.main-hand
@@ -8048,12 +8045,12 @@ MonoBehaviour:
     Note: lot feedback; cost = upgrade gold
   - Key: hub.lot.feedback.materials-missing
     Values:
-    - The materials went missing between checking and paying.
+    - Not enough materials.
     Reviewed: 0
     Note: lot feedback (rare failure)
   - Key: hub.lot.feedback.gold-missing
     Values:
-    - The gold went missing between checking and paying.
+    - Not enough gold.
     Reviewed: 0
     Note: lot feedback (rare failure)
   - Key: hub.lot.feedback.built
@@ -8103,7 +8100,7 @@ MonoBehaviour:
     Note: run complete screen title when the run is unknown
   - Key: hub.complete.revisit-message
     Values:
-    - Revisit cleared at Fear level {fear}. Every reward on the way paid +{bonus}%.
+    - Revisit cleared at Fear level {fear}. All rewards were increased by {bonus}%.
     Reviewed: 0
     Note: run complete message; fear = Fear level, bonus = reward bonus percent
   - Key: hub.complete.best-fear
@@ -8128,7 +8125,7 @@ MonoBehaviour:
     Note: run complete message when new runs opened
   - Key: hub.complete.message-victorious
     Values:
-    - Every floor cleared. Your heroes stand victorious.
+    - Every floor cleared. Well done.
     Reviewed: 0
     Note: run complete message
   - Key: hub.complete.now-open
@@ -8143,7 +8140,7 @@ MonoBehaviour:
     Note: run complete row label
   - Key: hub.complete.revisit-value
     Values:
-    - Run it again from the story map, harder, for bigger rewards
+    - Replay it from the story map at a higher difficulty for bigger rewards
     Reviewed: 0
     Note: run complete row value on a first clear of a revisitable run
   - Key: hub.complete.enemies-felled
@@ -8226,8 +8223,8 @@ MonoBehaviour:
     Note: story map detail status while picking revisit conditions
   - Key: hub.campaign.revisit-blurb
     Values:
-    - 'Each condition raises the Fear level by its +number: a harder run, bigger
-      rewards. Stronger heroes come from the Hall of Progression.'
+    - 'Each condition raises the Fear level by its number: a harder run with bigger
+      rewards. Get stronger at the Hall of Progression.'
     Reviewed: 0
     Note: story map detail blurb while picking revisit conditions
   - Key: hub.campaign.begin-revisit
@@ -8302,8 +8299,8 @@ MonoBehaviour:
     Note: fear picker when no rules exist (dev-facing)
   - Key: hub.campaign.revisit-base
     Values:
-    - 'Every revisit: enemies +{percent}% to every stat - health, damage, speed,
-      defences.'
+    - 'Every revisit: enemies get +{percent}% to all stats (health, damage, speed,
+      defence).'
     Reviewed: 0
     Note: fear picker summary; percent = base enemy stat bonus
   - Key: hub.campaign.conditions
@@ -8463,7 +8460,7 @@ MonoBehaviour:
     Note: carried ability line; name = ability, charges = hub.camp.charges(-left)
   - Key: hub.camp.leader-note
     Values:
-    - The leader walks at the front and takes any XP an even split leaves over.
+    - The leader walks in front and gets any XP left over from an even split.
     Reviewed: 0
     Note: campfire detail note on the leader
   - Key: hub.camp.belt-slot
@@ -8534,7 +8531,7 @@ MonoBehaviour:
     Note: campfire feedback; hero = hero name
   - Key: hub.camp.feedback.they-lead
     Values:
-    - They leads the party.
+    - They lead the party.
     Reviewed: 0
     Note: campfire feedback when the hero is unknown (wording as before)
   - Key: hub.camp.feedback.too-small
@@ -8599,7 +8596,7 @@ MonoBehaviour:
     Note: merchant list title (belt tab)
   - Key: hub.merchant.empty.no-belt
     Values:
-    - The merchant has no belt work today.
+    - No belt upgrades available.
     Reviewed: 0
     Note: merchant empty belt list
   - Key: hub.merchant.price-max
@@ -8669,7 +8666,7 @@ MonoBehaviour:
     Note: belt slot upgrade; now = current slots, next = after
   - Key: hub.merchant.belt.slots-max
     Values:
-    - '{now} slots, the most a belt holds'
+    - '{now} slots (maximum)'
     Reviewed: 0
     Note: belt slot upgrade maxed; now = slots
   - Key: hub.merchant.belt.new-potion
@@ -8684,7 +8681,7 @@ MonoBehaviour:
     Note: belt capacity upgrade; now/next = potions per run
   - Key: hub.merchant.belt.capacity-max
     Values:
-    - '{now} per run, the most it carries'
+    - '{now} per run (maximum)'
     Reviewed: 0
     Note: belt capacity maxed; now = potions per run
   - Key: hub.merchant.belt.charges-change
@@ -8694,7 +8691,7 @@ MonoBehaviour:
     Note: belt potency upgrade (charge potion); now/next = charges
   - Key: hub.merchant.belt.charges-max
     Values:
-    - '{now} charges restored, the strongest brew'
+    - '{now} charges restored (maximum)'
     Reviewed: 0
     Note: belt potency maxed (charge potion); now = charges
   - Key: hub.merchant.belt.heal-change
@@ -8704,7 +8701,7 @@ MonoBehaviour:
     Note: belt potency upgrade (healing potion); now/next = percent
   - Key: hub.merchant.belt.heal-max
     Values:
-    - '{now}% of max health, the strongest brew'
+    - '{now}% of max health (maximum)'
     Reviewed: 0
     Note: belt potency maxed (healing potion); now = percent
   - Key: hub.merchant.fully-upgraded
@@ -8719,8 +8716,8 @@ MonoBehaviour:
     Note: merchant reason for a belt step
   - Key: hub.merchant.belt.slot-desc
     Values:
-    - Each slot carries one kind of potion, chosen at the campfire before a run.
-      The belt refills when a run begins, not between floors.
+    - Each slot holds one type of potion, chosen at the campfire before a run. The
+      belt refills at the start of each run, not between floors.
     Reviewed: 0
     Note: belt slot offer description
   - Key: hub.merchant.belt.recipe-desc
@@ -8767,7 +8764,7 @@ MonoBehaviour:
     Note: merchant feedback
   - Key: hub.merchant.feedback.restocked
     Values:
-    - The merchant lays out fresh wares.
+    - The merchant has new stock.
     Reviewed: 0
     Note: merchant feedback
   - Key: hub.merchant.feedback.nothing-to-sell
@@ -8995,7 +8992,7 @@ MonoBehaviour:
     Note: consumables/materials summary; kinds = distinct items, total = count
   - Key: items.inv.consumables-note
     Values:
-    - Shared by the whole party, and used from the Item command in a fight.
+    - Shared by the whole party. Use them with the Item command in a fight.
     Reviewed: 0
     Note: consumables tab note
   - Key: items.inv.empty.no-consumables
@@ -9075,13 +9072,13 @@ MonoBehaviour:
     Note: ability detail section title
   - Key: items.inv.note.in-run
     Values:
-    - In this run's slots until the run ends. Its charges come back at a refuge.
+    - In this run's slots until the run ends. Charges are restored at a refuge.
     Reviewed: 0
     Note: ability detail note
   - Key: items.inv.note.carried-last
     Values:
-    - Carried. A hero always takes at least one ability - carry another to swap this
-      one out.
+    - Carried. A hero must carry at least one ability. Carry another to replace this
+      one.
     Reviewed: 0
     Note: ability detail note
   - Key: items.inv.note.carried
@@ -9091,7 +9088,7 @@ MonoBehaviour:
     Note: ability detail note
   - Key: items.inv.note.slots-in-use
     Values:
-    - Every slot is in use this run. It can be carried from the next run on.
+    - All slots are in use this run. You can carry it from the next run.
     Reviewed: 0
     Note: ability detail note
   - Key: items.inv.note.slots-full
@@ -9341,7 +9338,7 @@ MonoBehaviour:
     Note: Hall of Knowledge empty Monsters page title
   - Key: bestiary.empty.enemies.sub
     Values:
-    - Everything the party survives is written down here.
+    - Enemies you meet are recorded here.
     Reviewed: 0
     Note: Hall of Knowledge empty Monsters page subtitle
   - Key: bestiary.detail.not-encountered
@@ -9885,32 +9882,30 @@ MonoBehaviour:
     Note: Sphere grid detail title for an ability slot node
   - Key: grid.upgrade-detail.power
     Values:
-    - '{ability} hits (or heals) for {amount} more, before its scaling stat.'
+    - '{ability} deals (or heals) {amount} more, before its stat bonus.'
     Reviewed: 0
     Note: Sphere grid ability upgrade detail; {ability} name, {amount} power
   - Key: grid.upgrade-detail.crit-chance
     Values:
-    - '{ability} can land critical hits, at {amount}% better odds than this hero''s
-      own - Luck raises both.'
+    - '{ability} can land critical hits, with a {amount}% higher chance than the
+      hero''s own. Luck raises both.'
     Reviewed: 0
     Note: Sphere grid ability upgrade detail; {ability} name, {amount} percentage
       points
   - Key: grid.upgrade-detail.duration.one
     Values:
-    - Everything {ability} leaves behind - buffs, debuffs, poisons, burns - lasts
-      1 turn longer.
+    - Buffs, debuffs and damage over time from {ability} last 1 turn longer.
     Reviewed: 0
     Note: Sphere grid ability upgrade detail (+1 turn); {ability} name
   - Key: grid.upgrade-detail.duration.many
     Values:
-    - Everything {ability} leaves behind - buffs, debuffs, poisons, burns - lasts
-      {amount} turns longer.
+    - Buffs, debuffs and damage over time from {ability} last {amount} turns longer.
     Reviewed: 0
     Note: Sphere grid ability upgrade detail; {ability} name, {amount} turns (not
       1)
   - Key: grid.upgrade-detail.apply-chance
     Values:
-    - '{ability}''s debuffs are {amount}% likelier to take hold.'
+    - '{ability}''s debuffs have a {amount}% higher chance to land.'
     Reviewed: 0
     Note: Sphere grid ability upgrade detail; {ability} name, {amount} percentage
       points
@@ -9927,8 +9922,8 @@ MonoBehaviour:
       1)
   - Key: grid.detail.learns
     Values:
-    - Learns {ability}, {charges} charges a run. Carry it by giving it a slot in
-      the Storehouse.
+    - Learns {ability} ({charges} charges per run). Give it a slot in the Storehouse
+      to carry it.
     Reviewed: 0
     Note: Sphere grid known-ability node detail (after the ability's description);
       {ability} name, {charges} per run
@@ -9939,7 +9934,7 @@ MonoBehaviour:
     Note: Sphere grid awakening node detail; {from}/{to} ability names
   - Key: grid.detail.ability-slot
     Values:
-    - Carry one more of the abilities this hero knows into every run.
+    - Carry one more ability into every run.
     Reviewed: 0
     Note: Sphere grid ability slot node detail
   - Key: grid.detail.summon
@@ -9950,8 +9945,8 @@ MonoBehaviour:
     Note: Sphere grid summon node detail; {summon} summon name
   - Key: grid.detail.ultra
     Values:
-    - Learns the Ultra {ultra}. {what}Use it from the Ultra command once the gauge
-      is full - losing health in a fight fills it.
+    - Learns the Ultra {ultra}. {what}Use it with the Ultra command once the gauge
+      is full. Taking damage fills the gauge.
     Reviewed: 0
     Note: Sphere grid Ultra node detail; {ultra} Ultra name, {what} the Ultra's description
       followed by ". " (or empty)

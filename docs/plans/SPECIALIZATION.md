@@ -599,7 +599,7 @@ Warrior's two. The user picked the shapes; the numbers are starting numbers.
 | branch | summon | kind | does | upgrades (d13 → d14 → d15) | material |
 |---|---|---|---|---|---|
 | A — Shield Up, Ward | **Aegis Lion** | special attack, on the Paladin | +50% own Endurance for 3 turns and **+60 threat** | +25% END → +1 turn → +1 charge | Cut Stone |
-| B — Sunder, Consecrate | **Judgement Seraph** | replaces the party — the **hitter** the Golem left open | HP 120% · STR 180% · END 70% · AGI 120%; **Radiant Cut** (Holy, one enemy), Signature **Judgement** (Holy, all enemies) | +30 HP-ratio → +1 turn → +1 charge | Gild Leaf |
+| B — Sunder, Consecrate | **Judgement Seraph** | replaces the party — the **hitter** the Golem left open | HP 120% · STR 180% · END 70% · AGI 120%; **Radiant Cut** (Holy, one enemy), Signature **Judgement** (Holy, all enemies) | +30 HP-ratio → +1 turn → +1 charge | Gilded Leaf |
 | C — Heal, Renew | **Dawn Stag** | special attack, whole party | heals 40% of each hero's health, then Regenerating 3 a turn for 3 turns | +10% heal → +1 turn → +1 charge | Mire Reed |
 
 Two small code changes came with them: **`SummonSO.BonusThreat` / `ThreatMultiplier`** (a summoning

@@ -318,7 +318,7 @@ the one XP can never express. Materials are excluded from the cache's single **i
 (`PickTreasureItem`) — a material is common by design, so leaving them in that one-winner walk meant
 the first shuffled material almost always took the slot and a cache stopped producing gear.
 
-**Ten materials.** Five from places — Rotted Timber, Cut Stone, Mire Reed, Slag Coal, Gild Leaf —
+**Ten materials.** Five from places — Rotted Timber, Cut Stone, Mire Reed, Slag Coal, Gilded Leaf —
 and five from creatures — Scrap Iron, Ember Iron, Mire Hide, Hex Silk, Void Shard. Every boss
 guarantees its run's signature material plus Void Shard, which is deliberately the only material
 that is *only* ever a boss drop. **Exception since 2026-10-06:** a boss that sits on a *repeatable*
@@ -332,7 +332,7 @@ placeholder-art bargain phase 3 already assumed.
 | | total | from kills | from caches |
 |---|---|---|---|
 | Scrap Iron | 31.7 | 30.5 | 1.2 |
-| Gild Leaf | 17.5 | 16.5 | 1.0 |
+| Gilded Leaf | 17.5 | 16.5 | 1.0 |
 | Ember Iron | 12.3 | 11.8 | 0.5 |
 | Cut Stone | 9.0 | 5.1 | 3.9 |
 | Void Shard | 8.5 | 8.5 | 0.0 |

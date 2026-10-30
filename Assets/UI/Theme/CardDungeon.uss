@@ -3349,6 +3349,20 @@
     height: 70%;
 }
 
+/* An upgrade node's "▲" / "+" over the art of what it upgrades. */
+.sg-node__badge {
+    position: absolute;
+    right: -2px;
+    bottom: -2px;
+    font-size: 13px;
+    -unity-font-style: bold;
+    color: var(--cd-gold);
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: rgb(10, 5, 20);
+    padding: 0;
+    margin: 0;
+}
+
 /* A stat node's short name ("STR", "HP") inside the same 44px circle. */
 .sg-node__glyph--word {
     font-size: 12px;
@@ -3563,6 +3577,49 @@
 .cm-fear-row--on .cm-fear-row__name {
     color: var(--cd-gold);
     -unity-font-style: bold;
+}
+
+/* A condition's rank reads at a glance: gold, orange, red, each with its numeral badge
+   (playtest 2026-10-30). Borders are left alone so the keyboard cursor stays visible. */
+.cm-fear-row__title {
+    flex-direction: row;
+    align-items: center;
+}
+
+.cm-fear-row__badge {
+    font-size: 13px;
+    -unity-font-style: bold;
+    color: rgb(20, 10, 30);
+    background-color: var(--cd-gold);
+    border-radius: 3px;
+    padding: 0 5px;
+    margin: 0 6px 0 0;
+}
+
+.cm-fear-row--rank-2 {
+    background-color: rgba(240, 140, 50, 0.16);
+}
+
+.cm-fear-row--rank-2 .cm-fear-row__name,
+.cm-fear-row--rank-2 .cm-fear-row__rank {
+    color: rgb(245, 150, 60);
+}
+
+.cm-fear-row--rank-2 .cm-fear-row__badge {
+    background-color: rgb(245, 150, 60);
+}
+
+.cm-fear-row--rank-3 {
+    background-color: rgba(230, 70, 60, 0.18);
+}
+
+.cm-fear-row--rank-3 .cm-fear-row__name,
+.cm-fear-row--rank-3 .cm-fear-row__rank {
+    color: rgb(240, 90, 75);
+}
+
+.cm-fear-row--rank-3 .cm-fear-row__badge {
+    background-color: rgb(240, 90, 75);
 }
 
 .cm-fear-row__rank {

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Assets.Scripts.Rooms;
+using ImmoralityGaming.Localization;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -290,7 +291,8 @@ namespace Tests.EditMode
             }, 0);
 
             string line = DungeonMapOps.WaitingLine(model);
-            Assert.AreEqual("Exit not found yet · still waiting: 1 fight · 1 cache", line,
+            Assert.AreEqual(Loc.Format("room.map.waiting.some", ("exit", Loc.Get("room.map.waiting.exit-not-found")),
+                    ("things", Loc.Get("room.map.waiting.fight.one") + Loc.Get("room.map.waiting.separator") + Loc.Get("room.map.waiting.cache.one"))), line,
                 "one thing per room by the marker priority, and nothing from a room not entered");
         }
 
@@ -303,7 +305,7 @@ namespace Tests.EditMode
                 Room(1, explored: true, isExit: true, neighbours: new[] { 0 }),
             }, 1);
 
-            Assert.AreEqual("Exit found · nothing left waiting", DungeonMapOps.WaitingLine(done));
+            Assert.AreEqual(Loc.Format("room.map.waiting.none", ("exit", Loc.Get("room.map.waiting.exit-found"))), DungeonMapOps.WaitingLine(done));
         }
 
         // --- fast travel --------------------------------------------------------------
@@ -328,7 +330,7 @@ namespace Tests.EditMode
             var model = DungeonMapOps.Build(rooms, 0);
             Assert.IsTrue(model.TravelBlockedByEnemies);
             Assert.AreEqual(0, model.TravelCount);
-            Assert.That(DungeonMapOps.TravelHint(model), Does.Contain("Enemies hold this room"));
+            Assert.That(DungeonMapOps.TravelHint(model), Does.Contain(Loc.Get("room.map.hint.enemies")));
         }
 
         /// <summary>
@@ -443,7 +445,7 @@ namespace Tests.EditMode
                 Room(0, explored: true, neighbours: new[] { 1 }),
                 Room(1, explored: true, neighbours: new[] { 0 }),
             }, 0);
-            Assert.That(DungeonMapOps.TravelHint(open), Does.Contain("travel there instantly"));
+            Assert.That(DungeonMapOps.TravelHint(open), Does.Contain(Loc.Get("room.map.hint.travel")));
         }
 
         /// <summary>

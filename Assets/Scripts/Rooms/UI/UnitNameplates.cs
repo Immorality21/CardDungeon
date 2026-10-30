@@ -80,13 +80,22 @@ namespace Assets.Scripts.Rooms.UI
                 }
             }
 
+            // A unit a cast has just killed is already dead while the cast is still being presented;
+            // its plate stays (at its pre-hit health) until the hit lands and releases it - the
+            // plate used to vanish before an Ice Mage's projectile arrived (playtest 2026-10-30).
             _stale.Clear();
             foreach (var unit in _plates.Keys)
             {
-                if (!alive.Contains(unit))
+                if (alive.Contains(unit))
                 {
-                    _stale.Add(unit);
+                    continue;
                 }
+                if (HealthDisplay.IsHeld(unit) && unit != null && unit.Transform != null)
+                {
+                    alive.Add(unit);
+                    continue;
+                }
+                _stale.Add(unit);
             }
             foreach (var unit in _stale)
             {

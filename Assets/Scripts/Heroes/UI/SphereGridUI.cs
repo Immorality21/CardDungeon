@@ -661,6 +661,10 @@ namespace Assets.Scripts.Heroes.UI
                 }
                 var info = nodes[i];
                 info.Icon = NodeIcon(node);
+                if (info.Icon != null && IsUpgradeKind(node.Kind))
+                {
+                    info.Badge = info.Glyph;
+                }
                 nodes[i] = info;
             }
         }
@@ -684,7 +688,20 @@ namespace Assets.Scripts.Heroes.UI
                     var magic = MagicCatalog.HasInstance ? MagicCatalog.Instance.GetMagic(node.GrantedMagicKey) : null;
                     return magic != null ? magic.Icon : null;
                 }
+                // An ability upgrade shows the ability it improves; the "▲" rides along as a badge.
+                case SphereNodeKind.MagicUpgrade:
+                {
+                    var magic = MagicCatalog.HasInstance ? MagicCatalog.Instance.GetMagic(node.GrantedMagicKey) : null;
+                    return magic != null ? magic.Icon : null;
+                }
                 case SphereNodeKind.Summon:
+                case SphereNodeKind.SummonPower:
+                case SphereNodeKind.SummonDuration:
+                case SphereNodeKind.SummonCharge:
+                case SphereNodeKind.SummonSize:
+                case SphereNodeKind.SummonPromote:
+                case SphereNodeKind.SummonApplyChance:
+                case SphereNodeKind.SummonDamage:
                 {
                     var summon = string.IsNullOrEmpty(node.GrantedSummonKey) ? null : SummonCatalogSO.Resolve(node.GrantedSummonKey);
                     return summon != null ? summon.Sprite : null;
@@ -692,10 +709,36 @@ namespace Assets.Scripts.Heroes.UI
                 case SphereNodeKind.Ultra:
                 {
                     var ultra = string.IsNullOrEmpty(node.GrantedUltraKey) ? null : UltraCatalogSO.Resolve(node.GrantedUltraKey);
-                    return ultra != null && ultra.FormFrames != null && ultra.FormFrames.Length > 0 ? ultra.FormFrames[0] : null;
+                    if (ultra == null)
+                    {
+                        return null;
+                    }
+                    if (ultra.Icon != null)
+                    {
+                        return ultra.Icon;
+                    }
+                    return ultra.FormFrames != null && ultra.FormFrames.Length > 0 ? ultra.FormFrames[0] : null;
                 }
                 default:
                     return null;
+            }
+        }
+
+        private static bool IsUpgradeKind(SphereNodeKind kind)
+        {
+            switch (kind)
+            {
+                case SphereNodeKind.MagicUpgrade:
+                case SphereNodeKind.SummonPower:
+                case SphereNodeKind.SummonDuration:
+                case SphereNodeKind.SummonCharge:
+                case SphereNodeKind.SummonSize:
+                case SphereNodeKind.SummonPromote:
+                case SphereNodeKind.SummonApplyChance:
+                case SphereNodeKind.SummonDamage:
+                    return true;
+                default:
+                    return false;
             }
         }
 
