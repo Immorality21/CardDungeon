@@ -48,9 +48,7 @@ namespace ImmoralityGaming.Menu
         public event Action Cancelled;
 
         /// <summary>
-        /// Whether the cursor is currently on something. Screens that share Enter with another
-        /// mechanic - the room bar shares it with walking through the selected door - need to know
-        /// whether this cursor is the one that should answer.
+        /// Whether the cursor is currently on something.
         /// </summary>
         public bool HasSelection => _selected != null;
 

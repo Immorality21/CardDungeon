@@ -141,9 +141,15 @@ namespace Assets.Scripts.Rooms
         /// tile of <paramref name="mustReach"/> (the doors, where the party stands) can still reach the
         /// others. A room is small and its contents are placed to spread out, not to leave a way past, so
         /// something in a cramped room stays walkable rather than shutting the party in. A tile the party
-        /// must reach is never solid itself.
+        /// must reach is never solid itself. Each of <paramref name="mustUse"/> (the stairs, a chest, a
+        /// tile on the wall) likewise stays within reach, on it or beside it: walking up to it is the
+        /// only way to use it, so stairs boxed in by a chest would end the floor.
         /// </summary>
-        public static HashSet<Vector2Int> Solid(RectInt floor, IEnumerable<Vector2Int> occupied, IReadOnlyList<Vector2Int> mustReach)
+        public static HashSet<Vector2Int> Solid(
+            RectInt floor,
+            IEnumerable<Vector2Int> occupied,
+            IReadOnlyList<Vector2Int> mustReach,
+            IReadOnlyList<Vector2Int> mustUse = null)
         {
             var solid = new HashSet<Vector2Int>();
             foreach (var tile in occupied)
@@ -153,7 +159,7 @@ namespace Assets.Scripts.Rooms
                     continue;
                 }
                 solid.Add(tile);
-                if (!AllConnected(floor, solid, mustReach))
+                if (!AllConnected(floor, solid, mustReach) || !AllUsable(floor, solid, mustReach[0], mustUse))
                 {
                     solid.Remove(tile);
                 }
@@ -166,6 +172,24 @@ namespace Assets.Scripts.Rooms
             for (int i = 1; i < tiles.Count; i++)
             {
                 if (Path(tiles[0], tiles[i], floor, blocked) == null)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private static bool AllUsable(RectInt floor, ICollection<Vector2Int> blocked, Vector2Int from, IReadOnlyList<Vector2Int> tiles)
+        {
+            if (tiles == null)
+            {
+                return true;
+            }
+            foreach (var tile in tiles)
+            {
+                bool walkable = floor.Contains(tile) && !blocked.Contains(tile);
+                var path = walkable ? Path(from, tile, floor, blocked) : PathNextTo(from, tile, floor, blocked);
+                if (path == null)
                 {
                     return false;
                 }

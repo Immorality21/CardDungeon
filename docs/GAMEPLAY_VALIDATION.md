@@ -184,7 +184,7 @@ Hard-won gotchas (each cost a failed compile until learned):
 
     Keys work the same way - `KeyDownEvent.GetPooled('\0', KeyCode.DownArrow, EventModifiers.None)`
     sent to the panel root drives every arrow-key cursor in the game, so a whole keyboard-only run
-    (walk the dungeon by door, Tab to the room bar, Enter through a dialog) can be scripted from a
+    (walk the dungeon by door, Enter on the chest, Enter through a dialog) can be scripted from a
     command.
 
     > **A synthetic `KeyDownEvent` proves the handler, NOT the keyboard.** Sending one straight to
@@ -248,7 +248,7 @@ Hard-won gotchas (each cost a failed compile until learned):
 ## Screenshotting a **UI Toolkit** screen — `ScreenCapture.CaptureScreenshot` + the Read tool
 
 `Capture2DScene` renders its own orthographic view of a **world-space** rectangle, so it cannot see
-a UITK panel at all — the hub, the room bar and the command menu are screen-overlay UI and come back
+a UITK panel at all — the hub, the Fight/Flee bar and the command menu are screen-overlay UI and come back
 absent from every frame it takes. For those, capture the **game view** from inside a `RunCommand` and
 then read the file:
 

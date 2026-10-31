@@ -1102,7 +1102,7 @@ namespace Assets.Scripts.Rooms
         /// the room's doors.
         ///
         /// <para>It no longer completes the level, even after clearing the exit room - that is the
-        /// Descend button's job. Doors are re-enabled unconditionally, which also un-seals a boss
+        /// stairs' job. Doors are re-enabled unconditionally, which also un-seals a boss
         /// room (<c>DisableAllDoors</c>) so the player can go back for anything they left.</para>
         /// </summary>
         public void FinishVictory()

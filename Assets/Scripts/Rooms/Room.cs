@@ -381,7 +381,8 @@ namespace Assets.Scripts.Rooms
 
         /// <summary>
         /// The tiles a walking party may not step on, standing on <paramref name="partyTile"/>: everything
-        /// claimed but the dead, except where blocking it would cut off a door (<see cref="TileWalkOps.Solid"/>).
+        /// claimed but the dead, except where blocking it would cut off a door or something the party
+        /// has to walk up to (<see cref="TileWalkOps.Solid"/>).
         /// </summary>
         public HashSet<Vector2Int> SolidTiles(Vector2Int partyTile)
         {
@@ -404,7 +405,27 @@ namespace Assets.Scripts.Rooms
                 }
             }
             var floor = new RectInt(GridPosition, new Vector2Int(RoomSO.Width, RoomSO.Height));
-            return TileWalkOps.Solid(floor, occupied, mustReach);
+            return TileWalkOps.Solid(floor, occupied, mustReach, UsableTiles());
+        }
+
+        /// <summary>Whether what stands on a tile is something the party uses, spent or not.</summary>
+        public bool HasUsableAt(Vector2Int tile)
+        {
+            return UsableTiles().Contains(tile);
+        }
+
+        /// <summary>Where the room's stairs, chest or campfire, event object and way back stand.</summary>
+        private List<Vector2Int> UsableTiles()
+        {
+            var tiles = new List<Vector2Int>();
+            foreach (var marker in new Component[] { ExitMarker, KindMarker, EventMarker, ReturnMarker })
+            {
+                if (marker != null)
+                {
+                    tiles.Add(Vector2Int.RoundToInt(marker.transform.position));
+                }
+            }
+            return tiles;
         }
 
         /// <summary>Whether anything has claimed a tile in this room.</summary>

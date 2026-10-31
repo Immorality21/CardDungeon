@@ -2595,7 +2595,7 @@ namespace Assets.Scripts.Balance
                     "This event has nothing to do")
                 {
                     Asset = definition,
-                    Detail = "Every option is a Decline, so the Action button opens a window whose only exit "
+                    Detail = "Every option is a Decline, so using its object opens a window whose only exit "
                            + "is walking away.",
                     Suggestion = "Add a StatCheck or Guaranteed option, or delete the event."
                 });

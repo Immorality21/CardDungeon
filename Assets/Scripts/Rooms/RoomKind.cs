@@ -38,7 +38,7 @@ namespace Assets.Scripts.Rooms
         }
 
         /// <summary>
-        /// Whether the room offers a one-shot payload through the room bar (Search / Rest). The two
+        /// Whether the room offers a one-shot payload through its object (a chest, a campfire). The two
         /// kinds that do are also the two that can be *promoted* onto an ordinary room at generation.
         /// </summary>
         public static bool HasPayload(this RoomKind kind)

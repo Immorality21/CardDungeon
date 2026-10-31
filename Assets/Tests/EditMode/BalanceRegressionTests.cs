@@ -135,7 +135,7 @@ namespace Tests.EditMode
         {
             AssertNoIssues(
                 issue => issue.Category == BalanceCategory.Event && issue.Title.Contains("nothing to do"),
-                "A room event offers no option but walking away, so its Action button is a dead end.");
+                "A room event offers no option but walking away, so its object is a dead end.");
         }
 
         [Test]

@@ -2,7 +2,7 @@
 
 > **Reads with:** [NEXT_STEPS.md](../NEXT_STEPS.md) (the index and the **do-not-relitigate** list) ·
 > [Polish Content](POLISH_CONTENT.md) §2 (room variety, which this plan absorbs) · [Hub](HUB.md) ·
-> `Assets/Scripts/Rooms/CLAUDE.md` (generation, the room bar, the map, click-to-walk) ·
+> `Assets/Scripts/Rooms/CLAUDE.md` (generation, using a room's objects, the map, click-to-walk) ·
 > `docs/PIXEL_ART.md` (sizes, the PixelLab workflow).
 >
 > **Status (2026-10-31): phases 0, 1, 2, 7 and the Crypt half of 3 are done: every floor of every run is drawn with a
@@ -275,8 +275,8 @@ through the spent object, not by a real door on the floor's map. **Stand-ins to 
 "rats" are a Ghoul (no rat enemy), the statue is a Stone Sentinel, the Apprentice's wraith is a Wight, the Thirteenth
 Step's fight is the Lich. New gear copies an existing item's numbers: not balanced yet.
 
-**Next from here:** the events playtest (`docs/TO_PLAYTEST.md`), the other biomes being built (below); and the *Cleanup*
-below, which needs only the room bar's Search, Rest and Descend moved, since events no longer use it.
+**Next from here:** the events playtest (`docs/TO_PLAYTEST.md`), the other biomes being built (below). The *Cleanup*
+below is done.
 
 ## Phase 3: the other four biomes (2026-10-31)
 
@@ -323,23 +323,21 @@ has a spent sprite afterwards. Plus a new room kind, the **Shrine** (a refuge wi
 `RestRooms`. A new `RoomKind` also needs the balance model (`RunCurveModel`, `RoomKindPlanner`), so rerun the
 regression suite after it. The event objects need no balance work.
 
-**The plan's "the button stays for the keyboard" is out of date:** Enter on a facing object covers the keyboard now.
-The button stays only until the room bar goes (*Cleanup*, below), which phase 3 unblocks.
-
-## Cleanup once everything is migrated: no more room bar (owner, 2026-10-31)
+## Cleanup: no more room bar (owner, 2026-10-31; done 2026-10-31)
 
 Every room action is triggered by **interacting with its object**, and the room bar goes. *"They should
 be triggered from interacting with all the objects (can only be done when everything has been
 migrated)."*
 
-**It waits for:** phase 2 (every floor drawn, manual layouts included) and phase 3 (every room event
-has an object; events are the one action with nothing to walk up to today).
+**Done:** the bar, its Tab cursor and the Tab part of the walking hint are gone. `UseFacing` and the click
+on an object are the only way in, keeping the prompts that ask first (a refuge, the stairs). `ShowMainBar`
+became `SettleRoom`, which only frees a captive and hands over an event's loot. The tutorial never read the
+bar, and the camera now clears the Fight/Flee bar, the HUD and the party window.
 
-**Then:** remove the bar's Action / Search / Rest / Descend buttons and the Tab cursor over them
-(`ShowMainBar`, `_barNav`, `HasRoomActions`), and the Tab part of the walking hint. `UseFacing` and the
-click on an object become the only way in, keeping the prompts that ask first (a refuge, the stairs).
-Check what still reads the bar: the tutorial's guidance (`docs/TUTORIAL.md`), and the camera clearing it
-(`GetCameraSafePanels`).
+**What the bar had been hiding:** it was also the way in to anything out of reach. Now
+`TileWalkOps.Solid` keeps every object within reach as well as every door (stairs in a corner could be boxed
+in by a chest and an event), a walkable object is used by standing on it or clicking it, and the stairs are
+placed even with no sprite.
 
 ## Open questions
 

@@ -4657,7 +4657,7 @@
     border-color: var(--cd-frame);
 }
 
-/* Keyboard hint line, bottom-centre under the room bar. Deliberately quiet:
+/* Keyboard hint line, bottom-centre. Deliberately quiet:
    it is there to be found once, not read every room. */
 /* Full-width and text-centred rather than left 50% + translate -50%: the percentage translate was
    not recomputed when the text changed width, so the hint drifted ~85px left of the bar it belongs
@@ -4673,10 +4673,9 @@
     opacity: 0.7;
 }
 
-/* While the pause overlay is up, the room bar, the command menu and the hint under them are hidden
+/* While the pause overlay is up, the Fight/Flee bar, the command menu and the hint under them are hidden
    (visibility, not display, so every "which bar is up" check in RoomActionUI still reads true and the
    shared cursor skips them). A highlighted Fight button under the pause window was a second cursor. */
-.cd-root--paused > #main-bar,
 .cd-root--paused > #combat-bar,
 .cd-root--paused > #hero-bar,
 .cd-root--paused > #nav-hint {

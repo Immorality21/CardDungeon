@@ -137,6 +137,34 @@ namespace Tests.EditMode
         }
 
         [Test]
+        public void Solid_LeavesWalkableWhatWouldBoxInSomethingToUse()
+        {
+            // Stairs in the corner of a 3x3 room, with a tile occupied on each open side.
+            var floor = new RectInt(0, 0, 3, 3);
+            var stairs = new Vector2Int(0, 0);
+            var occupied = new[] { stairs, new Vector2Int(1, 0), new Vector2Int(0, 1) };
+            var party = new List<Vector2Int> { new Vector2Int(2, 2) };
+
+            var solid = TileWalkOps.Solid(floor, occupied, party, new List<Vector2Int> { stairs });
+
+            CollectionAssert.AreEquivalent(new[] { stairs, new Vector2Int(1, 0) }, solid);
+            Assert.IsNotNull(TileWalkOps.PathNextTo(party[0], stairs, floor, solid));
+        }
+
+        [Test]
+        public void Solid_KeepsTheTileBelowAWallObjectFree()
+        {
+            var floor = new RectInt(0, 0, 3, 2);
+            var onWall = new Vector2Int(1, 2);
+            var below = new Vector2Int(1, 1);
+            var party = new List<Vector2Int> { new Vector2Int(0, 0) };
+
+            var solid = TileWalkOps.Solid(floor, new[] { below }, party, new List<Vector2Int> { onWall });
+
+            CollectionAssert.IsEmpty(solid);
+        }
+
+        [Test]
         public void NearestFloorTile_SnapsAnEvenRoomsCentreOntoTheFloor()
         {
             var tile = TileWalkOps.NearestFloorTile(Floor, new Vector2(1.5f, 1f));

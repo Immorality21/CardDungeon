@@ -133,8 +133,8 @@ does still carry an unused `ScalingStat` if that ever needs revisiting.
   saved with the dungeon so quitting to the menu is not a cure.
 - **UI.** Using the object opens `#event-window` (title / prompt / odds line / one button per option), then
   reuses `#detail-window` for the result: the outcome's copy, then one line per concrete consequence.
-  If the outcome woke something, **Ok re-shows the room** so the Fight/Flee bar replaces the
-  room bar. There is no option-list window any more - it was retired with the flavour strings, since
+  If the outcome woke something, **Ok re-shows the room** so the Fight/Flee bar comes up. There is no
+  option-list window any more - it was retired with the flavour strings, since
   its only real entry was the event itself.
 - **The odds line is about the gamble, not the window.** It is hidden unless some option is a
   `StatCheck`, and worded "anything you chance here turns on Luck", because an event can mix a sure

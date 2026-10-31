@@ -4248,11 +4248,6 @@ MonoBehaviour:
     - Combat speed
     Reviewed: 0
     Note: 
-  - Key: ui.room.descend-btn
-    Values:
-    - Take the stairs
-    Reviewed: 0
-    Note: 
   - Key: ui.room.detail-cancel
     Values:
     - Cancel
@@ -4335,7 +4330,7 @@ MonoBehaviour:
     Note: 
   - Key: ui.room.nav-hint
     Values:
-    - "Arrows / WASD walk \xB7 Enter use \xB7 Tab room actions"
+    - "Arrows / WASD walk \xB7 Enter use"
     Reviewed: 0
     Note: 
   - Key: ui.room.not-entered
@@ -4371,16 +4366,6 @@ MonoBehaviour:
   - Key: ui.room.refuge
     Values:
     - refuge
-    Reviewed: 0
-    Note: 
-  - Key: ui.room.rest-btn
-    Values:
-    - Rest at the refuge
-    Reviewed: 0
-    Note: 
-  - Key: ui.room.search-btn
-    Values:
-    - Open the cache
     Reviewed: 0
     Note: 
   - Key: ui.room.sound-effects
@@ -6091,7 +6076,7 @@ MonoBehaviour:
     Note: Keyboard hint while the combat command window is up
   - Key: room.keys.doors
     Values:
-    - "Arrows / WASD walk \xB7 Enter use \xB7 Tab room actions"
+    - "Arrows / WASD walk \xB7 Enter use"
     Reviewed: 0
     Note: Keyboard hint while walking the floor
   - Key: room.party.hp

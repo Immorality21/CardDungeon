@@ -1515,7 +1515,8 @@ namespace Assets.Scripts.Dungeon
                 : _exitRoomMarkerSprite;
             if (stairs == null)
             {
-                return;
+                // Placed all the same: the marker is the only way off the floor, drawn or not.
+                Debug.LogError($"DungeonManager: no exit sprite for level '{CurrentLevel?.name}'.");
             }
 
             var markerObj = new GameObject("ExitMarker");

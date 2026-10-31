@@ -247,7 +247,7 @@ namespace Assets.Scripts.Sandbox
 
         private static IEnumerator WalkIn(Room startRoom, Room encounterRoom)
         {
-            // One frame, so GameManager.EnterRoom(start) has run and the room bar is listening.
+            // One frame, so GameManager.EnterRoom(start) has run and the room panel is listening.
             yield return null;
             var door = startRoom.Doors.FirstOrDefault(d => d.GetOtherRoom(startRoom) == encounterRoom);
             if (door != null)

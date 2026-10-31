@@ -882,7 +882,7 @@ namespace Assets.Scripts.Hub
         // ============================================================
 
         /// <summary>
-        /// Arrow keys for the hub, matching how combat and the room bar are driven. One
+        /// Arrow keys for the hub, matching how combat is driven. One
         /// <see cref="KeyboardNavigator"/> serves every screen this class owns, because it navigates
         /// whatever buttons are visible rather than a list wired per screen - and only one of these
         /// views is ever displayed at a time.

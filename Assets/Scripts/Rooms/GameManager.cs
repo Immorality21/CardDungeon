@@ -48,7 +48,7 @@ namespace Assets.Scripts.Rooms
             room.Reveal();
 
             // The exit room is an ordinary room: it completes the level only when the player takes
-            // the stairs (RoomActionUI's Descend button). Ending the level on entry meant walking
+            // the stairs (RoomActionUI.UseFacing). Ending the level on entry meant walking
             // into the wrong room finished it for you, with a level's worth of unexplored rooms and
             // unspent room events behind you.
             if (_roomActionUI != null)

@@ -64,10 +64,10 @@ namespace Assets.Scripts.Dungeon
                  "level clear: die first and they are lost with the run.")]
         public HeroSO RescueHero;
 
-        [Tooltip("Whether room events (the Action-button gambles) can appear on this level at all. " +
+        [Tooltip("Whether room events (the objects in a room) can appear on this level at all. " +
                  "On by default. Turn it off for a level whose job is teaching - the first floor of " +
                  "the tutorial run - so the only things in it are the ones it means to teach. The " +
-                 "rooms keep their PossibleEvents; this only stops them being placed here.")]
+                 "level's event chances stay; this only stops them being placed here.")]
         public bool AllowRoomEvents = true;
 
         [Tooltip("A floor the owner wants harder than one health bar comfortably covers. The balance " +

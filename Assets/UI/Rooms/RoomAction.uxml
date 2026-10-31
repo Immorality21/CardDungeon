@@ -16,13 +16,6 @@
             <ui:Label name="hud-explore" text="" class="cd-hud__explore" picking-mode="Ignore" />
         </ui:VisualElement>
 
-        <!-- Non-combat room actions -->
-        <ui:VisualElement name="main-bar" class="cd-bar cd-dock-bottom cd-hidden">
-            <ui:Button name="search-btn" text="#ui.room.search-btn" class="cd-cmd cd-hidden" />
-            <ui:Button name="rest-btn" text="#ui.room.rest-btn" class="cd-cmd cd-hidden" />
-            <ui:Button name="descend-btn" text="#ui.room.descend-btn" class="cd-cmd cd-hidden" />
-        </ui:VisualElement>
-
         <!-- Enemies present: start or flee -->
         <ui:VisualElement name="combat-bar" class="cd-bar cd-dock-bottom cd-hidden">
             <!-- Who is in the room, above the choice it asks for (2026-09-30): bestiary names, "???"

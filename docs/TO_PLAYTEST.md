@@ -6,6 +6,14 @@ it has been played; anything that turns out wrong becomes a backlog item in `NEX
 Most of it came out of playtest 3 (2026-10-26 to 2026-10-28); the first section is the outside
 playtest's fixes (2026-10-30).
 
+## No more room bar (2026-10-31)
+
+- [ ] **Chest, campfire, stairs** - Enter while facing one, and a click from across the room. The campfire
+      and the stairs still ask first; the walking hint no longer mentions Tab.
+- [ ] **A cramped room** - something left walkable (you can step onto it) is used by Enter while standing
+      on it, or by clicking it. Nothing in a room can be out of reach.
+- [ ] **Do new players find the stairs?** Nothing on screen names them any more; the bar used to.
+
 ## Outside playtest fixes (2026-10-30)
 
 Synthetic key events reached every handler below; what is not known is whether a **real** key press

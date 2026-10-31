@@ -32,9 +32,8 @@ namespace Assets.Scripts.Rooms
         }
 
         /// <summary>
-        /// The same for several panels, most important first. Since playtest 2 finding 8 the room bar
-        /// and the Fight/Flee bar (bottom centre) and the party window (bottom right) are protected as
-        /// well as the HUD: an enemy on a room's bottom row stood under the Fight/Flee bar, and in one
+        /// The same for several panels, most important first. Since playtest 2 finding 8 the Fight/Flee
+        /// bar (bottom centre) and the party window (bottom right) are protected as well as the HUD: an enemy on a room's bottom row stood under the Fight/Flee bar, and in one
         /// room the bar covered a door.
         ///
         /// <para>Of every shift that clears all the panels and keeps the room on screen, the shortest

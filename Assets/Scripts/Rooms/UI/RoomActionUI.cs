@@ -29,7 +29,6 @@ namespace Assets.Scripts.Rooms
         [SerializeField] private UIDocument _document;
 
         private VisualElement _root;
-        private VisualElement _mainBar;
         private VisualElement _combatBar;
         private VisualElement _heroBar;
         private VisualElement _detailWindow;
@@ -80,9 +79,6 @@ namespace Assets.Scripts.Rooms
         /// <summary>The open event's own walk-away option, if it has one - what Escape presses.</summary>
         private Button _eventDecline;
 
-        private Button _searchBtn;
-        private Button _restBtn;
-        private Button _descendBtn;
         private Button _fightBtn;
         private Button _fleeBtn;
         private Button _detailOk;
@@ -178,7 +174,7 @@ namespace Assets.Scripts.Rooms
         private readonly List<Label> _commandCursors = new List<Label>();
         private int _selectedCommand;
 
-        // Walking the dungeon from the keyboard: arrows/WASD walk the party, Tab reaches the room bar.
+        // Walking the dungeon from the keyboard: arrows/WASD walk the party, Enter uses what it faces.
         private readonly List<Door> _navDoors = new List<Door>();
         private bool _doorsLive;
         private PartyWalk _walk;
@@ -186,7 +182,6 @@ namespace Assets.Scripts.Rooms
         private Room _walkGoalRoom;
         private Vector2Int _walkGoalTile;
         private Vector2Int? _walkUseTile;
-        private KeyboardNavigator _barNav;
         private KeyboardNavigator _combatNav;
         private KeyboardNavigator _eventNav;
         private KeyboardNavigator _detailNav;
@@ -216,7 +211,6 @@ namespace Assets.Scripts.Rooms
             global::ImmoralityGaming.Menu.HoverTips.Attach(root);
             _root = root;
 
-            _mainBar = root.Q<VisualElement>("main-bar");
             _combatBar = root.Q<VisualElement>("combat-bar");
             _fightFoes = root.Q<Label>("fight-foes");
             _dialogScrim = root.Q<VisualElement>("dialog-scrim");
@@ -274,9 +268,6 @@ namespace Assets.Scripts.Rooms
             _eventOptions = root.Q<ScrollView>("event-options");
             _eventBack = root.Q<Button>("event-back");
 
-            _searchBtn = root.Q<Button>("search-btn");
-            _restBtn = root.Q<Button>("rest-btn");
-            _descendBtn = root.Q<Button>("descend-btn");
             _fightBtn = root.Q<Button>("fight-btn");
             _fleeBtn = root.Q<Button>("flee-btn");
             _detailOk = root.Q<Button>("detail-ok");
@@ -289,18 +280,6 @@ namespace Assets.Scripts.Rooms
             _abilityBanner = root.Q<VisualElement>("ability-banner");
             _abilityBannerName = root.Q<Label>("ability-banner-name");
 
-            if (_searchBtn != null)
-            {
-                _searchBtn.clicked += OnSearch;
-            }
-            if (_restBtn != null)
-            {
-                _restBtn.clicked += OnRest;
-            }
-            if (_descendBtn != null)
-            {
-                _descendBtn.clicked += OnDescend;
-            }
             _fightBtn.clicked += OnFight;
             _fleeBtn.clicked += OnFlee;
             if (_eventBack != null)
@@ -325,7 +304,7 @@ namespace Assets.Scripts.Rooms
             // Strip focusability from every focusable descendant so UI Toolkit's arrow-key
             // navigation has nowhere to move focus — keyboard focus stays on the root and our
             // cursor nav keeps receiving keys. (Buttons stay clickable + hotkey-driven.)
-            foreach (var focusable in new Focusable[] { _searchBtn, _restBtn, _descendBtn, _fightBtn, _fleeBtn, _detailOk, _detailCancel, _victoryContinue, _levelContinue, _levelNextLevel, _levelBody, _victoryRewards, _eventBack, _eventOptions })
+            foreach (var focusable in new Focusable[] { _fightBtn, _fleeBtn, _detailOk, _detailCancel, _victoryContinue, _levelContinue, _levelNextLevel, _levelBody, _victoryRewards, _eventBack, _eventOptions })
             {
                 if (focusable != null)
                 {
@@ -338,11 +317,6 @@ namespace Assets.Scripts.Rooms
             // same handler as its button, and only fires when the matching bar is visible.
             root.RegisterCallback<KeyDownEvent>(OnCombatHotkey);
             root.focusable = true;
-
-            // Tab-driven cursor for the room bar, so Search/Rest/Descend are reachable without
-            // the mouse while the arrow keys stay free for the doors. Scoped to the bar itself: it
-            // must never wander onto a combat button.
-            _barNav = new KeyboardNavigator(_mainBar);
 
             // Fight/Flee is a bar like any other. It kept its F/R letters, but a player who has just
             // learnt that arrows-and-Enter drive the room, the command menu and the whole hub should
@@ -458,18 +432,10 @@ namespace Assets.Scripts.Rooms
             }
             _combatNav?.Reset();
 
-            // A captive is only reachable once the room is clear - guards first. With enemies up the
-            // room bar is irrelevant anyway; without them, ShowMainBar decides whether there is
-            // anything to show.
-            if (hasEnemy)
+            // A captive is only reachable once the room is clear - guards first.
+            if (!hasEnemy)
             {
-                SetShown(_mainBar, false);
-                RefreshPayloadButtons();
-                RefreshDescendButton();
-            }
-            else
-            {
-                ShowMainBar();
+                SettleRoom();
             }
 
             // Boss rooms: announce the boss and remove Flee — the climax can't be skipped.
@@ -519,7 +485,6 @@ namespace Assets.Scripts.Rooms
 
         private void HideAll()
         {
-            SetShown(_mainBar, false);
             SetShown(_combatBar, false);
             SetShown(_bossBanner, false);
             SetShown(_heroBar, false);
@@ -582,7 +547,6 @@ namespace Assets.Scripts.Rooms
                 return true;
             }
 
-            SetShown(_mainBar, false);
             ShowRoomEvent(roomEvent);
             return true;
         }
@@ -635,7 +599,6 @@ namespace Assets.Scripts.Rooms
                 DungeonSaveManager.Instance.Save(_currentRoom);
             }
 
-            SetShown(_mainBar, false);
             ShowDetail(owner.RoomEvent != null ? owner.RoomEvent.Title : string.Empty,
                 item != null ? Loc.Format("event-text.report.found", ("item", item.DisplayName)) : string.Empty);
             _detailOkAction = () =>
@@ -647,7 +610,7 @@ namespace Assets.Scripts.Rooms
                 }
                 else
                 {
-                    ShowMainBar();
+                    SettleRoom();
                 }
             };
             return true;
@@ -999,7 +962,7 @@ namespace Assets.Scripts.Rooms
                 }
                 else
                 {
-                    ShowMainBar();
+                    SettleRoom();
                 }
             };
         }
@@ -1024,7 +987,7 @@ namespace Assets.Scripts.Rooms
             {
                 _detailOk.text = Loc.Get("room.detail.ok");
                 SetShown(_detailWindow, false);
-                ShowMainBar();
+                SettleRoom();
             };
             SetShown(_detailCancel, true);
         }
@@ -1034,7 +997,7 @@ namespace Assets.Scripts.Rooms
             SetShown(_detailWindow, false);
             _currentEvent = null;
             _eventActingHero = null;
-            ShowMainBar();
+            SettleRoom();
         }
 
         private void OnEventBack()
@@ -1045,7 +1008,7 @@ namespace Assets.Scripts.Rooms
             _eventDecline = null;
             _currentEvent = null;
             _eventActingHero = null;
-            ShowMainBar();
+            SettleRoom();
         }
 
         /// <summary>
@@ -1067,7 +1030,7 @@ namespace Assets.Scripts.Rooms
             _detailOkAction = () =>
             {
                 SetShown(_detailWindow, false);
-                ShowMainBar();
+                SettleRoom();
             };
             SetShown(_detailWindow, true);
         }
@@ -1120,11 +1083,9 @@ namespace Assets.Scripts.Rooms
         {
             if (_currentRoom == null || !_currentRoom.IsExit)
             {
-                RefreshDescendButton();
                 return;
             }
 
-            SetShown(_mainBar, false);
             // Warn only about what is really left, and say what - "anything still unfound stays here"
             // on a floor with nothing left read as a trap.
             var dungeon = DungeonManager.HasInstance ? DungeonManager.Instance : null;
@@ -1152,7 +1113,7 @@ namespace Assets.Scripts.Rooms
         /// a real choice (playtest 2026-09-28): the only decision the old Rescue button posed was
         /// whether to press it. One statement says who joined, and the party window is rebuilt at
         /// once so the newcomer's row is there before the player walks on. Returns false when there
-        /// was nobody to free, so the caller can show the ordinary room bar instead.
+        /// was nobody to free, so the caller can move on.
         /// </summary>
         private bool TryAutoRescue()
         {
@@ -1163,7 +1124,6 @@ namespace Assets.Scripts.Rooms
                 return false;
             }
 
-            SetShown(_mainBar, false);
             // Rebuilt, not refreshed: RefreshPartyStatus only updates the rows that already exist,
             // which is why the newcomer used to be missing until the next room.
             ShowPartyStatusOutOfCombat();
@@ -1191,11 +1151,9 @@ namespace Assets.Scripts.Rooms
             if (_currentRoom == null || !_currentRoom.HasPendingPayload
                 || _currentRoom.Kind != RoomKind.Treasure)
             {
-                RefreshPayloadButtons();
                 return;
             }
 
-            SetShown(_mainBar, false);
 
             int gold = RoomKindRewards.TreasureGold(DungeonManager.RunLevelIndex);
             if (gold > 0)
@@ -1310,7 +1268,6 @@ namespace Assets.Scripts.Rooms
             if (_currentRoom == null || !_currentRoom.HasPendingPayload
                 || _currentRoom.Kind != RoomKind.Rest)
             {
-                RefreshPayloadButtons();
                 return;
             }
 
@@ -1327,7 +1284,6 @@ namespace Assets.Scripts.Rooms
                 }
             }
 
-            SetShown(_mainBar, false);
 
             string state = missing > 0
                 ? Loc.Format("room.refuge.state.hurt", ("missing", missing))
@@ -1412,7 +1368,7 @@ namespace Assets.Scripts.Rooms
         private void ClosePayloadResult()
         {
             SetShown(_detailWindow, false);
-            ShowMainBar();
+            SettleRoom();
         }
 
         // ============================================================
@@ -2038,7 +1994,7 @@ namespace Assets.Scripts.Rooms
         /// <summary>
         /// The whole keyboard for this panel, dispatched by which bar is up: Fight/Flee on the combat
         /// bar, the hero command cursor and its letter shortcuts on the command bar, and otherwise the
-        /// dungeon keys - arrows for doors, Tab for the room bar. A key only ever acts when its bar is
+        /// dungeon keys - arrows to walk, Enter to use. A key only ever acts when its bar is
         /// visible, and only invokes actions whose buttons are currently shown (Magic and Item
         /// appear conditionally), so a hotkey can never do something the on-screen menu cannot.
         /// </summary>
@@ -2619,9 +2575,11 @@ namespace Assets.Scripts.Rooms
             var solid = _currentRoom.SolidTiles(party.Tile);
             if (door == null && _walkGoalRoom == _currentRoom)
             {
-                // Something solid is walked up to and used; anywhere else is just walked to.
-                bool useIt = solid.Contains(_walkGoalTile);
-                var path = useIt
+                // Something solid is walked up to and used, something left walkable walked onto
+                // and used; anywhere else is just walked to.
+                bool isSolid = solid.Contains(_walkGoalTile);
+                bool useIt = isSolid || _currentRoom.HasUsableAt(_walkGoalTile);
+                var path = isSolid
                     ? TileWalkOps.PathNextTo(party.Tile, _walkGoalTile, floor, solid)
                     : TileWalkOps.Path(party.Tile, _walkGoalTile, floor, solid);
                 _walkUseTile = useIt && path != null ? _walkGoalTile : (Vector2Int?)null;
@@ -2655,7 +2613,7 @@ namespace Assets.Scripts.Rooms
             _walk.Follow(steps);
         }
 
-        /// <summary>The last of a click on something solid: turn to it, now the party is beside it, and use it.</summary>
+        /// <summary>The last of a click on something: turn to it, now the party is beside it or on it, and use it.</summary>
         private void FinishWalkUse()
         {
             if (_walkUseTile == null || _walk.IsStepping || _walk.HasPath)
@@ -2670,11 +2628,16 @@ namespace Assets.Scripts.Rooms
                 return;
             }
             var offset = tile - party.Tile;
-            if (Mathf.Abs(offset.x) + Mathf.Abs(offset.y) == 1)
+            int distance = Mathf.Abs(offset.x) + Mathf.Abs(offset.y);
+            if (distance > 1)
+            {
+                return;
+            }
+            if (distance == 1)
             {
                 party.Face(offset);
-                UseFacing();
             }
+            UseFacing();
         }
 
         /// <summary>Whether the pointer is over something on the UI panel (its root does not pick).</summary>
@@ -3069,9 +3032,9 @@ namespace Assets.Scripts.Rooms
 
         /// <summary>
         /// The out-of-combat keyboard: the arrows (and WASD) walk the party - read by
-        /// <see cref="TickWalk"/>, since a held key must keep walking - and Tab moves a cursor along
-        /// the room bar, which Enter presses. The arrows are still swallowed here, or UI Toolkit would
-        /// move focus off the panel with them.
+        /// <see cref="TickWalk"/>, since a held key must keep walking - and Enter uses what it faces.
+        /// The arrows and Tab are still swallowed here, or UI Toolkit would move focus off the panel
+        /// with them.
         /// </summary>
         private bool HandleDungeonKey(KeyDownEvent evt)
         {
@@ -3081,17 +3044,12 @@ namespace Assets.Scripts.Rooms
                 case KeyCode.DownArrow:
                 case KeyCode.LeftArrow:
                 case KeyCode.RightArrow:
-                    return true;
                 case KeyCode.Tab:
-                    return _barNav != null && _barNav.HandleKey(evt);
+                    return true;
                 case KeyCode.Return:
                 case KeyCode.KeypadEnter:
                 case KeyCode.Z:
                 case KeyCode.Space:
-                    if (_barNav != null && _barNav.HasSelection)
-                    {
-                        return _barNav.HandleKey(evt);
-                    }
                     return UseFacing();
             }
 
@@ -3099,50 +3057,43 @@ namespace Assets.Scripts.Rooms
         }
 
         /// <summary>
-        /// Uses what the party is standing against, the way pressing A at a chest does in FF: the same
-        /// action as its button on the room bar, so a refuge still asks first and the stairs still
-        /// warn. Nothing happens when the bar would not offer it either - a spent chest, a guarded room.
-        /// Public so a scripted check can press what Enter presses.
+        /// Uses what the party is standing against, the way pressing A at a chest does in FF: the only
+        /// way into a room's contents, so a refuge still asks first and the stairs still warn. Nothing
+        /// happens on a spent chest or in a guarded room. Standing on it counts too: an object that
+        /// would shut something off is left walkable. Public so a scripted check can press what Enter
+        /// presses.
         /// </summary>
         public bool UseFacing()
         {
             var party = GameManager.HasInstance ? GameManager.Instance.Party : null;
-            if (party == null || _currentRoom == null)
+            if (party == null || _currentRoom == null || _currentRoom.Enemies.Any(e => e != null && e.IsAlive))
             {
                 return false;
             }
 
-            var tile = party.Tile + party.Facing;
-            if (_currentRoom.ReturnMarker != null && Vector2Int.RoundToInt(_currentRoom.ReturnMarker.transform.position) == tile
-                && !_currentRoom.Enemies.Any(e => e != null && e.IsAlive))
+            var facing = party.Tile + party.Facing;
+            if (IsAtHand(_currentRoom.ReturnMarker, facing, party.Tile))
             {
                 LeaveSideRoom();
                 return true;
             }
-            // Standing on it counts too: an object that would cut a door off is left walkable.
-            if (_currentRoom.EventMarker != null)
+            if (IsAtHand(_currentRoom.EventMarker, facing, party.Tile) && TryUseEvent())
             {
-                var eventTile = Vector2Int.RoundToInt(_currentRoom.EventMarker.transform.position);
-                if ((eventTile == tile || eventTile == party.Tile) && TryUseEvent())
-                {
-                    return true;
-                }
+                return true;
             }
-            if (_currentRoom.KindMarker != null && Vector2Int.RoundToInt(_currentRoom.KindMarker.transform.position) == tile)
+            if (IsAtHand(_currentRoom.KindMarker, facing, party.Tile) && _currentRoom.HasPendingPayload)
             {
-                if (IsShown(_searchBtn))
+                if (_currentRoom.Kind == RoomKind.Treasure)
                 {
                     OnSearch();
-                    return true;
                 }
-                if (IsShown(_restBtn))
+                else
                 {
                     OnRest();
-                    return true;
                 }
+                return true;
             }
-            if (_currentRoom.ExitMarker != null && IsShown(_descendBtn)
-                && Vector2Int.RoundToInt(_currentRoom.ExitMarker.position) == tile)
+            if (_currentRoom.IsExit && IsAtHand(_currentRoom.ExitMarker, facing, party.Tile))
             {
                 OnDescend();
                 return true;
@@ -3150,10 +3101,19 @@ namespace Assets.Scripts.Rooms
             return false;
         }
 
+        private static bool IsAtHand(Component marker, Vector2Int facing, Vector2Int standing)
+        {
+            if (marker == null)
+            {
+                return false;
+            }
+            var tile = Vector2Int.RoundToInt(marker.transform.position);
+            return tile == facing || tile == standing;
+        }
+
         /// <summary>
         /// Walks the party while a direction is held and the doors are live (<see cref="DoorNavActive"/>:
         /// nothing over the room, no fight waiting). A step through a door is <see cref="OnDoorSelected"/>.
-        /// A step hands Enter back from the room bar to walking, as the door cursor's arrows used to.
         /// </summary>
         private void TickWalk()
         {
@@ -3162,10 +3122,7 @@ namespace Assets.Scripts.Rooms
                 _walk = new PartyWalk(OnDoorSelected);
             }
             var party = GameManager.HasInstance ? GameManager.Instance.Party : null;
-            if (_walk.Tick(party, _currentRoom, DoorNavActive(), Time.deltaTime))
-            {
-                _barNav?.Reset();
-            }
+            _walk.Tick(party, _currentRoom, DoorNavActive(), Time.deltaTime);
             ContinueWalkGoal();
             FinishWalkUse();
         }
@@ -3401,7 +3358,6 @@ namespace Assets.Scripts.Rooms
 
         private void ShowDeathScreen(string log)
         {
-            SetShown(_mainBar, false);
             SetShown(_combatBar, false);
             // What dying costs and what it keeps, as rows (2026-09-30) - it used to be the generic
             // detail dialog with the raw combat log dumped in it.
@@ -3566,7 +3522,6 @@ namespace Assets.Scripts.Rooms
 
         private void ShowCombatResult(string title, string message, bool showNormalAfter, bool returnToCombat = false)
         {
-            SetShown(_mainBar, false);
             SetShown(_combatBar, false);
             _detailNav?.Reset();
             _detailTitle.text = title;
@@ -3577,7 +3532,7 @@ namespace Assets.Scripts.Rooms
                 if (showNormalAfter)
                 {
                     _currentRoom.EnableAllDoors();
-                    ShowMainBar();
+                    SettleRoom();
                     SubscribeDoors();
                 }
                 else if (returnToCombat)
@@ -3594,7 +3549,6 @@ namespace Assets.Scripts.Rooms
 
         private void ShowVictory(CombatResult result)
         {
-            SetShown(_mainBar, false);
             SetShown(_combatBar, false);
             SetShown(_detailWindow, false);
 
@@ -3773,13 +3727,13 @@ namespace Assets.Scripts.Rooms
 
         /// <summary>
         /// Every panel the camera should keep the party's room out from under, most important first,
-        /// in viewport space: the Fight/Flee bar, the room bar, the HUD and the party window - only
-        /// the ones that are up (playtest 2 finding 8: the bars covered a door and an enemy).
+        /// in viewport space: the Fight/Flee bar, the HUD and the party window - only
+        /// the ones that are up (playtest 2 finding 8: the bar covered a door and an enemy).
         /// </summary>
         public void GetCameraSafePanels(List<Rect> panels)
         {
             panels.Clear();
-            foreach (var element in new[] { _combatBar, _mainBar, _hud, _partyStatus })
+            foreach (var element in new[] { _combatBar, _hud, _partyStatus })
             {
                 if (TryGetViewportRect(element, out Rect rect))
                 {
@@ -3876,7 +3830,6 @@ namespace Assets.Scripts.Rooms
             // Nothing else is live now: the level is over, and a door clicked behind the window
             // would walk a party that no longer has a floor.
             UnsubscribeDoors();
-            SetShown(_mainBar, false);
             SetShown(_combatBar, false);
             SetShown(_detailWindow, false);
             SetShown(_eventWindow, false);
@@ -4083,8 +4036,8 @@ namespace Assets.Scripts.Rooms
             CombatManager.Instance.FinishVictory();
             ShowPartyStatusOutOfCombat();
             // Always back to the room, even after clearing the exit: the level completes when the
-            // player takes the stairs, which ShowMainBar surfaces as the Descend button.
-            ShowMainBar();
+            // player takes the stairs.
+            SettleRoom();
             SubscribeDoors();
         }
 
@@ -4155,56 +4108,18 @@ namespace Assets.Scripts.Rooms
         }
 
         /// <summary>
-        /// Shows the room bar, or nothing at all, re-evaluating what it can offer. Every button on it
-        /// is conditional, so an ordinary cleared room has no bar rather than an empty frame docked
-        /// at the bottom. Always use this rather than showing <c>_mainBar</c> directly: what the room
-        /// offers changes *after* <see cref="Show"/> ran - clearing the room's guards is exactly what
-        /// frees a captive and unlocks a cache - so a bare SetShown would miss it.
+        /// What a room does by itself each time the party is back in it with nothing over it. Run it
+        /// whenever a window closes: what is due changes *after* <see cref="Show"/> ran - clearing the
+        /// room's guards is exactly what frees a captive.
         /// </summary>
-        private void ShowMainBar()
+        private void SettleRoom()
         {
-            // The bar is rebuilt button-by-button below; whatever the Tab cursor was on may be about
-            // to be hidden, so it starts over.
-            _barNav?.Reset();
             // A captive in a clear room is freed on the spot; its notice dismisses back through
             // here, by which time there is nobody left to free.
-            if (TryAutoRescue() || TryGrantEventLoot())
+            if (!TryAutoRescue())
             {
-                return;
+                TryGrantEventLoot();
             }
-            RefreshPayloadButtons();
-            RefreshDescendButton();
-            SetShown(_mainBar, HasRoomActions());
-        }
-
-        private bool HasRoomActions()
-        {
-            return IsShown(_searchBtn) || IsShown(_restBtn) || IsShown(_descendBtn);
-        }
-
-        /// <summary>
-        /// Search and Rest exist only in a room of that kind whose payload is still unspent, and only
-        /// once the room is clear. Conditional like every other button on the
-        /// bar: a Search that reports "nothing here" teaches the player to stop pressing it.
-        /// </summary>
-        private void RefreshPayloadButtons()
-        {
-            bool clear = _currentRoom != null && !_currentRoom.Enemies.Any(e => e != null && e.IsAlive);
-            bool pending = clear && _currentRoom.HasPendingPayload;
-
-            SetShown(_searchBtn, pending && _currentRoom.Kind == RoomKind.Treasure);
-            SetShown(_restBtn, pending && _currentRoom.Kind == RoomKind.Rest);
-        }
-
-        /// <summary>
-        /// The stairs, in a cleared exit room. Shown rather than fired automatically so finishing a
-        /// level is the player's decision - they may want to sweep the rooms they skipped, or spend
-        /// an event they walked past, before leaving.
-        /// </summary>
-        private void RefreshDescendButton()
-        {
-            bool clear = _currentRoom != null && !_currentRoom.Enemies.Any(e => e != null && e.IsAlive);
-            SetShown(_descendBtn, clear && _currentRoom != null && _currentRoom.IsExit);
         }
 
         private static void SetShown(VisualElement element, bool shown)

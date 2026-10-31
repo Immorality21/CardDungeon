@@ -92,28 +92,26 @@ namespace Assets.Scripts.Rooms
         /// <summary>
         /// Advances the step being drawn, then starts the next one if a key is held and
         /// <paramref name="canWalk"/> - the room panel's "the doors are live and nothing is over the
-        /// room". Returns true when a new step started.
+        /// room".
         /// </summary>
-        public bool Tick(Party party, Room room, bool canWalk, float deltaTime)
+        public void Tick(Party party, Room room, bool canWalk, float deltaTime)
         {
             ReadKeys();
             if (IsStepping)
             {
                 _sinceStep = 0f;
                 Advance(deltaTime);
-                return false;
+                return;
             }
-            bool stepped = NextStep(party, room, canWalk);
-            if (stepped)
+            if (NextStep(party, room, canWalk))
             {
-                return true;
+                return;
             }
             _sinceStep += deltaTime;
             if (party != null && _sinceStep >= WalkCycleGrace)
             {
                 party.SetWalking(false);
             }
-            return false;
         }
 
         private bool NextStep(Party party, Room room, bool canWalk)
