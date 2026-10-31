@@ -1,0 +1,567 @@
+fileFormatVersion: 2
+guid: 390eadc07c5e2ec42a2a2be60f4fa291
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -7565066804449369985
+    second: tinkerer-walk_0
+  - first:
+      213: 8264287384996066691
+    second: tinkerer-walk_1
+  - first:
+      213: -4672380759002158236
+    second: tinkerer-walk_2
+  - first:
+      213: -5893842530986508729
+    second: tinkerer-walk_3
+  - first:
+      213: -5075988163721928062
+    second: tinkerer-walk_4
+  - first:
+      213: 7579996453814625193
+    second: tinkerer-walk_5
+  - first:
+      213: -6907210554944724791
+    second: tinkerer-walk_6
+  - first:
+      213: -490108882231335582
+    second: tinkerer-walk_7
+  - first:
+      213: 6415401119308218699
+    second: tinkerer-walk_8
+  - first:
+      213: -8436760354837374040
+    second: tinkerer-walk_9
+  - first:
+      213: 5493616656964771767
+    second: tinkerer-walk_10
+  - first:
+      213: -1711967280560370952
+    second: tinkerer-walk_11
+  - first:
+      213: -1170652291568875206
+    second: tinkerer-walk_12
+  - first:
+      213: -6308408712806662180
+    second: tinkerer-walk_13
+  - first:
+      213: 7889439643497297051
+    second: tinkerer-walk_14
+  - first:
+      213: -590645564814249429
+    second: tinkerer-walk_south_0
+  - first:
+      213: -6905872355875731852
+    second: tinkerer-walk_south_1
+  - first:
+      213: -1960716886005483117
+    second: tinkerer-walk_south_2
+  - first:
+      213: -3739509210928191307
+    second: tinkerer-walk_south_3
+  - first:
+      213: 8081313510762320997
+    second: tinkerer-walk_south_4
+  - first:
+      213: -3593382589751609132
+    second: tinkerer-walk_north_0
+  - first:
+      213: -2402419448018633253
+    second: tinkerer-walk_north_1
+  - first:
+      213: -3935809932456478195
+    second: tinkerer-walk_north_2
+  - first:
+      213: -4657732686477922130
+    second: tinkerer-walk_north_3
+  - first:
+      213: 8302935721125586767
+    second: tinkerer-walk_north_4
+  - first:
+      213: -1775509261370021741
+    second: tinkerer-walk_east_0
+  - first:
+      213: 61688117810712489
+    second: tinkerer-walk_east_1
+  - first:
+      213: 2319127715310052345
+    second: tinkerer-walk_east_2
+  - first:
+      213: -2041060293242564976
+    second: tinkerer-walk_east_3
+  - first:
+      213: 7601605372593448003
+    second: tinkerer-walk_east_4
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 32
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: tinkerer-walk_south_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b223619fcfa9dc7f0800000000000000
+      internalID: -590645564814249429
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tinkerer-walk_south_1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 47646d36ea96920a0800000000000000
+      internalID: -6905872355875731852
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tinkerer-walk_south_2
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 399788861622ac4e0800000000000000
+      internalID: -1960716886005483117
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tinkerer-walk_south_3
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5b8e2587f289a1cc0800000000000000
+      internalID: -3739509210928191307
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tinkerer-walk_south_4
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5649d8742d7962070800000000000000
+      internalID: 8081313510762320997
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tinkerer-walk_north_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4d838cbb29db12ec0800000000000000
+      internalID: -3593382589751609132
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tinkerer-walk_north_1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bddfb579d34e8aed0800000000000000
+      internalID: -2402419448018633253
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tinkerer-walk_north_2
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d0a3a7028b13169c0800000000000000
+      internalID: -3935809932456478195
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tinkerer-walk_north_3
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ea0f1c3acc86c5fb0800000000000000
+      internalID: -4657732686477922130
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tinkerer-walk_north_4
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f47a79a2c04f93370800000000000000
+      internalID: 8302935721125586767
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tinkerer-walk_east_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 398af9cdbbf1c57e0800000000000000
+      internalID: -1775509261370021741
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tinkerer-walk_east_1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9af48fc24092bd000800000000000000
+      internalID: 61688117810712489
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tinkerer-walk_east_2
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9f3a1dbae523f2020800000000000000
+      internalID: 2319127715310052345
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tinkerer-walk_east_3
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 09e4f103a72bca3e0800000000000000
+      internalID: -2041060293242564976
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tinkerer-walk_east_4
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3442224bfc35e7960800000000000000
+      internalID: 7601605372593448003
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      tinkerer-walk_0: -7565066804449369985
+      tinkerer-walk_1: 8264287384996066691
+      tinkerer-walk_10: 5493616656964771767
+      tinkerer-walk_11: -1711967280560370952
+      tinkerer-walk_12: -1170652291568875206
+      tinkerer-walk_13: -6308408712806662180
+      tinkerer-walk_14: 7889439643497297051
+      tinkerer-walk_2: -4672380759002158236
+      tinkerer-walk_3: -5893842530986508729
+      tinkerer-walk_4: -5075988163721928062
+      tinkerer-walk_5: 7579996453814625193
+      tinkerer-walk_6: -6907210554944724791
+      tinkerer-walk_7: -490108882231335582
+      tinkerer-walk_8: 6415401119308218699
+      tinkerer-walk_9: -8436760354837374040
+      tinkerer-walk_east_0: -1775509261370021741
+      tinkerer-walk_east_1: 61688117810712489
+      tinkerer-walk_east_2: 2319127715310052345
+      tinkerer-walk_east_3: -2041060293242564976
+      tinkerer-walk_east_4: 7601605372593448003
+      tinkerer-walk_north_0: -3593382589751609132
+      tinkerer-walk_north_1: -2402419448018633253
+      tinkerer-walk_north_2: -3935809932456478195
+      tinkerer-walk_north_3: -4657732686477922130
+      tinkerer-walk_north_4: 8302935721125586767
+      tinkerer-walk_south_0: -590645564814249429
+      tinkerer-walk_south_1: -6905872355875731852
+      tinkerer-walk_south_2: -1960716886005483117
+      tinkerer-walk_south_3: -3739509210928191307
+      tinkerer-walk_south_4: 8081313510762320997
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -43,6 +43,9 @@ namespace Assets.Scripts.Rooms
         /// </summary>
         public RoomKind Kind = RoomKind.Combat;
 
+        /// <summary>The stairs in an exit room, where walking up to them and pressing Enter descends.</summary>
+        public Transform ExitMarker;
+
         /// <summary>The marker sprite drawn for a payload room, so it can be swapped once taken.</summary>
         public SpriteRenderer KindMarker;
 
@@ -286,6 +289,34 @@ namespace Assets.Scripts.Rooms
             {
                 _spots.Remove(owner);
             }
+        }
+
+        /// <summary>
+        /// The tiles a walking party may not step on, standing on <paramref name="partyTile"/>: everything
+        /// claimed but the dead, except where blocking it would cut off a door (<see cref="TileWalkOps.Solid"/>).
+        /// </summary>
+        public HashSet<Vector2Int> SolidTiles(Vector2Int partyTile)
+        {
+            var occupied = new List<Vector2Int>();
+            foreach (var spot in _spots)
+            {
+                if (spot.Key is Enemy enemy && (enemy == null || !enemy.IsAlive))
+                {
+                    continue;
+                }
+                occupied.Add(Vector2Int.RoundToInt(spot.Value));
+            }
+
+            var mustReach = new List<Vector2Int> { partyTile };
+            foreach (var door in Doors)
+            {
+                if (door != null)
+                {
+                    mustReach.Add(Vector2Int.RoundToInt(door.GetPositionInRoom(this)));
+                }
+            }
+            var floor = new RectInt(GridPosition, new Vector2Int(RoomSO.Width, RoomSO.Height));
+            return TileWalkOps.Solid(floor, occupied, mustReach);
         }
 
         /// <summary>Whether anything has claimed a tile in this room.</summary>

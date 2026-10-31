@@ -464,3 +464,22 @@ What the pass learned, for the next biome:
   door's edge down to 16 over 20 px). 170 over 14 px was too faint. The tiles are made once and rotated.
 - **A sprite reimported during play does not reach a Tilemap already painted**; it keeps the old
   image until it is redrawn. Relaunch before judging a tile change.
+
+## Hero walk cycles (2026-10-30)
+
+Nine heroes, `Sprites/Heroes/<hero>-walk.png`: 160x96, rows south / north / east, each the standing frame
+then four of the cycle. About 4 generations a hero in all, by far the cheapest art in this guide.
+
+1. **Facings:** `create_object_pro_flash` with the idle's first frame and `n_directions: 8`, 1 generation.
+   Our heroes are drawn three-quarter, and passing one as "south" works: south comes back as the input
+   pixel for pixel (compare them, it is a free corruption check), east is a clean profile, north a real
+   back view. West drifted on the Warrior, so left mirrors east.
+2. **Walk:** `animate_object` with `directions: ["south","north","east"]`, `frame_count: 4`, default `v3`.
+   Three jobs a hero, so two heroes fit a wave of the 8-job limit. `/mcp/objects/<id>/download` is a zip
+   with every frame, which saves a `get_object` per hero. Frame 0 is the input.
+3. **Lock the face on the front row:** the generated frames change it (the Cultist and Paladin went dark
+   on frame 1, the Rogue's mask moved), which strobes at 12 fps. Paste rows 0-14 of the standing frame over
+   frames 1-4 of the south row. Backs and profiles did not need it.
+
+**Never hand-copy base64 into a tool call**, even at 1 KB: three of eight failed with "a character was
+altered in transit". `get_upload_url`, `curl -F`, then `upload:<id>` as `first_frame_url`. Free.

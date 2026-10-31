@@ -1,0 +1,567 @@
+fileFormatVersion: 2
+guid: a0bd923ab5fe71b4b9022abd721c999a
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -5211613402895662512
+    second: cultist-walk_0
+  - first:
+      213: 8647300906156813464
+    second: cultist-walk_1
+  - first:
+      213: -5813335169523935035
+    second: cultist-walk_2
+  - first:
+      213: 1139229864248678143
+    second: cultist-walk_3
+  - first:
+      213: -5829301148250645497
+    second: cultist-walk_4
+  - first:
+      213: -6735886324341209117
+    second: cultist-walk_5
+  - first:
+      213: -1950720294679349305
+    second: cultist-walk_6
+  - first:
+      213: 7938235992497511113
+    second: cultist-walk_7
+  - first:
+      213: -7886800209802961510
+    second: cultist-walk_8
+  - first:
+      213: 2096589641166457464
+    second: cultist-walk_9
+  - first:
+      213: -7207459654193067
+    second: cultist-walk_10
+  - first:
+      213: -5058792154802564596
+    second: cultist-walk_11
+  - first:
+      213: 5796266215983473106
+    second: cultist-walk_12
+  - first:
+      213: -8244244940926374096
+    second: cultist-walk_13
+  - first:
+      213: -4466910447904274182
+    second: cultist-walk_14
+  - first:
+      213: -5819398428819740948
+    second: cultist-walk_south_0
+  - first:
+      213: -1875669425836391437
+    second: cultist-walk_south_1
+  - first:
+      213: 7142282630486844118
+    second: cultist-walk_south_2
+  - first:
+      213: 5451958074689877629
+    second: cultist-walk_south_3
+  - first:
+      213: -7689631657089967012
+    second: cultist-walk_south_4
+  - first:
+      213: -4971755304818874405
+    second: cultist-walk_north_0
+  - first:
+      213: 1659337648618025742
+    second: cultist-walk_north_1
+  - first:
+      213: -5236862983018995339
+    second: cultist-walk_north_2
+  - first:
+      213: -4108802612987964792
+    second: cultist-walk_north_3
+  - first:
+      213: 8627334369415455004
+    second: cultist-walk_north_4
+  - first:
+      213: 7673336709490765512
+    second: cultist-walk_east_0
+  - first:
+      213: 2843755264542552207
+    second: cultist-walk_east_1
+  - first:
+      213: 3493037572902840387
+    second: cultist-walk_east_2
+  - first:
+      213: -3815993527692195828
+    second: cultist-walk_east_3
+  - first:
+      213: -5266682833937962538
+    second: cultist-walk_east_4
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 32
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: cultist-walk_south_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ce6abb326f75d3fa0800000000000000
+      internalID: -5819398428819740948
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cultist-walk_south_1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3f306fc489848f5e0800000000000000
+      internalID: -1875669425836391437
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cultist-walk_south_2
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6d26c93063c7e1360800000000000000
+      internalID: 7142282630486844118
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cultist-walk_south_3
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d767634bbfe39ab40800000000000000
+      internalID: 5451958074689877629
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cultist-walk_south_4
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c5cdd81dfb0f84590800000000000000
+      internalID: -7689631657089967012
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cultist-walk_north_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bd76b1a44e6c00bb0800000000000000
+      internalID: -4971755304818874405
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cultist-walk_north_1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e033f44ccc6270710800000000000000
+      internalID: 1659337648618025742
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cultist-walk_north_2
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 571a2cfecdce257b0800000000000000
+      internalID: -5236862983018995339
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cultist-walk_north_3
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 882d7a8fac99af6c0800000000000000
+      internalID: -4108802612987964792
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cultist-walk_north_4
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c11e68f36e27ab770800000000000000
+      internalID: 8627334369415455004
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cultist-walk_east_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8ce692b051b2d7a60800000000000000
+      internalID: 7673336709490765512
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cultist-walk_east_1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f80b433a85c077720800000000000000
+      internalID: 2843755264542552207
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cultist-walk_east_2
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 34867f76a23c97030800000000000000
+      internalID: 3493037572902840387
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cultist-walk_east_3
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c0887b4ca1eda0bc0800000000000000
+      internalID: -3815993527692195828
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cultist-walk_east_4
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6d9ea7adddbf8e6b0800000000000000
+      internalID: -5266682833937962538
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      cultist-walk_0: -5211613402895662512
+      cultist-walk_1: 8647300906156813464
+      cultist-walk_10: -7207459654193067
+      cultist-walk_11: -5058792154802564596
+      cultist-walk_12: 5796266215983473106
+      cultist-walk_13: -8244244940926374096
+      cultist-walk_14: -4466910447904274182
+      cultist-walk_2: -5813335169523935035
+      cultist-walk_3: 1139229864248678143
+      cultist-walk_4: -5829301148250645497
+      cultist-walk_5: -6735886324341209117
+      cultist-walk_6: -1950720294679349305
+      cultist-walk_7: 7938235992497511113
+      cultist-walk_8: -7886800209802961510
+      cultist-walk_9: 2096589641166457464
+      cultist-walk_east_0: 7673336709490765512
+      cultist-walk_east_1: 2843755264542552207
+      cultist-walk_east_2: 3493037572902840387
+      cultist-walk_east_3: -3815993527692195828
+      cultist-walk_east_4: -5266682833937962538
+      cultist-walk_north_0: -4971755304818874405
+      cultist-walk_north_1: 1659337648618025742
+      cultist-walk_north_2: -5236862983018995339
+      cultist-walk_north_3: -4108802612987964792
+      cultist-walk_north_4: 8627334369415455004
+      cultist-walk_south_0: -5819398428819740948
+      cultist-walk_south_1: -1875669425836391437
+      cultist-walk_south_2: 7142282630486844118
+      cultist-walk_south_3: 5451958074689877629
+      cultist-walk_south_4: -7689631657089967012
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

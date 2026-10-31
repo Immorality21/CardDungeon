@@ -1,0 +1,567 @@
+fileFormatVersion: 2
+guid: b12b2c88362b6e049ba6539afb218d96
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -5960528791309928835
+    second: ranger-walk_0
+  - first:
+      213: -1148906092393138411
+    second: ranger-walk_1
+  - first:
+      213: -322445922643466920
+    second: ranger-walk_2
+  - first:
+      213: 4216415094733906515
+    second: ranger-walk_3
+  - first:
+      213: -8691099367266448192
+    second: ranger-walk_4
+  - first:
+      213: -2848599263653853652
+    second: ranger-walk_5
+  - first:
+      213: -8757095804105155814
+    second: ranger-walk_6
+  - first:
+      213: -3465348575604257313
+    second: ranger-walk_7
+  - first:
+      213: 4905813023503055162
+    second: ranger-walk_8
+  - first:
+      213: -3195630526451343154
+    second: ranger-walk_9
+  - first:
+      213: -8951589098441138631
+    second: ranger-walk_10
+  - first:
+      213: 7841070494643294881
+    second: ranger-walk_11
+  - first:
+      213: 1773518139270249198
+    second: ranger-walk_12
+  - first:
+      213: 2356845713921377373
+    second: ranger-walk_13
+  - first:
+      213: -5936224559175923112
+    second: ranger-walk_14
+  - first:
+      213: 3007393837236298013
+    second: ranger-walk_south_0
+  - first:
+      213: -7712284666048981438
+    second: ranger-walk_south_1
+  - first:
+      213: 6639088640902587897
+    second: ranger-walk_south_2
+  - first:
+      213: -6647079899590145232
+    second: ranger-walk_south_3
+  - first:
+      213: 2724342322892922330
+    second: ranger-walk_south_4
+  - first:
+      213: 5440219314683979860
+    second: ranger-walk_north_0
+  - first:
+      213: -7049298801521971447
+    second: ranger-walk_north_1
+  - first:
+      213: 5624185671003774488
+    second: ranger-walk_north_2
+  - first:
+      213: 1381097796736449399
+    second: ranger-walk_north_3
+  - first:
+      213: -6388156458722838865
+    second: ranger-walk_north_4
+  - first:
+      213: 4331646989407318140
+    second: ranger-walk_east_0
+  - first:
+      213: 7274158321423515696
+    second: ranger-walk_east_1
+  - first:
+      213: -760449955240006253
+    second: ranger-walk_east_2
+  - first:
+      213: 555821118766252658
+    second: ranger-walk_east_3
+  - first:
+      213: -4095187497176639628
+    second: ranger-walk_east_4
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 32
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: ranger-walk_south_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d112b28d2c86cb920800000000000000
+      internalID: 3007393837236298013
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranger-walk_south_1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 246557925f578f490800000000000000
+      internalID: -7712284666048981438
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranger-walk_south_2
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9f5645981f7c22c50800000000000000
+      internalID: 6639088640902587897
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranger-walk_south_3
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 03b4a4f8c04d0c3a0800000000000000
+      internalID: -6647079899590145232
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranger-walk_south_4
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: add589298eecec520800000000000000
+      internalID: 2724342322892922330
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranger-walk_north_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 45825f7a4aa8f7b40800000000000000
+      internalID: 5440219314683979860
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranger-walk_north_1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 90f22bbb61cdb2e90800000000000000
+      internalID: -7049298801521971447
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranger-walk_north_2
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 81e950fc11f1d0e40800000000000000
+      internalID: 5624185671003774488
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranger-walk_north_3
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 77bfc86f025aa2310800000000000000
+      internalID: 1381097796736449399
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranger-walk_north_4
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fa63534fb85b857a0800000000000000
+      internalID: -6388156458722838865
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranger-walk_east_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c707300acf91d1c30800000000000000
+      internalID: 4331646989407318140
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranger-walk_east_1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0308664047003f460800000000000000
+      internalID: 7274158321423515696
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranger-walk_east_2
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 39d25747bc65275f0800000000000000
+      internalID: -760449955240006253
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranger-walk_east_3
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 27209b6dc5ca6b700800000000000000
+      internalID: 555821118766252658
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ranger-walk_east_4
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4775a262ba8fa27c0800000000000000
+      internalID: -4095187497176639628
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      ranger-walk_0: -5960528791309928835
+      ranger-walk_1: -1148906092393138411
+      ranger-walk_10: -8951589098441138631
+      ranger-walk_11: 7841070494643294881
+      ranger-walk_12: 1773518139270249198
+      ranger-walk_13: 2356845713921377373
+      ranger-walk_14: -5936224559175923112
+      ranger-walk_2: -322445922643466920
+      ranger-walk_3: 4216415094733906515
+      ranger-walk_4: -8691099367266448192
+      ranger-walk_5: -2848599263653853652
+      ranger-walk_6: -8757095804105155814
+      ranger-walk_7: -3465348575604257313
+      ranger-walk_8: 4905813023503055162
+      ranger-walk_9: -3195630526451343154
+      ranger-walk_east_0: 4331646989407318140
+      ranger-walk_east_1: 7274158321423515696
+      ranger-walk_east_2: -760449955240006253
+      ranger-walk_east_3: 555821118766252658
+      ranger-walk_east_4: -4095187497176639628
+      ranger-walk_north_0: 5440219314683979860
+      ranger-walk_north_1: -7049298801521971447
+      ranger-walk_north_2: 5624185671003774488
+      ranger-walk_north_3: 1381097796736449399
+      ranger-walk_north_4: -6388156458722838865
+      ranger-walk_south_0: 3007393837236298013
+      ranger-walk_south_1: -7712284666048981438
+      ranger-walk_south_2: 6639088640902587897
+      ranger-walk_south_3: -6647079899590145232
+      ranger-walk_south_4: 2724342322892922330
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

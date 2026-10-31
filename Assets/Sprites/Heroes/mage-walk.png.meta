@@ -1,0 +1,567 @@
+fileFormatVersion: 2
+guid: 752e09113ff1ea747a1bdd027d86a6ee
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -3251010046393154304
+    second: mage-walk_0
+  - first:
+      213: -1075151656242009664
+    second: mage-walk_1
+  - first:
+      213: 6627142284741371545
+    second: mage-walk_2
+  - first:
+      213: 1888646499602337586
+    second: mage-walk_3
+  - first:
+      213: -4610242724219454512
+    second: mage-walk_4
+  - first:
+      213: 7215803797784588834
+    second: mage-walk_5
+  - first:
+      213: 6209505157344542581
+    second: mage-walk_6
+  - first:
+      213: 4444238411473110289
+    second: mage-walk_7
+  - first:
+      213: 3304700626390203822
+    second: mage-walk_8
+  - first:
+      213: 8829021738479945184
+    second: mage-walk_9
+  - first:
+      213: 7656624269959690797
+    second: mage-walk_10
+  - first:
+      213: 659879589721254035
+    second: mage-walk_11
+  - first:
+      213: -1530996766854494816
+    second: mage-walk_12
+  - first:
+      213: 7552164925493744061
+    second: mage-walk_13
+  - first:
+      213: -5226896028332702840
+    second: mage-walk_14
+  - first:
+      213: 4669066549480733129
+    second: mage-walk_south_0
+  - first:
+      213: -8199485072505821837
+    second: mage-walk_south_1
+  - first:
+      213: 4205136387075644958
+    second: mage-walk_south_2
+  - first:
+      213: -3967771434926113793
+    second: mage-walk_south_3
+  - first:
+      213: -4578782832377742861
+    second: mage-walk_south_4
+  - first:
+      213: 4385135036516229662
+    second: mage-walk_north_0
+  - first:
+      213: -1435483104376632325
+    second: mage-walk_north_1
+  - first:
+      213: -5748240504591642309
+    second: mage-walk_north_2
+  - first:
+      213: 7834515265033623053
+    second: mage-walk_north_3
+  - first:
+      213: -4039030184036965766
+    second: mage-walk_north_4
+  - first:
+      213: -4134089914164558129
+    second: mage-walk_east_0
+  - first:
+      213: 8682139253025290309
+    second: mage-walk_east_1
+  - first:
+      213: 4359185999402319682
+    second: mage-walk_east_2
+  - first:
+      213: -7931152993287537486
+    second: mage-walk_east_3
+  - first:
+      213: 2793818402881610708
+    second: mage-walk_east_4
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 32
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: mage-walk_south_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9c9357af94bdbc040800000000000000
+      internalID: 4669066549480733129
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: mage-walk_south_1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3752c20f4c3953e80800000000000000
+      internalID: -8199485072505821837
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: mage-walk_south_2
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e1e96b7a345ab5a30800000000000000
+      internalID: 4205136387075644958
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: mage-walk_south_3
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ffb794fe6e4afe8c0800000000000000
+      internalID: -3967771434926113793
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: mage-walk_south_4
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3f9b77cf545e470c0800000000000000
+      internalID: -4578782832377742861
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: mage-walk_north_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e126baf05112bdc30800000000000000
+      internalID: 4385135036516229662
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: mage-walk_north_1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bfb4e8ad8b3241ce0800000000000000
+      internalID: -1435483104376632325
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: mage-walk_north_2
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b319d4077b52a30b0800000000000000
+      internalID: -5748240504591642309
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: mage-walk_north_3
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d0654bfdf1ac9bc60800000000000000
+      internalID: 7834515265033623053
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: mage-walk_north_4
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a726563827b72f7c0800000000000000
+      internalID: -4039030184036965766
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: mage-walk_east_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fc642bc5023c0a6c0800000000000000
+      internalID: -4134089914164558129
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: mage-walk_east_1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5483c0396a72d7870800000000000000
+      internalID: 8682139253025290309
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: mage-walk_east_2
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 24f3b3c0290fe7c30800000000000000
+      internalID: 4359185999402319682
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: mage-walk_east_3
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2bcf1d7af52eee190800000000000000
+      internalID: -7931152993287537486
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: mage-walk_east_4
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4d325bef803a5c620800000000000000
+      internalID: 2793818402881610708
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      mage-walk_0: -3251010046393154304
+      mage-walk_1: -1075151656242009664
+      mage-walk_10: 7656624269959690797
+      mage-walk_11: 659879589721254035
+      mage-walk_12: -1530996766854494816
+      mage-walk_13: 7552164925493744061
+      mage-walk_14: -5226896028332702840
+      mage-walk_2: 6627142284741371545
+      mage-walk_3: 1888646499602337586
+      mage-walk_4: -4610242724219454512
+      mage-walk_5: 7215803797784588834
+      mage-walk_6: 6209505157344542581
+      mage-walk_7: 4444238411473110289
+      mage-walk_8: 3304700626390203822
+      mage-walk_9: 8829021738479945184
+      mage-walk_east_0: -4134089914164558129
+      mage-walk_east_1: 8682139253025290309
+      mage-walk_east_2: 4359185999402319682
+      mage-walk_east_3: -7931152993287537486
+      mage-walk_east_4: 2793818402881610708
+      mage-walk_north_0: 4385135036516229662
+      mage-walk_north_1: -1435483104376632325
+      mage-walk_north_2: -5748240504591642309
+      mage-walk_north_3: 7834515265033623053
+      mage-walk_north_4: -4039030184036965766
+      mage-walk_south_0: 4669066549480733129
+      mage-walk_south_1: -8199485072505821837
+      mage-walk_south_2: 4205136387075644958
+      mage-walk_south_3: -3967771434926113793
+      mage-walk_south_4: -4578782832377742861
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

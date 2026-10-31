@@ -61,6 +61,24 @@ MonoBehaviour:
   - {fileID: -5963465782880156, guid: ff471b3be2e44c929e7c2002d67e925c, type: 3}
   - {fileID: -4682416728303873, guid: ff471b3be2e44c929e7c2002d67e925c, type: 3}
   AnimationFps: 4
+  WalkSouth:
+  - {fileID: 4669066549480733129, guid: 752e09113ff1ea747a1bdd027d86a6ee, type: 3}
+  - {fileID: -8199485072505821837, guid: 752e09113ff1ea747a1bdd027d86a6ee, type: 3}
+  - {fileID: 4205136387075644958, guid: 752e09113ff1ea747a1bdd027d86a6ee, type: 3}
+  - {fileID: -3967771434926113793, guid: 752e09113ff1ea747a1bdd027d86a6ee, type: 3}
+  - {fileID: -4578782832377742861, guid: 752e09113ff1ea747a1bdd027d86a6ee, type: 3}
+  WalkNorth:
+  - {fileID: 4385135036516229662, guid: 752e09113ff1ea747a1bdd027d86a6ee, type: 3}
+  - {fileID: -1435483104376632325, guid: 752e09113ff1ea747a1bdd027d86a6ee, type: 3}
+  - {fileID: -5748240504591642309, guid: 752e09113ff1ea747a1bdd027d86a6ee, type: 3}
+  - {fileID: 7834515265033623053, guid: 752e09113ff1ea747a1bdd027d86a6ee, type: 3}
+  - {fileID: -4039030184036965766, guid: 752e09113ff1ea747a1bdd027d86a6ee, type: 3}
+  WalkEast:
+  - {fileID: -4134089914164558129, guid: 752e09113ff1ea747a1bdd027d86a6ee, type: 3}
+  - {fileID: 8682139253025290309, guid: 752e09113ff1ea747a1bdd027d86a6ee, type: 3}
+  - {fileID: 4359185999402319682, guid: 752e09113ff1ea747a1bdd027d86a6ee, type: 3}
+  - {fileID: -7931152993287537486, guid: 752e09113ff1ea747a1bdd027d86a6ee, type: 3}
+  - {fileID: 2793818402881610708, guid: 752e09113ff1ea747a1bdd027d86a6ee, type: 3}
   HitFrames:
   - {fileID: -1504315201840661378, guid: 74c8f252ca5b8b744adf463dc32fbab8, type: 3}
   - {fileID: 6105479866048589006, guid: 74c8f252ca5b8b744adf463dc32fbab8, type: 3}

@@ -239,3 +239,10 @@ path. Every grid's trunk ability slot sat exactly on the hub-to-middle-branch li
 the gate to that branch while the branch could be bought without it (playtest 3 finding 4). The slot
 is a spur at `(60, -375)` now, mirroring the middle branch's first stat spur at `(-60, -375)`.
 
+
+## Walking the dungeon
+
+Only the leader shows on the map, but any hero can lead, so every `HeroSO` carries `WalkSouth`,
+`WalkNorth` and `WalkEast`: the standing frame first, then the walk cycle; left mirrors east.
+`Party.Face` and `Party.SetWalking` play them (see the Rooms guide). A hero with none keeps its idle loop
+and is only mirrored. A new hero needs them: `docs/PIXEL_ART.md`, *Hero walk cycles*.

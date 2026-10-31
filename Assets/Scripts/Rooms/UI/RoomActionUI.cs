@@ -179,6 +179,7 @@ namespace Assets.Scripts.Rooms
         private Door _walkGoalDoor;
         private Room _walkGoalRoom;
         private Vector2Int _walkGoalTile;
+        private Vector2Int? _walkUseTile;
         private KeyboardNavigator _barNav;
         private KeyboardNavigator _combatNav;
         private KeyboardNavigator _eventNav;
@@ -2362,6 +2363,7 @@ namespace Assets.Scripts.Rooms
         private void SetWalkGoal(Door door, Room room, Vector2Int tile)
         {
             _walk?.Follow(System.Array.Empty<Vector2Int>());
+            _walkUseTile = null;
             _walkGoalDoor = door;
             _walkGoalRoom = room;
             _walkGoalTile = tile;
@@ -2403,10 +2405,21 @@ namespace Assets.Scripts.Rooms
                 ClearWalkGoal();
                 return;
             }
+            var floor = FloorOf(_currentRoom);
+            var solid = _currentRoom.SolidTiles(party.Tile);
             if (door == null && _walkGoalRoom == _currentRoom)
             {
-                _walk.Follow(TileWalkOps.Path(party.Tile, _walkGoalTile));
+                // Something solid is walked up to and used; anywhere else is just walked to.
+                bool useIt = solid.Contains(_walkGoalTile);
+                var path = useIt
+                    ? TileWalkOps.PathNextTo(party.Tile, _walkGoalTile, floor, solid)
+                    : TileWalkOps.Path(party.Tile, _walkGoalTile, floor, solid);
+                _walkUseTile = useIt && path != null ? _walkGoalTile : (Vector2Int?)null;
                 ClearWalkGoal();
+                if (path != null)
+                {
+                    _walk.Follow(path);
+                }
                 return;
             }
             if (door == null)
@@ -2422,9 +2435,36 @@ namespace Assets.Scripts.Rooms
             }
 
             _walkGoalDoor = null;
-            var steps = TileWalkOps.Path(party.Tile, Vector2Int.RoundToInt(door.GetPositionInRoom(_currentRoom)));
+            var steps = TileWalkOps.Path(party.Tile, Vector2Int.RoundToInt(door.GetPositionInRoom(_currentRoom)), floor, solid);
+            if (steps == null)
+            {
+                ClearWalkGoal();
+                return;
+            }
             steps.Add(door.DirectionFrom(_currentRoom));
             _walk.Follow(steps);
+        }
+
+        /// <summary>The last of a click on something solid: turn to it, now the party is beside it, and use it.</summary>
+        private void FinishWalkUse()
+        {
+            if (_walkUseTile == null || _walk.IsStepping || _walk.HasPath)
+            {
+                return;
+            }
+            var tile = _walkUseTile.Value;
+            _walkUseTile = null;
+            var party = GameManager.HasInstance ? GameManager.Instance.Party : null;
+            if (party == null || _walk.KeyHeld || !DoorNavActive())
+            {
+                return;
+            }
+            var offset = tile - party.Tile;
+            if (Mathf.Abs(offset.x) + Mathf.Abs(offset.y) == 1)
+            {
+                party.Face(offset);
+                UseFacing();
+            }
         }
 
         /// <summary>Whether the pointer is over something on the UI panel (its root does not pick).</summary>
@@ -2838,9 +2878,49 @@ namespace Assets.Scripts.Rooms
                 case KeyCode.KeypadEnter:
                 case KeyCode.Z:
                 case KeyCode.Space:
-                    return _barNav != null && _barNav.HasSelection && _barNav.HandleKey(evt);
+                    if (_barNav != null && _barNav.HasSelection)
+                    {
+                        return _barNav.HandleKey(evt);
+                    }
+                    return UseFacing();
             }
 
+            return false;
+        }
+
+        /// <summary>
+        /// Uses what the party is standing against, the way pressing A at a chest does in FF: the same
+        /// action as its button on the room bar, so a refuge still asks first and the stairs still
+        /// warn. Nothing happens when the bar would not offer it either - a spent chest, a guarded room.
+        /// </summary>
+        private bool UseFacing()
+        {
+            var party = GameManager.HasInstance ? GameManager.Instance.Party : null;
+            if (party == null || _currentRoom == null)
+            {
+                return false;
+            }
+
+            var tile = party.Tile + party.Facing;
+            if (_currentRoom.KindMarker != null && Vector2Int.RoundToInt(_currentRoom.KindMarker.transform.position) == tile)
+            {
+                if (IsShown(_searchBtn))
+                {
+                    OnSearch();
+                    return true;
+                }
+                if (IsShown(_restBtn))
+                {
+                    OnRest();
+                    return true;
+                }
+            }
+            if (_currentRoom.ExitMarker != null && IsShown(_descendBtn)
+                && Vector2Int.RoundToInt(_currentRoom.ExitMarker.position) == tile)
+            {
+                OnDescend();
+                return true;
+            }
             return false;
         }
 
@@ -2861,6 +2941,7 @@ namespace Assets.Scripts.Rooms
                 _barNav?.Reset();
             }
             ContinueWalkGoal();
+            FinishWalkUse();
         }
 
         /// <summary>Takes one step, as a held key would. For scripts and tests: no keyboard involved.</summary>

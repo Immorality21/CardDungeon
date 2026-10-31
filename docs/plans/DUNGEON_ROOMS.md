@@ -5,8 +5,8 @@
 > `Assets/Scripts/Rooms/CLAUDE.md` (generation, the room bar, the map, click-to-walk) ·
 > `docs/PIXEL_ART.md` (sizes, the PixelLab workflow).
 >
-> **Status: plan, written 2026-10-30; phase 0 decided the same day (below); phase 1 spike built the
-> same day, waiting on the owner's look (see *Phase 1: what the spike found*).** From the owner's playtest note of 2026-10-29:
+> **Status (2026-10-31): phases 0, 1 and 7 are done and the owner signed off the look. Next is phase 2;
+> start at *Phase 2: where to start*. The new look still exists only in the sandbox.** From the owner's playtest note of 2026-10-29:
 > *"Dungeon rooms need more flair/artwork. Room events should also be somewhat visible from art
 > instead of just a button. Also more variations, maybe even rethink how we generate these."*
 
@@ -43,7 +43,7 @@ walls one tile thick, the floor a single texture, the hero one tile).
    unlock, for now.
 5. **Elites are a surprise** (no mark on the door), and they are **the very last part of the plan**.
 
-## Where it stands today
+## Where it stood when the plan was written (2026-10-30)
 
 - **Every room looks the same**: one 32 px flagstone (`floor-tile.png`) tinted by `RoomSO.Color`,
   the walls 6 px overlay bands from `WallGenerator`, and a uniform bedrock between rooms. The only
@@ -110,13 +110,13 @@ Each phase leaves the game playable and is checked in play before the next one s
 | # | phase | what lands | why here |
 |---|---|---|---|
 | **0** | ✅ **Decided 2026-10-30** | C; same room count; walking later; hidden rooms optional, no retry; Elites last and a surprise | see above |
-| **1** | 🔶 **Spike built 2026-10-30, needs the owner's eye** — one biome, one floor | Tilemap rendering of floors and walls with a one-tile north wall face, one biome's tiles (PixelLab), props on free tiles, in the sandbox. Screenshots beside the two FF references. No gameplay change, door-to-door movement kept | proves the look and the tile pipeline before anything is converted; cheap to throw away |
-| **2** | **Biomes and props everywhere** | a `BiomeSO` per area (floor variants, wall Rule Tiles, door arch, prop set with weights, lights), one per run family (crypt, ember forge, swamp, archive, vault); templates grow one row for the wall; the old tint and `WallGenerator` retire | the visual upgrade on every floor at once, still no new mechanics |
+| **1** | ✅ **Spike built 2026-10-30, signed off by the owner** — one biome, one floor | Tilemap rendering of floors and walls with a one-tile north wall face, one biome's tiles (PixelLab), props on free tiles, in the sandbox. Screenshots beside the two FF references. No gameplay change, door-to-door movement kept | proves the look and the tile pipeline before anything is converted; cheap to throw away |
+| **2** | **Biomes and props everywhere** | a `BiomeSO` per area (floors, wall faces, door art, edge texture, weighted props, lights), one per run family (crypt, ember forge, swamp, archive, vault), set on every level; manual layouts re-placed for the wall row; the old tint retires. Rule Tiles turned out unnecessary (`RoomTileOps` picks the pieces). See *Phase 2: where to start* | the visual upgrade on every floor at once, still no new mechanics |
 | **3** | **Events and kinds you can see** | each `RoomEventSO` gets a world sprite (and a spent one), placed on entry and visible before the fight, clicked once the room is clear (the button stays for the keyboard); a new kind **Shrine** (a refuge with a price) | content the new rooms can show off; independent of movement |
 | **4** | **Authored room shapes** | templates as painted tilemaps with door sockets and spots (option C); a socket-matching generator; pillars, L-shapes, carpets, alcoves; enemies, markers and props placed on the walkable mask | needs 1-2's pipeline |
 | **5** | **Hidden rooms** | the generator adds secret rooms behind a **locked door**, always a side room and **never on the path to the stairs**; a new event outcome **Unlock** opens it ("try to pick the lock": success opens it, failure leaves it shut **for good**); the map and the frontier count do not show it until it is open; it holds a cache or a captive | a door state plus one outcome type; easiest once rooms and doors are tiles |
 | **6** | **Branching routes** | floors fork on purpose: a main path to the stairs and side branches that trade danger for reward (a cache, a shrine, a hidden room), told apart by the door art and the map | the open half of `POLISH_CONTENT.md` §2 |
-| **7** | 🔶 **Tile walking - moved first, core built 2026-10-30** (walk cycles, blocking props still open) | the leader walks tile by tile: arrows step, click paths (A*), doorways enter rooms; 4-direction walk cycles; enemies stand on tiles; Fight / Flee on entry as today | the biggest change to how the game feels; the owner wants it after the look and the rooms, as exploration gains rewards |
+| **7** | ✅ **Tile walking - moved first, built 2026-10-30** (special doors belong to phase 5) | the leader walks tile by tile: arrows step, click paths (A*), doorways enter rooms; 4-direction walk cycles; enemies stand on tiles; Fight / Flee on entry as today | the biggest change to how the game feels; the owner wants it after the look and the rooms, as exploration gains rewards |
 | **8** | **Elites (last)** | a new kind **Elite**: a tougher fight with a better drop table, **not marked** before you walk in (a surprise); placed on side branches more than on the main path | the owner's call: the very last part of the plan |
 
 **Backlog, later (owner):** more room events, and a pool of events per area so each region has its
@@ -199,10 +199,48 @@ on (*"they dont look so nice"*). What stayed, on the owner's direction:
 **Not saved yet:** which doors are open is not in the save, so a resumed floor shows them all shut,
 and they swing once more. Map fast travel opens no doors either.
 
-**Still open from phase 7:** 4-direction walk cycles per hero (the sprite only mirrors left/right
-today); chests, campfires, stairs and captives do not block a step yet, and pressing toward one does
-not use it - the room bar still does that; "special" doors (locked, hidden - phase 5) as tiles that do
-not open by walking.
+**A room's contents are solid and used by walking up to them (2026-10-30):** chests, campfires, the
+stairs and anything alive refuse a step and leave the party facing them; Enter uses what it faces, by
+the same action as the room bar's button, so a refuge and the stairs still ask first. A click on one
+walks beside it and uses it, and click paths go around them (`TileWalkOps.Path`, a real search now).
+**Nothing may shut the party in**: `TileWalkOps.Solid` leaves walkable anything that would cut a door
+off, because contents are placed to spread out, not to leave a way past. The room bar stays, for the
+mouse and for room events, which have no object yet (phase 3).
+
+**Every hero walks in four directions (2026-10-30):** `HeroSO.WalkSouth/North/East`, the standing frame
+then a 4-frame cycle, left mirroring east. Only the leader shows on the map, but any of the nine can lead.
+At rest the party keeps the way it faced; facing the viewer is the idle loop.
+
+**Still open from phase 7:** "special" doors (locked, hidden - phase 5) that do not open by walking.
+
+## Phase 2: where to start (written 2026-10-31)
+
+**What exists:** `BiomeSO`, `RoomTileOps`, `RoomTilePainter`, tile walking, swinging doors and walk cycles
+all work, on any generated floor that has a biome. `Biomes/Crypt.asset` is the one biome, and only
+`Sandbox/RoomSpike.asset` uses it (`SandboxConfigSO.Biome`). **No level sets `LevelDefinitionSO.Biome`.**
+Walking, doors, solid contents and walk cycles are **already live on every campaign floor**, in the old
+look.
+
+**Decide first, with the owner:**
+1. **Enemy size on the walking view** (half a tile, `localScale 0.5`, against a full-tile hero). Try full
+   size in the sandbox: it is one line, but five foes crowd a two-row room. It affects every biome.
+2. **Does a biome's floor need lights** (the plan lists them; the crypt has none)?
+
+**The work, in order:**
+1. **Set the Crypt on the Catacombs levels first**, and play them: the first real floors with the wall
+   row. `BiomeOverride` stays for the sandbox.
+2. **Saves:** a biome changes a floor's layout, because of the wall row, so a mid-floor save from before
+   it reloads onto different rooms (`DungeonSaveCompatibility` compares the room count, which does not
+   change). Stamp or invalidate it. Open doors are not saved either: decide if that matters.
+3. **Manual layouts** (`BuildManualDungeon` forces no biome): their positions assume no wall row, so re-place
+   them or add a converter. The tutorial's floors are among them (`docs/TUTORIAL.md`).
+4. **The other biomes:** one art pass each, by the recipe in `docs/PIXEL_ART.md` (*Dungeon tiles and
+   props*): tiles, props, side door, arch door, swing frames, shade. About 50 generations a biome.
+5. **Retire** the tint and the old door sprite once nothing uses them, and rerun the balance suite.
+
+**Known leftovers from the spike:** the stone cap on an open side door reads a bit like rubble; the arch
+door was scaled up from 10x15; wall props carry a small mount plate; the Warlock's walk frames keep the
+big-head style, pending the owner (`docs/PIXEL_ART.md`).
 
 ## Open questions
 
@@ -215,7 +253,6 @@ not open by walking.
   from its seed and comparing.
 - **Balance**: the room count stays, but Shrines, hidden rooms, routes and Elites change what a floor
   pays and costs; rerun the regression suite after phases 3, 5, 6 and 8.
-- **Every scripted check that clicks doors** (`docs/GAMEPLAY_VALIDATION.md`, the sandbox's
-  `SendMessage("OnMouseDown")`) changes with phase 7.
+- **Scripted checks that click doors** must wait: since phase 7 a door click is a walk
+  (`docs/GAMEPLAY_VALIDATION.md`), and the sandbox's `SendMessage("OnMouseDown")` walk-in is untested with it.
 - **The tutorial's manual floors** (`ManualLayoutSO`) must be converted with the rest.
-- **The click-to-walk just built** becomes A* pathing in phase 7; its safety rules carry over.

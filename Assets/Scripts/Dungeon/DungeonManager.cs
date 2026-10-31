@@ -1347,6 +1347,7 @@ namespace Assets.Scripts.Dungeon
             var markerObj = new GameObject("ExitMarker");
             markerObj.transform.SetParent(room.transform, false);
             markerObj.transform.position = room.ClaimSpot(markerObj, -0.5f);
+            room.ExitMarker = markerObj.transform;
             var sr = markerObj.AddComponent<SpriteRenderer>();
             sr.sprite = stairs;
             sr.sortingOrder = RoomMarkerSortOrder;

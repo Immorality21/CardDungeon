@@ -19,7 +19,7 @@ work, then open only the plan file your work touches:
 | `docs/plans/HUB.md` | campfire, materials, buildings, gold sinks, crafting (§3, §7) |
 | `docs/plans/BALANCE_OPEN.md` | open balance steps and findings, losability, the retry economy (§0–§0g, §3b) |
 | `docs/plans/REVISITS.md` | re-clearing runs at a player-selected difficulty (conditions and limits) |
-| `docs/plans/DUNGEON_ROOMS.md` | the dungeon's look and feel: biome tiles and props, events you can see, FF-style tile walking, authored room shapes, hidden rooms, branching routes, Elites (phased; decided 2026-10-30, next is the phase 1 spike) |
+| `docs/plans/DUNGEON_ROOMS.md` | the dungeon's look and feel: biome tiles and props, events you can see, FF-style tile walking, authored room shapes, hidden rooms, branching routes, Elites (phased; tile walking and the crypt spike done 2026-10-30, next is phase 2: biomes on every floor) |
 | `docs/plans/EVENTS.md` | event-driven rules: the health funnel, the fight's and the game's event streams, reactions on items/enemies/summons, items that grow; passive grid nodes (after the demo) |
 | `docs/plans/POLISH_CONTENT.md` | battle/room polish, player-facing information, content volume, **the tutorial** (§1, §2, §6, §8, §14–§20) |
 
@@ -56,7 +56,7 @@ Tuning and balance work has its own accumulated-learnings file, **`docs/BALANCIN
 
 **`Assets.Scripts.*`** — Game-specific code:
 - `UnitStats/` — **the stat model**: `StatType` (the one stat enum, `None = 0`), `UnitStat` (one stat + amount), `StatBlock` (a sparse, indexable set), **`StatCatalog`** (the one per-stat mapping — labels, recruit/power weights, authoring defaults, iteration order), and `Editor/StatBlockDrawer` (one labelled row per stat in the inspector). **Adding a stat is one `StatType` member plus one `StatCatalog` row**; `StatCatalogTests` fails if the row is missing.
-- `Rooms/` — Dungeon generation (`RoomManager`, `RoomNode`, `Room`, `Door`, `RoomSO`), **room kinds** (`RoomKind` + the pure `RoomKindPlanner` / `RoomKindRewards` — caches and refuges, placed per instance on a per-level quota), `GameManager`, `CombatManager`
+- `Rooms/` — Dungeon generation (`RoomManager`, `RoomNode`, `Room`, `Door`, `RoomSO`), **room kinds** (`RoomKind` + the pure `RoomKindPlanner` / `RoomKindRewards` — caches and refuges, placed per instance on a per-level quota), **biome-drawn floors** (`BiomeSO`, the pure `RoomTileOps`, `RoomTilePainter`), **tile walking** (the pure `TileWalkOps`, `UI/PartyWalk`), `GameManager`, `CombatManager`
 - `Rooms/Events/` — **room events**: the stat-resolved gambles behind a room's **Action** button (`RoomEventSO`, `RoomEventSpawn`, `RoomEventResolver`, `RoomEventRunner`, `LevelAfflictionTracker`) — see its own `CLAUDE.md`
 - `Heroes/` — `Hero`, `HeroSO`, `Party`, `HeroSaveData`, **the sphere grid** (`SphereGridSO` node-graph assets + `SphereGridOps`, the pure rules — XP is a per-hero bank spent on nodes at the hub; `LevelConfiguration` is gone), and `UI/` (`SphereGridView` — the UITK graph renderer shared by the hub screen and the `Tools ▸ Sphere Grid Editor` window — `SphereGridPresenter`, `SphereGridUI`)
 - `Enemies/` — `Enemy`, `EnemyManager`, `EnemySpawnEntry`, **the bestiary** (`EnemyCatalogSO` + the pure `BestiaryPresenter` and `UI/BestiaryLineView`/`UI/BestiaryUI` — what the player has *observed* about each enemy, shown by the in-combat Inspect page and the hub Bestiary screen)

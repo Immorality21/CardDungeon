@@ -51,13 +51,32 @@ MonoBehaviour:
     Overlaps: 'Warrior (front-liner, damage) and Cleric (healer). Three branches
       against their two: broader, never the best at any one.'
     OpenQuestions: What does a Paladin do that the Warrior and the Cleric cannot?
-      Holy damage, and since 2026-10-30 negating a hit outright (Divine Protection, Aegis) - he shares no ability with the Warrior any more.
+      Holy damage, and since 2026-10-30 negating a hit outright (Divine Protection,
+      Aegis) - he shares no ability with the Warrior any more.
   Sprite: {fileID: -4830569828500545, guid: e404973d0e8b4991a9ca92f0d7566c3a, type: 3}
   AnimationFrames:
   - {fileID: -4830569828500545, guid: e404973d0e8b4991a9ca92f0d7566c3a, type: 3}
   - {fileID: -6482093923986577, guid: e404973d0e8b4991a9ca92f0d7566c3a, type: 3}
   - {fileID: -4621225683566614, guid: e404973d0e8b4991a9ca92f0d7566c3a, type: 3}
   AnimationFps: 4
+  WalkSouth:
+  - {fileID: 7711642739442073588, guid: 353b4bf1a7df8b448bc81afb283ff07d, type: 3}
+  - {fileID: -2934830208306087874, guid: 353b4bf1a7df8b448bc81afb283ff07d, type: 3}
+  - {fileID: 2097500495070340744, guid: 353b4bf1a7df8b448bc81afb283ff07d, type: 3}
+  - {fileID: -2696143741887234845, guid: 353b4bf1a7df8b448bc81afb283ff07d, type: 3}
+  - {fileID: -8425723077825934836, guid: 353b4bf1a7df8b448bc81afb283ff07d, type: 3}
+  WalkNorth:
+  - {fileID: 593926811211946269, guid: 353b4bf1a7df8b448bc81afb283ff07d, type: 3}
+  - {fileID: 5731738855615753606, guid: 353b4bf1a7df8b448bc81afb283ff07d, type: 3}
+  - {fileID: -7233454248950529525, guid: 353b4bf1a7df8b448bc81afb283ff07d, type: 3}
+  - {fileID: 3495141587307086262, guid: 353b4bf1a7df8b448bc81afb283ff07d, type: 3}
+  - {fileID: 5347545997166801392, guid: 353b4bf1a7df8b448bc81afb283ff07d, type: 3}
+  WalkEast:
+  - {fileID: -377975565630753515, guid: 353b4bf1a7df8b448bc81afb283ff07d, type: 3}
+  - {fileID: -9005097877078500054, guid: 353b4bf1a7df8b448bc81afb283ff07d, type: 3}
+  - {fileID: 1538216262908158145, guid: 353b4bf1a7df8b448bc81afb283ff07d, type: 3}
+  - {fileID: 7071860751747219520, guid: 353b4bf1a7df8b448bc81afb283ff07d, type: 3}
+  - {fileID: 8713400565882868155, guid: 353b4bf1a7df8b448bc81afb283ff07d, type: 3}
   HitFrames:
   - {fileID: 8984468634625761959, guid: d06a5d42ebf56034b9f69d068adb9dfa, type: 3}
   - {fileID: 3333253707095661055, guid: d06a5d42ebf56034b9f69d068adb9dfa, type: 3}

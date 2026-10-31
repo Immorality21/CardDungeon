@@ -1,0 +1,567 @@
+fileFormatVersion: 2
+guid: 7c5deba7c0f77db4abac088ff70ca7e0
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -3786236187768511233
+    second: cleric-walk_0
+  - first:
+      213: -4632501138972048487
+    second: cleric-walk_1
+  - first:
+      213: -7861629164845672823
+    second: cleric-walk_2
+  - first:
+      213: -2963275742661208821
+    second: cleric-walk_3
+  - first:
+      213: -8050868816754266447
+    second: cleric-walk_4
+  - first:
+      213: 1232230236066345945
+    second: cleric-walk_5
+  - first:
+      213: -2272493330387401852
+    second: cleric-walk_6
+  - first:
+      213: 3391251597868779087
+    second: cleric-walk_7
+  - first:
+      213: 602717709071826813
+    second: cleric-walk_8
+  - first:
+      213: -2444118384503591786
+    second: cleric-walk_9
+  - first:
+      213: 5500472482608899126
+    second: cleric-walk_10
+  - first:
+      213: 4167706096483436466
+    second: cleric-walk_11
+  - first:
+      213: -2980356236855271214
+    second: cleric-walk_12
+  - first:
+      213: -2405808156031494874
+    second: cleric-walk_13
+  - first:
+      213: 1532236080951301686
+    second: cleric-walk_14
+  - first:
+      213: -1259656981799228804
+    second: cleric-walk_south_0
+  - first:
+      213: -1719349572661233074
+    second: cleric-walk_south_1
+  - first:
+      213: 5630132094368617244
+    second: cleric-walk_south_2
+  - first:
+      213: 7161213753881496379
+    second: cleric-walk_south_3
+  - first:
+      213: 6757371895544826528
+    second: cleric-walk_south_4
+  - first:
+      213: 5722188425025393507
+    second: cleric-walk_north_0
+  - first:
+      213: 7491792901782712372
+    second: cleric-walk_north_1
+  - first:
+      213: 2292916679502109781
+    second: cleric-walk_north_2
+  - first:
+      213: 7215532035759363535
+    second: cleric-walk_north_3
+  - first:
+      213: 7906407091411997482
+    second: cleric-walk_north_4
+  - first:
+      213: 38639370637128395
+    second: cleric-walk_east_0
+  - first:
+      213: 564240711808789459
+    second: cleric-walk_east_1
+  - first:
+      213: 7868343114777385952
+    second: cleric-walk_east_2
+  - first:
+      213: -8142624920024135455
+    second: cleric-walk_east_3
+  - first:
+      213: -8631881910682544731
+    second: cleric-walk_east_4
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 32
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: cleric-walk_south_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c7a240526acc48ee0800000000000000
+      internalID: -1259656981799228804
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cleric-walk_south_1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e4abec45ca4a328e0800000000000000
+      internalID: -1719349572661233074
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cleric-walk_south_2
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c131e536f4f322e40800000000000000
+      internalID: 5630132094368617244
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cleric-walk_south_3
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b3b8fb8a7fdb16360800000000000000
+      internalID: 7161213753881496379
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cleric-walk_south_4
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0aa4829dfe107cd50800000000000000
+      internalID: 6757371895544826528
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cleric-walk_north_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3639d7b1e0c496f40800000000000000
+      internalID: 5722188425025393507
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cleric-walk_north_1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4303d8173f138f760800000000000000
+      internalID: 7491792901782712372
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cleric-walk_north_2
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 55c9a45529312df10800000000000000
+      internalID: 2292916679502109781
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cleric-walk_north_3
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fc553e03828b22460800000000000000
+      internalID: 7215532035759363535
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cleric-walk_north_4
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a23dd351c5339bd60800000000000000
+      internalID: 7906407091411997482
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cleric-walk_east_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bc2bb298d46498000800000000000000
+      internalID: 38639370637128395
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cleric-walk_east_1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3db2d2b10f594d700800000000000000
+      internalID: 564240711808789459
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cleric-walk_east_2
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0eb5237ef58f13d60800000000000000
+      internalID: 7868343114777385952
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cleric-walk_east_3
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1e8c7b6d6c59ffe80800000000000000
+      internalID: -8142624920024135455
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cleric-walk_east_4
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5a595aac225653880800000000000000
+      internalID: -8631881910682544731
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      cleric-walk_0: -3786236187768511233
+      cleric-walk_1: -4632501138972048487
+      cleric-walk_10: 5500472482608899126
+      cleric-walk_11: 4167706096483436466
+      cleric-walk_12: -2980356236855271214
+      cleric-walk_13: -2405808156031494874
+      cleric-walk_14: 1532236080951301686
+      cleric-walk_2: -7861629164845672823
+      cleric-walk_3: -2963275742661208821
+      cleric-walk_4: -8050868816754266447
+      cleric-walk_5: 1232230236066345945
+      cleric-walk_6: -2272493330387401852
+      cleric-walk_7: 3391251597868779087
+      cleric-walk_8: 602717709071826813
+      cleric-walk_9: -2444118384503591786
+      cleric-walk_east_0: 38639370637128395
+      cleric-walk_east_1: 564240711808789459
+      cleric-walk_east_2: 7868343114777385952
+      cleric-walk_east_3: -8142624920024135455
+      cleric-walk_east_4: -8631881910682544731
+      cleric-walk_north_0: 5722188425025393507
+      cleric-walk_north_1: 7491792901782712372
+      cleric-walk_north_2: 2292916679502109781
+      cleric-walk_north_3: 7215532035759363535
+      cleric-walk_north_4: 7906407091411997482
+      cleric-walk_south_0: -1259656981799228804
+      cleric-walk_south_1: -1719349572661233074
+      cleric-walk_south_2: 5630132094368617244
+      cleric-walk_south_3: 7161213753881496379
+      cleric-walk_south_4: 6757371895544826528
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

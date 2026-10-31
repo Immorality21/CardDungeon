@@ -1,0 +1,567 @@
+fileFormatVersion: 2
+guid: 10d03c4d840216c4da0a5f6a51f14aa3
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 6490835606819814876
+    second: rogue-walk_0
+  - first:
+      213: 2102150453756773914
+    second: rogue-walk_1
+  - first:
+      213: -4188781809577145744
+    second: rogue-walk_2
+  - first:
+      213: -8983364407098880740
+    second: rogue-walk_3
+  - first:
+      213: -4112135300485179371
+    second: rogue-walk_4
+  - first:
+      213: -288590500293032717
+    second: rogue-walk_5
+  - first:
+      213: -5634614705637403701
+    second: rogue-walk_6
+  - first:
+      213: -1140987649673871376
+    second: rogue-walk_7
+  - first:
+      213: -604709114892695855
+    second: rogue-walk_8
+  - first:
+      213: -2119710820207184008
+    second: rogue-walk_9
+  - first:
+      213: 4990013447602780379
+    second: rogue-walk_10
+  - first:
+      213: 4954030528430431800
+    second: rogue-walk_11
+  - first:
+      213: -9024421015826457180
+    second: rogue-walk_12
+  - first:
+      213: -7593398572539314549
+    second: rogue-walk_13
+  - first:
+      213: -316015119987071046
+    second: rogue-walk_14
+  - first:
+      213: -5794629103453460424
+    second: rogue-walk_south_0
+  - first:
+      213: -2213010960344064075
+    second: rogue-walk_south_1
+  - first:
+      213: 5562166361424421249
+    second: rogue-walk_south_2
+  - first:
+      213: -3102735762462207184
+    second: rogue-walk_south_3
+  - first:
+      213: 4178344200265273346
+    second: rogue-walk_south_4
+  - first:
+      213: 7390236042962081465
+    second: rogue-walk_north_0
+  - first:
+      213: -1851916447697853065
+    second: rogue-walk_north_1
+  - first:
+      213: -3343806316262384870
+    second: rogue-walk_north_2
+  - first:
+      213: -3056107796821557954
+    second: rogue-walk_north_3
+  - first:
+      213: 2371203594429391759
+    second: rogue-walk_north_4
+  - first:
+      213: 8750706065941483607
+    second: rogue-walk_east_0
+  - first:
+      213: 2931839213609561224
+    second: rogue-walk_east_1
+  - first:
+      213: -3896525167600422818
+    second: rogue-walk_east_2
+  - first:
+      213: -8940932231108388029
+    second: rogue-walk_east_3
+  - first:
+      213: 8710324986672177838
+    second: rogue-walk_east_4
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 32
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: rogue-walk_south_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 838248b1887559fa0800000000000000
+      internalID: -5794629103453460424
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: rogue-walk_south_1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5bf55a0b14ec941e0800000000000000
+      internalID: -2213010960344064075
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: rogue-walk_south_2
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 181645a06d8c03d40800000000000000
+      internalID: 5562166361424421249
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: rogue-walk_south_3
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0331a86534ed0f4d0800000000000000
+      internalID: -3102735762462207184
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: rogue-walk_south_4
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 200102e89e57cf930800000000000000
+      internalID: 4178344200265273346
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: rogue-walk_north_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9b61b03a6846f8660800000000000000
+      internalID: 7390236042962081465
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: rogue-walk_north_1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 775244d7dcbac46e0800000000000000
+      internalID: -1851916447697853065
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: rogue-walk_north_2
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a1b19712fd96891d0800000000000000
+      internalID: -3343806316262384870
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: rogue-walk_north_3
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e3d362796268695d0800000000000000
+      internalID: -3056107796821557954
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: rogue-walk_north_4
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f83e7102b1538e020800000000000000
+      internalID: 2371203594429391759
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: rogue-walk_east_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7505c42cdc0c07970800000000000000
+      internalID: 8750706065941483607
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: rogue-walk_east_1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 88c22c13b3cffa820800000000000000
+      internalID: 2931839213609561224
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: rogue-walk_east_2
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e50bec63103cce9c0800000000000000
+      internalID: -3896525167600422818
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: rogue-walk_east_3
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 34b91f3c18d6be380800000000000000
+      internalID: -8940932231108388029
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: rogue-walk_east_4
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ea2edc41d6a41e870800000000000000
+      internalID: 8710324986672177838
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      rogue-walk_0: 6490835606819814876
+      rogue-walk_1: 2102150453756773914
+      rogue-walk_10: 4990013447602780379
+      rogue-walk_11: 4954030528430431800
+      rogue-walk_12: -9024421015826457180
+      rogue-walk_13: -7593398572539314549
+      rogue-walk_14: -316015119987071046
+      rogue-walk_2: -4188781809577145744
+      rogue-walk_3: -8983364407098880740
+      rogue-walk_4: -4112135300485179371
+      rogue-walk_5: -288590500293032717
+      rogue-walk_6: -5634614705637403701
+      rogue-walk_7: -1140987649673871376
+      rogue-walk_8: -604709114892695855
+      rogue-walk_9: -2119710820207184008
+      rogue-walk_east_0: 8750706065941483607
+      rogue-walk_east_1: 2931839213609561224
+      rogue-walk_east_2: -3896525167600422818
+      rogue-walk_east_3: -8940932231108388029
+      rogue-walk_east_4: 8710324986672177838
+      rogue-walk_north_0: 7390236042962081465
+      rogue-walk_north_1: -1851916447697853065
+      rogue-walk_north_2: -3343806316262384870
+      rogue-walk_north_3: -3056107796821557954
+      rogue-walk_north_4: 2371203594429391759
+      rogue-walk_south_0: -5794629103453460424
+      rogue-walk_south_1: -2213010960344064075
+      rogue-walk_south_2: 5562166361424421249
+      rogue-walk_south_3: -3102735762462207184
+      rogue-walk_south_4: 4178344200265273346
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

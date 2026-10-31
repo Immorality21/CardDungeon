@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Assets.Scripts.UnitStats;
 using UnityEngine;
@@ -41,6 +41,17 @@ namespace Assets.Scripts.Heroes
 
         public Sprite[] AnimationFrames;
         public float AnimationFps = 8f;
+
+        [Header("Walking the dungeon")]
+        [Tooltip("Facing the viewer: the standing frame first, then the walk cycle. Empty leaves the " +
+                 "idle loop playing while the hero walks.")]
+        public Sprite[] WalkSouth;
+
+        [Tooltip("From behind: the standing frame first, then the walk cycle.")]
+        public Sprite[] WalkNorth;
+
+        [Tooltip("In profile, facing right: the standing frame first, then the walk cycle. Mirrored for a walk left.")]
+        public Sprite[] WalkEast;
 
         [Tooltip("The hit reaction: shown once, briefly, whenever the hero is struck (CombatFeedback). " +
                  "Same size and facing as the idle frames. Empty = the hero only recoils.")]

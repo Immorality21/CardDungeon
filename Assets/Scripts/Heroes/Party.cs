@@ -232,16 +232,88 @@ namespace Assets.Scripts.Heroes
         /// <summary>The tile the party stands on.</summary>
         public Vector2Int Tile => Vector2Int.RoundToInt(transform.position);
 
+        /// <summary>The way the party last stepped or tried to: what Enter uses is the tile that way.</summary>
+        public Vector2Int Facing { get; private set; } = Vector2Int.down;
+
+        // Walk cycles play this much faster than a step needs, so the feet keep up with the floor.
+        private const float WalkFps = 12f;
+
+        private bool _walking;
+
         /// <summary>
-        /// Turns the party sprite toward a step: left mirrors it, right restores it, up and down keep
-        /// the last facing (there are no up/down frames yet).
+        /// Turns the party toward a step: the leader's frames for that way, mirrored for left. A leader
+        /// with no walk frames keeps its idle loop and is only mirrored.
         /// </summary>
         public void Face(Vector2Int direction)
         {
+            if (direction == Vector2Int.zero)
+            {
+                return;
+            }
+            bool turned = direction != Facing;
+            Facing = direction;
             if (_spriteRenderer != null && direction.x != 0)
             {
                 _spriteRenderer.flipX = direction.x < 0;
             }
+            else if (_spriteRenderer != null && WalkFrames() != null)
+            {
+                _spriteRenderer.flipX = false;
+            }
+            if (turned)
+            {
+                ShowPose();
+            }
+        }
+
+        /// <summary>Starts or stops the walk cycle for the way the party is facing.</summary>
+        public void SetWalking(bool walking)
+        {
+            if (_walking != walking)
+            {
+                _walking = walking;
+                ShowPose();
+            }
+        }
+
+        /// <summary>
+        /// What the leader shows now: the walk cycle, or standing still that way. Facing the viewer at
+        /// rest is the idle loop, the one pose that has one.
+        /// </summary>
+        private void ShowPose()
+        {
+            var frames = WalkFrames();
+            if (_spriteAnimator == null || Leader == null || frames == null)
+            {
+                return;
+            }
+
+            if (_walking && frames.Length > 1)
+            {
+                var cycle = new Sprite[frames.Length - 1];
+                System.Array.Copy(frames, 1, cycle, 0, cycle.Length);
+                _spriteAnimator.Initialize(cycle, WalkFps);
+            }
+            else if (Facing == Vector2Int.down && Leader.HeroSO.AnimationFrames != null && Leader.HeroSO.AnimationFrames.Length > 0)
+            {
+                _spriteAnimator.Initialize(Leader.HeroSO.AnimationFrames, Leader.HeroSO.AnimationFps);
+            }
+            else
+            {
+                _spriteAnimator.Initialize(new[] { frames[0] }, 1f);
+            }
+        }
+
+        /// <summary>The leader's frames for the way the party faces, or null when it has none.</summary>
+        private Sprite[] WalkFrames()
+        {
+            if (Leader == null)
+            {
+                return null;
+            }
+            var hero = Leader.HeroSO;
+            var frames = Facing.y > 0 ? hero.WalkNorth : Facing.y < 0 ? hero.WalkSouth : hero.WalkEast;
+            return frames != null && frames.Length > 0 ? frames : null;
         }
 
         /// <summary>

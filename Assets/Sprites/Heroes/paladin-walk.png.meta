@@ -1,0 +1,567 @@
+fileFormatVersion: 2
+guid: 353b4bf1a7df8b448bc81afb283ff07d
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -5711261629207960112
+    second: paladin-walk_0
+  - first:
+      213: -5185125816809135226
+    second: paladin-walk_1
+  - first:
+      213: -4871835801728653972
+    second: paladin-walk_2
+  - first:
+      213: -3074130600113563907
+    second: paladin-walk_3
+  - first:
+      213: 9153241708516040694
+    second: paladin-walk_4
+  - first:
+      213: -5655221042601322426
+    second: paladin-walk_5
+  - first:
+      213: 8090508212091409127
+    second: paladin-walk_6
+  - first:
+      213: -8681927741928214722
+    second: paladin-walk_7
+  - first:
+      213: 7878997449891331365
+    second: paladin-walk_8
+  - first:
+      213: -7726803762218596376
+    second: paladin-walk_9
+  - first:
+      213: -897013631458954253
+    second: paladin-walk_10
+  - first:
+      213: -1434849173043480529
+    second: paladin-walk_11
+  - first:
+      213: -7736847847531604390
+    second: paladin-walk_12
+  - first:
+      213: 5095746934239679305
+    second: paladin-walk_13
+  - first:
+      213: 1975693967999872089
+    second: paladin-walk_14
+  - first:
+      213: 7711642739442073588
+    second: paladin-walk_south_0
+  - first:
+      213: -2934830208306087874
+    second: paladin-walk_south_1
+  - first:
+      213: 2097500495070340744
+    second: paladin-walk_south_2
+  - first:
+      213: -2696143741887234845
+    second: paladin-walk_south_3
+  - first:
+      213: -8425723077825934836
+    second: paladin-walk_south_4
+  - first:
+      213: 593926811211946269
+    second: paladin-walk_north_0
+  - first:
+      213: 5731738855615753606
+    second: paladin-walk_north_1
+  - first:
+      213: -7233454248950529525
+    second: paladin-walk_north_2
+  - first:
+      213: 3495141587307086262
+    second: paladin-walk_north_3
+  - first:
+      213: 5347545997166801392
+    second: paladin-walk_north_4
+  - first:
+      213: -377975565630753515
+    second: paladin-walk_east_0
+  - first:
+      213: -9005097877078500054
+    second: paladin-walk_east_1
+  - first:
+      213: 1538216262908158145
+    second: paladin-walk_east_2
+  - first:
+      213: 7071860751747219520
+    second: paladin-walk_east_3
+  - first:
+      213: 8713400565882868155
+    second: paladin-walk_east_4
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 32
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: paladin-walk_south_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4ff3a27a632450b60800000000000000
+      internalID: 7711642739442073588
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: paladin-walk_south_1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e3874d599736547d0800000000000000
+      internalID: -2934830208306087874
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: paladin-walk_south_2
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 886afd45691db1d10800000000000000
+      internalID: 2097500495070340744
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: paladin-walk_south_3
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3ec3b613d8f559ad0800000000000000
+      internalID: -2696143741887234845
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: paladin-walk_south_4
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c0acf5a8081d11b80800000000000000
+      internalID: -8425723077825934836
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: paladin-walk_north_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d195edcb94d0e3800800000000000000
+      internalID: 593926811211946269
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: paladin-walk_north_1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 68de7420f1a3b8f40800000000000000
+      internalID: 5731738855615753606
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: paladin-walk_north_2
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b0283406fab9d9b90800000000000000
+      internalID: -7233454248950529525
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: paladin-walk_north_3
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6b1422f61cc318030800000000000000
+      internalID: 3495141587307086262
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: paladin-walk_north_4
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0f1703d70cc463a40800000000000000
+      internalID: 5347545997166801392
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: paladin-walk_east_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5153dc4c93921caf0800000000000000
+      internalID: -377975565630753515
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: paladin-walk_east_1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a2d9c1d1137770380800000000000000
+      internalID: -9005097877078500054
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: paladin-walk_east_2
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1c0ae529a87d85510800000000000000
+      internalID: 1538216262908158145
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: paladin-walk_east_3
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0408be8a2eb442260800000000000000
+      internalID: 7071860751747219520
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: paladin-walk_east_4
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bb1d22b26a73ce870800000000000000
+      internalID: 8713400565882868155
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      paladin-walk_0: -5711261629207960112
+      paladin-walk_1: -5185125816809135226
+      paladin-walk_10: -897013631458954253
+      paladin-walk_11: -1434849173043480529
+      paladin-walk_12: -7736847847531604390
+      paladin-walk_13: 5095746934239679305
+      paladin-walk_14: 1975693967999872089
+      paladin-walk_2: -4871835801728653972
+      paladin-walk_3: -3074130600113563907
+      paladin-walk_4: 9153241708516040694
+      paladin-walk_5: -5655221042601322426
+      paladin-walk_6: 8090508212091409127
+      paladin-walk_7: -8681927741928214722
+      paladin-walk_8: 7878997449891331365
+      paladin-walk_9: -7726803762218596376
+      paladin-walk_east_0: -377975565630753515
+      paladin-walk_east_1: -9005097877078500054
+      paladin-walk_east_2: 1538216262908158145
+      paladin-walk_east_3: 7071860751747219520
+      paladin-walk_east_4: 8713400565882868155
+      paladin-walk_north_0: 593926811211946269
+      paladin-walk_north_1: 5731738855615753606
+      paladin-walk_north_2: -7233454248950529525
+      paladin-walk_north_3: 3495141587307086262
+      paladin-walk_north_4: 5347545997166801392
+      paladin-walk_south_0: 7711642739442073588
+      paladin-walk_south_1: -2934830208306087874
+      paladin-walk_south_2: 2097500495070340744
+      paladin-walk_south_3: -2696143741887234845
+      paladin-walk_south_4: -8425723077825934836
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

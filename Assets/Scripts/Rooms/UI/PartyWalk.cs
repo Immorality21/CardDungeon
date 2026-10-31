@@ -24,6 +24,10 @@ namespace Assets.Scripts.Rooms
         /// <summary>Seconds per tile: about seven tiles a second, close to an SNES walk.</summary>
         public const float StepSeconds = 0.14f;
 
+        // How long after a step the walk cycle keeps running, so the feet do not stop for the one
+        // frame between two steps of a held key.
+        private const float WalkCycleGrace = 0.06f;
+
         private static readonly (Vector2Int Direction, KeyCode Arrow, KeyCode Letter)[] Keys =
         {
             (Vector2Int.up, KeyCode.UpArrow, KeyCode.W),
@@ -44,6 +48,7 @@ namespace Assets.Scripts.Rooms
         private float _elapsed;
         private float _duration;
         private float _doorWait;
+        private float _sinceStep;
         private Door _throughDoor;
 
         /// <param name="enterDoor">Walks through a door: what a click on it does.</param>
@@ -81,9 +86,25 @@ namespace Assets.Scripts.Rooms
             ReadKeys();
             if (IsStepping)
             {
+                _sinceStep = 0f;
                 Advance(deltaTime);
                 return false;
             }
+            bool stepped = NextStep(party, room, canWalk);
+            if (stepped)
+            {
+                return true;
+            }
+            _sinceStep += deltaTime;
+            if (party != null && _sinceStep >= WalkCycleGrace)
+            {
+                party.SetWalking(false);
+            }
+            return false;
+        }
+
+        private bool NextStep(Party party, Room room, bool canWalk)
+        {
             if (!canWalk || party == null || room == null)
             {
                 _path.Clear();
@@ -138,7 +159,7 @@ namespace Assets.Scripts.Rooms
                 _open.Add(collider == null || collider.enabled);
             }
 
-            var step = TileWalkOps.Step(from, direction, floor, _doorways, _open);
+            var step = TileWalkOps.Step(from, direction, floor, _doorways, _open, room.SolidTiles(from));
             switch (step.Kind)
             {
                 case WalkStepKind.Move:
@@ -174,6 +195,8 @@ namespace Assets.Scripts.Rooms
 
         private void Begin(Party party, Vector3 target, float tiles, Door throughDoor)
         {
+            party.SetWalking(true);
+            _sinceStep = 0f;
             _party = party;
             _from = party.transform.position;
             _to = target;
