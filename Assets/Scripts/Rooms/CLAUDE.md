@@ -133,8 +133,8 @@ click, which walks there first. It does nothing in a guarded room or on somethin
 
 **So nothing may be out of reach.** `Room.SolidTiles` leaves an object walkable rather than let it box
 in a door or another object (`TileWalkOps.Solid`, `mustUse`), and an object left walkable is used by
-standing on it, or by clicking it. `PlaceExitMarker` places the stairs even with no sprite, and logs
-an error: with no marker, the floor would have no way off it.
+standing on it, or by clicking it. `PlaceExitMarker` and `PlaceKindMarker` place their object even with no
+sprite, and log an error: with no marker, the floor would have no way off it, or the room no way in.
 
 - **A chest** (`OnSearch`) - an unspent **Treasure** room, once it is clear. Not confirmed: nothing is
   spent and nothing risked, so the only decision a cache poses is whether to walk to it.

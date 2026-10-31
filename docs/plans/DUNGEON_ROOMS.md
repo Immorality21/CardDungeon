@@ -336,8 +336,8 @@ bar, and the camera now clears the Fight/Flee bar, the HUD and the party window.
 
 **What the bar had been hiding:** it was also the way in to anything out of reach. Now
 `TileWalkOps.Solid` keeps every object within reach as well as every door (stairs in a corner could be boxed
-in by a chest and an event), a walkable object is used by standing on it or clicking it, and the stairs are
-placed even with no sprite.
+in by a chest and an event), a walkable object is used by standing on it or clicking it, and the stairs, chests and
+campfires are placed even with no sprite.
 
 ## Open questions
 

@@ -1112,8 +1112,8 @@ namespace Assets.Scripts.Dungeon
         /// - but the glyph has to be its <b>own</b> silhouette, not the exit door under a tint: the
         /// first version of this reused the exit sprite recoloured and read as a second staircase,
         /// which is worse than no marker at all. Loaded from Resources so the marker needs no scene
-        /// wiring, and it is skipped outright if the glyph is missing rather than falling back to
-        /// something that means "the way down".
+        /// wiring. A missing glyph is logged, never replaced by something that means "the way down",
+        /// and the marker is placed all the same: it is the only way to use the room.
         /// </summary>
         private void PlaceKindMarker(Room room)
         {
@@ -1127,7 +1127,7 @@ namespace Assets.Scripts.Dungeon
             var sprite = chest != null ? chest.Closed : Combat.CombatIcons.Get(treasure ? "chest" : "campfire");
             if (sprite == null)
             {
-                return;
+                Debug.LogError($"DungeonManager: no marker sprite for a {room.Kind} room in level '{CurrentLevel?.name}'.");
             }
 
             var markerObj = new GameObject(room.Kind + "Marker");
