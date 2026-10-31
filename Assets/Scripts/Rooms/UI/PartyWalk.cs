@@ -28,6 +28,19 @@ namespace Assets.Scripts.Rooms
         // frame between two steps of a held key.
         private const float WalkCycleGrace = 0.06f;
 
+        /// <summary>The way a walking key points, or zero for any other key.</summary>
+        public static Vector2Int DirectionOf(KeyCode keyCode)
+        {
+            foreach (var key in Keys)
+            {
+                if (key.Arrow == keyCode || key.Letter == keyCode)
+                {
+                    return key.Direction;
+                }
+            }
+            return Vector2Int.zero;
+        }
+
         private static readonly (Vector2Int Direction, KeyCode Arrow, KeyCode Letter)[] Keys =
         {
             (Vector2Int.up, KeyCode.UpArrow, KeyCode.W),

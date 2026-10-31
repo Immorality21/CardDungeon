@@ -1379,9 +1379,12 @@ namespace Assets.Scripts.Balance
             if (settings.Policy != SimPolicy.AttackOnly && !silenced)
             {
                 var damageSlot = BestDamageSlot(hero, enemies, buffTracker);
-                if (damageSlot != null && ultras != null && ultras.MultiCastReady(hero))
+                var multiCastSlot = ultras != null && ultras.MultiCastReady(hero)
+                    ? BestDamageSlot(hero, enemies, buffTracker, anyCharges: true)
+                    : null;
+                if (multiCastSlot != null)
                 {
-                    MultiCast(hero, damageSlot, side, enemies, buffTracker, tagTracker, comboDetector, resolver, result,
+                    MultiCast(hero, multiCastSlot, side, enemies, buffTracker, tagTracker, comboDetector, resolver, result,
                         FocusOps.Casts(ultras.Focus.Spend(hero)));
                     return;
                 }
@@ -1399,7 +1402,7 @@ namespace Assets.Scripts.Balance
             }
         }
 
-        /// <summary>The Mage's MultiCast, as <c>CombatManager.ExecuteMultiCast</c> resolves it: one charge,
+        /// <summary>The Mage's MultiCast, as <c>CombatManager.ExecuteMultiCast</c> resolves it: no charge,
         /// <paramref name="casts"/> casts, each aimed afresh at whoever stands.</summary>
         private static void MultiCast(
             SimUnit caster,
@@ -1413,7 +1416,6 @@ namespace Assets.Scripts.Balance
             TrialResult result,
             int casts)
         {
-            slot.Charges--;
             result.Casts++;
             for (int i = 0; i < casts; i++)
             {
@@ -1633,7 +1635,7 @@ namespace Assets.Scripts.Balance
         }
 
         /// <summary>The castable damage slot that would land the most damage on the weakest enemy.</summary>
-        private static SimMagicSlot BestDamageSlot(SimUnit hero, List<SimUnit> enemies, CombatBuffTracker buffTracker)
+        private static SimMagicSlot BestDamageSlot(SimUnit hero, List<SimUnit> enemies, CombatBuffTracker buffTracker, bool anyCharges = false)
         {
             var target = WeakestAlive(enemies);
             if (target == null)
@@ -1646,7 +1648,7 @@ namespace Assets.Scripts.Balance
 
             foreach (var slot in hero.MagicSlots)
             {
-                if (!slot.CanCast || !slot.Magic.HasEffectType(SpellEffectType.Damage))
+                if (slot.Magic == null || (!slot.CanCast && !anyCharges) || !slot.Magic.HasEffectType(SpellEffectType.Damage))
                 {
                     continue;
                 }

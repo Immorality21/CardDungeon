@@ -394,7 +394,7 @@ MonoBehaviour:
     Neighbors:
     - mage-b-3
   - Key: mage-b-3
-    Kind: 3
+    Kind: 0
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
@@ -402,10 +402,12 @@ MonoBehaviour:
     RequiredNodes: []
     Position: {x: 0, y: -450}
     Gains:
-      Values: []
+      Values:
+      - Type: 4
+        Amount: 2
     ResistType: 0
     ResistPercent: 0
-    GrantedMagicKey: IceShard
+    GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
     UpgradeType: 0
@@ -718,7 +720,7 @@ MonoBehaviour:
     Neighbors:
     - mage-c-2
   - Key: mage-c-6
-    Kind: 3
+    Kind: 0
     XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
@@ -726,10 +728,12 @@ MonoBehaviour:
     RequiredNodes: []
     Position: {x: 572, y: -540}
     Gains:
-      Values: []
+      Values:
+      - Type: 4
+        Amount: 2
     ResistType: 0
     ResistPercent: 0
-    GrantedMagicKey: Fireball
+    GrantedMagicKey: 
     GrantedCharges: 2
     AwakenedMagicKey: 
     UpgradeType: 0
@@ -1139,3 +1143,47 @@ MonoBehaviour:
     SummonAmount: 1
     Neighbors:
     - mage-ifrit-stay
+  - Key: mage-ice-basic
+    Kind: 3
+    XpCost: 0
+    UnlockedByDefault: 1
+    MaterialCosts: []
+    EssenceCost: 0
+    RequiredNodes: []
+    Position: {x: -110, y: 40}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: IceShard
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-sig
+  - Key: mage-fire-basic
+    Kind: 3
+    XpCost: 0
+    UnlockedByDefault: 1
+    MaterialCosts: []
+    EssenceCost: 0
+    RequiredNodes: []
+    Position: {x: 0, y: 95}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: Fireball
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - mage-sig

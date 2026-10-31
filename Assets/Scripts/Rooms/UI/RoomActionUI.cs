@@ -80,7 +80,6 @@ namespace Assets.Scripts.Rooms
         /// <summary>The open event's own walk-away option, if it has one - what Escape presses.</summary>
         private Button _eventDecline;
 
-        private Button _actionBtn;
         private Button _searchBtn;
         private Button _restBtn;
         private Button _descendBtn;
@@ -145,6 +144,13 @@ namespace Assets.Scripts.Rooms
         // Room-event state, live only while the event window is up.
         private readonly Events.RoomEventRunner _eventRunner = new Events.RoomEventRunner();
         private Events.RoomEventSO _currentEvent;
+
+        // Where the party stood when it left for a side room, and the choice a mandatory one waits on:
+        // that event only resolves when its fight is won.
+        private Vector2Int _sideReturnTile;
+        private int _arenaOption = -1;
+        private int _arenaOutcome = -1;
+        private bool _arenaSucceeded;
         private Heroes.Hero _eventActingHero;
         private float _eventChance;
 
@@ -268,7 +274,6 @@ namespace Assets.Scripts.Rooms
             _eventOptions = root.Q<ScrollView>("event-options");
             _eventBack = root.Q<Button>("event-back");
 
-            _actionBtn = root.Q<Button>("action-btn");
             _searchBtn = root.Q<Button>("search-btn");
             _restBtn = root.Q<Button>("rest-btn");
             _descendBtn = root.Q<Button>("descend-btn");
@@ -284,7 +289,6 @@ namespace Assets.Scripts.Rooms
             _abilityBanner = root.Q<VisualElement>("ability-banner");
             _abilityBannerName = root.Q<Label>("ability-banner-name");
 
-            _actionBtn.clicked += OnAction;
             if (_searchBtn != null)
             {
                 _searchBtn.clicked += OnSearch;
@@ -321,7 +325,7 @@ namespace Assets.Scripts.Rooms
             // Strip focusability from every focusable descendant so UI Toolkit's arrow-key
             // navigation has nowhere to move focus — keyboard focus stays on the root and our
             // cursor nav keeps receiving keys. (Buttons stay clickable + hotkey-driven.)
-            foreach (var focusable in new Focusable[] { _actionBtn, _searchBtn, _restBtn, _descendBtn, _fightBtn, _fleeBtn, _detailOk, _detailCancel, _victoryContinue, _levelContinue, _levelNextLevel, _levelBody, _victoryRewards, _eventBack, _eventOptions })
+            foreach (var focusable in new Focusable[] { _searchBtn, _restBtn, _descendBtn, _fightBtn, _fleeBtn, _detailOk, _detailCancel, _victoryContinue, _levelContinue, _levelNextLevel, _levelBody, _victoryRewards, _eventBack, _eventOptions })
             {
                 if (focusable != null)
                 {
@@ -460,7 +464,6 @@ namespace Assets.Scripts.Rooms
             if (hasEnemy)
             {
                 SetShown(_mainBar, false);
-                RefreshActionButton();
                 RefreshPayloadButtons();
                 RefreshDescendButton();
             }
@@ -472,7 +475,8 @@ namespace Assets.Scripts.Rooms
             // Boss rooms: announce the boss and remove Flee — the climax can't be skipped.
             var boss = room.Enemies.FirstOrDefault(e => e != null && e.IsAlive && e.IsBoss);
             bool isBossRoom = hasEnemy && boss != null;
-            SetShown(_fleeBtn, hasEnemy && !isBossRoom);
+            // A side room has no door to flee through.
+            SetShown(_fleeBtn, hasEnemy && !isBossRoom && !room.IsSideRoom);
             SetShown(_bossBanner, isBossRoom);
             if (isBossRoom && _bossBannerName != null)
             {
@@ -555,21 +559,98 @@ namespace Assets.Scripts.Rooms
         // ============================================================
 
         /// <summary>
-        /// Action is the verb that costs something, so it only exists when there is something to
-        /// spend it on: the room's event. <see cref="RefreshActionButton"/> hides it otherwise
-        /// rather than offering a dead affordance.
+        /// Opens the room's event, from walking up to its object, once the room is clear. There is no
+        /// button for it: the object in the room is the way in.
         /// </summary>
-        private void OnAction()
+        private bool TryUseEvent()
         {
+            if (_currentRoom.Enemies.Any(e => e != null && e.IsAlive))
+            {
+                return false;
+            }
+
             var roomEvent = PendingEvent();
             if (roomEvent == null)
             {
-                RefreshActionButton();
-                return;
+                // What the event opened: its object is the way in now.
+                var spec = DungeonManager.Instance.ResolvedOutcomeOf(_currentRoom)?.SideRoom;
+                if (spec == null || !spec.IsSet || spec.Mandatory)
+                {
+                    return false;
+                }
+                EnterSideRoom(_currentRoom, spec);
+                return true;
             }
 
             SetShown(_mainBar, false);
             ShowRoomEvent(roomEvent);
+            return true;
+        }
+
+        /// <summary>Takes the party to <paramref name="host"/>'s side room, remembering where it stood.</summary>
+        private void EnterSideRoom(Room host, Events.SideRoomSpec spec, List<ItemSO> pendingLoot = null)
+        {
+            var party = GameManager.Instance.Party;
+            var side = DungeonManager.Instance.SideRoomFor(host, spec, pendingLoot);
+            _sideReturnTile = party.Tile;
+            party.PlaceOnTile(side, side.SideEntryTile);
+            side.Reveal();
+            GameManager.Instance.SnapCamera();
+            Show(side);
+        }
+
+        private void LeaveSideRoom()
+        {
+            var host = _currentRoom.HostRoom;
+            var party = GameManager.Instance.Party;
+            party.PlaceOnTile(host, _sideReturnTile);
+            GameManager.Instance.SnapCamera();
+            Show(host);
+        }
+
+        /// <summary>
+        /// Pays the item an event held back until its fight was won, as one statement once the room is
+        /// clear. Winning a mandatory side room is what resolves its event, and takes the party back.
+        /// </summary>
+        private bool TryGrantEventLoot()
+        {
+            if (_currentRoom == null || _currentRoom.PendingEventLoot == null
+                || _currentRoom.Enemies.Any(e => e != null && e.IsAlive))
+            {
+                return false;
+            }
+
+            var item = Events.RoomEventRunner.GrantOneOf(_currentRoom.PendingEventLoot);
+            _currentRoom.PendingEventLoot = null;
+            var owner = _currentRoom.IsSideRoom ? _currentRoom.HostRoom : _currentRoom;
+            owner.EventLootClaimed = true;
+            bool arena = _currentRoom.IsSideRoom && _currentRoom.SideSpec.Mandatory;
+            if (arena && _arenaOption >= 0)
+            {
+                owner.MarkEventResolved(_arenaOption, _arenaOutcome, _arenaSucceeded);
+                _arenaOption = -1;
+            }
+            if (DungeonSaveManager.HasInstance)
+            {
+                DungeonSaveManager.Instance.Save(_currentRoom);
+            }
+
+            SetShown(_mainBar, false);
+            ShowDetail(owner.RoomEvent != null ? owner.RoomEvent.Title : string.Empty,
+                item != null ? Loc.Format("event-text.report.found", ("item", item.DisplayName)) : string.Empty);
+            _detailOkAction = () =>
+            {
+                SetShown(_detailWindow, false);
+                if (arena)
+                {
+                    LeaveSideRoom();
+                }
+                else
+                {
+                    ShowMainBar();
+                }
+            };
+            return true;
         }
 
 
@@ -699,7 +780,8 @@ namespace Assets.Scripts.Rooms
         }
 
         /// <summary>
-        /// A choice's right-hand tag: "safe" for a sure thing or walking away, otherwise the stat it
+        /// A choice's right-hand tag: what a sure thing really holds ("safe", "price", "danger") or
+        /// walking away, otherwise the stat it
         /// turns on and the odds as far as the party can read them ("LCK · even", "INT · risky",
         /// "WIS · ?"). <paramref name="tone"/> is the colour class suffix.
         /// </summary>
@@ -708,8 +790,23 @@ namespace Assets.Scripts.Rooms
         {
             if (option.Kind != Events.RoomEventOptionKind.StatCheck)
             {
-                tone = "safe";
-                return option.Kind == Events.RoomEventOptionKind.Decline ? Loc.Get("room.event.tag.leave") : Loc.Get("room.event.tag.safe");
+                if (option.Kind == Events.RoomEventOptionKind.Decline)
+                {
+                    tone = "safe";
+                    return Loc.Get("room.event.tag.leave");
+                }
+                switch (Events.RoomEventResolver.RiskOf(option))
+                {
+                    case Events.OptionRisk.Danger:
+                        tone = "bad";
+                        return Loc.Get("room.event.tag.danger");
+                    case Events.OptionRisk.Price:
+                        tone = "even";
+                        return Loc.Get("room.event.tag.price");
+                    default:
+                        tone = "safe";
+                        return Loc.Get("room.event.tag.safe");
+                }
             }
             string stat = StatCatalog.ShortName(roomEvent.GoverningStat);
             if (clarity == Events.OddsClarity.Unknown)
@@ -777,8 +874,8 @@ namespace Assets.Scripts.Rooms
                 string declineText = string.IsNullOrEmpty(option.DeclineText)
                     ? Loc.Get("room.event.decline.default")
                     : option.DeclineText;
-                // Say so, or the Action button that stays on the bar reads as a bug rather than an
-                // offer still open (revisit playtest finding 11).
+                // Say so, or the object still standing there reads as a bug rather than an offer
+                // still open (revisit playtest finding 11).
                 ShowDetail(_currentEvent.Title, Loc.Format("room.event.decline.message", ("text", declineText)));
                 _detailOkAction = CloseEventResult;
                 return;
@@ -805,16 +902,28 @@ namespace Assets.Scripts.Rooms
 
             // The party window reports what the outcome did at once, not after the dialog is dismissed.
             RefreshPartyStatus();
-            _currentRoom.MarkEventResolved(optionIndex, outcomeIndex, succeeded);
-            if (DungeonSaveManager.HasInstance)
+
+            bool arena = outcome != null && outcome.SideRoom != null && outcome.SideRoom.IsSet && outcome.SideRoom.Mandatory;
+            if (arena)
             {
-                DungeonSaveManager.Instance.Save(_currentRoom);
+                _arenaOption = optionIndex;
+                _arenaOutcome = outcomeIndex;
+                _arenaSucceeded = succeeded;
+            }
+            else
+            {
+                _currentRoom.MarkEventResolved(optionIndex, outcomeIndex, succeeded);
+                if (DungeonSaveManager.HasInstance)
+                {
+                    DungeonSaveManager.Instance.Save(_currentRoom);
+                }
             }
 
-            ShowEventResult(report, option.Kind == Events.RoomEventOptionKind.StatCheck ? (bool?)succeeded : null);
+            ShowEventResult(report, option.Kind == Events.RoomEventOptionKind.StatCheck ? (bool?)succeeded : null,
+                arena ? outcome : null);
         }
 
-        private void ShowEventResult(Events.RoomEventOutcomeReport report, bool? checkPassed = null)
+        private void ShowEventResult(Events.RoomEventOutcomeReport report, bool? checkPassed = null, Events.RoomEventOutcome arena = null)
         {
             string message = string.IsNullOrEmpty(report.Text) ? Loc.Get("room.event.result.nothing") : report.Text;
             if (report.Lines.Count > 0)
@@ -840,7 +949,11 @@ namespace Assets.Scripts.Rooms
                 _currentEvent = null;
                 _eventActingHero = null;
 
-                if (woken)
+                if (arena != null)
+                {
+                    EnterSideRoom(_currentRoom, arena.SideRoom, arena.LootOneOf);
+                }
+                else if (woken)
                 {
                     Show(_currentRoom, _entryDoor);
                 }
@@ -1056,6 +1169,14 @@ namespace Assets.Scripts.Rooms
             if (item != null && InventoryManager.HasInstance)
             {
                 InventoryManager.Instance.AddItem(item, 1, EconomySource.Cache);
+            }
+
+            // A side room's chest can hold better than a cache's depth roll.
+            var sideSpec = _currentRoom.SideSpec;
+            if (sideSpec != null && UnityEngine.Random.Range(0f, 100f) < sideSpec.ChestLootChancePercent)
+            {
+                var rare = Events.RoomEventRunner.GrantOneOf(sideSpec.ChestLoot);
+                item = rare != null ? rare : item;
             }
 
             // The floor's own raw stuff, rolled separately from the gear slot above - see
@@ -1937,6 +2058,15 @@ namespace Assets.Scripts.Rooms
 
             if (IsShown(_combatBar))
             {
+                // Stepping back through the door the party came in by is Flee; nothing walks further in.
+                if (IsShown(_fleeBtn) && _entryDoor != null
+                    && PartyWalk.DirectionOf(evt.keyCode) == _entryDoor.DirectionFrom(_currentRoom))
+                {
+                    evt.StopPropagation();
+                    OnFlee();
+                    return;
+                }
+
                 // Arrows/Tab move along the bar, Enter presses. Flee is hidden in a boss room, so the
                 // cursor cannot reach a way out the fight does not offer.
                 if (_combatNav != null && _combatNav.HandleKey(evt))
@@ -2045,7 +2175,8 @@ namespace Assets.Scripts.Rooms
         /// </summary>
         private bool CanOpenMap()
         {
-            if (_mapWindow == null || IsShown(_mapWindow) || IsDialogUp())
+            // A side room is not on the floor's map.
+            if (_mapWindow == null || IsShown(_mapWindow) || IsDialogUp() || (_currentRoom != null && _currentRoom.IsSideRoom))
             {
                 return false;
             }
@@ -2295,6 +2426,12 @@ namespace Assets.Scripts.Rooms
             var hit = Physics2D.OverlapPoint(world);
             if (hit != null && hit.GetComponentInParent<Door>() != null)
             {
+                return;
+            }
+
+            if (_currentRoom != null && _currentRoom.IsSideRoom)
+            {
+                SetWalkGoal(null, _currentRoom, TileWalkOps.NearestFloorTile(FloorOf(_currentRoom), world));
                 return;
             }
 
@@ -2892,8 +3029,9 @@ namespace Assets.Scripts.Rooms
         /// Uses what the party is standing against, the way pressing A at a chest does in FF: the same
         /// action as its button on the room bar, so a refuge still asks first and the stairs still
         /// warn. Nothing happens when the bar would not offer it either - a spent chest, a guarded room.
+        /// Public so a scripted check can press what Enter presses.
         /// </summary>
-        private bool UseFacing()
+        public bool UseFacing()
         {
             var party = GameManager.HasInstance ? GameManager.Instance.Party : null;
             if (party == null || _currentRoom == null)
@@ -2902,6 +3040,21 @@ namespace Assets.Scripts.Rooms
             }
 
             var tile = party.Tile + party.Facing;
+            if (_currentRoom.ReturnMarker != null && Vector2Int.RoundToInt(_currentRoom.ReturnMarker.transform.position) == tile
+                && !_currentRoom.Enemies.Any(e => e != null && e.IsAlive))
+            {
+                LeaveSideRoom();
+                return true;
+            }
+            // Standing on it counts too: an object that would cut a door off is left walkable.
+            if (_currentRoom.EventMarker != null)
+            {
+                var eventTile = Vector2Int.RoundToInt(_currentRoom.EventMarker.transform.position);
+                if ((eventTile == tile || eventTile == party.Tile) && TryUseEvent())
+                {
+                    return true;
+                }
+            }
             if (_currentRoom.KindMarker != null && Vector2Int.RoundToInt(_currentRoom.KindMarker.transform.position) == tile)
             {
                 if (IsShown(_searchBtn))
@@ -3942,11 +4095,10 @@ namespace Assets.Scripts.Rooms
             _barNav?.Reset();
             // A captive in a clear room is freed on the spot; its notice dismisses back through
             // here, by which time there is nobody left to free.
-            if (TryAutoRescue())
+            if (TryAutoRescue() || TryGrantEventLoot())
             {
                 return;
             }
-            RefreshActionButton();
             RefreshPayloadButtons();
             RefreshDescendButton();
             SetShown(_mainBar, HasRoomActions());
@@ -3954,8 +4106,7 @@ namespace Assets.Scripts.Rooms
 
         private bool HasRoomActions()
         {
-            return IsShown(_actionBtn) || IsShown(_searchBtn) || IsShown(_restBtn)
-                || IsShown(_descendBtn);
+            return IsShown(_searchBtn) || IsShown(_restBtn) || IsShown(_descendBtn);
         }
 
         /// <summary>
@@ -3981,22 +4132,6 @@ namespace Assets.Scripts.Rooms
         {
             bool clear = _currentRoom != null && !_currentRoom.Enemies.Any(e => e != null && e.IsAlive);
             SetShown(_descendBtn, clear && _currentRoom != null && _currentRoom.IsExit);
-        }
-
-        /// <summary>
-        /// Action exists only when the room has an unresolved event. Hiding it is the point: a
-        /// button that reports "there is nothing here" teaches the player to stop pressing it, and
-        /// then they miss the rooms where it mattered. Examine always stays - looking is free.
-        /// </summary>
-        private void RefreshActionButton()
-        {
-            var roomEvent = PendingEvent();
-            SetShown(_actionBtn, roomEvent != null);
-            // The button names the thing ("The Treasury"), not a generic verb.
-            if (roomEvent != null && _actionBtn != null)
-            {
-                _actionBtn.text = string.IsNullOrEmpty(roomEvent.Title) ? Loc.Get("room.bar.investigate") : roomEvent.Title;
-            }
         }
 
         private static void SetShown(VisualElement element, bool shown)

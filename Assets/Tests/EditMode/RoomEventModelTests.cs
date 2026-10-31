@@ -129,7 +129,7 @@ namespace Tests.EditMode
             var definition = Make<RoomEventSO>();
             definition.Key = key;
             definition.Title = key;
-            definition.SpawnChancePercent = spawnPercent;
+            _chances[definition] = spawnPercent;
             definition.SpawnModifierStat = StatType.None;
             definition.Options = new List<RoomEventOption>
             {
@@ -143,6 +143,15 @@ namespace Tests.EditMode
             return definition;
         }
 
+        private readonly Dictionary<RoomEventSO, float> _chances = new Dictionary<RoomEventSO, float>();
+        private readonly Dictionary<RoomSO, List<LevelEventEntry>> _pools = new Dictionary<RoomSO, List<LevelEventEntry>>();
+
+        /// <summary>The model, reading the pool of the test's one room as its level's.</summary>
+        private List<RoomEventEncounter> BuildForLevel(List<RoomEncounter> rooms, PartyBaseline party, BalanceRulesSO rules, int index)
+        {
+            return RoomEventModel.BuildForLevel(rooms, _pools[rooms[0].Room], party, rules, index);
+        }
+
         private RoomSO RoomOffering(params RoomEventSO[] events)
         {
             var room = Make<RoomSO>();
@@ -150,7 +159,16 @@ namespace Tests.EditMode
             room.Width = 3;
             room.Height = 3;
             room.EnemySpawnTable = new List<EnemySpawnEntry>();
-            room.PossibleEvents = new List<RoomEventSO>(events);
+            var pool = new List<LevelEventEntry>();
+            foreach (var definition in events)
+            {
+                pool.Add(new LevelEventEntry
+                {
+                    Event = definition,
+                    ChancePercent = _chances.TryGetValue(definition, out var chance) ? chance : 100f
+                });
+            }
+            _pools[room] = pool;
             return room;
         }
 
@@ -313,7 +331,6 @@ namespace Tests.EditMode
             definition.Key = "Tomb";
             definition.GoverningStat = StatType.Strength;
             definition.Difficulty = 12;  // matches the hero, so an even bet.
-            definition.SpawnChancePercent = 100f;
             definition.SpawnModifierStat = StatType.None;
             definition.Options = new List<RoomEventOption>
             {
@@ -369,7 +386,6 @@ namespace Tests.EditMode
             definition.Key = "Treasury";
             definition.GoverningStat = StatType.Luck;
             definition.Difficulty = 0;  // never rolls below the floor; irrelevant to a Guaranteed option.
-            definition.SpawnChancePercent = 100f;
             definition.SpawnModifierStat = StatType.None;
             definition.Options = new List<RoomEventOption>
             {
@@ -405,7 +421,6 @@ namespace Tests.EditMode
 
             var definition = Make<RoomEventSO>();
             definition.Key = "Nothing";
-            definition.SpawnChancePercent = 100f;
             definition.SpawnModifierStat = StatType.None;
             definition.Options = new List<RoomEventOption>
             {
@@ -432,7 +447,7 @@ namespace Tests.EditMode
             var definition = GuaranteedEvent("Trap", 50f, outcome);
             var rooms = Encounters(party, 4f, RoomOffering(definition));
 
-            var events = RoomEventModel.BuildForLevel(rooms, party, Rules(), 0);
+            var events = BuildForLevel(rooms, party, Rules(), 0);
 
             Assert.AreEqual(1, events.Count);
             Assert.AreEqual(0.5f, events[0].AppearChancePerRoom, 0.001f);
@@ -450,7 +465,7 @@ namespace Tests.EditMode
             var definition = GuaranteedEvent("Trap", 10f, outcome);
             var rooms = Encounters(party, 1f, RoomOffering(definition));
 
-            var events = RoomEventModel.BuildForLevel(rooms, party, Rules(), 0);
+            var events = BuildForLevel(rooms, party, Rules(), 0);
 
             Assert.AreEqual(0.1f, events[0].Occurrences, 0.001f);
         }
@@ -465,7 +480,7 @@ namespace Tests.EditMode
             var second = GuaranteedEvent("Second", 50f, Outcome());
 
             var rooms = Encounters(party, 1f, RoomOffering(first, second));
-            var events = RoomEventModel.BuildForLevel(rooms, party, Rules(), 0);
+            var events = BuildForLevel(rooms, party, Rules(), 0);
 
             Assert.AreEqual(0.5f, events[0].AppearChancePerRoom, 0.001f);
             Assert.AreEqual(0.25f, events[1].AppearChancePerRoom, 0.001f);
@@ -482,7 +497,7 @@ namespace Tests.EditMode
             var open = GuaranteedEvent("Open", 100f, Outcome());
 
             var rooms = Encounters(party, 1f, RoomOffering(gated, open));
-            var events = RoomEventModel.BuildForLevel(rooms, party, Rules(), 0);
+            var events = BuildForLevel(rooms, party, Rules(), 0);
 
             Assert.IsFalse(events[0].RequirementsMet);
             Assert.AreEqual(0f, events[0].AppearChancePerRoom, 0.001f);
@@ -508,7 +523,7 @@ namespace Tests.EditMode
                 new UnitStat(StatType.Intelligence, 15)
             };
 
-            var events = RoomEventModel.BuildForLevel(
+            var events = BuildForLevel(
                 Encounters(party, 1f, RoomOffering(gated)), party, Rules(), 0);
 
             Assert.IsTrue(events[0].RequirementsMet);
@@ -523,7 +538,7 @@ namespace Tests.EditMode
             definition.SpawnModifierStat = StatType.Luck;
             definition.SpawnModifierRate = 5f;
 
-            var events = RoomEventModel.BuildForLevel(
+            var events = BuildForLevel(
                 Encounters(party, 1f, RoomOffering(definition)), party, Rules(), 0);
 
             // 10 + 10 * (10 * 5 / 100) = 15%.
@@ -537,7 +552,7 @@ namespace Tests.EditMode
             var room = RoomOffering(GuaranteedEvent("Trap", 100f, Outcome()));
             room.Kind = RoomKind.Connector;
 
-            var events = RoomEventModel.BuildForLevel(Encounters(party, 4f, room), party, Rules(), 0);
+            var events = BuildForLevel(Encounters(party, 4f, room), party, Rules(), 0);
 
             Assert.AreEqual(0, events.Count);
         }
@@ -552,6 +567,7 @@ namespace Tests.EditMode
             template.Key = "T";
             template.RoomsToGenerate = roomsToGenerate;
             template.RoomPool = new List<RoomSO> { room };
+            template.RoomEvents = _pools[room];
 
             var run = Make<RunDefinitionSO>();
             run.Levels = new List<RunLevelEntry>

@@ -23,6 +23,10 @@ namespace Assets.Scripts.Dungeon
                  "their bar. Also a room that no longer holds a fight - the two levers move together.")]
         [Min(0)] public int RestRooms;
 
+        [Tooltip("The room events this level can offer, each at its own chance. Empty means none: " +
+                 "an event belongs to a biome and is tuned per level.")]
+        public List<Rooms.Events.LevelEventEntry> RoomEvents = new List<Rooms.Events.LevelEventEntry>();
+
         [Tooltip("Raw materials this place is made of, found in its caches. Enemies drop what they " +
                  "are made of (EnemySO.LootTable); this is what the *floor* is made of, which is how " +
                  "a material ends up gating on where the player has been rather than on how long " +

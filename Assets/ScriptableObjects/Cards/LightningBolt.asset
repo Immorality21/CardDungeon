@@ -33,20 +33,6 @@ MonoBehaviour:
     BonusVsStatus: 0
     BonusPerDebuff: 0
     DrainToParty: 0
-  - EffectType: 3
-    Power: 2
-    PowerMode: 0
-    ScalingStat: 4
-    DamageType: 0
-    BuffType: 2
-    Duration: 2
-    UnlockLevel: 0
-    ApplyChance: 100
-    BonusVsTrait: 0
-    BonusPercent: 0
-    BonusVsStatus: 0
-    BonusPerDebuff: 0
-    DrainToParty: 0
   Tags: 02000000
   TagDuration: 3
   ThreatMultiplier: 1

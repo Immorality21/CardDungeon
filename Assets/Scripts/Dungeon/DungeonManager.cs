@@ -426,6 +426,10 @@ namespace Assets.Scripts.Dungeon
             // Afflictions and the consumption ledger are level-scoped like health, so a fresh level
             // starts clean on all three.
             Afflictions.Clear();
+            if (ActiveRun != null)
+            {
+                Afflictions.Restore(_fileHandler.Load<RunSaveData>()?.RunAfflictions);
+            }
             if (InventoryManager.HasInstance)
             {
                 InventoryManager.Instance.BeginDungeonConsumption();
@@ -828,16 +832,26 @@ namespace Assets.Scripts.Dungeon
             }
 
             room.MarkEventResolved(roomData.EventOptionIndex, roomData.EventOutcomeIndex, roomData.EventSucceeded);
-
-            if (!respawnAwakened)
-            {
-                return;
-            }
+            room.EventLootClaimed = roomData.EventLootClaimed;
+            room.SideRoomCleared = roomData.SideRoomCleared;
 
             var outcome = ResolvedOutcome(room.RoomEvent, roomData);
             if (outcome == null || outcome.AwakenedEnemies == null)
             {
                 return;
+            }
+
+            // A fight still guarding an item stands up again even on a restart, or quitting would
+            // lose the item the event promised.
+            bool guardsLoot = outcome.AwakenedEnemies.Count > 0 && outcome.LootOneOf != null
+                && outcome.LootOneOf.Count > 0 && !room.EventLootClaimed;
+            if (!respawnAwakened && !guardsLoot)
+            {
+                return;
+            }
+            if (guardsLoot)
+            {
+                room.PendingEventLoot = outcome.LootOneOf;
             }
 
             foreach (var definition in outcome.AwakenedEnemies)
@@ -869,6 +883,91 @@ namespace Assets.Scripts.Dungeon
             }
 
             room.MarkPayloadTaken();
+        }
+
+        /// <summary>The outcome <paramref name="room"/>'s event resolved to, or null.</summary>
+        public Rooms.Events.RoomEventOutcome ResolvedOutcomeOf(Room room)
+        {
+            if (room == null || room.RoomEvent == null || !room.EventConsumed)
+            {
+                return null;
+            }
+            return ResolvedOutcome(room.RoomEvent, new RoomSaveData
+            {
+                EventOptionIndex = room.EventOptionIndex,
+                EventOutcomeIndex = room.EventOutcomeIndex,
+                EventSucceeded = room.EventSucceeded
+            });
+        }
+
+        /// <summary>Writes what lasts the run into the run save, at once: a floor can still be lost.</summary>
+        public void SaveRunAfflictions()
+        {
+            if (ActiveRun == null)
+            {
+                return;
+            }
+            var runSave = _fileHandler.Load<RunSaveData>();
+            if (runSave != null)
+            {
+                runSave.RunAfflictions = Afflictions.GetRunSaveData();
+                _fileHandler.Save(runSave);
+            }
+        }
+
+        /// <summary>
+        /// The side room hanging off <paramref name="host"/>, built the first time it is asked for. What
+        /// stands in it comes from the host's place on the floor, so a resumed floor gets the same room.
+        /// </summary>
+        public Room SideRoomFor(Room host, Rooms.Events.SideRoomSpec spec, List<Items.ItemSO> pendingLoot = null)
+        {
+            if (host.SideRoom != null)
+            {
+                return host.SideRoom;
+            }
+
+            int seed = host.GridPosition.x * 73856093 ^ host.GridPosition.y * 19349663;
+            var side = _roomManager.BuildSideRoom(spec.Template, seed);
+            side.RoomIndex = -1;
+            side.HostRoom = host;
+            side.SideSpec = spec;
+            side.PendingEventLoot = pendingLoot;
+            host.SideRoom = side;
+
+            if (!spec.Mandatory)
+            {
+                PlaceReturnMarker(side, host);
+            }
+            if (spec.Chest)
+            {
+                side.Kind = RoomKind.Treasure;
+                PlaceKindMarker(side);
+            }
+            if (host.SideRoomCleared)
+            {
+                side.MarkPayloadTaken();
+                return side;
+            }
+
+            var rng = new System.Random(seed);
+            int count = spec.RollEnemyCount(rng.NextDouble(), rng.NextDouble());
+            for (int i = 0; i < count; i++)
+            {
+                EnemyManager.Instance.SpawnSingle(spec.Enemies[rng.Next(spec.Enemies.Count)], side);
+            }
+            return side;
+        }
+
+        private void PlaceReturnMarker(Room side, Room host)
+        {
+            var markerObj = new GameObject("WayBack");
+            markerObj.transform.SetParent(side.transform, false);
+            markerObj.transform.position = side.ClaimTile(
+                markerObj, side.GridPosition + new Vector2Int(side.RoomSO.Width / 2, 0), -0.5f);
+            var sr = markerObj.AddComponent<SpriteRenderer>();
+            sr.sprite = host.RoomEvent != null ? host.RoomEvent.SpentSprite : null;
+            sr.sortingOrder = RoomMarkerSortOrder;
+            side.ReturnMarker = sr;
         }
 
         /// <summary>The outcome the save says resolved, or null when the indices no longer fit.</summary>
@@ -1075,10 +1174,15 @@ namespace Assets.Scripts.Dungeon
                 return;
             }
 
-            // A teaching floor opts out entirely (RunLevelEntry.AllowRoomEvents): its rooms are
-            // shared templates whose PossibleEvents serve every other level.
+            // A teaching floor opts out entirely (RunLevelEntry.AllowRoomEvents).
             var entry = CurrentLevelEntry;
             if (entry != null && !entry.AllowRoomEvents)
+            {
+                return;
+            }
+
+            var pool = CurrentLevel != null ? CurrentLevel.RoomEvents : null;
+            if (pool == null || pool.Count == 0)
             {
                 return;
             }
@@ -1101,11 +1205,10 @@ namespace Assets.Scripts.Dungeon
                 }
 
                 // Each candidate gets its own roll, in authored order, and the first to pass takes
-                // the room - a room only ever offers one thing. Listing two events therefore raises
-                // the odds of the room having *something*, which is the intended lever: a common
-                // find and a once-a-run find can share a room pool.
-                foreach (var candidate in room.RoomSO.PossibleEvents)
+                // the room - a room only ever offers one thing.
+                foreach (var option in pool)
                 {
+                    var candidate = option != null ? option.Event : null;
                     if (candidate == null || placed.Contains(candidate))
                     {
                         continue;
@@ -1130,7 +1233,7 @@ namespace Assets.Scripts.Dungeon
                     }
 
                     float chance = Rooms.Events.RoomEventSpawn.ChancePercent(
-                        candidate.SpawnChancePercent,
+                        option.ChancePercent,
                         partyStats[candidate.SpawnModifierStat],
                         candidate.SpawnModifierRate);
 
@@ -1138,10 +1241,45 @@ namespace Assets.Scripts.Dungeon
                     {
                         room.RoomEvent = candidate;
                         placed.Add(candidate);
+                        PlaceEventMarker(room);
                         break;
                     }
                 }
             }
+        }
+
+        /// <summary>Puts <paramref name="roomEvent"/> in the room in place of what it rolled: the sandbox's way in.</summary>
+        public void ReplaceRoomEvent(Room room, Rooms.Events.RoomEventSO roomEvent)
+        {
+            if (room.EventMarker != null)
+            {
+                room.ReleaseSpot(room.EventMarker.gameObject);
+                Destroy(room.EventMarker.gameObject);
+                room.EventMarker = null;
+            }
+            room.RoomEvent = roomEvent;
+            PlaceEventMarker(room);
+        }
+
+        /// <summary>
+        /// Stands the event's object in the room, seen before any fight there. Claiming a tile draws
+        /// nothing from the seeded stream (<see cref="RoomSpotOps"/>), and this is the last pass.
+        /// </summary>
+        private void PlaceEventMarker(Room room)
+        {
+            var sprite = room.RoomEvent != null ? room.RoomEvent.WorldSprite : null;
+            if (sprite == null)
+            {
+                return;
+            }
+
+            var markerObj = new GameObject(room.RoomEvent.SaveKey + "Marker");
+            markerObj.transform.SetParent(room.transform, false);
+            markerObj.transform.position = room.ClaimSpot(markerObj, -0.5f);
+            var sr = markerObj.AddComponent<SpriteRenderer>();
+            sr.sprite = sprite;
+            sr.sortingOrder = RoomMarkerSortOrder;
+            room.EventMarker = sr;
         }
 
         /// <summary>
@@ -1157,9 +1295,7 @@ namespace Assets.Scripts.Dungeon
                    && room.CaptiveHero == null
                    && room.RoomSO != null
                    && !room.RoomSO.IsConnectorRoom
-                   && room.Kind.AcceptsOtherSpecials()
-                   && room.RoomSO.PossibleEvents != null
-                   && room.RoomSO.PossibleEvents.Count > 0;
+                   && room.Kind.AcceptsOtherSpecials();
         }
 
         /// <summary>

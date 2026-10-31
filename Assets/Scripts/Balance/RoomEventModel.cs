@@ -196,6 +196,7 @@ namespace Assets.Scripts.Balance
         /// </summary>
         public static List<RoomEventEncounter> BuildForLevel(
             IList<RoomEncounter> rooms,
+            IList<LevelEventEntry> pool,
             PartyBaseline party,
             BalanceRulesSO rules,
             int runLevelIndex,
@@ -203,7 +204,7 @@ namespace Assets.Scripts.Balance
             LevelEnemyTuning tuning = null)
         {
             var encounters = new List<RoomEventEncounter>();
-            if (rooms == null || party == null || party.Size == 0)
+            if (rooms == null || pool == null || party == null || party.Size == 0)
             {
                 return encounters;
             }
@@ -213,7 +214,7 @@ namespace Assets.Scripts.Balance
             foreach (var roomEncounter in rooms)
             {
                 var room = roomEncounter != null ? roomEncounter.Room : null;
-                if (room == null || room.IsConnectorRoom || room.PossibleEvents == null)
+                if (room == null || room.IsConnectorRoom)
                 {
                     continue;
                 }
@@ -222,12 +223,12 @@ namespace Assets.Scripts.Balance
 
                 // Placement is one pass per room: each candidate rolls in authored order and the
                 // first to pass takes it, so a later candidate only gets its roll when every earlier
-                // one missed. That is why listing two events raises the odds of the room offering
-                // *something* rather than splitting them between the two.
+                // one missed.
                 float unclaimed = 1f;
 
-                foreach (var definition in room.PossibleEvents)
+                foreach (var option in pool)
                 {
+                    var definition = option != null ? option.Event : null;
                     if (definition == null)
                     {
                         continue;
@@ -239,7 +240,7 @@ namespace Assets.Scripts.Balance
 
                     float chance = encounter.RequirementsMet
                         ? RoomEventSpawn.ChancePercent(
-                              definition.SpawnChancePercent,
+                              option.ChancePercent,
                               best[definition.SpawnModifierStat],
                               definition.SpawnModifierRate) / 100f
                         : 0f;

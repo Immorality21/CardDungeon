@@ -5,9 +5,9 @@
 > `Assets/Scripts/Rooms/CLAUDE.md` (generation, the room bar, the map, click-to-walk) ·
 > `docs/PIXEL_ART.md` (sizes, the PixelLab workflow).
 >
-> **Status (2026-10-31): phases 0, 1, 2 and 7 are done: every floor of every run is drawn with a biome and the old
-> look is gone. The owner saw the Crypt in the sandbox and approved it; the four other biomes are still to be
-> played. Next is phase 3.** From the owner's playtest note of 2026-10-29:
+> **Status (2026-10-31): phases 0, 1, 2, 7 and the Crypt half of 3 are done: every floor of every run is drawn with a
+> biome and the old look is gone. The owner saw the Crypt and the Swamp in the sandbox and approved both; Ember, Archive and Vault are
+> still to be seen. Next is the Crypt playtest; see *Phase 3: what was done*. All of this is uncommitted, on `main`.** From the owner's playtest note of 2026-10-29:
 > *"Dungeon rooms need more flair/artwork. Room events should also be somewhat visible from art
 > instead of just a button. Also more variations, maybe even rethink how we generate these."*
 
@@ -112,7 +112,7 @@ Each phase leaves the game playable and is checked in play before the next one s
 |---|---|---|---|
 | **0** | ✅ **Decided 2026-10-30** | C; same room count; walking later; hidden rooms optional, no retry; Elites last and a surprise | see above |
 | **1** | ✅ **Spike built 2026-10-30, signed off by the owner** — one biome, one floor | Tilemap rendering of floors and walls with a one-tile north wall face, one biome's tiles (PixelLab), props on free tiles, in the sandbox. Screenshots beside the two FF references. No gameplay change, door-to-door movement kept | proves the look and the tile pipeline before anything is converted; cheap to throw away |
-| **2** | ✅ **Built 2026-10-31** - **Biomes and props everywhere** | a `BiomeSO` per area (floors, wall faces, door art, edge texture, weighted props, lights), one per run family (crypt, ember forge, swamp, archive, vault), set on every level; manual layouts re-placed for the wall row; the old tint retires. Rule Tiles turned out unnecessary (`RoomTileOps` picks the pieces). See *Phase 2: where to start* | the visual upgrade on every floor at once, still no new mechanics |
+| **2** | ✅ **Built 2026-10-31** - **Biomes and props everywhere** | a `BiomeSO` per area (floors, wall faces, door art, edge texture, weighted props, lights), one per run family (crypt, ember forge, swamp, archive, vault), set on every level; manual layouts re-placed for the wall row; the old tint retires. Rule Tiles turned out unnecessary (`RoomTileOps` picks the pieces). See *Phase 2: what was done* | the visual upgrade on every floor at once, still no new mechanics |
 | **3** | **Events and kinds you can see** | each `RoomEventSO` gets a world sprite (and a spent one), placed on entry and visible before the fight, clicked once the room is clear (the button stays for the keyboard); a new kind **Shrine** (a refuge with a price) | content the new rooms can show off; independent of movement |
 | **4** | **Authored room shapes** | templates as painted tilemaps with door sockets and spots (option C); a socket-matching generator; pillars, L-shapes, carpets, alcoves; enemies, markers and props placed on the walkable mask | needs 1-2's pipeline |
 | **5** | **Hidden rooms** | the generator adds secret rooms behind a **locked door**, always a side room and **never on the path to the stairs**; a new event outcome **Unlock** opens it ("try to pick the lock": success opens it, failure leaves it shut **for good**); the map and the frontier count do not show it until it is open; it holds a cache or a captive | a door state plus one outcome type; easiest once rooms and doors are tiles |
@@ -214,7 +214,7 @@ At rest the party keeps the way it faced; facing the viewer is the idle loop.
 
 **Still open from phase 7:** "special" doors (locked, hidden - phase 5) that do not open by walking.
 
-## Phase 2: where to start (written 2026-10-31)
+## Phase 2: what was done (2026-10-31)
 
 **Decided by the owner (2026-10-31):**
 1. **Foes are a full tile on the walking view**, the size of a hero, tried in the sandbox with five foes in
@@ -262,6 +262,55 @@ saves were scripted on the Crypt and the Swamp only; Ember, Archive and Vault we
 **Known leftovers from the spike:** the stone cap on an open side door reads a bit like rubble; the arch
 door was scaled up from 10x15; wall props carry a small mount plate; the Warlock's walk frames keep the
 big-head style, pending the owner (`docs/PIXEL_ART.md`).
+
+## Phase 3: what was done (2026-10-31)
+
+**Built for the Crypt, from the owner's reviewed workbook:** every event is an object in the room, the Action
+button is gone, events hang off the level with a chance per level, and every non-Crypt event is parked. Nine
+events are live on eleven levels; A Scout Who Stopped and A Sealed Tomb have stronger versions deeper down. Two of
+the Crypt's cuts stay out (Chalk on the Stone, Coins for the Ferryman). See `Assets/Scripts/Rooms/Events/CLAUDE.md`.
+
+**The Choked Passage is an early, simple form of phase 5:** the hidden room is built off to the side and reached
+through the spent object, not by a real door on the floor's map. **Stand-ins to replace or confirm:** the Scout's
+"rats" are a Ghoul (no rat enemy), the statue is a Stone Sentinel, the Apprentice's wraith is a Wight, the Thirteenth
+Step's fight is the Lich. New gear copies an existing item's numbers: not balanced yet.
+
+**Next from here:** the Crypt playtest; the workbook's other biomes; and the *Cleanup* below, which needs only the
+room bar's Search, Rest and Descend moved, since events no longer use it.
+
+## Phase 3: where to start (written 2026-10-31)
+
+**Changed by the owner, 2026-10-31:** the Shrine is off for now. Events come first, and each event belongs to one biome, its chance and reward tuned per level
+(guaranteed in the Threshold as a tutorial, back in the Catacombs rarer and richer), so its art is made once. More
+variety and super rare events move up from the backlog. The proposal lives in the
+[Room Event Workbook](https://claude.ai/artifact/94jVJSDSqNPnwWWqUD9z6H); nothing is built until the owner has
+been through it. Today's events hang off `RoomSO.PossibleEvents`, and room templates are shared between runs, so
+per-level tuning means moving the pool onto the level, with its own chance. The notes below predate this.
+
+**The ask:** an event shows as an object you see on entry, before the fight; it is used once the room is clear; it
+has a spent sprite afterwards. Plus a new room kind, the **Shrine** (a refuge with a price).
+
+**What exists to build on:**
+- A room's chest and campfire are the pattern: `Room.KindMarker` / `KindMarkerSpent`, swapped by
+  `ShowSpentKindMarker`, and `RoomSaveData.KindConsumed` for the save. An event's save state is already there.
+- `Room.ClaimSpot` places an occupant, and `Room.SolidTiles` / `RoomActionUI.UseFacing` make it solid and usable
+  with Enter or a click. **An event's object should claim a spot, join those two, and call the same action the
+  room bar's button calls.** `UseFacing` is gated on the bar showing that button, which keeps "only once the room
+  is clear" true for free.
+- `DungeonManager.PlaceRoomEvents` runs last of the content passes. **Claiming a spot draws nothing from the seeded
+  stream** (`RoomSpotOps`), so an object does not move any seed's content; a saved floor's indices are unchanged.
+- There are 7 events in `ScriptableObjects/RoomEvents` (`CeilingShaft`, `ChokedPassage`, `Cutpurse`,
+  `DrownedOffering`, `MustyTome`, `SealedTomb`, `TreasuryHoard`), each needing a world sprite and a spent one, on
+  `RoomEventSO`. `create_image_pro` at 32x32 suits them, as for props. One look across biomes, so an event reads
+  the same everywhere; a per-area pool of events is the backlog item, not this phase.
+- Read `Assets/Scripts/Rooms/Events/CLAUDE.md` first.
+
+**Decide with the owner before building the Shrine:** what it costs, what it gives, and whether it counts against
+`RestRooms`. A new `RoomKind` also needs the balance model (`RunCurveModel`, `RoomKindPlanner`), so rerun the
+regression suite after it. The event objects need no balance work.
+
+**The plan's "the button stays for the keyboard" is out of date:** Enter on a facing object covers the keyboard now.
+The button stays only until the room bar goes (*Cleanup*, below), which phase 3 unblocks.
 
 ## Cleanup once everything is migrated: no more room bar (owner, 2026-10-31)
 

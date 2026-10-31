@@ -305,6 +305,16 @@ namespace Assets.Scripts.Cards
         /// <summary>Prefix of a Strike's throwaway castable, so it can never be taken for a real ability.</summary>
         public const string CastKeyPrefix = "ultra:";
 
+        /// <summary>
+        /// Whether casting <paramref name="magic"/> again does anything more: damage and healing add up,
+        /// while a cloak or any other buff only lands on itself, so a MultiCast does not offer it.
+        /// </summary>
+        public static bool Repeats(MagicSO magic)
+        {
+            return magic != null
+                && (magic.HasEffectType(SpellEffectType.Damage) || magic.HasEffectType(SpellEffectType.Heal));
+        }
+
         /// <summary>A MultiCast (the Mage's): fed by Focus rather than the gauge.</summary>
         public static bool IsMultiCast(UltraSO ultra)
         {

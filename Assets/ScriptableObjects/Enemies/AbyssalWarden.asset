@@ -43,7 +43,7 @@ MonoBehaviour:
   Archetype: 4
   Behavior: {fileID: 11400000, guid: b575fd7d7492cf140b29e2ddd986ad43, type: 2}
   Spells:
-  - Magic: {fileID: 11400000, guid: b1f7e9d9b4ce4f9e8f22c5191b19339c, type: 2}
+  - Magic: {fileID: 11400000, guid: 95cf41f7557ec7a4ebbe661296b4049c, type: 2}
     CastWeight: 1
   - Magic: {fileID: 11400000, guid: 36201a51cb01429fbed42d98c1e23162, type: 2}
     CastWeight: 1

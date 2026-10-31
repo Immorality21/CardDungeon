@@ -222,7 +222,7 @@
 
 /* Doubled so it beats .cd-select-scroll's flex-grow, which otherwise hands the list the width. */
 .cd-select-scroll.cd-picker-list {
-    width: 280px;
+    width: 320px;
     flex-grow: 0;
     flex-shrink: 0;
 }
@@ -524,6 +524,9 @@
 
 .cd-sel-row__name {
     flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    white-space: normal;
     font-size: 17px;
     -unity-font-style: bold;
     color: var(--cd-text-dark);

@@ -418,7 +418,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.fireball.description
     Values:
-    - Hurls a ball of fire at all enemies.
+    - Hurls a ball of fire at an enemy.
     Reviewed: 0
     Note: 
   - Key: ability.fire-cloak.name
@@ -2306,7 +2306,8 @@ MonoBehaviour:
     Note: 
   - Key: ultra.multi-cast.description
     Values:
-    - 'Focus spent all at once: the next ability again, and again, and again.'
+    - 'Focus spent all at once: any ability of yours that deals damage or heals,
+      again and again. Free, even with no charges left.'
     Reviewed: 0
     Note: 
   - Key: ultra.oil-spewing-mech.name
@@ -3189,20 +3190,18 @@ MonoBehaviour:
     Note: 
   - Key: event.choked-passage.prompt
     Values:
-    - Half the ceiling has come down across a side passage, and the draught coming
-      through the gap smells of open air rather than more dungeon. The top slab is
-      the only thing holding the rest up. Somebody could get a shoulder under it.
+    - Half the ceiling has come down across a side passage, you can see a room on
+      the other end.
     Reviewed: 0
     Note: 
   - Key: event.choked-passage.option-1.label
     Values:
-    - Get a shoulder under it
+    - Shoulder the slab aside
     Reviewed: 0
     Note: 
   - Key: event.choked-passage.option-1.success-1.text
     Values:
-    - 'You take the weight long enough for the rest of the party to clear the gap,
-      and what is behind it: a dead porter, still carrying.'
+    - The slab shifts, and a doorway opens.
     Reviewed: 0
     Note: 
   - Key: event.choked-passage.option-1.success-2.text
@@ -3213,8 +3212,7 @@ MonoBehaviour:
     Note: 
   - Key: event.choked-passage.option-1.failure-1.text
     Values:
-    - The slab shifts the wrong way and the rest of it follows. Everyone comes out
-      of the dust coughing and bleeding.
+    - The ceiling comes down on the party.
     Reviewed: 0
     Note: 
   - Key: event.choked-passage.option-1.failure-2.text
@@ -3392,20 +3390,18 @@ MonoBehaviour:
     Note: 
   - Key: event.sealed-tomb.prompt
     Values:
-    - A slab of stone has been dragged over a hole in the cavern floor and mortared
-      down at the edges. Somebody wanted this shut. The mortar is old, and the slab
-      has a lip you could get your hands under.
+    - A slab of stone has been dragged over a hole and mortared down at the edges.
+      Somebody wanted this shut.
     Reviewed: 0
     Note: 
   - Key: event.sealed-tomb.option-1.label
     Values:
-    - Heave the slab aside
+    - Lift the slab
     Reviewed: 0
     Note: 
   - Key: event.sealed-tomb.option-1.success-1.text
     Values:
-    - 'The mortar goes with a crack and the slab slides. Below: a body in good armour
-      that has not needed it for a century.'
+    - A single skeleton lies below, and it has no more use for what it holds.
     Reviewed: 0
     Note: 
   - Key: event.sealed-tomb.option-1.success-2.text
@@ -3415,8 +3411,7 @@ MonoBehaviour:
     Note: 
   - Key: event.sealed-tomb.option-1.failure-1.text
     Values:
-    - The slab comes back on your fingers and the whole cavern hears about it. Whatever
-      was sealed in was not the only thing down here.
+    - The slab breaks, with your fingers underneath.
     Reviewed: 0
     Note: 
   - Key: event.sealed-tomb.option-1.failure-2.text
@@ -4277,11 +4272,6 @@ MonoBehaviour:
   - Key: ui.menu.sound-effects
     Values:
     - Sound Effects
-    Reviewed: 0
-    Note: 
-  - Key: ui.room.action-btn
-    Values:
-    - Action
     Reviewed: 0
     Note: 
   - Key: ui.room.audio
@@ -6142,7 +6132,7 @@ MonoBehaviour:
     Note: Pause menu note once leaving is armed
   - Key: room.keys.combat-bar
     Values:
-    - "\u2190 \u2192 choose \xB7 Enter confirm"
+    - "\u2190 \u2192 choose \xB7 Enter confirm \xB7 step back out to flee"
     Reviewed: 0
     Note: Keyboard hint while the Fight/Flee bar is up
   - Key: room.keys.hero-bar
@@ -6447,11 +6437,6 @@ MonoBehaviour:
     - x{count}
     Reviewed: 0
     Note: Level-clear loot cell count; {count} = quantity
-  - Key: room.bar.investigate
-    Values:
-    - Investigate
-    Reviewed: 0
-    Note: Room bar action button when the event has no title
   - Key: abilities.describe.crit-chance
     Values:
     - '{line}, {chance}% crit'
@@ -7033,8 +7018,8 @@ MonoBehaviour:
     Note: summon effect
   - Key: abilities.ultra.multicast
     Values:
-    - "Next ability: cast once, +1 per Focus, for one charge \xB7 all Focus spent\nFocus:
-      +1 each turn you cast"
+    - "Next ability: cast once, +1 per Focus, free \xB7 all Focus spent\nFocus: +1
+      each turn you cast"
     Reviewed: 0
     Note: 'Ultra description: MultiCast kind'
   - Key: abilities.ultra.sacrifice-creature
@@ -10239,3 +10224,514 @@ MonoBehaviour:
     - The halls below the entrance, and the first blade worth keeping.
     Reviewed: 0
     Note: Story map blurb
+  - Key: set.bonewrought.name
+    Values:
+    - Bonewrought
+    Reviewed: 0
+    Note: 
+  - Key: set.bonewrought.tier-1.text
+    Values:
+    - +5% Endurance
+    Reviewed: 0
+    Note: 
+  - Key: set.bonewrought.tier-2.text
+    Values:
+    - +5% Strength
+    Reviewed: 0
+    Note: 
+  - Key: item.bonewrought-helm.name
+    Values:
+    - Bonewrought Helm
+    Reviewed: 0
+    Note: 
+  - Key: item.bonewrought-helm.description
+    Values:
+    - A skull cap, still humming faintly.
+    Reviewed: 0
+    Note: 
+  - Key: item.bonewrought-mail.name
+    Values:
+    - Bonewrought Mail
+    Reviewed: 0
+    Note: 
+  - Key: item.bonewrought-mail.description
+    Values:
+    - Ribs laced into a breastplate.
+    Reviewed: 0
+    Note: 
+  - Key: item.bonewrought-greaves.name
+    Values:
+    - Bonewrought Greaves
+    Reviewed: 0
+    Note: 
+  - Key: item.bonewrought-greaves.description
+    Values:
+    - Long bones bound with old leather.
+    Reviewed: 0
+    Note: 
+  - Key: item.delvers-blade.name
+    Values:
+    - The Delver's Blade
+    Reviewed: 0
+    Note: 
+  - Key: item.delvers-blade.description
+    Values:
+    - It has waited a long time for a successor.
+    Reviewed: 0
+    Note: 
+  - Key: item.apprentice-phylactery.name
+    Values:
+    - Apprentice's Phylactery
+    Reviewed: 0
+    Note: 
+  - Key: item.apprentice-phylactery.description
+    Values:
+    - A very small voice, put to use.
+    Reviewed: 0
+    Note: 
+  - Key: item.initiate-knife.name
+    Values:
+    - Initiate's Knife
+    Reviewed: 0
+    Note: 
+  - Key: item.initiate-knife.description
+    Values:
+    - Every initiate took one.
+    Reviewed: 0
+    Note: 
+  - Key: event.fallen-scout.title
+    Values:
+    - A Scout Who Stopped
+    Reviewed: 0
+    Note: 
+  - Key: event.fallen-scout.prompt
+    Values:
+    - You see the body of the scout, clenching a half-chewed pack.
+    Reviewed: 0
+    Note: 
+  - Key: event.fallen-scout.option-1.label
+    Values:
+    - Go through the pack
+    Reviewed: 0
+    Note: 
+  - Key: event.fallen-scout.option-1.success-1.text
+    Values:
+    - Coin, and something still worth carrying.
+    Reviewed: 0
+    Note: 
+  - Key: event.fallen-scout.option-1.failure-1.text
+    Values:
+    - Whatever was chewing the pack has not finished.
+    Reviewed: 0
+    Note: 
+  - Key: event.fallen-scout.option-2.label
+    Values:
+    - Leave it
+    Reviewed: 0
+    Note: 
+  - Key: event.fallen-scout.option-2.decline
+    Values:
+    - You leave the scout to it.
+    Reviewed: 0
+    Note: 
+  - Key: event.fallen-scout-catacombs.title
+    Values:
+    - A Scout Who Stopped
+    Reviewed: 0
+    Note: 
+  - Key: event.fallen-scout-catacombs.prompt
+    Values:
+    - You see the body of the scout, clenching a half-chewed pack.
+    Reviewed: 0
+    Note: 
+  - Key: event.fallen-scout-catacombs.option-1.label
+    Values:
+    - Go through the pack
+    Reviewed: 0
+    Note: 
+  - Key: event.fallen-scout-catacombs.option-1.success-1.text
+    Values:
+    - Coin, and something still worth carrying.
+    Reviewed: 0
+    Note: 
+  - Key: event.fallen-scout-catacombs.option-1.failure-1.text
+    Values:
+    - Whatever was chewing the pack has not finished.
+    Reviewed: 0
+    Note: 
+  - Key: event.fallen-scout-catacombs.option-2.label
+    Values:
+    - Leave it
+    Reviewed: 0
+    Note: 
+  - Key: event.fallen-scout-catacombs.option-2.decline
+    Values:
+    - You leave the scout to it.
+    Reviewed: 0
+    Note: 
+  - Key: event.fallen-scout-sepulchre.title
+    Values:
+    - A Scout Who Stopped
+    Reviewed: 0
+    Note: 
+  - Key: event.fallen-scout-sepulchre.prompt
+    Values:
+    - You see the body of the scout, clenching a half-chewed pack.
+    Reviewed: 0
+    Note: 
+  - Key: event.fallen-scout-sepulchre.option-1.label
+    Values:
+    - Go through the pack
+    Reviewed: 0
+    Note: 
+  - Key: event.fallen-scout-sepulchre.option-1.success-1.text
+    Values:
+    - Coin, and something still worth carrying.
+    Reviewed: 0
+    Note: 
+  - Key: event.fallen-scout-sepulchre.option-1.failure-1.text
+    Values:
+    - Whatever was chewing the pack has not finished.
+    Reviewed: 0
+    Note: 
+  - Key: event.fallen-scout-sepulchre.option-2.label
+    Values:
+    - Leave it
+    Reviewed: 0
+    Note: 
+  - Key: event.fallen-scout-sepulchre.option-2.decline
+    Values:
+    - You leave the scout to it.
+    Reviewed: 0
+    Note: 
+  - Key: event.fallen-scout-deep.title
+    Values:
+    - A Scout Who Stopped
+    Reviewed: 0
+    Note: 
+  - Key: event.fallen-scout-deep.prompt
+    Values:
+    - You see the body of the scout, clenching a half-chewed pack.
+    Reviewed: 0
+    Note: 
+  - Key: event.fallen-scout-deep.option-1.label
+    Values:
+    - Go through the pack
+    Reviewed: 0
+    Note: 
+  - Key: event.fallen-scout-deep.option-1.success-1.text
+    Values:
+    - Coin, and something still worth carrying.
+    Reviewed: 0
+    Note: 
+  - Key: event.fallen-scout-deep.option-1.failure-1.text
+    Values:
+    - Whatever was chewing the pack has not finished.
+    Reviewed: 0
+    Note: 
+  - Key: event.fallen-scout-deep.option-2.label
+    Values:
+    - Leave it
+    Reviewed: 0
+    Note: 
+  - Key: event.fallen-scout-deep.option-2.decline
+    Values:
+    - You leave the scout to it.
+    Reviewed: 0
+    Note: 
+  - Key: event.sealed-tomb-deep.title
+    Values:
+    - A Sealed Tomb
+    Reviewed: 0
+    Note: 
+  - Key: event.sealed-tomb-deep.prompt
+    Values:
+    - A slab of stone has been dragged over a hole and mortared down at the edges.
+      Somebody wanted this shut.
+    Reviewed: 0
+    Note: 
+  - Key: event.sealed-tomb-deep.option-1.label
+    Values:
+    - Lift the slab
+    Reviewed: 0
+    Note: 
+  - Key: event.sealed-tomb-deep.option-1.success-1.text
+    Values:
+    - A single skeleton lies below, and it has no more use for what it holds.
+    Reviewed: 0
+    Note: 
+  - Key: event.sealed-tomb-deep.option-1.failure-1.text
+    Values:
+    - The slab breaks, with your fingers underneath.
+    Reviewed: 0
+    Note: 
+  - Key: event.choked-passage-galleries.title
+    Values:
+    - A Choked Passage
+    Reviewed: 0
+    Note: 
+  - Key: event.choked-passage-galleries.prompt
+    Values:
+    - Half the ceiling has come down across a side passage, you can see a room on
+      the other end.
+    Reviewed: 0
+    Note: 
+  - Key: event.choked-passage-galleries.option-1.label
+    Values:
+    - Shoulder the slab aside
+    Reviewed: 0
+    Note: 
+  - Key: event.choked-passage-galleries.option-1.success-1.text
+    Values:
+    - The slab shifts, and a doorway opens.
+    Reviewed: 0
+    Note: 
+  - Key: event.choked-passage-galleries.option-1.failure-1.text
+    Values:
+    - The ceiling comes down on the party.
+    Reviewed: 0
+    Note: 
+  - Key: event.bone-choir.title
+    Values:
+    - The Bone Choir
+    Reviewed: 0
+    Note: 
+  - Key: event.bone-choir.prompt
+    Values:
+    - The skulls are humming, very low. There is a gap in the ring about the width
+      of a person.
+    Reviewed: 0
+    Note: 
+  - Key: event.bone-choir.option-1.label
+    Values:
+    - Stand in the ring
+    Reviewed: 0
+    Note: 
+  - Key: event.bone-choir.option-1.success-1.text
+    Values:
+    - The humming rises, and the room is gone. Something answers.
+    Reviewed: 0
+    Note: 
+  - Key: event.bone-choir.option-2.label
+    Values:
+    - Leave it
+    Reviewed: 0
+    Note: 
+  - Key: event.bone-choir.option-2.decline
+    Values:
+    - You keep out of the ring.
+    Reviewed: 0
+    Note: 
+  - Key: event.first-delver.title
+    Values:
+    - An Inanimate Statue
+    Reviewed: 0
+    Note: 
+  - Key: event.first-delver.prompt
+    Values:
+    - There is a statue with a sword in one of its hands, emitting an enchanting
+      glow.
+    Reviewed: 0
+    Note: 
+  - Key: event.first-delver.option-1.label
+    Values:
+    - Take the sword
+    Reviewed: 0
+    Note: 
+  - Key: event.first-delver.option-1.success-1.text
+    Values:
+    - The stone fingers open.
+    Reviewed: 0
+    Note: 
+  - Key: event.first-delver.option-1.failure-1.text
+    Values:
+    - The statue wakes.
+    Reviewed: 0
+    Note: 
+  - Key: event.knife-rack.title
+    Values:
+    - The Knife Rack
+    Reviewed: 0
+    Note: 
+  - Key: event.knife-rack.prompt
+    Values:
+    - Every initiate took one. Every knife here is sharp, and the rack is wired to
+      something overhead.
+    Reviewed: 0
+    Note: 
+  - Key: event.knife-rack.option-1.label
+    Values:
+    - Lift a knife
+    Reviewed: 0
+    Note: 
+  - Key: event.knife-rack.option-1.success-1.text
+    Values:
+    - It comes free without a sound.
+    Reviewed: 0
+    Note: 
+  - Key: event.knife-rack.option-1.failure-1.text
+    Values:
+    - The wire pulls, and the rack answers.
+    Reviewed: 0
+    Note: 
+  - Key: event.knife-rack.option-2.label
+    Values:
+    - Leave it
+    Reviewed: 0
+    Note: 
+  - Key: event.knife-rack.option-2.decline
+    Values:
+    - You leave the knives where they are.
+    Reviewed: 0
+    Note: 
+  - Key: event.lich-apprentice.title
+    Values:
+    - The Lich's Apprentice
+    Reviewed: 0
+    Note: 
+  - Key: event.lich-apprentice.prompt
+    Values:
+    - The apprentice's soul is still in here, begging in a very small voice to be
+      let out or put to use.
+    Reviewed: 0
+    Note: 
+  - Key: event.lich-apprentice.option-1.label
+    Values:
+    - Bind it
+    Reviewed: 0
+    Note: 
+  - Key: event.lich-apprentice.option-1.success-1.text
+    Values:
+    - The voice stops, and the box goes warm.
+    Reviewed: 0
+    Note: 
+  - Key: event.lich-apprentice.option-1.failure-1.text
+    Values:
+    - It tears loose, and it is not small any more.
+    Reviewed: 0
+    Note: 
+  - Key: event.lich-apprentice.option-2.label
+    Values:
+    - Free it
+    Reviewed: 0
+    Note: 
+  - Key: event.lich-apprentice.option-2.success-1.text
+    Values:
+    - It thanks you, and leaves something behind.
+    Reviewed: 0
+    Note: 
+  - Key: event.lich-apprentice.option-3.label
+    Values:
+    - Leave it
+    Reviewed: 0
+    Note: 
+  - Key: event.lich-apprentice.option-3.decline
+    Values:
+    - You leave the box chained.
+    Reviewed: 0
+    Note: 
+  - Key: event.red-basin.title
+    Values:
+    - A Basin of Red Water
+    Reviewed: 0
+    Note: 
+  - Key: event.red-basin.prompt
+    Values:
+    - It is warm. It is not quite water. Your wounds ache towards it.
+    Reviewed: 0
+    Note: 
+  - Key: event.red-basin.option-1.label
+    Values:
+    - Drink
+    Reviewed: 0
+    Note: 
+  - Key: event.red-basin.option-1.success-1.text
+    Values:
+    - It closes every wound, and leaves a taste that does not fade.
+    Reviewed: 0
+    Note: 
+  - Key: event.red-basin.option-2.label
+    Values:
+    - Leave it
+    Reviewed: 0
+    Note: 
+  - Key: event.red-basin.option-2.decline
+    Values:
+    - You leave the basin full.
+    Reviewed: 0
+    Note: 
+  - Key: event.thirteenth-step.title
+    Values:
+    - The Thirteenth Step
+    Reviewed: 0
+    Note: 
+  - Key: event.thirteenth-step.prompt
+    Values:
+    - You have counted these stairs on every floor. There were always twelve.
+    Reviewed: 0
+    Note: 
+  - Key: event.thirteenth-step.option-1.label
+    Values:
+    - Stand on it
+    Reviewed: 0
+    Note: 
+  - Key: event.thirteenth-step.option-1.success-1.text
+    Values:
+    - Gold spills up out of the stone, far more than it could hold.
+    Reviewed: 0
+    Note: 
+  - Key: event.thirteenth-step.option-1.failure-1.text
+    Values:
+    - Something from further down comes up.
+    Reviewed: 0
+    Note: 
+  - Key: event.thirteenth-step.option-2.label
+    Values:
+    - Step around it
+    Reviewed: 0
+    Note: 
+  - Key: event.thirteenth-step.option-2.decline
+    Values:
+    - You step around it, and do not count.
+    Reviewed: 0
+    Note: 
+  - Key: event-text.affliction.run
+    Values:
+    - '{hero} loses {amount} {stat} for the rest of the run.'
+    Reviewed: 0
+    Note: 
+  - Key: room.event.tag.danger
+    Values:
+    - danger
+    Reviewed: 0
+    Note: 
+  - Key: room.event.tag.price
+    Values:
+    - price
+    Reviewed: 0
+    Note: 
+  - Key: ability.enemy-fireball.name
+    Values:
+    - Fireball
+    Reviewed: 0
+    Note: 
+  - Key: ability.enemy-fireball.description
+    Values:
+    - Hurls a ball of fire at all enemies.
+    Reviewed: 0
+    Note: 
+  - Key: ability.enemy-lightning-bolt.name
+    Values:
+    - Lightning Bolt
+    Reviewed: 0
+    Note: 
+  - Key: ability.enemy-lightning-bolt.description
+    Values:
+    - Strikes an enemy with a crackling bolt of lightning.
+    Reviewed: 0
+    Note: 
+  - Key: abilities.menu.meta-no-stack
+    Values:
+    - '{meta}  does not stack'
+    Reviewed: 0
+    Note: 

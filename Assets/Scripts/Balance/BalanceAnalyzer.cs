@@ -2362,14 +2362,14 @@ namespace Assets.Scripts.Balance
                 EvaluateEventAsset(pair.Value, report, rules, ceiling);
             }
 
-            // An event asset no run's room pool lists is content nobody can reach - the room-event
+            // An event asset no level lists is content nobody can reach - the room-event
             // equivalent of ProgressionMap's unreachable magic. Only answerable from the project-wide
             // list, since the curves can only see what the rooms offer.
             if (input.RoomEvents != null)
             {
                 foreach (var definition in input.RoomEvents)
                 {
-                    if (definition == null || audits.ContainsKey(definition))
+                    if (definition == null || definition.Parked || audits.ContainsKey(definition))
                     {
                         continue;
                     }
@@ -2379,10 +2379,9 @@ namespace Assets.Scripts.Balance
                         "No room in any run offers this event")
                     {
                         Asset = definition,
-                        Detail = "Nothing lists it in RoomSO.PossibleEvents, or the rooms that do are in no "
-                               + "run's level pool, so it can never be placed.",
-                        Suggestion = "Add it to a RoomSO.PossibleEvents that a run's templates draw from, "
-                                   + "or delete the asset."
+                        Detail = "No LevelDefinitionSO.RoomEvents lists it, or the levels that do are in no "
+                               + "run, so it can never be placed.",
+                        Suggestion = "Add it to a level's RoomEvents, set it Parked, or delete the asset."
                     });
                 }
             }
@@ -2523,9 +2522,8 @@ namespace Assets.Scripts.Balance
                     "This event can never be placed")
                 {
                     Asset = definition,
-                    Detail = $"SpawnChancePercent is {definition.SpawnChancePercent:0.#}, so every roll fails. "
-                           + "The rooms that list it always fall through to the next candidate.",
-                    Suggestion = "Raise SpawnChancePercent above 0, or remove it from the room pools."
+                    Detail = "Every level that lists it does so at 0%, so every roll fails.",
+                    Suggestion = "Raise its ChancePercent above 0, or remove it from the levels' RoomEvents."
                 });
             }
 

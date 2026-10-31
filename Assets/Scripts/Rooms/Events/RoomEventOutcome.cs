@@ -73,6 +73,19 @@ namespace Assets.Scripts.Rooms.Events
                  "actually drops - a treasure event is a chance at gear, not a guarantee.")]
         public List<ItemSO> LootTable = new List<ItemSO>();
 
+        [Tooltip("Always pays exactly one of these, picked at random: a unique find, not a roll. " +
+                 "With AwakenedEnemies or a Mandatory side room it waits until the fight is won.")]
+        public List<ItemSO> LootOneOf = new List<ItemSO>();
+
+        [Tooltip("A stat the acting hero loses for the rest of the RUN, not the level.")]
+        public StatType RunStatLoss = StatType.None;
+
+        [Tooltip("How much of that stat, as a percent of the hero's value at the time.")]
+        [Range(0f, 100f)] public float RunStatLossPercent;
+
+        [Tooltip("A room this outcome leads to, off the floor's map.")]
+        public SideRoomSpec SideRoom = new SideRoomSpec();
+
         [Tooltip("Added to the run's pending gold, so it is banked on level-clear and lost on death.")]
         public int Gold;
 

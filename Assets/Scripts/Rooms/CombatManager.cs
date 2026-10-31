@@ -423,7 +423,7 @@ namespace Assets.Scripts.Rooms
             return _focus != null ? _focus.FocusOf(hero) : 0;
         }
 
-        /// <summary>A MultiCast needs an ability to repeat: a charged slot, and no Silence.</summary>
+        /// <summary>A MultiCast needs an ability worth repeating, charged or not, and no Silence.</summary>
         private bool CanMultiCast(ICombatUnit hero)
         {
             var component = hero as Hero;
@@ -432,7 +432,7 @@ namespace Assets.Scripts.Rooms
                 return false;
             }
             return DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null
-                   && DungeonManager.Instance.MagicState.HasAnyCastable(component.HeroKey);
+                   && DungeonManager.Instance.MagicState.HasAnyMultiCastable(component.HeroKey);
         }
 
         /// <summary>Whom an Ultra that takes a target may be aimed at: the Sacrifice's candidates, the
@@ -1149,8 +1149,9 @@ namespace Assets.Scripts.Rooms
                 yield return ExecuteCastAction(repeat, slotIndex, spendCharge: false);
                 log += (log.Length > 0 ? " " : "") + _lastTurnLog;
             }
-            // One charge pays for every repeat - spent once, however many landed before the field emptied.
-            SpendCharge(caster, slotIndex);
+            // Free, and from an empty slot too (owner, 2026-10-31): Focus is the price, and every point of
+            // it already cost a charge to build, so the Ultra was dry when it was finally ready.
+            SpendCharge(caster, slotIndex, free: true);
             _lastTurnLog = Loc.Format("combat.log.multi-cast",
                 ("caster", caster.DisplayName), ("ability", castAction.Magic.DisplayName), ("casts", casts)) + " " + log;
         }
@@ -1162,8 +1163,9 @@ namespace Assets.Scripts.Rooms
         }
 
         /// <summary>Spends one charge from <paramref name="caster"/>'s slot <paramref name="slotIndex"/> -
-        /// unless a reaction made this cast free - and tells the game a hero used an ability.</summary>
-        private static void SpendCharge(ICombatUnit caster, int slotIndex)
+        /// unless the cast is <paramref name="free"/> or a reaction made it so - and tells the game a hero
+        /// used an ability.</summary>
+        private static void SpendCharge(ICombatUnit caster, int slotIndex, bool free = false)
         {
             if (!(caster is Hero hero))
             {
@@ -1175,7 +1177,7 @@ namespace Assets.Scripts.Rooms
             string abilityKey = slots != null && slotIndex >= 0 && slotIndex < slots.Count && slots[slotIndex]?.Magic != null
                 ? slots[slotIndex].Magic.Key
                 : null;
-            if (!_freeCasts.Remove(caster) && DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null)
+            if (!_freeCasts.Remove(caster) && !free && DungeonManager.HasInstance && DungeonManager.Instance.MagicState != null)
             {
                 DungeonManager.Instance.MagicState.TryCast(hero.HeroKey, slotIndex);
             }

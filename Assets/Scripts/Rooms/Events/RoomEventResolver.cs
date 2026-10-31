@@ -28,6 +28,18 @@ namespace Assets.Scripts.Rooms.Events
         Clear = 2
     }
 
+    /// <summary>What a choice with no roll really holds, for its tag: no roll is not the same as no risk.</summary>
+    public enum OptionRisk
+    {
+        Safe = 0,
+
+        /// <summary>A known cost and no fight: a curse, a lost consumable.</summary>
+        Price = 1,
+
+        /// <summary>A fight or damage: the Bone Choir.</summary>
+        Danger = 2
+    }
+
     /// <summary>
     /// The maths behind a room event: how a stat becomes odds, how odds become words, and how a
     /// weighted outcome pool resolves. Deterministic - every roll is supplied by the caller - in the
@@ -36,6 +48,43 @@ namespace Assets.Scripts.Rooms.Events
     /// </summary>
     public static class RoomEventResolver
     {
+        /// <summary>The worst thing <paramref name="option"/>'s success pool can do.</summary>
+        public static OptionRisk RiskOf(RoomEventOption option)
+        {
+            var risk = OptionRisk.Safe;
+            if (option?.Success == null)
+            {
+                return risk;
+            }
+
+            foreach (var outcome in option.Success)
+            {
+                if (outcome == null)
+                {
+                    continue;
+                }
+
+                bool fight = (outcome.AwakenedEnemies != null && outcome.AwakenedEnemies.Count > 0)
+                    || (outcome.SideRoom != null && outcome.SideRoom.IsSet && outcome.SideRoom.Enemies != null
+                        && outcome.SideRoom.Enemies.Count > 0 && outcome.SideRoom.EnemyChancePercent > 0f);
+                bool hurts = outcome.Effects != null
+                    && outcome.Effects.Exists(e => e != null && e.EffectType == Cards.SpellEffectType.Damage);
+                if (fight || hurts)
+                {
+                    return OptionRisk.Danger;
+                }
+
+                bool costs = outcome.LoseAConsumable || outcome.RunStatLoss != UnitStats.StatType.None
+                    || (outcome.Effects != null
+                        && outcome.Effects.Exists(e => e != null && e.EffectType == Cards.SpellEffectType.Debuff));
+                if (costs)
+                {
+                    risk = OptionRisk.Price;
+                }
+            }
+            return risk;
+        }
+
         /// <summary>Nothing is ever a certainty in either direction.</summary>
         public const float MinChance = 0.05f;
 

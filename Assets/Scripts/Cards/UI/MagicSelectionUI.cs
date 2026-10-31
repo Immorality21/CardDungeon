@@ -190,6 +190,7 @@ namespace Assets.Scripts.Cards.UI
             _targetDesc = root.Q<Label>("target-desc");
             _targetPrompt = root.Q<Label>("target-prompt");
             _listScroll = root.Q<ScrollView>("list-scroll");
+            _listScroll.horizontalScrollerVisibility = ScrollerVisibility.Hidden;
             _targetScroll = root.Q<ScrollView>("target-scroll");
             _listBack = root.Q<Button>("list-back");
             _targetBack = root.Q<Button>("target-back");
@@ -298,7 +299,8 @@ namespace Assets.Scripts.Cards.UI
                 {
                     continue;
                 }
-                bool selectable = slot.CanCast;
+                // A MultiCast is free, so an empty slot still casts; a cloak does not stack, so it does not.
+                bool selectable = _multiCast ? UltraOps.Repeats(slot.Magic) : slot.CanCast;
 
                 string name = slot.IsEmpty ? Loc.Get("abilities.menu.empty-slot") : slot.Magic.DisplayName;
                 string meta = slot.IsEmpty ? "" : slot.Unlimited ? Loc.Get("abilities.menu.unlimited") : Loc.Format("abilities.menu.charges", ("charges", slot.Charges), ("max", slot.MaxCharges));
@@ -334,6 +336,11 @@ namespace Assets.Scripts.Cards.UI
                         selectable = false;
                         meta = Loc.Format("abilities.menu.meta-nothing-spent", ("meta", meta));
                     }
+                }
+
+                if (_multiCast && !UltraOps.Repeats(slot.Magic))
+                {
+                    meta = Loc.Format("abilities.menu.meta-no-stack", ("meta", meta));
                 }
 
                 int captured = i;
@@ -1281,6 +1288,11 @@ namespace Assets.Scripts.Cards.UI
             if (icon != null)
             {
                 iconElement.style.backgroundImage = new StyleBackground(icon);
+            }
+            else
+            {
+                // Nothing to draw: the name takes the room.
+                iconElement.style.display = DisplayStyle.None;
             }
             row.Add(iconElement);
 

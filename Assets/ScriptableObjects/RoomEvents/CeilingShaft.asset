@@ -14,7 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Rooms.Events.RoomEventSO
   Key: CeilingShaft
   GoverningStat: 3
-  SpawnChancePercent: 10
+  WorldSprite: {fileID: 0}
+  SpentSprite: {fileID: 0}
+  Parked: 1
   SpawnModifierStat: 3
   SpawnModifierRate: 5
   SpawnRequirements: []
@@ -33,6 +35,19 @@ MonoBehaviour:
       LootTable:
       - {fileID: 11400000, guid: 49f583fd473ca6144819051f4d6a6f7d, type: 2}
       - {fileID: 11400000, guid: 77a107a8fa4807a4782e3b6cfa65505e, type: 2}
+      LootOneOf: []
+      RunStatLoss: 0
+      RunStatLossPercent: 0
+      SideRoom:
+        Template: {fileID: 0}
+        Mandatory: 0
+        EnemyChancePercent: 100
+        Enemies: []
+        MinEnemies: 1
+        MaxEnemies: 1
+        Chest: 0
+        ChestLootChancePercent: 0
+        ChestLoot: []
       Gold: 15
       LoseAConsumable: 0
       AwakenedEnemies: []
@@ -44,6 +59,19 @@ MonoBehaviour:
       Effects: []
       Targets: 0
       LootTable: []
+      LootOneOf: []
+      RunStatLoss: 0
+      RunStatLossPercent: 0
+      SideRoom:
+        Template: {fileID: 0}
+        Mandatory: 0
+        EnemyChancePercent: 100
+        Enemies: []
+        MinEnemies: 1
+        MaxEnemies: 1
+        Chest: 0
+        ChestLootChancePercent: 0
+        ChestLoot: []
       Gold: 25
       LoseAConsumable: 0
       AwakenedEnemies: []
@@ -84,6 +112,19 @@ MonoBehaviour:
         DrainToParty: 0
       Targets: 0
       LootTable: []
+      LootOneOf: []
+      RunStatLoss: 0
+      RunStatLossPercent: 0
+      SideRoom:
+        Template: {fileID: 0}
+        Mandatory: 0
+        EnemyChancePercent: 100
+        Enemies: []
+        MinEnemies: 1
+        MaxEnemies: 1
+        Chest: 0
+        ChestLootChancePercent: 0
+        ChestLoot: []
       Gold: 0
       LoseAConsumable: 0
       AwakenedEnemies: []
@@ -109,6 +150,19 @@ MonoBehaviour:
         DrainToParty: 0
       Targets: 0
       LootTable: []
+      LootOneOf: []
+      RunStatLoss: 0
+      RunStatLossPercent: 0
+      SideRoom:
+        Template: {fileID: 0}
+        Mandatory: 0
+        EnemyChancePercent: 100
+        Enemies: []
+        MinEnemies: 1
+        MaxEnemies: 1
+        Chest: 0
+        ChestLootChancePercent: 0
+        ChestLoot: []
       Gold: 0
       LoseAConsumable: 0
       AwakenedEnemies:

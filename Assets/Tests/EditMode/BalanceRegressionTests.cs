@@ -119,9 +119,9 @@ namespace Tests.EditMode
         public void EveryRoomEventCanActuallyBePlaced()
         {
             // Room events are authored content reached through a chain that is easy to break by
-            // accident: the event needs a room to list it, that room needs to be in a run's pool, its
-            // SpawnChancePercent needs to be above zero, and some level's party needs to clear its
-            // SpawnRequirements. Miss any link and the asset exists but nobody ever sees it.
+            // accident: the event needs a level to list it above 0%, that level needs to be in a run,
+            // and its party needs to clear the SpawnRequirements. Miss any link and the asset exists
+            // but nobody ever sees it. A Parked event is set aside on purpose.
             AssertNoIssues(
                 issue => issue.Category == BalanceCategory.Event
                          && (issue.Title.Contains("No room in any run offers")

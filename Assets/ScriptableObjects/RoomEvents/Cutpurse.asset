@@ -14,7 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Rooms.Events.RoomEventSO
   Key: Cutpurse
   GoverningStat: 3
-  SpawnChancePercent: 40
+  WorldSprite: {fileID: 0}
+  SpentSprite: {fileID: 0}
+  Parked: 1
   SpawnModifierStat: 6
   SpawnModifierRate: 5
   SpawnRequirements: []
@@ -31,6 +33,19 @@ MonoBehaviour:
       Effects: []
       Targets: 0
       LootTable: []
+      LootOneOf: []
+      RunStatLoss: 0
+      RunStatLossPercent: 0
+      SideRoom:
+        Template: {fileID: 0}
+        Mandatory: 0
+        EnemyChancePercent: 100
+        Enemies: []
+        MinEnemies: 1
+        MaxEnemies: 1
+        Chest: 0
+        ChestLootChancePercent: 0
+        ChestLoot: []
       Gold: 0
       LoseAConsumable: 0
       AwakenedEnemies: []
@@ -43,6 +58,19 @@ MonoBehaviour:
       Effects: []
       Targets: 0
       LootTable: []
+      LootOneOf: []
+      RunStatLoss: 0
+      RunStatLossPercent: 0
+      SideRoom:
+        Template: {fileID: 0}
+        Mandatory: 0
+        EnemyChancePercent: 100
+        Enemies: []
+        MinEnemies: 1
+        MaxEnemies: 1
+        Chest: 0
+        ChestLootChancePercent: 0
+        ChestLoot: []
       Gold: 0
       LoseAConsumable: 1
       AwakenedEnemies: []

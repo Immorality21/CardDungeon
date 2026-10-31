@@ -14,9 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Rooms.Events.RoomEventSO
   Key: ChokedPassage
   GoverningStat: 2
-  SpawnChancePercent: 10
-  SpawnModifierStat: 2
-  SpawnModifierRate: 5
+  WorldSprite: {fileID: 21300000, guid: e8c3b6f33d1a0034ebf4befb0f5ff508, type: 3}
+  SpentSprite: {fileID: 21300000, guid: a7e2331cb95af204fbe87ea9a32dde42, type: 3}
+  Parked: 0
+  SpawnModifierStat: 0
+  SpawnModifierRate: 0
   SpawnRequirements: []
   Difficulty: 10
   Options:
@@ -25,51 +27,42 @@ MonoBehaviour:
     DeclineTextKey: 
     Success:
     - TextKey: event.choked-passage.option-1.success-1.text
-      Weight: 3
+      Weight: 1
       WeightModifierStat: 0
       WeightModifierRate: 0
       Effects: []
       Targets: 0
-      LootTable:
-      - {fileID: 11400000, guid: 48143a77cb3b71041a7cbf5a38862834, type: 2}
-      - {fileID: 11400000, guid: a980d0c632d67214090fec83f40050c4, type: 2}
-      Gold: 20
-      LoseAConsumable: 0
-      AwakenedEnemies: []
-      JoinsHero: {fileID: 0}
-    - TextKey: event.choked-passage.option-1.success-2.text
-      Weight: 1
-      WeightModifierStat: 0
-      WeightModifierRate: 0
-      Effects:
-      - EffectType: 0
-        Power: 3
-        PowerMode: 0
-        ScalingStat: 0
-        DamageType: 0
-        BuffType: 0
-        Duration: 3
-        UnlockLevel: 0
-        ApplyChance: 100
-        BonusVsTrait: 0
-        BonusPercent: 0
-        BonusVsStatus: 0
-        BonusPerDebuff: 0
-        DrainToParty: 0
-      Targets: 0
       LootTable: []
-      Gold: 15
+      LootOneOf: []
+      RunStatLoss: 0
+      RunStatLossPercent: 0
+      SideRoom:
+        Template: {fileID: 11400000, guid: cae357e7460da5d45b806b7fdde53d54, type: 2}
+        Mandatory: 0
+        EnemyChancePercent: 25
+        Enemies:
+        - {fileID: 11400000, guid: b8b4c4bd15ba1e54bb30021170a2a2ed, type: 2}
+        MinEnemies: 1
+        MaxEnemies: 2
+        Chest: 1
+        ChestLootChancePercent: 35
+        ChestLoot:
+        - {fileID: 11400000, guid: 99d424a2cb164181834d533fd80fde39, type: 2}
+        - {fileID: 11400000, guid: 0dc302d9056f4f73ac9a0ff3ab14c158, type: 2}
+        - {fileID: 11400000, guid: 0af466e4089275b4d9535cd9f2710019, type: 2}
+        - {fileID: 11400000, guid: 938b36f6c7fa4b83b973113a0a86d6bc, type: 2}
+      Gold: 0
       LoseAConsumable: 0
       AwakenedEnemies: []
       JoinsHero: {fileID: 0}
     Failure:
     - TextKey: event.choked-passage.option-1.failure-1.text
-      Weight: 2
+      Weight: 1
       WeightModifierStat: 0
       WeightModifierRate: 0
       Effects:
       - EffectType: 0
-        Power: 3
+        Power: 6
         PowerMode: 0
         ScalingStat: 0
         DamageType: 0
@@ -84,51 +77,20 @@ MonoBehaviour:
         DrainToParty: 0
       Targets: 1
       LootTable: []
+      LootOneOf: []
+      RunStatLoss: 0
+      RunStatLossPercent: 0
+      SideRoom:
+        Template: {fileID: 0}
+        Mandatory: 0
+        EnemyChancePercent: 100
+        Enemies: []
+        MinEnemies: 1
+        MaxEnemies: 1
+        Chest: 0
+        ChestLootChancePercent: 0
+        ChestLoot: []
       Gold: 0
       LoseAConsumable: 0
       AwakenedEnemies: []
       JoinsHero: {fileID: 0}
-    - TextKey: event.choked-passage.option-1.failure-2.text
-      Weight: 1
-      WeightModifierStat: 0
-      WeightModifierRate: 0
-      Effects:
-      - EffectType: 0
-        Power: 4
-        PowerMode: 0
-        ScalingStat: 0
-        DamageType: 0
-        BuffType: 0
-        Duration: 3
-        UnlockLevel: 0
-        ApplyChance: 100
-        BonusVsTrait: 0
-        BonusPercent: 0
-        BonusVsStatus: 0
-        BonusPerDebuff: 0
-        DrainToParty: 0
-      - EffectType: 3
-        Power: 2
-        PowerMode: 0
-        ScalingStat: 0
-        DamageType: 0
-        BuffType: 2
-        Duration: 3
-        UnlockLevel: 0
-        ApplyChance: 100
-        BonusVsTrait: 0
-        BonusPercent: 0
-        BonusVsStatus: 0
-        BonusPerDebuff: 0
-        DrainToParty: 0
-      Targets: 0
-      LootTable: []
-      Gold: 0
-      LoseAConsumable: 0
-      AwakenedEnemies: []
-      JoinsHero: {fileID: 0}
-  - LabelKey: event.choked-passage.option-2.label
-    Kind: 2
-    DeclineTextKey: event.choked-passage.option-2.decline
-    Success: []
-    Failure: []

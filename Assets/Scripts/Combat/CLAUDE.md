@@ -137,6 +137,8 @@ from `PartyBaseline`. The closed form does not price it.
 (`summon:` / `ultra:` keys) is not a cast, and the turn Focus is spent builds none. It is spent whole by
 his **MultiCast** Ultra (`UltraKind.MultiCast`), which is ready on Focus instead of the gauge
 (`UltraOps.IsReady`): the Ultra list opens the Ability list titled "Double/Triple/Quadruple-cast", and
+**MultiCast costs no charge and can cast from an empty slot** (owner, 2026-10-31): Focus is the whole
+price. It offers only what adds up (`UltraOps.Repeats`: damage or healing), so a cloak is listed, dimmed.
 `CombatManager.ExecuteMultiCast` casts the pick `1 + Focus` times, each repeat re-aimed at who stands,
 for **one** charge spent after the last (`SpendCharge` - tying it to the last repeat let a field that
 emptied early skip the charge). The party window's gauge bar shows Focus for a Focus hero, and the Ultra

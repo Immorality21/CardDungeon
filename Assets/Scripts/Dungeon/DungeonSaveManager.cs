@@ -53,6 +53,12 @@ namespace Assets.Scripts.Dungeon
 
         private void Save(Room currentRoom, bool restartAtEntrance)
         {
+            // A side room is no place to resume: it is not in the save, and the room it hangs off is.
+            if (currentRoom != null && currentRoom.IsSideRoom)
+            {
+                currentRoom = currentRoom.HostRoom;
+            }
+
             var data = new DungeonSaveData
             {
                 RestartAtEntrance = restartAtEntrance,
@@ -76,6 +82,8 @@ namespace Assets.Scripts.Dungeon
                     EventOptionIndex = room.EventOptionIndex,
                     EventOutcomeIndex = room.EventOutcomeIndex,
                     EventSucceeded = room.EventSucceeded,
+                    EventLootClaimed = room.EventLootClaimed,
+                    SideRoomCleared = room.SideRoomCleared,
                     Kind = (int)room.Kind,
                     KindConsumed = room.KindConsumed
                 });

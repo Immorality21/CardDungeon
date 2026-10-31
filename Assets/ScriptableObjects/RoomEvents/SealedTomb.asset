@@ -14,9 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Rooms.Events.RoomEventSO
   Key: SealedTomb
   GoverningStat: 1
-  SpawnChancePercent: 10
-  SpawnModifierStat: 1
-  SpawnModifierRate: 5
+  WorldSprite: {fileID: 21300000, guid: ae940d5c98bbf0f4b9fa16a3bd8f4f02, type: 3}
+  SpentSprite: {fileID: 21300000, guid: af7a54efd0dad0345beb7c843dcdac60, type: 3}
+  Parked: 0
+  SpawnModifierStat: 0
+  SpawnModifierRate: 0
   SpawnRequirements: []
   Difficulty: 10
   Options:
@@ -25,99 +27,54 @@ MonoBehaviour:
     DeclineTextKey: 
     Success:
     - TextKey: event.sealed-tomb.option-1.success-1.text
-      Weight: 3
+      Weight: 1
       WeightModifierStat: 0
       WeightModifierRate: 0
       Effects: []
       Targets: 0
-      LootTable:
+      LootTable: []
+      LootOneOf:
+      - {fileID: 11400000, guid: 098bb76c9957858418ab9ec1d033fcd7, type: 2}
+      - {fileID: 11400000, guid: 77a107a8fa4807a4782e3b6cfa65505e, type: 2}
       - {fileID: 11400000, guid: d584e10d49b161a4ebb6040a496455d6, type: 2}
-      - {fileID: 11400000, guid: 098bb76c9957858418ab9ec1d033fcd7, type: 2}
-      Gold: 15
-      LoseAConsumable: 0
-      AwakenedEnemies: []
-      JoinsHero: {fileID: 0}
-    - TextKey: event.sealed-tomb.option-1.success-2.text
-      Weight: 1
-      WeightModifierStat: 0
-      WeightModifierRate: 0
-      Effects:
-      - EffectType: 0
-        Power: 3
-        PowerMode: 0
-        ScalingStat: 0
-        DamageType: 0
-        BuffType: 0
-        Duration: 3
-        UnlockLevel: 0
-        ApplyChance: 100
-        BonusVsTrait: 0
-        BonusPercent: 0
-        BonusVsStatus: 0
-        BonusPerDebuff: 0
-        DrainToParty: 0
-      Targets: 0
-      LootTable:
-      - {fileID: 11400000, guid: 098bb76c9957858418ab9ec1d033fcd7, type: 2}
-      Gold: 0
+      RunStatLoss: 0
+      RunStatLossPercent: 0
+      SideRoom:
+        Template: {fileID: 0}
+        Mandatory: 0
+        EnemyChancePercent: 100
+        Enemies: []
+        MinEnemies: 1
+        MaxEnemies: 1
+        Chest: 0
+        ChestLootChancePercent: 0
+        ChestLoot: []
+      Gold: 25
       LoseAConsumable: 0
       AwakenedEnemies: []
       JoinsHero: {fileID: 0}
     Failure:
     - TextKey: event.sealed-tomb.option-1.failure-1.text
-      Weight: 2
-      WeightModifierStat: 0
-      WeightModifierRate: 0
-      Effects:
-      - EffectType: 0
-        Power: 3
-        PowerMode: 0
-        ScalingStat: 0
-        DamageType: 0
-        BuffType: 0
-        Duration: 3
-        UnlockLevel: 0
-        ApplyChance: 100
-        BonusVsTrait: 0
-        BonusPercent: 0
-        BonusVsStatus: 0
-        BonusPerDebuff: 0
-        DrainToParty: 0
-      Targets: 0
-      LootTable: []
-      Gold: 0
-      LoseAConsumable: 0
-      AwakenedEnemies:
-      - {fileID: 11400000, guid: ce571ba2b36e6c14bb37279e004b146c, type: 2}
-      - {fileID: 11400000, guid: bf6697af4924975448304c7112cc67ec, type: 2}
-      JoinsHero: {fileID: 0}
-    - TextKey: event.sealed-tomb.option-1.failure-2.text
       Weight: 1
       WeightModifierStat: 0
       WeightModifierRate: 0
-      Effects:
-      - EffectType: 0
-        Power: 4
-        PowerMode: 0
-        ScalingStat: 0
-        DamageType: 0
-        BuffType: 0
-        Duration: 3
-        UnlockLevel: 0
-        ApplyChance: 100
-        BonusVsTrait: 0
-        BonusPercent: 0
-        BonusVsStatus: 0
-        BonusPerDebuff: 0
-        DrainToParty: 0
+      Effects: []
       Targets: 0
       LootTable: []
+      LootOneOf: []
+      RunStatLoss: 1
+      RunStatLossPercent: 15
+      SideRoom:
+        Template: {fileID: 0}
+        Mandatory: 0
+        EnemyChancePercent: 100
+        Enemies: []
+        MinEnemies: 1
+        MaxEnemies: 1
+        Chest: 0
+        ChestLootChancePercent: 0
+        ChestLoot: []
       Gold: 0
       LoseAConsumable: 0
       AwakenedEnemies: []
       JoinsHero: {fileID: 0}
-  - LabelKey: event.sealed-tomb.option-2.label
-    Kind: 2
-    DeclineTextKey: event.sealed-tomb.option-2.decline
-    Success: []
-    Failure: []

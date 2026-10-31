@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2774e2128e940c2ba863d0a3b1314ce, type: 3}
+  m_Name: BoneChoir
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Rooms.Events.RoomEventSO
+  Key: BoneChoir
+  GoverningStat: 5
+  WorldSprite: {fileID: 21300000, guid: e8e8b98177fc3e540817295f22d42287, type: 3}
+  SpentSprite: {fileID: 21300000, guid: 45b12e67de9e11c45b2d3154734a1d54, type: 3}
+  Parked: 0
+  SpawnModifierStat: 0
+  SpawnModifierRate: 0
+  SpawnRequirements: []
+  Difficulty: 9
+  Options:
+  - LabelKey: event.bone-choir.option-1.label
+    Kind: 1
+    DeclineTextKey: 
+    Success:
+    - TextKey: event.bone-choir.option-1.success-1.text
+      Weight: 1
+      WeightModifierStat: 0
+      WeightModifierRate: 0
+      Effects: []
+      Targets: 0
+      LootTable: []
+      LootOneOf:
+      - {fileID: 11400000, guid: 018f532725fa1fe40ae34be2cf5bea36, type: 2}
+      - {fileID: 11400000, guid: f01cefdfbfa14b84494c7461d725ff18, type: 2}
+      - {fileID: 11400000, guid: 1809acdd556726d46a993731fba97b45, type: 2}
+      RunStatLoss: 0
+      RunStatLossPercent: 0
+      SideRoom:
+        Template: {fileID: 11400000, guid: bd004bf7dde73974b91bcec2c1a77b8a, type: 2}
+        Mandatory: 1
+        EnemyChancePercent: 100
+        Enemies:
+        - {fileID: 11400000, guid: eaa6b30e7c013504ca95da0365eb252a, type: 2}
+        MinEnemies: 3
+        MaxEnemies: 5
+        Chest: 0
+        ChestLootChancePercent: 0
+        ChestLoot: []
+      Gold: 0
+      LoseAConsumable: 0
+      AwakenedEnemies: []
+      JoinsHero: {fileID: 0}
+    Failure: []
+  - LabelKey: event.bone-choir.option-2.label
+    Kind: 2
+    DeclineTextKey: event.bone-choir.option-2.decline
+    Success: []
+    Failure: []

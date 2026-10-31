@@ -210,6 +210,16 @@ namespace Assets.Scripts.Heroes
             transform.position = new Vector3(tile.x, tile.y, -1f);
         }
 
+        /// <summary>
+        /// Stands the party on one tile of <paramref name="room"/>, for a move no door explains: into a
+        /// side room and back. <c>PreviousRoom</c> is left alone, since a side room offers no Flee.
+        /// </summary>
+        public void PlaceOnTile(Room room, Vector2Int tile)
+        {
+            CurrentRoom = room;
+            transform.position = new Vector3(tile.x, tile.y, -1f);
+        }
+
         public void PlaceAtDoor(Door door, Room fromRoom)
         {
             PreviousRoom = CurrentRoom;

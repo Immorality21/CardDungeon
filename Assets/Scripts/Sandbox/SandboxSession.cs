@@ -186,9 +186,14 @@ namespace Assets.Scripts.Sandbox
 
             GrantItems(config);
 
+            if (config.RoomEvent != null && encounterRoom != null)
+            {
+                DungeonManager.Instance.ReplaceRoomEvent(encounterRoom, config.RoomEvent);
+            }
+
             Debug.Log(LogPrefix + BuildReport(encounterRoom));
 
-            if (config.WalkIntoEncounter && encounterRoom != null && enemies.Count > 0)
+            if (config.WalkIntoEncounter && encounterRoom != null && (enemies.Count > 0 || config.RoomEvent != null))
             {
                 SandboxRunner.Run(WalkIn(startRoom, encounterRoom));
             }

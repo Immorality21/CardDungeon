@@ -1,8 +1,35 @@
 # Room Events (`Assets.Scripts.Rooms.Events`)
 
-Stat-resolved gambles behind a room's **Action** button: the thing that makes a dungeon a sequence of
-decisions rather than a corridor of fights. The button itself, and the rest of the room bar, is
-`RoomActionUI` - see `Assets/Scripts/Rooms/CLAUDE.md`.
+Stat-resolved gambles behind an **object standing in the room**: the thing that makes a dungeon a
+sequence of decisions rather than a corridor of fights. There is no button: the party walks up to the
+object and presses Enter, or clicks it (`RoomActionUI.TryUseEvent`, from `UseFacing`), once the room is
+clear. See `Assets/Scripts/Rooms/CLAUDE.md`.
+
+## Since 2026-10-31 (owner): an event belongs to a biome, and is tuned per level
+
+- **The pool is on the level**: `LevelDefinitionSO.RoomEvents`, a list of `LevelEventEntry` (event +
+  chance per room). `RoomSO.PossibleEvents` and `RoomEventSO.SpawnChancePercent` are gone, and notes
+  below that mention them are history. The list rolls in order, so **rarest first**
+  (`RoomEventObjectTests` guards it, and that every listed event has both sprites).
+- **Stronger versions on deeper levels are their own assets** sharing the art (`FallenScout`,
+  `FallenScoutCatacombs`, `FallenScoutSepulchre`, `FallenScoutDeep`; `SealedTombDeep`).
+- **Only the Crypt has events for now.** The rest are `RoomEventSO.Parked` (`CeilingShaft`, `Cutpurse`,
+  `DrownedOffering`, `MustyTome`, `TreasuryHoard`): no level lists them, and the analyzer does not call
+  that a mistake. The design lives in the Room Event Workbook (`docs/plans/DUNGEON_ROOMS.md`).
+- **The object**: `RoomEventSO.WorldSprite` / `SpentSprite`, placed by `DungeonManager.PlaceEventMarker`,
+  swapped in `Room.MarkEventResolved`, art in `Sprites/Environment/Events`.
+- **`LootOneOf`**: an outcome that always pays one item. With `AwakenedEnemies` it waits for the fight
+  (`Room.PendingEventLoot`, paid by `TryGrantEventLoot`); a fight guarding an item stands up again even
+  on a floor restart.
+- **`RunStatLoss` + `RunStatLossPercent`**: the acting hero loses a share of a stat, held as a flat
+  loss, for the run: `LevelAffliction.ForRun`, kept in `RunSaveData.RunAfflictions`.
+- **`SideRoom` (`SideRoomSpec`)**: a room off the floor's map, with no doors (`RoomManager.BuildSideRoom`,
+  `DungeonManager.SideRoomFor`). It is not in `CurrentRooms`, has `RoomIndex` -1, and saving from one
+  saves its `HostRoom`. `Mandatory` (the Bone Choir) takes the party there at once and only resolves the
+  event when the fight is won, so quitting mid-fight leaves the event to do again. Otherwise (the Choked
+  Passage) the spent object is the way in, `Room.ReturnMarker` the way back, and `SideRoomCleared` is saved
+  on the host. **No Flee in a side room, and no map.**
+- **`SandboxConfigSO.RoomEvent`** stands any event in the encounter room (`Sandbox/CryptEvents.asset`).
 
 ## Files
 
@@ -86,7 +113,7 @@ does still carry an unused `ScalingStat` if that ever needs revisiting.
   corridor. `CombatManager.RunCombat` **seeds** each fight's tracker from it, so the cost is paid in
   every encounter for the rest of the level. Level-scoped like health: cleared on fresh entry, and
   saved with the dungeon so quitting to the menu is not a cure.
-- **UI.** Action opens `#event-window` (title / prompt / odds line / one button per option), then
+- **UI.** Using the object opens `#event-window` (title / prompt / odds line / one button per option), then
   reuses `#detail-window` for the result: the outcome's copy, then one line per concrete consequence.
   If the outcome woke something, **Ok re-shows the room** so the Fight/Flee bar replaces the
   room bar. There is no option-list window any more - it was retired with the flavour strings, since

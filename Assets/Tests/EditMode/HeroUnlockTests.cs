@@ -372,18 +372,14 @@ namespace Tests.EditMode
                 }
                 foreach (var level in node.Run.Levels)
                 {
-                    if (level?.LevelTemplate?.RoomPool == null || !level.AllowRoomEvents)
+                    if (level?.LevelTemplate?.RoomEvents == null || !level.AllowRoomEvents)
                     {
                         continue;
                     }
-                    foreach (var room in level.LevelTemplate.RoomPool)
+                    foreach (var entry in level.LevelTemplate.RoomEvents)
                     {
-                        if (room?.PossibleEvents == null)
                         {
-                            continue;
-                        }
-                        foreach (var definition in room.PossibleEvents)
-                        {
+                            var definition = entry?.Event;
                             if (definition?.Options == null)
                             {
                                 continue;

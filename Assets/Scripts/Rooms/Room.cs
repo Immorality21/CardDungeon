@@ -30,8 +30,7 @@ namespace Assets.Scripts.Rooms
         public Assets.Scripts.Heroes.HeroSO CaptiveHero;
         /// <summary>
         /// The stat-check event this room offers, assigned at placement by <c>DungeonManager</c> from
-        /// the room template's <c>RoomSO.PossibleEvents</c>. Lives on the instance, not the template,
-        /// so a template used three times in one level does not offer the same event three times.
+        /// the level's <c>LevelDefinitionSO.RoomEvents</c>, per instance.
         /// </summary>
         public Events.RoomEventSO RoomEvent;
 
@@ -90,6 +89,10 @@ namespace Assets.Scripts.Rooms
         public void MarkPayloadTaken()
         {
             KindConsumed = true;
+            if (HostRoom != null)
+            {
+                HostRoom.SideRoomCleared = true;
+            }
             ShowSpentKindMarker();
         }
 
@@ -105,6 +108,39 @@ namespace Assets.Scripts.Rooms
                 KindMarker.sprite = KindMarkerSpent;
             }
         }
+
+        /// <summary>
+        /// The object standing in the room for its event, drawn from <c>RoomEventSO.WorldSprite</c>.
+        /// Null when the event has no art: there is then nothing to walk up to, which
+        /// <c>RoomEventObjectTests</c> guards against for every event a level lists.
+        /// </summary>
+        public SpriteRenderer EventMarker;
+
+        /// <summary>An outcome's item, waiting for this room's fight to be won.</summary>
+        [System.NonSerialized] public List<Assets.Scripts.Items.ItemSO> PendingEventLoot;
+
+        /// <summary>Whether the event's guaranteed item has been handed over. Saved, so it pays once.</summary>
+        public bool EventLootClaimed { get; set; }
+
+        /// <summary>The room this one was reached from, or null for a room of the floor itself.</summary>
+        public Room HostRoom { get; set; }
+
+        /// <summary>What this side room was built from; null on a room of the floor itself.</summary>
+        public Events.SideRoomSpec SideSpec { get; set; }
+
+        /// <summary>This room's side room, once it has been built.</summary>
+        public Room SideRoom { get; set; }
+
+        /// <summary>Whether this room's side room has been emptied. Saved on this room.</summary>
+        public bool SideRoomCleared { get; set; }
+
+        public bool IsSideRoom => HostRoom != null;
+
+        /// <summary>The way back out of a side room, walked up to like anything else.</summary>
+        public SpriteRenderer ReturnMarker;
+
+        /// <summary>Where the party stands on entering a side room: above its way out, in the middle.</summary>
+        public Vector2Int SideEntryTile => GridPosition + new Vector2Int(RoomSO.Width / 2, 1);
 
         /// <summary>Whether the room still has an event to offer.</summary>
         public bool HasPendingEvent
@@ -123,6 +159,10 @@ namespace Assets.Scripts.Rooms
             EventOptionIndex = optionIndex;
             EventOutcomeIndex = outcomeIndex;
             EventSucceeded = succeeded;
+            if (EventMarker != null && RoomEvent != null && RoomEvent.SpentSprite != null)
+            {
+                EventMarker.sprite = RoomEvent.SpentSprite;
+            }
         }
 
         public void Reveal()
@@ -245,6 +285,10 @@ namespace Assets.Scripts.Rooms
 
             var center = (Vector2)GetCenter();
             var avoid = new List<Vector2>(_spots.Values);
+            if (IsSideRoom)
+            {
+                avoid.Add(SideEntryTile);
+            }
             foreach (var door in Doors)
             {
                 if (door == null)
@@ -273,6 +317,13 @@ namespace Assets.Scripts.Rooms
                 _spots[owner] = spot;
             }
             return new Vector3(spot.x, spot.y, z);
+        }
+
+        /// <summary>Claims one exact tile, for what has its own place in a side room.</summary>
+        public Vector3 ClaimTile(object owner, Vector2Int tile, float z)
+        {
+            _spots[owner] = tile;
+            return new Vector3(tile.x, tile.y, z);
         }
 
         /// <summary>

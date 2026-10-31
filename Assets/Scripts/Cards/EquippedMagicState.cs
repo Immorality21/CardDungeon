@@ -199,6 +199,12 @@ namespace Assets.Scripts.Cards
             return _heroSlots.TryGetValue(heroKey, out var slots) && slots.Any(s => s.CanCast);
         }
 
+        /// <summary>True if the hero carries an ability a MultiCast can repeat, charged or not.</summary>
+        public bool HasAnyMultiCastable(string heroKey)
+        {
+            return _heroSlots.TryGetValue(heroKey, out var slots) && slots.Any(s => UltraOps.Repeats(s.Magic));
+        }
+
         /// <summary>Spends one charge from a slot. Returns false if the slot is empty or out of charges.</summary>
         public bool TryCast(string heroKey, int slotIndex)
         {

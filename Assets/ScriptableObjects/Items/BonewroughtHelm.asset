@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69b3836c2cb69fc4b815c96944749c08, type: 3}
+  m_Name: BonewroughtHelm
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Items.ItemSO
+  Key: BonewroughtHelm
+  Icon: {fileID: 21300000, guid: cb5e3d5a193ef4b4980ab4a5ce157035, type: 3}
+  Rarity: 2
+  ItemLevel: 4
+  FindChanceScale: 0
+  Category: 0
+  SlotType: 2
+  Bonuses:
+  - StatType: 2
+    BonusType: 0
+    Value: 6
+  - StatType: 7
+    BonusType: 0
+    Value: 16
+  Resistances:
+  - DamageType: 3
+    Percent: 20
+  Triggers:
+  - LabelKey: 
+    TextKey: item.warden-helm.reaction-1.text
+    When: 7
+    Chance: 1
+    Limit: 0
+    FilterDamageType: 0
+    DamageType: 0
+    IgnoreOverTime: 0
+    Target: 0
+    Effects:
+    - EffectType: 2
+      Power: 4
+      PowerMode: 1
+      ScalingStat: 0
+      DamageType: 0
+      BuffType: 2
+      Duration: 3
+      UnlockLevel: 0
+      ApplyChance: 100
+      BonusVsTrait: 0
+      BonusPercent: 0
+      BonusVsStatus: 0
+      BonusPerDebuff: 0
+      DrainToParty: 0
+  Milestones: []
+  Set: {fileID: 11400000, guid: cb946548aa77c7349846c96c49fa8b20, type: 2}
+  CraftOnly: 0
+  CraftResult: {fileID: 0}
+  CraftBase: {fileID: 0}
+  CraftMaterials: []
+  CraftGold: 0
+  KnownWithForge: 0
+  ConsumableEffect: 0
+  ConsumableAmount: 0
+  ConsumableCharges: 0
+  ConsumablePercent: 0
+  MaxStack: 99
+  RevisitFear: -1
+  RevisitRun: 

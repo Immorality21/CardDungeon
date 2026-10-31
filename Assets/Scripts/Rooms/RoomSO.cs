@@ -31,11 +31,6 @@ namespace Assets.Scripts.Rooms
             get { return Kind == RoomKind.Connector; }
         }
 
-        [Tooltip("Events this kind of room CAN offer - a swamp offers swamp events. Each is rolled " +
-                 "separately against its own RoomEventSO.SpawnChancePercent, so listing two raises " +
-                 "the odds of the room having something; the first to pass is placed.")]
-        public List<Events.RoomEventSO> PossibleEvents = new List<Events.RoomEventSO>();
-
         public List<EnemySpawnEntry> EnemySpawnTable;
     }
 }

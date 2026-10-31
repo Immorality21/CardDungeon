@@ -9,10 +9,8 @@ namespace Assets.Scripts.Rooms.Events
     /// decides what happens once the player engages one: this is the roll that decides the event is
     /// *there*.
     ///
-    /// <para>Rarity is per event rather than per level. A level used to be handed a budget ("two
-    /// rooms get an event"), which made every eligible room in a small level a near certainty; a base
-    /// chance on the event itself lets a common find and a once-a-run find sit in the same room pool.
-    /// </para>
+    /// <para>Rarity is per level (<see cref="LevelEventEntry"/>): an event can be guaranteed on one
+    /// floor and rare on another.</para>
     ///
     /// <para>Pure and caller-rolled, like <c>LootRoller</c> and <see cref="RoomEventResolver"/>, so
     /// the odds are testable without generating a dungeon.</para>

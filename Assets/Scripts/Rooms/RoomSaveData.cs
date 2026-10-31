@@ -30,6 +30,11 @@ namespace Assets.Scripts.Rooms
 
         public bool EventSucceeded;
 
+        // An event's guaranteed item was handed over, and its side room emptied.
+        public bool EventLootClaimed;
+
+        public bool SideRoomCleared;
+
         // --- Room kind state. The kind itself is deterministic from the seed, so it is stored only as
         // a guard: if a re-authored quota or a shifted RNG stream lands a different kind here on
         // reload, a consumed flag must not be applied to somebody else's payload.

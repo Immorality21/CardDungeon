@@ -52,7 +52,7 @@ namespace Assets.Scripts.Rooms.Events
             return !(BuffHandlerRegistry.Get(buff) is IOverTimeBuffHandler);
         }
 
-        public void Add(string heroKey, BuffType buff, int amount)
+        public void Add(string heroKey, BuffType buff, int amount, bool forRun = false)
         {
             if (string.IsNullOrEmpty(heroKey) || buff == BuffType.None || amount == 0)
             {
@@ -75,14 +75,14 @@ namespace Assets.Scripts.Rooms.Events
 
             foreach (var entry in _entries)
             {
-                if (entry.HeroKey == heroKey && entry.Buff == buff)
+                if (entry.HeroKey == heroKey && entry.Buff == buff && entry.ForRun == forRun)
                 {
                     entry.Amount += amount;
                     return;
                 }
             }
 
-            _entries.Add(new LevelAffliction(heroKey, buff, amount));
+            _entries.Add(new LevelAffliction(heroKey, buff, amount, forRun));
         }
 
         /// <summary>Everything one hero is carrying.</summary>
@@ -141,9 +141,28 @@ namespace Assets.Scripts.Rooms.Events
             var copy = new List<LevelAffliction>(_entries.Count);
             foreach (var entry in _entries)
             {
-                copy.Add(new LevelAffliction(entry.HeroKey, entry.Buff, entry.Amount));
+                copy.Add(new LevelAffliction(entry.HeroKey, entry.Buff, entry.Amount, entry.ForRun));
             }
             return copy;
+        }
+
+        /// <summary>What outlasts this floor, for the run save.</summary>
+        public List<LevelAffliction> GetRunSaveData()
+        {
+            return GetSaveData().FindAll(entry => entry.ForRun);
+        }
+
+        /// <summary>
+        /// How many points <paramref name="percent"/>% of a stat costs: at least one, so a low stat
+        /// still pays, and never more than the stat itself.
+        /// </summary>
+        public static int PercentLoss(int stat, float percent)
+        {
+            if (stat <= 0 || percent <= 0f)
+            {
+                return 0;
+            }
+            return UnityEngine.Mathf.Clamp(UnityEngine.Mathf.RoundToInt(stat * percent / 100f), 1, stat);
         }
 
         /// <summary>Replaces the contents from a dungeon save.</summary>
@@ -159,7 +178,7 @@ namespace Assets.Scripts.Rooms.Events
             {
                 if (entry != null)
                 {
-                    Add(entry.HeroKey, entry.Buff, entry.Amount);
+                    Add(entry.HeroKey, entry.Buff, entry.Amount, entry.ForRun);
                 }
             }
         }

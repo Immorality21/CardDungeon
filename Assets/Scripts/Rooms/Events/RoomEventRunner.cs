@@ -9,6 +9,7 @@ using Assets.Scripts.Heroes;
 using Assets.Scripts.Items;
 using Assets.Scripts.Progression;
 using ImmoralityGaming.Fundamentals;
+using Assets.Scripts.UnitStats;
 using UnityEngine;
 using Assets.Scripts.Events;
 
@@ -56,7 +57,9 @@ namespace Assets.Scripts.Rooms.Events
 
             ApplyEffects(outcome, party, actingHero, afflictions, report);
             ApplyGold(outcome, report);
+            ApplyRunStatLoss(outcome, actingHero, afflictions, report);
             ApplyLoot(outcome, report);
+            ApplyGuaranteedLoot(outcome, room, report);
             ApplyConsumableLoss(outcome, report);
             ApplyAwakenedEnemies(outcome, room, report);
             ApplyJoin(outcome, report);
@@ -299,6 +302,81 @@ namespace Assets.Scripts.Rooms.Events
             {
                 report.Lines.Add(Loc.Get("event-text.report.found-nothing"));
             }
+        }
+
+        /// <summary>
+        /// The one item an outcome always pays. Behind a fight it waits on the room
+        /// (<see cref="Room.PendingEventLoot"/>); a mandatory side room hands it over when it is built.
+        /// </summary>
+        private void ApplyGuaranteedLoot(RoomEventOutcome outcome, Room room, RoomEventOutcomeReport report)
+        {
+            if (outcome.LootOneOf == null || outcome.LootOneOf.Count == 0 || room == null)
+            {
+                return;
+            }
+            if (outcome.SideRoom != null && outcome.SideRoom.IsSet && outcome.SideRoom.Mandatory)
+            {
+                return;
+            }
+            if (outcome.AwakenedEnemies != null && outcome.AwakenedEnemies.Count > 0)
+            {
+                room.PendingEventLoot = outcome.LootOneOf;
+                return;
+            }
+
+            var item = GrantOneOf(outcome.LootOneOf);
+            room.EventLootClaimed = true;
+            if (item != null)
+            {
+                report.Lines.Add(Loc.Format("event-text.report.found", ("item", item.DisplayName)));
+            }
+        }
+
+        /// <summary>Hands over one item of <paramref name="items"/>, or null when there is none to give.</summary>
+        public static ItemSO GrantOneOf(List<ItemSO> items)
+        {
+            if (items == null || items.Count == 0 || !InventoryManager.HasInstance)
+            {
+                return null;
+            }
+            var item = items[Random.Range(0, items.Count)];
+            if (item != null)
+            {
+                InventoryManager.Instance.AddItem(item, 1, EconomySource.RoomEvent);
+            }
+            return item;
+        }
+
+        /// <summary>
+        /// A share of the acting hero's stat, gone for the run. It is worked out once, from the stat as
+        /// it stands, and held as a flat loss like any affliction.
+        /// </summary>
+        private void ApplyRunStatLoss(
+            RoomEventOutcome outcome,
+            Hero actingHero,
+            LevelAfflictionTracker afflictions,
+            RoomEventOutcomeReport report)
+        {
+            if (outcome.RunStatLoss == StatType.None || actingHero == null || afflictions == null
+                || !System.Enum.TryParse(outcome.RunStatLoss.ToString(), out BuffType buff))
+            {
+                return;
+            }
+
+            int loss = LevelAfflictionTracker.PercentLoss(
+                actingHero.GetEffectiveStat(outcome.RunStatLoss), outcome.RunStatLossPercent);
+            if (loss <= 0)
+            {
+                return;
+            }
+
+            afflictions.Add(actingHero.HeroKey, buff, -loss, forRun: true);
+            if (DungeonManager.HasInstance)
+            {
+                DungeonManager.Instance.SaveRunAfflictions();
+            }
+            report.Lines.Add(Loc.Format("event-text.affliction.run",
+                ("hero", actingHero.DisplayName), ("stat", StatCatalog.DisplayName(outcome.RunStatLoss)), ("amount", loss)));
         }
 
         private void ApplyConsumableLoss(RoomEventOutcome outcome, RoomEventOutcomeReport report)

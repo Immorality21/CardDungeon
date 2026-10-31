@@ -49,14 +49,20 @@ namespace Assets.Scripts.Rooms.Events
         [Tooltip("The stat every StatCheck option on this event is resolved against.")]
         public StatType GoverningStat = StatType.Luck;
 
-        [Header("Turning up at all")]
-        [Range(0f, 100f)]
-        [Tooltip("Percent chance this event is placed in an eligible room. 100 = always (a treasury " +
-                 "hoard); 0 = switched off. Defaults to 100 so a newly authored event is visible " +
-                 "immediately and gets tuned DOWN - a rarity default would look like a broken event.")]
-        public float SpawnChancePercent = 100f;
+        [Header("In the room")]
+        [Tooltip("The object drawn in the room, seen from the moment the room is. It stands on a tile, " +
+                 "is solid, and is used by walking up to it once the room is clear.")]
+        public Sprite WorldSprite;
 
-        [Tooltip("Optional: a party stat that raises the spawn chance, read as the party's best at " +
+        [Tooltip("What that object looks like once the event is resolved.")]
+        public Sprite SpentSprite;
+
+        [Header("Turning up at all")]
+        [Tooltip("Set aside until it is reworked: no level lists it, and the balance analyzer does " +
+                 "not report that as a mistake.")]
+        public bool Parked;
+
+        [Tooltip("Optional: a party stat that raises the level's chance, read as the party's best at " +
                  "it. Luck for blind finds, Intelligence for things only a scholar would notice.")]
         public StatType SpawnModifierStat = StatType.None;
 

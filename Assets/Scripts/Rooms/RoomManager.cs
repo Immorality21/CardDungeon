@@ -14,6 +14,11 @@ namespace Assets.Scripts.Rooms
         private LevelDefinitionSO _currentLevel;
 
         public List<Room> SpawnedRooms { get; private set; } = new List<Room>();
+
+        // Clear of the floor's last room, and well inside the backdrop's 40-unit margin.
+        private const int SideRoomGap = 20;
+
+        private List<Room> _sideRooms = new List<Room>();
         private List<Door> _spawnedDoors = new List<Door>();
         private HashSet<Vector2Int> _occupiedTiles = new HashSet<Vector2Int>();
         private List<(RoomNode, RoomNode)> _placementPairs = new List<(RoomNode, RoomNode)>();
@@ -42,6 +47,7 @@ namespace Assets.Scripts.Rooms
             _biome = ResolveBiome(biome, level);
 
             SpawnedRooms.DestroyAndClear(true);
+            _sideRooms.DestroyAndClear(true);
             _spawnedDoors.DestroyAndClear(true);
             _occupiedTiles.Clear();
 
@@ -110,6 +116,7 @@ namespace Assets.Scripts.Rooms
             _biome = ResolveBiome(biome, level);
 
             SpawnedRooms.DestroyAndClear(true);
+            _sideRooms.DestroyAndClear(true);
             _spawnedDoors.DestroyAndClear(true);
             _occupiedTiles.Clear();
 
@@ -499,6 +506,29 @@ namespace Assets.Scripts.Rooms
                 }
             }
             return true;
+        }
+
+        /// <summary>
+        /// Builds a room off to the side of the floor, past its last room but still over the backdrop,
+        /// with no doors and no place in <see cref="SpawnedRooms"/>: the map, the save and the floor's
+        /// counts never see it. Hidden until the party is brought there.
+        /// </summary>
+        public Room BuildSideRoom(RoomSO template, int decorSeed)
+        {
+            int x = SideRoomGap;
+            foreach (var room in SpawnedRooms)
+            {
+                x = Mathf.Max(x, room.GridPosition.x + room.RoomSO.Width + SideRoomGap);
+            }
+            x += _sideRooms.Count * SideRoomGap;
+            int y = SpawnedRooms.Count > 0 ? SpawnedRooms[0].GridPosition.y : 0;
+
+            var side = PlaceRoom(new RoomNode { roomData = template }, new Vector2Int(x, y), transform);
+            SpawnedRooms.Remove(side);
+            _sideRooms.Add(side);
+            new RoomTilePainter(_biome).Paint(new List<Room> { side }, decorSeed);
+            side.Hide();
+            return side;
         }
 
         private Room PlaceRoom(RoomNode roomNode, Vector2Int startPos, Transform parent)

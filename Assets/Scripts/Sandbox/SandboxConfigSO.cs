@@ -42,6 +42,9 @@ namespace Assets.Scripts.Sandbox
         [Tooltip("The level's Difficulty dial for these enemies (1 = the template exactly). Scales MaxHealth and Strength.")]
         [Min(0.1f)] public float EnemyDifficulty = 1f;
 
+        [Tooltip("A room event to stand in the encounter room, to try it without waiting for its roll.")]
+        public Rooms.Events.RoomEventSO RoomEvent;
+
         [Tooltip("Remove every other enemy from the floor, so the encounter is the only fight.")]
         public bool ClearOtherRooms = true;
 

@@ -599,7 +599,8 @@ namespace Assets.Scripts.Balance
             }
 
             level.Events = RoomEventModel.BuildForLevel(
-                level.Rooms, party, rules, level.Index, factor, level.Tuning);
+                level.Rooms, entry.LevelTemplate != null ? entry.LevelTemplate.RoomEvents : null,
+                party, rules, level.Index, factor, level.Tuning);
         }
 
         private static void ReplaceExitRoomWithBoss(LevelCurve level, RunLevelEntry entry, PartyBaseline party, BalanceRulesSO rules)

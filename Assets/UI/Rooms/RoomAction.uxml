@@ -18,7 +18,6 @@
 
         <!-- Non-combat room actions -->
         <ui:VisualElement name="main-bar" class="cd-bar cd-dock-bottom cd-hidden">
-            <ui:Button name="action-btn" text="#ui.room.action-btn" class="cd-cmd" />
             <ui:Button name="search-btn" text="#ui.room.search-btn" class="cd-cmd cd-hidden" />
             <ui:Button name="rest-btn" text="#ui.room.rest-btn" class="cd-cmd cd-hidden" />
             <ui:Button name="descend-btn" text="#ui.room.descend-btn" class="cd-cmd cd-hidden" />

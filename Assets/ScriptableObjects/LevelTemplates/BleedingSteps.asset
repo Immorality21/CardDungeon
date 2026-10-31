@@ -23,10 +23,19 @@ MonoBehaviour:
   RoomsToGenerate: 6
   ChainBias: 0.6
   MomentumBias: 0.5
-  WallColor: {r: 0.3, g: 0.07, b: 0.08, a: 1}
-  WallTexture: {fileID: 2800000, guid: ff0bc926681e4304e8e378a75971a2bf, type: 3}
   TreasureRooms: 1
   RestRooms: 0
+  RoomEvents:
+  - Event: {fileID: 11400000, guid: 74a1ecb492a569d43acc1a5590a217a6, type: 2}
+    ChancePercent: 1
+  - Event: {fileID: 11400000, guid: 84e3b7ae60edfa24ba38752902528829, type: 2}
+    ChancePercent: 3
+  - Event: {fileID: 11400000, guid: 71edccd7c6a72f34ea28cc057581087d, type: 2}
+    ChancePercent: 6
+  - Event: {fileID: 11400000, guid: f2121a36ec864bc4cb5398559dd291a2, type: 2}
+    ChancePercent: 12
+  - Event: {fileID: 11400000, guid: 35d045d1bb57d5b498685ea10f53fea8, type: 2}
+    ChancePercent: 20
   MaterialTable:
   - Item: {fileID: 11400000, guid: c0de5211aa090000000000000000ab09, type: 2}
     Chance: 0.6

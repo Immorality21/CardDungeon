@@ -1,0 +1,74 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69b3836c2cb69fc4b815c96944749c08, type: 3}
+  m_Name: BonewroughtGreaves
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Items.ItemSO
+  Key: BonewroughtGreaves
+  Icon: {fileID: 21300000, guid: 4ddc70e9915db024f9803db976e01e68, type: 3}
+  Rarity: 2
+  ItemLevel: 4
+  FindChanceScale: 0
+  Category: 0
+  SlotType: 4
+  Bonuses:
+  - StatType: 2
+    BonusType: 0
+    Value: 3
+  - StatType: 3
+    BonusType: 0
+    Value: 4
+  - StatType: 7
+    BonusType: 0
+    Value: 14
+  Resistances:
+  - DamageType: 1
+    Percent: 25
+  Triggers:
+  - LabelKey: 
+    TextKey: item.ember-greaves.reaction-1.text
+    When: 4
+    Chance: 0.2
+    Limit: 0
+    FilterDamageType: 0
+    DamageType: 0
+    IgnoreOverTime: 1
+    Target: 1
+    Effects:
+    - EffectType: 3
+      Power: 2
+      PowerMode: 1
+      ScalingStat: 0
+      DamageType: 0
+      BuffType: 15
+      Duration: 2
+      UnlockLevel: 0
+      ApplyChance: 100
+      BonusVsTrait: 0
+      BonusPercent: 0
+      BonusVsStatus: 0
+      BonusPerDebuff: 0
+      DrainToParty: 0
+  Milestones: []
+  Set: {fileID: 11400000, guid: cb946548aa77c7349846c96c49fa8b20, type: 2}
+  CraftOnly: 0
+  CraftResult: {fileID: 0}
+  CraftBase: {fileID: 0}
+  CraftMaterials: []
+  CraftGold: 0
+  KnownWithForge: 0
+  ConsumableEffect: 0
+  ConsumableAmount: 0
+  ConsumableCharges: 0
+  ConsumablePercent: 0
+  MaxStack: 99
+  RevisitFear: -1
+  RevisitRun: 

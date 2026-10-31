@@ -17,13 +17,17 @@ namespace Assets.Scripts.Rooms.Events
         /// <summary>Signed magnitude - negative is a debuff, exactly as the executors pass it.</summary>
         public int Amount;
 
+        /// <summary>Carried to the run's next floors rather than ending with this one.</summary>
+        public bool ForRun;
+
         public LevelAffliction() { }
 
-        public LevelAffliction(string heroKey, BuffType buff, int amount)
+        public LevelAffliction(string heroKey, BuffType buff, int amount, bool forRun = false)
         {
             HeroKey = heroKey;
             Buff = buff;
             Amount = amount;
+            ForRun = forRun;
         }
     }
 }

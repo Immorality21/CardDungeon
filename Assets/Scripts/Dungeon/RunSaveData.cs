@@ -29,6 +29,9 @@ namespace Assets.Scripts.Dungeon
         // Heroes who fell and stay down on the run's next floor; emptied by a visit to town (DownedCarry).
         public List<string> DownedHeroKeys = new List<string>();
 
+        // Room event losses that last the run; a floor's own afflictions live in the dungeon save.
+        public List<Rooms.Events.LevelAffliction> RunAfflictions = new List<Rooms.Events.LevelAffliction>();
+
         public string GetFileName()
         {
             return "Run";
