@@ -5,8 +5,9 @@
 > `Assets/Scripts/Rooms/CLAUDE.md` (generation, the room bar, the map, click-to-walk) ·
 > `docs/PIXEL_ART.md` (sizes, the PixelLab workflow).
 >
-> **Status (2026-10-31): phases 0, 1 and 7 are done and the owner signed off the look. Next is phase 2;
-> start at *Phase 2: where to start*. The new look still exists only in the sandbox.** From the owner's playtest note of 2026-10-29:
+> **Status (2026-10-31): phases 0, 1, 2 and 7 are done: every floor of every run is drawn with a biome and the old
+> look is gone. The owner saw the Crypt in the sandbox and approved it; the four other biomes are still to be
+> played. Next is phase 3.** From the owner's playtest note of 2026-10-29:
 > *"Dungeon rooms need more flair/artwork. Room events should also be somewhat visible from art
 > instead of just a button. Also more variations, maybe even rethink how we generate these."*
 
@@ -111,7 +112,7 @@ Each phase leaves the game playable and is checked in play before the next one s
 |---|---|---|---|
 | **0** | ✅ **Decided 2026-10-30** | C; same room count; walking later; hidden rooms optional, no retry; Elites last and a surprise | see above |
 | **1** | ✅ **Spike built 2026-10-30, signed off by the owner** — one biome, one floor | Tilemap rendering of floors and walls with a one-tile north wall face, one biome's tiles (PixelLab), props on free tiles, in the sandbox. Screenshots beside the two FF references. No gameplay change, door-to-door movement kept | proves the look and the tile pipeline before anything is converted; cheap to throw away |
-| **2** | **Biomes and props everywhere** | a `BiomeSO` per area (floors, wall faces, door art, edge texture, weighted props, lights), one per run family (crypt, ember forge, swamp, archive, vault), set on every level; manual layouts re-placed for the wall row; the old tint retires. Rule Tiles turned out unnecessary (`RoomTileOps` picks the pieces). See *Phase 2: where to start* | the visual upgrade on every floor at once, still no new mechanics |
+| **2** | ✅ **Built 2026-10-31** - **Biomes and props everywhere** | a `BiomeSO` per area (floors, wall faces, door art, edge texture, weighted props, lights), one per run family (crypt, ember forge, swamp, archive, vault), set on every level; manual layouts re-placed for the wall row; the old tint retires. Rule Tiles turned out unnecessary (`RoomTileOps` picks the pieces). See *Phase 2: where to start* | the visual upgrade on every floor at once, still no new mechanics |
 | **3** | **Events and kinds you can see** | each `RoomEventSO` gets a world sprite (and a spent one), placed on entry and visible before the fight, clicked once the room is clear (the button stays for the keyboard); a new kind **Shrine** (a refuge with a price) | content the new rooms can show off; independent of movement |
 | **4** | **Authored room shapes** | templates as painted tilemaps with door sockets and spots (option C); a socket-matching generator; pillars, L-shapes, carpets, alcoves; enemies, markers and props placed on the walkable mask | needs 1-2's pipeline |
 | **5** | **Hidden rooms** | the generator adds secret rooms behind a **locked door**, always a side room and **never on the path to the stairs**; a new event outcome **Unlock** opens it ("try to pick the lock": success opens it, failure leaves it shut **for good**); the map and the frontier count do not show it until it is open; it holds a cache or a captive | a door state plus one outcome type; easiest once rooms and doors are tiles |
@@ -122,13 +123,16 @@ Each phase leaves the game playable and is checked in play before the next one s
 **Backlog, later (owner):** more room events, and a pool of events per area so each region has its
 own. Not part of this plan's phases.
 
+**Post-demo, very late (owner, 2026-10-31):** biome lights: a light mood per biome, torches that glow. Today
+the dungeon has one global light plus the party's.
+
 ## Phase 1: what the spike found (2026-10-30)
 
 **What was built.** `BiomeSO` (floors, wall faces, an archway, a thin-edge texture, weighted floor
 and wall props), the pure `RoomTileOps` (which piece, variant and prop goes in each cell; 10 tests in
 `RoomTileOpsTests`) and `RoomTilePainter` (one Grid + Tilemaps per room, so `Room.Hide` still works -
 it now switches every `Renderer`, not only sprites). A floor is drawn this way only when a biome is
-set: `LevelDefinitionSO.Biome` (**no level sets one yet**) or the sandbox's `SandboxConfigSO.Biome`
+set: `LevelDefinitionSO.Biome` or the sandbox's `SandboxConfigSO.Biome`
 (`DungeonManager.BiomeOverride`). The one biome is `ScriptableObjects/Biomes/Crypt.asset`, seen
 through `Sandbox/RoomSpike.asset` (Bone Galleries, seed 21). Every campaign floor is unchanged:
 with no biome the wall-row count is 0 and generation is byte-for-byte the old path (suite 1,706 / 0).
@@ -143,9 +147,7 @@ the map's room boxes and click-to-walk use the footprint. Decoration draws on
 every prop). Occupants keep off floor-prop tiles while the room has other free tiles (`Room.PropCells`).
 
 **Findings to decide on:**
-- **Enemies are drawn at half a tile on the walking view** (`localScale 0.5`) while the party is a
-  full tile. Against real stone they read as specks; in FF a foe on the map is the size of a hero.
-  Growing them is a one-line change with layout consequences (five foes in a 2-row room) - an owner call.
+- ~~**Enemies are drawn at half a tile on the walking view.**~~ Resolved 2026-10-31: a full tile, see phase 2.
 - ~~**The door sprite fights the archway.**~~ Resolved with tile walking (below): on a biome floor
   the door keeps only its collider, and the gap or archway in the tilemap is the door.
 - **Décor must be quieter than units.** The first pass had a skull pile brighter and bigger than the
@@ -153,8 +155,7 @@ every prop). Occupants keep off floor-prop tiles while the room has other free t
   removed. Rule for phase 2: the floor is the darkest, quietest thing in the room.
 - **Room size: no growth needed yet** beyond the wall row (the open question below). A 4x3 floor
   with a face reads as a room; 2-row floors are the tightest and should be watched in play.
-- **Manual layouts keep the old look**: their authored grid positions assume no wall row, so they
-  need re-placing (or a converter) in phase 2 - the tutorial's floors among them.
+- ~~**Manual layouts keep the old look.**~~ Resolved 2026-10-31: `ManualLayoutOps`, see phase 2.
 - Not done in the spike: lights, a door arch on the side walls, per-room shapes, any campaign level.
 
 ## Tile walking, moved ahead of phase 2 (owner, 2026-10-30)
@@ -215,32 +216,67 @@ At rest the party keeps the way it faced; facing the viewer is the idle loop.
 
 ## Phase 2: where to start (written 2026-10-31)
 
-**What exists:** `BiomeSO`, `RoomTileOps`, `RoomTilePainter`, tile walking, swinging doors and walk cycles
-all work, on any generated floor that has a biome. `Biomes/Crypt.asset` is the one biome, and only
-`Sandbox/RoomSpike.asset` uses it (`SandboxConfigSO.Biome`). **No level sets `LevelDefinitionSO.Biome`.**
-Walking, doors, solid contents and walk cycles are **already live on every campaign floor**, in the old
-look.
+**Decided by the owner (2026-10-31):**
+1. **Foes are a full tile on the walking view**, the size of a hero, tried in the sandbox with five foes in
+   a 5x2 room: packed but readable. `Resources/Enemy.prefab` is scale 1 and `CombatStage.EnemyStageScale`
+   lost its `2f`, which only undid the old 0.5, so battle sizes are unchanged. Bosses and the Bone Golem
+   stand about 1.7 tiles tall on the floor. (`Prefabs/EnemyPrefab.prefab` is an unused duplicate; nothing
+   loads it.)
+2. **No lights in a biome for now.** Biome light moods and torch glow are post-demo, very late (see *Phases*).
 
-**Decide first, with the owner:**
-1. **Enemy size on the walking view** (half a tile, `localScale 0.5`, against a full-tile hero). Try full
-   size in the sandbox: it is one line, but five foes crowd a two-row room. It affects every biome.
-2. **Does a biome's floor need lights** (the plan lists them; the crypt has none)?
+**Done (2026-10-31):**
+1. **The Crypt is on 12 levels:** the Catacombs' three, the Threshold's four and the Blood Stair's five. The
+   Threshold and the Blood Stair are a placeholder choice until the owner has seen them. `BiomeOverride` stays
+   for the sandbox, and now reaches manual floors too.
+2. **Saves are stamped:** `DungeonSaveData.BiomeKey`, compared by `DungeonSaveCompatibility`
+   (`DifferentBiome`). A save from before a level had a biome has no stamp and restarts that floor, checked in
+   play. **Open doors stay unsaved:** a resumed floor shows them shut and they swing once more, which costs
+   nothing.
+3. **Manual layouts convert at build time:** `ManualLayoutOps.WithWallRows` walks the doors out from the start
+   room and adds the wall row past each north or south door. Assets stay floors-only, so a level with no biome
+   and the layout editor are unaffected. `EveryManualLayout_WithAWallRow_StillFits` guards all seven; only
+   the Blood Stair's first four floors actually move. The tutorial's first floor was loaded as a real run,
+   walked, resumed, and rejected from a stale save.
 
-**The work, in order:**
-1. **Set the Crypt on the Catacombs levels first**, and play them: the first real floors with the wall
-   row. `BiomeOverride` stays for the sandbox.
-2. **Saves:** a biome changes a floor's layout, because of the wall row, so a mid-floor save from before
-   it reloads onto different rooms (`DungeonSaveCompatibility` compares the room count, which does not
-   change). Stamp or invalidate it. Open doors are not saved either: decide if that matters.
-3. **Manual layouts** (`BuildManualDungeon` forces no biome): their positions assume no wall row, so re-place
-   them or add a converter. The tutorial's floors are among them (`docs/TUTORIAL.md`).
-4. **The other biomes:** one art pass each, by the recipe in `docs/PIXEL_ART.md` (*Dungeon tiles and
-   props*): tiles, props, side door, arch door, swing frames, shade. About 50 generations a biome.
-5. **Retire** the tint and the old door sprite once nothing uses them, and rerun the balance suite.
+**Measured:** the wall row does not change room counts. Over 150 seeds each on six levels, 31 floors came up
+short of `RoomsToGenerate` without it and 32 with it, and all 22 generated levels stayed connected over 40 seeds
+on the Crypt. **Already true before this work:** `TryPlaceChild` skips a room it cannot place, so some floors
+lose a room or two on any look (7% of BoneGalleries floors, about 20% of The Gilded Vault's), which quietly
+bends decision 2. Not fixed here.
+
+4. **The other biomes (owner: "looks good, continue", on the Crypt):** Ember (Ashen Deep), Swamp (Drowned March,
+   Seeping Cistern, Drowned Chapel), Archive (Sealed Archive) and Vault (Hollow Vault, and The Warrens, which is
+   a thieves' den with the Gilded Hoarder at the bottom: a call made here, not the owner's). 30 generations each,
+   not 50: only tiles, floor props and wall props are generated; doors are the Crypt's recoloured
+   (`tools/biomes/build_biome.py`), so every biome's doors swing alike and share one silhouette.
+5. **The old look is retired:** the flagstone branch, the tint, `WallGenerator.PlaceWalls`, the door sprite and
+   the wall colour and texture fields. `WallGenerator` stays for the thin walls' band sprites, and `RoomSO.Color`
+   only colours the layout editor's boxes. A level with no biome now throws, naming the level, and
+   `BiomeAssetTests` fails first. Suite 1,735 / 0, balance included; 183 floors built across every level of every
+   run, all connected. **Left on disk, unused:** `Floor.prefab`, `floor-tile.png`, the old door sprite and
+   `Prefabs/EnemyPrefab.prefab`.
+
+**To watch in play:** Archive's floor mixes parquet patterns and is the busiest of the five. Walking, a fight and
+saves were scripted on the Crypt and the Swamp only; Ember, Archive and Vault were built and looked at, not played.
 
 **Known leftovers from the spike:** the stone cap on an open side door reads a bit like rubble; the arch
 door was scaled up from 10x15; wall props carry a small mount plate; the Warlock's walk frames keep the
 big-head style, pending the owner (`docs/PIXEL_ART.md`).
+
+## Cleanup once everything is migrated: no more room bar (owner, 2026-10-31)
+
+Every room action is triggered by **interacting with its object**, and the room bar goes. *"They should
+be triggered from interacting with all the objects (can only be done when everything has been
+migrated)."*
+
+**It waits for:** phase 2 (every floor drawn, manual layouts included) and phase 3 (every room event
+has an object; events are the one action with nothing to walk up to today).
+
+**Then:** remove the bar's Action / Search / Rest / Descend buttons and the Tab cursor over them
+(`ShowMainBar`, `_barNav`, `HasRoomActions`), and the Tab part of the walking hint. `UseFacing` and the
+click on an object become the only way in, keeping the prompts that ask first (a refuge, the stairs).
+Check what still reads the bar: the tutorial's guidance (`docs/TUTORIAL.md`), and the camera clearing it
+(`GetCameraSafePanels`).
 
 ## Open questions
 
@@ -255,4 +291,3 @@ big-head style, pending the owner (`docs/PIXEL_ART.md`).
   pays and costs; rerun the regression suite after phases 3, 5, 6 and 8.
 - **Scripted checks that click doors** must wait: since phase 7 a door click is a walk
   (`docs/GAMEPLAY_VALIDATION.md`), and the sandbox's `SendMessage("OnMouseDown")` walk-in is untested with it.
-- **The tutorial's manual floors** (`ManualLayoutSO`) must be converted with the rest.

@@ -13,6 +13,7 @@ namespace Assets.Scripts.Dungeon
         private FileHandler _fileHandler;
         private int _seed;
         private string _levelKey;
+        private string _biomeKey;
         private List<Room> _rooms;
         private int _startRoomIndex;
 
@@ -22,10 +23,11 @@ namespace Assets.Scripts.Dungeon
             _fileHandler = new FileHandler();
         }
 
-        public void Initialize(int seed, string levelKey, List<Room> rooms, int startRoomIndex)
+        public void Initialize(int seed, string levelKey, string biomeKey, List<Room> rooms, int startRoomIndex)
         {
             _seed = seed;
             _levelKey = levelKey;
+            _biomeKey = biomeKey;
             _rooms = rooms;
             _startRoomIndex = startRoomIndex;
         }
@@ -57,6 +59,7 @@ namespace Assets.Scripts.Dungeon
                 StartRoomIndex = _startRoomIndex,
                 Seed = _seed,
                 LevelKey = _levelKey,
+                BiomeKey = _biomeKey,
                 // A restart puts the party back at the door, so that is where "current" is.
                 CurrentRoomIndex = restartAtEntrance ? _startRoomIndex : currentRoom.RoomIndex
             };

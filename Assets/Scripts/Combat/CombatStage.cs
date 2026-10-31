@@ -192,13 +192,12 @@ namespace Assets.Scripts.Combat
             }
         }
 
-        /// <summary>Enemies double their out-of-combat scale on the stage, times their CombatScale.</summary>
+        /// <summary>An enemy keeps its out-of-combat size on the stage, times its CombatScale.</summary>
         private static float EnemyStageScale(ICombatUnit unit)
         {
-            float combatScale = unit is Enemy enemy && enemy.Definition != null
+            return unit is Enemy enemy && enemy.Definition != null
                 ? enemy.Definition.CombatScale
                 : 1f;
-            return 2f * combatScale;
         }
 
         /// <summary>Half the width an enemy will have once placed — read before it is rescaled.</summary>

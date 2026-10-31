@@ -1,0 +1,126 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1656e8375cd51e419be64ade96f31dd, type: 3}
+  m_Name: Vault
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Rooms.BiomeSO
+  Key: vault
+  Floors:
+  - {fileID: 21300000, guid: 3db1bf02d61105949b1cb77cb684aa39, type: 3}
+  - {fileID: 21300000, guid: 2c53b23fbb8d80b43a3471fa974b62a2, type: 3}
+  - {fileID: 21300000, guid: 5d0749caa2067554495994813c616b74, type: 3}
+  - {fileID: 21300000, guid: 56c5b32ec6c832d4a884193be289d7aa, type: 3}
+  FloorVariantChance: 0.3
+  WallFaces:
+  - {fileID: 21300000, guid: 3213ff4397f8adb4bb6ce55dc2502558, type: 3}
+  - {fileID: 21300000, guid: 8fdcc9dc4deaea44ba892e44a1dd3586, type: 3}
+  - {fileID: 21300000, guid: 4976e6e3c9b7acb4c9c3d14777e22ede, type: 3}
+  - {fileID: 21300000, guid: f2c8fdfcdced7af4a91597312a933c4b, type: 3}
+  - {fileID: 21300000, guid: ffd388715e6d60848846e655593a35f0, type: 3}
+  WallFaceVariantChance: 0.3
+  Archway: {fileID: 21300000, guid: 527cdc00d0b1c2e42b7b58cc6ad6623f, type: 3}
+  DoorSide: {fileID: 21300000, guid: 30aee8e4b59095e418312f5092b99ca1, type: 3}
+  DoorSideOpening:
+  - {fileID: 21300000, guid: 7cc1eb455b81a41449e54a8659c189df, type: 3}
+  - {fileID: 21300000, guid: 8546bd590c9404442a2f073cdfb8a40e, type: 3}
+  - {fileID: 21300000, guid: 72d3bdcac0f655946bdb8a1c837c6db3, type: 3}
+  DoorArch: {fileID: 21300000, guid: f7fdaccc226e0f04784202ffac66a3dd, type: 3}
+  DoorArchOpeningNorth:
+  - {fileID: 21300000, guid: a6ded127d6458d0409d4a46b1503fe97, type: 3}
+  - {fileID: 21300000, guid: 92b01dc3268cd8245bc3ce3efe750279, type: 3}
+  - {fileID: 21300000, guid: d007e46dd2b6fa24db20c4aeed6bd571, type: 3}
+  DoorArchOpeningSouth:
+  - {fileID: 21300000, guid: 1945b70e827ea1f4b9a3114361639c1c, type: 3}
+  - {fileID: 21300000, guid: bfb35b67a1b66134b8ba2da836e4b3c4, type: 3}
+  - {fileID: 21300000, guid: ace1e76a7693f734a9ee2530b2f3a840, type: 3}
+  ShadeEast: {fileID: 21300000, guid: ddfa4736dedd70944a4944b9a56ba009, type: 3}
+  ShadeWest: {fileID: 21300000, guid: 6b63b1d6ae16b764bbc58d4f82b98caa, type: 3}
+  ShadeSouth: {fileID: 21300000, guid: 2bf48ef5694d71b47ac972337ea856cb, type: 3}
+  EdgeTexture: {fileID: 2800000, guid: 563b4d2fbd827e840af528291002fd30, type: 3}
+  EdgeColor: {r: 1, g: 1, b: 1, a: 1}
+  Props:
+  - Sprite: {fileID: 21300000, guid: ced4f73d985619c4b8a0465df530b9b8, type: 3}
+    Place: 0
+    Weight: 1
+  - Sprite: {fileID: 21300000, guid: 578c22aec19c90c439da72a5447c62e0, type: 3}
+    Place: 0
+    Weight: 1
+  - Sprite: {fileID: 21300000, guid: 1a46c079bec585a49b65edea90dc0933, type: 3}
+    Place: 0
+    Weight: 1
+  - Sprite: {fileID: 21300000, guid: 10a9bc633abb6274680ae3160217e7f7, type: 3}
+    Place: 0
+    Weight: 1
+  - Sprite: {fileID: 21300000, guid: 874ef3e209f68254ca298b393ee0ed27, type: 3}
+    Place: 0
+    Weight: 1
+  - Sprite: {fileID: 21300000, guid: 65d74d1b1a5ba024bbdd5b17079aca86, type: 3}
+    Place: 0
+    Weight: 1
+  - Sprite: {fileID: 21300000, guid: fb83d698a7cd5c34da92979f71802446, type: 3}
+    Place: 0
+    Weight: 1
+  - Sprite: {fileID: 21300000, guid: 5b10f794ee6a68240a04919b2d6a40dd, type: 3}
+    Place: 0
+    Weight: 1
+  - Sprite: {fileID: 21300000, guid: f3064d8d806f3b6439c6497746b5cf29, type: 3}
+    Place: 0
+    Weight: 1
+  - Sprite: {fileID: 21300000, guid: 804b8f6afedd9944680207f092e17060, type: 3}
+    Place: 0
+    Weight: 1
+  - Sprite: {fileID: 21300000, guid: 596701901c392c84786a19b1c9f9b4fd, type: 3}
+    Place: 0
+    Weight: 1
+  - Sprite: {fileID: 21300000, guid: 20179c53ab2d32347a61e7d05315c31d, type: 3}
+    Place: 0
+    Weight: 1
+  - Sprite: {fileID: 21300000, guid: 79084c686b16bf04aa11865a35f1e658, type: 3}
+    Place: 1
+    Weight: 1
+  - Sprite: {fileID: 21300000, guid: 83b06ecca25b9f941b78c1b7224a5e3f, type: 3}
+    Place: 1
+    Weight: 1
+  - Sprite: {fileID: 21300000, guid: 65dc27a3368cbb245b53b1423854a646, type: 3}
+    Place: 1
+    Weight: 1
+  - Sprite: {fileID: 21300000, guid: ae7129d503b1f884db5258dd2c50bbea, type: 3}
+    Place: 1
+    Weight: 1
+  - Sprite: {fileID: 21300000, guid: 891b9559578bdba4b83404ad0df74e6c, type: 3}
+    Place: 1
+    Weight: 1
+  - Sprite: {fileID: 21300000, guid: 97851cbcbbd272b4e86c0afebe87989c, type: 3}
+    Place: 1
+    Weight: 1
+  - Sprite: {fileID: 21300000, guid: 2851a6bb22818da4bb7fa5110d3356bc, type: 3}
+    Place: 1
+    Weight: 1
+  - Sprite: {fileID: 21300000, guid: 5afe8828f54413c43a8a6cb4e187f373, type: 3}
+    Place: 1
+    Weight: 1
+  - Sprite: {fileID: 21300000, guid: 80d468f1b18554a4c88f1f9de41e623e, type: 3}
+    Place: 1
+    Weight: 1
+  - Sprite: {fileID: 21300000, guid: 36108b1c528c3124eab8a64279353d77, type: 3}
+    Place: 1
+    Weight: 1
+  - Sprite: {fileID: 21300000, guid: 1b7a26b55533c8d4f9731a70a23f9d99, type: 3}
+    Place: 1
+    Weight: 1
+  - Sprite: {fileID: 21300000, guid: 2c37eeb9cfba9c04da83c1d277d78e0a, type: 3}
+    Place: 1
+    Weight: 1
+  - Sprite: {fileID: 21300000, guid: 8cfc147b324ac8d4183f3f9542552dec, type: 3}
+    Place: 1
+    Weight: 1
+  FloorPropChance: 0.1
+  WallPropChance: 0.3

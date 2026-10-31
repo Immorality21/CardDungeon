@@ -38,16 +38,17 @@ MonoBehaviour:
     Chance: 1
     MinQuantity: 1
     MaxQuantity: 1
+  RecipeTable:
+  - Item: {fileID: 11400000, guid: 2821f9005d394c5c9069c52a884ad13f, type: 2}
+    Chance: 0.4
+    MinQuantity: 1
+    MaxQuantity: 1
   CombatBackground: {fileID: 21300000, guid: a108f2f87beb42b5ad60f419e7e8284d, type: 3}
   MapBackdrop: {fileID: 21300000, guid: 4badd25672254d23a244105cbc936cd2, type: 3}
+  Biome: {fileID: 11400000, guid: 021279208925afc45a97b1b6f239aa7e, type: 2}
   ExplorationMusic: {fileID: 0}
   CombatMusic: {fileID: 0}
   ExitMarker: {fileID: 21300000, guid: eb61c34b5c4a4517a0c2dd1bb903084a, type: 3}
   Chests:
   - Closed: {fileID: 21300000, guid: 1075bfa40a2e4f7abc8cfdbec8b1edbc, type: 3}
     Open: {fileID: 21300000, guid: 3fe548a2508445a59d2d384edb157d4b, type: 3}
-  RecipeTable:
-  - Item: {fileID: 11400000, guid: 2821f9005d394c5c9069c52a884ad13f, type: 2}
-    Chance: 0.4
-    MinQuantity: 1
-    MaxQuantity: 1

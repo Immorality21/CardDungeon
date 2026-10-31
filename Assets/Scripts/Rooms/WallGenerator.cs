@@ -4,9 +4,8 @@ using UnityEngine;
 namespace Assets.Scripts.Rooms
 {
     /// <summary>
-    /// Generates wall overlay sprites at runtime and places them around room perimeters.
-    /// Uses a bitmask approach: Top=1, Right=2, Bottom=4, Left=8.
-    /// Walls are skipped on edges where doors exist.
+    /// Generates the thin wall sprites <see cref="RoomTilePainter"/> draws around a room, one per edge
+    /// mask: Top=1, Right=2, Bottom=4, Left=8.
     /// </summary>
     public class WallGenerator
     {
@@ -41,78 +40,6 @@ namespace Assets.Scripts.Rooms
         public Sprite SpriteFor(int mask)
         {
             return _wallSprites.TryGetValue(mask, out var sprite) ? sprite : null;
-        }
-
-        /// <summary>
-        /// Places walls around all rooms, skipping door edges.
-        /// Walls appear on any edge where the neighbor tile belongs to a different room or is empty.
-        /// Adjacent rooms each draw their own wall, giving a double-width wall between rooms.
-        /// </summary>
-        public void PlaceWalls(List<Room> rooms)
-        {
-            var tileOwner = BuildTileOwnerMap(rooms);
-
-            foreach (var room in rooms)
-            {
-                PlaceRoomWalls(room, tileOwner);
-            }
-        }
-
-        private void PlaceRoomWalls(Room room, Dictionary<Vector2Int, Room> tileOwner)
-        {
-            var origin = room.GridPosition;
-            var w = room.RoomSO.Width;
-            var h = room.RoomSO.Height;
-
-            for (int x = 0; x < w; x++)
-            {
-                for (int y = 0; y < h; y++)
-                {
-                    var tilePos = origin + new Vector2Int(x, y);
-                    int mask = 0;
-
-                    if (!IsSameRoom(tileOwner, tilePos + Vector2Int.up, room))
-                        mask |= Top;
-                    if (!IsSameRoom(tileOwner, tilePos + Vector2Int.right, room))
-                        mask |= Right;
-                    if (!IsSameRoom(tileOwner, tilePos + Vector2Int.down, room))
-                        mask |= Bottom;
-                    if (!IsSameRoom(tileOwner, tilePos + Vector2Int.left, room))
-                        mask |= Left;
-
-                    if (mask == 0) continue;
-
-                    var wallObj = new GameObject($"Wall_{tilePos.x}_{tilePos.y}");
-                    wallObj.transform.SetParent(room.transform, false);
-                    wallObj.transform.position = new Vector3(tilePos.x, tilePos.y, -0.5f);
-
-                    var sr = wallObj.AddComponent<SpriteRenderer>();
-                    sr.sprite = _wallSprites[mask];
-                    sr.sortingOrder = _sortingOrder;
-                }
-            }
-        }
-
-        private static bool IsSameRoom(Dictionary<Vector2Int, Room> tileOwner, Vector2Int pos, Room room)
-        {
-            return tileOwner.TryGetValue(pos, out var owner) && owner == room;
-        }
-
-        private static Dictionary<Vector2Int, Room> BuildTileOwnerMap(List<Room> rooms)
-        {
-            var map = new Dictionary<Vector2Int, Room>();
-            foreach (var room in rooms)
-            {
-                var origin = room.GridPosition;
-                for (int x = 0; x < room.RoomSO.Width; x++)
-                {
-                    for (int y = 0; y < room.RoomSO.Height; y++)
-                    {
-                        map[origin + new Vector2Int(x, y)] = room;
-                    }
-                }
-            }
-            return map;
         }
 
         private void GenerateSprites()

@@ -7,11 +7,8 @@ namespace Assets.Scripts.Rooms
     /// <summary>
     /// What a dungeon area is made of: its floor, its walls and the things lying about in it.
     /// A floor drawn with a biome is painted on Tilemaps by <see cref="RoomTilePainter"/> in the
-    /// SNES Final Fantasy style - the north wall a tile-tall face, the other walls thin stone tops -
-    /// instead of the tinted flagstone and the <see cref="WallGenerator"/> bands.
-    ///
-    /// <para><b>Phase 1 spike</b> (<c>docs/plans/DUNGEON_ROOMS.md</c>): only the sandbox sets one
-    /// (<c>SandboxConfigSO.Biome</c>), so no campaign floor changes look or layout yet.</para>
+    /// SNES Final Fantasy style - the north wall a tile-tall face, the other walls thin stone tops.
+    /// Every level has one (<c>LevelDefinitionSO.Biome</c>); see <c>docs/PIXEL_ART.md</c> for making one.
     /// </summary>
     [CreateAssetMenu(menuName = "SO/Biome")]
     public class BiomeSO : ScriptableObject

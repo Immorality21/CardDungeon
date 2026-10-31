@@ -202,7 +202,7 @@ passes. Full rationale: `docs/plans/COMBAT_DEPTH.md` §11.
   **relative to the boss's measured width** (`EscortGap` 0.4 from its edge), not at a fixed screen
   column, so a lone add stands beside the boss instead of floating mid-stage. The boss sits at 62%
   of the half-width, clear of the default background's right-hand pillar. Nearer ranks sort higher
-  (602/601/600) so they draw over a large boss. Enemies are scaled ×2 × **`EnemySO.CombatScale`**
+  (602/601/600) so they draw over a large boss. Enemies are scaled by **`EnemySO.CombatScale`**
   (1 by default; the Abyssal Warden is 1.8 ≈ 3 units tall). Five bodies is the design size —
   `BalanceRulesSO.MaxBodiesPerRoom`. It moves the existing
   unit Transforms rather than making new sprites, so `UnitHealthBar`, `CombatFeedback`,

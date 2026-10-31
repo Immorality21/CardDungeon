@@ -109,6 +109,27 @@ namespace Tests.EditMode
         }
 
         [Test]
+        public void SaveFromBeforeTheLevelHadABiome_IsRejected()
+        {
+            // The real case: same level, same room count, but the wall row moved every room.
+            var save = Save("BoneGalleries", roomCount: 6, currentRoom: 2);
+
+            Assert.AreEqual(DungeonSaveCompatibility.Reason.DifferentBiome,
+                DungeonSaveCompatibility.Check(save, "BoneGalleries", 6, "crypt"));
+            Assert.AreEqual("saved biome '', the level now uses 'crypt'",
+                DungeonSaveCompatibility.Describe(save, "BoneGalleries", 6, "crypt"));
+        }
+
+        [Test]
+        public void SameBiome_IsResumable()
+        {
+            var save = Save("BoneGalleries", roomCount: 6, currentRoom: 2);
+            save.BiomeKey = "crypt";
+
+            Assert.IsTrue(DungeonSaveCompatibility.IsCompatible(save, "BoneGalleries", 6, "crypt"));
+        }
+
+        [Test]
         public void NegativeCurrentRoom_IsRejected()
         {
             var save = Save("WeepingCauseway", roomCount: 6, currentRoom: -1);

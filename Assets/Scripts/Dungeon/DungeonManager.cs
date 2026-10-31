@@ -122,7 +122,7 @@ namespace Assets.Scripts.Dungeon
         /// Ignored when resuming a saved dungeon.</summary>
         public static int? SeedOverride;
 
-        /// <summary>Tooling hand-off (the sandbox): draws generated floors with this biome instead
+        /// <summary>Tooling hand-off (the sandbox): draws every floor with this biome instead
         /// of the level's own. Null in normal play.</summary>
         public static BiomeSO BiomeOverride;
 
@@ -256,7 +256,7 @@ namespace Assets.Scripts.Dungeon
             }
 
             // Build dungeon from manual layout
-            var rooms = _roomManager.BuildManualDungeon(layout, _level);
+            var rooms = _roomManager.BuildManualDungeon(layout, _level, seed, BiomeOverride);
 
             // Assign stable room indices
             for (int i = 0; i < rooms.Count; i++)
@@ -292,7 +292,7 @@ namespace Assets.Scripts.Dungeon
                 }
             }
 
-            if (saveData != null && DungeonSaveCompatibility.IsCompatible(saveData, LevelKeyForSave(), rooms.Count))
+            if (saveData != null && DungeonSaveCompatibility.IsCompatible(saveData, LevelKeyForSave(), rooms.Count, _roomManager.BiomeKey))
             {
                 RestoreSavedState(saveData, rooms);
             }
@@ -306,7 +306,7 @@ namespace Assets.Scripts.Dungeon
                     // the run continues and only this floor's progress is lost.
                     Debug.LogWarning(
                         $"Dungeon save for seed {saveData.Seed} no longer matches the layout "
-                        + $"'{LevelKeyForSave()}' generates ({DungeonSaveCompatibility.Describe(saveData, LevelKeyForSave(), rooms.Count)}). "
+                        + $"'{LevelKeyForSave()}' generates ({DungeonSaveCompatibility.Describe(saveData, LevelKeyForSave(), rooms.Count, _roomManager.BiomeKey)}). "
                         + "Starting the level fresh.");
                 }
                 SpawnFreshDungeon(seed, rooms, startRoom);
@@ -381,7 +381,7 @@ namespace Assets.Scripts.Dungeon
             PlaceCaptiveIfConfigured(rooms, startRoom);
             PlaceRoomEvents(rooms, startRoom);
 
-            if (saveData != null && DungeonSaveCompatibility.IsCompatible(saveData, LevelKeyForSave(), rooms.Count))
+            if (saveData != null && DungeonSaveCompatibility.IsCompatible(saveData, LevelKeyForSave(), rooms.Count, _roomManager.BiomeKey))
             {
                 RestoreSavedState(saveData, rooms);
             }
@@ -395,7 +395,7 @@ namespace Assets.Scripts.Dungeon
                     // the run continues and only this floor's progress is lost.
                     Debug.LogWarning(
                         $"Dungeon save for seed {saveData.Seed} no longer matches the layout "
-                        + $"'{LevelKeyForSave()}' generates ({DungeonSaveCompatibility.Describe(saveData, LevelKeyForSave(), rooms.Count)}). "
+                        + $"'{LevelKeyForSave()}' generates ({DungeonSaveCompatibility.Describe(saveData, LevelKeyForSave(), rooms.Count, _roomManager.BiomeKey)}). "
                         + "Starting the level fresh.");
                 }
                 SpawnFreshDungeon(seed, rooms, startRoom);
@@ -533,7 +533,7 @@ namespace Assets.Scripts.Dungeon
 
             // Initialize save manager and persist initial state
             var levelKey = LevelKeyForSave();
-            DungeonSaveManager.Instance.Initialize(seed, levelKey, rooms, startRoom.RoomIndex);
+            DungeonSaveManager.Instance.Initialize(seed, levelKey, _roomManager.BiomeKey, rooms, startRoom.RoomIndex);
             DungeonSaveManager.Instance.Save(startRoom);
 
             // Store active dungeon seed in run save so we can resume
@@ -672,7 +672,7 @@ namespace Assets.Scripts.Dungeon
             }
 
             DungeonSaveManager.Instance.Initialize(
-                saveData.Seed, LevelKeyForSave(), rooms, saveData.StartRoomIndex);
+                saveData.Seed, LevelKeyForSave(), _roomManager.BiomeKey, rooms, saveData.StartRoomIndex);
             GameEvents.Publish(new LevelStarted { RunKey = CurrentRunKey, LevelIndex = RunLevelIndex, Fresh = false });
             GameManager.Instance.EnterRoom(currentRoom);
         }

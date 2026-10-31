@@ -27,21 +27,23 @@ namespace Assets.Scripts.Dungeon
             NoSave,
             NoLayout,
             DifferentLevel,
+            DifferentBiome,
             RoomCountChanged,
             CurrentRoomOutOfRange
         }
 
         /// <summary>
         /// Whether <paramref name="saveData"/> can be restored onto a freshly built layout of
-        /// <paramref name="roomCount"/> rooms for the level keyed <paramref name="levelKey"/>.
+        /// <paramref name="roomCount"/> rooms for the level keyed <paramref name="levelKey"/>, drawn
+        /// with the biome keyed <paramref name="biomeKey"/> (null or empty for none).
         /// </summary>
-        public static bool IsCompatible(DungeonSaveData saveData, string levelKey, int roomCount)
+        public static bool IsCompatible(DungeonSaveData saveData, string levelKey, int roomCount, string biomeKey = null)
         {
-            return Check(saveData, levelKey, roomCount) == Reason.Compatible;
+            return Check(saveData, levelKey, roomCount, biomeKey) == Reason.Compatible;
         }
 
         /// <summary>The specific reason, so the warning can say something actionable.</summary>
-        public static Reason Check(DungeonSaveData saveData, string levelKey, int roomCount)
+        public static Reason Check(DungeonSaveData saveData, string levelKey, int roomCount, string biomeKey = null)
         {
             if (saveData == null)
             {
@@ -61,6 +63,14 @@ namespace Assets.Scripts.Dungeon
                 return Reason.DifferentLevel;
             }
 
+            // A biome's wall row moves the rooms, and so which room each index is, without changing
+            // how many there are. Unlike LevelKey an empty side counts: a save from before the level
+            // had a biome has none, and that is exactly the save that no longer fits.
+            if ((saveData.BiomeKey ?? "") != (biomeKey ?? ""))
+            {
+                return Reason.DifferentBiome;
+            }
+
             // One saved entry per room, so a differing count means the layout changed shape.
             if (saveData.Rooms == null || saveData.Rooms.Count != roomCount)
             {
@@ -76,9 +86,9 @@ namespace Assets.Scripts.Dungeon
         }
 
         /// <summary>A one-line explanation for the log, naming the numbers that disagree.</summary>
-        public static string Describe(DungeonSaveData saveData, string levelKey, int roomCount)
+        public static string Describe(DungeonSaveData saveData, string levelKey, int roomCount, string biomeKey = null)
         {
-            switch (Check(saveData, levelKey, roomCount))
+            switch (Check(saveData, levelKey, roomCount, biomeKey))
             {
                 case Reason.Compatible:
                     return "compatible";
@@ -91,6 +101,9 @@ namespace Assets.Scripts.Dungeon
 
                 case Reason.DifferentLevel:
                     return $"saved level '{saveData.LevelKey}', now loading '{levelKey}'";
+
+                case Reason.DifferentBiome:
+                    return $"saved biome '{saveData.BiomeKey}', the level now uses '{biomeKey}'";
 
                 case Reason.RoomCountChanged:
                 {

@@ -1,0 +1,57 @@
+{
+  "key": "archive",
+  "folder": "Archive",
+  "grade": [
+    1.06,
+    0.97,
+    0.86
+  ],
+  "floor_lum": 42,
+  "wall_lum": 52,
+  "stone": "#4d3a2c",
+  "wood": "#5c3e25",
+  "floor_prop_gain": 0.62,
+  "wall_prop_gain": 0.85,
+  "floors": [
+    1,
+    0,
+    2,
+    3
+  ],
+  "walls": [
+    8,
+    9,
+    14,
+    15
+  ],
+  "floor_props": {
+    "book": 3,
+    "books_a": 9,
+    "books_b": 14,
+    "scrolls_a": 17,
+    "scrolls_b": 18,
+    "pages_a": 28,
+    "pages_b": 31,
+    "ink": 38,
+    "candle": 43,
+    "stool": 50,
+    "quill": 58
+  },
+  "wall_props": {
+    "sconce_a": 5,
+    "sconce_b": 15,
+    "sconce_c": 21,
+    "chart_a": 3,
+    "chart_b": 18,
+    "chart_c": 23,
+    "banner_a": 11,
+    "banner_b": 19,
+    "clock_a": 13,
+    "clock_b": 36,
+    "orrery_a": 47,
+    "orrery_b": 53
+  },
+  "source": "C:/Users/brain/AppData/Local/Temp/claude/C--Repos-Games-Merge-Card-Dungeon/0312e649-1eaa-4dcc-bdd2-b072d37e0548/scratchpad/archive",
+  "edge_tile": 12,
+  "edge_gain": 1.3
+}

@@ -442,7 +442,7 @@ What the pass learned, for the next biome:
 - **Props fill the tile (24-28 px), and the floor must be the quietest thing in the room.** The raw
   tiles and bone-white props were brighter than the enemies. Shipped values: floors x0.66-0.74 (blue
   kept highest), wall faces x0.85, floor props x0.72-0.8, and nothing tile-filling and pale (the skull
-  pile was dropped). Check it against an enemy on the walking view, which is drawn at half scale.
+  pile was dropped). Check it against an enemy on the walking view, a full tile since 2026-10-31.
 - **The thin side walls and cap** use `BiomeSO.EdgeTexture` through `WallGenerator`'s bands, which
   only tint *toward* a colour (30%). A light stone top needs a brightened texture
   (`crypt_edge.png` = wall face x1.45), not a colour. It must be imported **Read/Write** (it is read
@@ -464,6 +464,29 @@ What the pass learned, for the next biome:
   door's edge down to 16 over 20 px). 170 over 14 px was too faint. The tiles are made once and rotated.
 - **A sprite reimported during play does not reach a Tilemap already painted**; it keeps the old
   image until it is redrawn. Relaunch before judging a tile change.
+
+## A new biome, the short way (2026-10-31)
+
+Ember, Swamp, Archive and Vault took 30 generations each, by `tools/biomes/build_biome.py` and one JSON per
+biome in the same folder.
+
+1. **Generate three things:** `create_tiles_pro` as above (four floors, four walls; "seen straight from the
+   front" on every wall) and two `create_image_pro` at 32x32, floor props and wall props. Download the candidates
+   with `?index=N`, or the sheet is only the first one.
+2. **Doors are not generated.** The script recolours the Crypt's doors, swings and archway: cool pixels onto
+   `stone`, warm ones onto `wood`, by brightness. The shade sprites are shared as they are.
+3. **Give it a colour of its own.** At the Crypt's brightness a neutral set just reads as grey: `grade` is an RGB
+   multiply (Ember 1.18/0.88/0.78), with `floor_lum` about 44 and `wall_lum` about 56. `keep_glow` spares lava.
+4. **Pale floor props go down:** `floor_prop_gain` 0.62-0.8. Parchment and bone are brighter than any unit.
+5. **Check `edge_tile`.** The thin walls are the first wall tile brightened, so a busy wall (bookshelves) makes
+   noisy stripes: point it at a plain tile.
+6. **Props can come back on a stone square** even with `no_background` (Vault's floor props, Swamp's wall props).
+   Floor props: `strip_floor_props` with the stone's exact colours floods it out from the sprite's edge, drops
+   colourless fragments and redraws a dark outline. A brightness threshold instead eats the object. Wall props
+   fused to their brick: leave them and match the wall with `wall_prop_gain` and `grade_wall_props`, as the Crypt
+   does.
+7. **Import** like the Crypt: copy `crypt_floor_0`'s importer settings, and `crypt_edge`'s for the edge, which
+   must stay Read/Write. `BiomeAssetTests` checks the set is whole.
 
 ## Hero walk cycles (2026-10-30)
 

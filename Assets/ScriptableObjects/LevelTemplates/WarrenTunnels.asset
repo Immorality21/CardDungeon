@@ -35,7 +35,11 @@ MonoBehaviour:
     MinQuantity: 1
     MaxQuantity: 1
   GuaranteedMaterials: []
+  RecipeTable: []
   CombatBackground: {fileID: 21300000, guid: a5d7aba0fbe84e6983ea6f54b8748a39, type: 3}
   MapBackdrop: {fileID: 21300000, guid: 40d8a8a7e0324015b7198d3b9ce1057d, type: 3}
+  Biome: {fileID: 11400000, guid: bf362adbdb382f544a17a6204181c47c, type: 2}
   ExplorationMusic: {fileID: 0}
   CombatMusic: {fileID: 0}
+  ExitMarker: {fileID: 0}
+  Chests: []

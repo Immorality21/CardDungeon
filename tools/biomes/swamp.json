@@ -1,0 +1,57 @@
+{
+  "key": "swamp",
+  "folder": "Swamp",
+  "grade": [
+    0.84,
+    1.04,
+    0.92
+  ],
+  "floor_lum": 46,
+  "wall_lum": 58,
+  "stone": "#36463c",
+  "wood": "#413a25",
+  "floor_prop_gain": 0.66,
+  "floors": [
+    2,
+    3,
+    0,
+    1,
+    4,
+    6
+  ],
+  "walls": [
+    10,
+    11,
+    12,
+    13,
+    14
+  ],
+  "floor_props": {
+    "lily": 2,
+    "reeds_a": 9,
+    "reeds_b": 15,
+    "mud": 18,
+    "mushrooms_a": 25,
+    "mushrooms_b": 29,
+    "plank": 34,
+    "algae": 45,
+    "bones": 48,
+    "roots": 57
+  },
+  "wall_props": {
+    "lantern_a": 1,
+    "lantern_b": 6,
+    "drain_a": 16,
+    "drain_b": 18,
+    "grate": 25,
+    "vines_a": 33,
+    "vines_b": 38,
+    "banner_a": 41,
+    "banner_b": 46,
+    "face_a": 49,
+    "face_b": 51
+  },
+  "source": "C:/Users/brain/AppData/Local/Temp/claude/C--Repos-Games-Merge-Card-Dungeon/0312e649-1eaa-4dcc-bdd2-b072d37e0548/scratchpad/swamp",
+  "wall_prop_gain": 1.3,
+  "grade_wall_props": true
+}

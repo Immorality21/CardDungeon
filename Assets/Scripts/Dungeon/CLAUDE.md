@@ -100,6 +100,9 @@ A save is resumable only when:
 
 - its `LevelKey` matches the level being built — compared **only when both sides have one**, since a
   save written before that field existed has none and rejecting those would throw away good runs;
+- its `BiomeKey` matches the biome the floor was built with, **an empty stamp counting as none**: a biome's
+  wall row moves the rooms without changing how many there are, and a save from before the level had a
+  biome is exactly the one with no stamp;
 - it holds exactly one room entry per built room (a differing count means the layout changed shape);
 - its `CurrentRoomIndex` is inside that count.
 

@@ -12,9 +12,8 @@ namespace Assets.Scripts.Rooms
         public Vector2Int GridPosition;
 
         /// <summary>
-        /// Rows of north wall face drawn above the floor - 1 on a floor drawn with a <see cref="BiomeSO"/>,
-        /// 0 on the old look. Part of the room's footprint on the grid, never walkable: the floor is
-        /// still <c>RoomSO.Width</c> x <c>RoomSO.Height</c> from <see cref="GridPosition"/>.
+        /// Rows of north wall face drawn above the floor. Part of the room's footprint on the grid, never
+        /// walkable: the floor is still <c>RoomSO.Width</c> x <c>RoomSO.Height</c> from <see cref="GridPosition"/>.
         /// </summary>
         public int WallRows;
 

@@ -11,6 +11,9 @@ namespace Assets.Scripts.Dungeon
     {
         public int Seed;
         public string LevelKey;
+
+        /// <summary>The biome the floor was built with, empty for none: a biome changes the layout.</summary>
+        public string BiomeKey;
         public int CurrentRoomIndex;
 
         /// <summary>

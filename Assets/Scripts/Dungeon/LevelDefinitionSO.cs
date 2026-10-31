@@ -13,8 +13,6 @@ namespace Assets.Scripts.Dungeon
         public int RoomsToGenerate;
         [Range(0f, 1f)] public float ChainBias = 0.6f;
         [Range(0f, 1f)] public float MomentumBias = 0.5f;
-        public Color WallColor = new Color(0.15f, 0.1f, 0.08f, 1f);
-        public Texture2D WallTexture;
 
         [Tooltip("Rooms of this level promoted to a one-shot treasure cache: gold plus a depth-rolled " +
                  "item, and no enemies. Taken off the combat room count, so raising this lowers the " +
@@ -61,10 +59,8 @@ namespace Assets.Scripts.Dungeon
                  "empty the default Resources/DungeonBackdrops/bedrock is used.")]
         public Sprite MapBackdrop;
 
-        [Tooltip("Optional: draw this floor with a biome's tiles (a tile-tall north wall, thin side " +
-                 "walls, props) instead of the tinted flagstone. Gives every room one extra row for " +
-                 "its wall, so it changes the floor's layout - and a save made mid-floor without it. " +
-                 "Generated floors only; a manual layout keeps the old look.")]
+        [Tooltip("Required: what the floor is drawn with (a tile-tall north wall, thin side walls, " +
+                 "props). Changing it invalidates a save made mid-floor on the old biome.")]
         public BiomeSO Biome;
 
         [Tooltip("Optional per-level music while walking the floor. When set it wins over the " +

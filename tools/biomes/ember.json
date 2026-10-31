@@ -1,0 +1,53 @@
+{
+  "key": "ember",
+  "folder": "Ember",
+  "source": "C:/Users/brain/AppData/Local/Temp/claude/C--Repos-Games-Merge-Card-Dungeon/0312e649-1eaa-4dcc-bdd2-b072d37e0548/scratchpad/ember",
+  "keep_glow": true,
+  "stone": "#4f3f3a",
+  "wood": "#4e3528",
+  "floors": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "walls": [
+    10,
+    11,
+    12,
+    13,
+    14
+  ],
+  "floor_props": {
+    "slag_a": 1,
+    "slag_b": 6,
+    "ash": 8,
+    "chain": 17,
+    "coals_a": 33,
+    "coals_b": 35,
+    "crucible": 43,
+    "ingot": 29,
+    "tongs": 58
+  },
+  "wall_props": {
+    "brazier_a": 3,
+    "brazier_b": 8,
+    "torch": 17,
+    "grate_a": 13,
+    "grate_b": 49,
+    "banner_a": 36,
+    "banner_b": 44,
+    "plaque_a": 7,
+    "plaque_b": 62,
+    "chains": 21
+  },
+  "grade": [
+    1.18,
+    0.88,
+    0.78
+  ],
+  "floor_lum": 46,
+  "wall_lum": 60
+}

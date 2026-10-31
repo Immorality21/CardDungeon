@@ -19,8 +19,7 @@ namespace Assets.Scripts.Rooms
         private const float SwingFrameSeconds = 0.05f;
 
         // Where this door is painted. A side door is painted by both rooms, each with tiles offset from
-        // its own cell, so a swing is one set of frames per place. Empty on the old look, whose door is
-        // the sprite.
+        // its own cell, so a swing is one set of frames per place.
         private readonly List<DoorPlace> _places = new List<DoorPlace>();
         private bool _opened;
 

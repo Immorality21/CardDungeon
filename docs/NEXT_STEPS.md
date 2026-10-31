@@ -413,9 +413,11 @@ backlog.**
 | **0** | Decisions | ✅ **2026-10-30**: authored rooms on a generated floor; same room count per floor; tile walking later; hidden rooms optional (never on the way to the stairs, no retry); Elites a surprise and last |
 | **1** | Spike: one biome (crypt) on one floor, sandbox only (`Sandbox/RoomSpike`) | ✅ **built 2026-10-30, signed off by the owner** |
 | **7** | **Tile walking, moved first** (owner, 2026-10-30): arrows/WASD walk, doors open by walking through them, doors drawn by the tilemap | ✅ **built 2026-10-30**: clicks walk, contents are solid and used with Enter, doors swing, all nine heroes have 4-direction walk cycles; **next: phase 2** |
-| **2** | Biomes and props on every floor | **next**: the plan's *Phase 2: where to start* (first the enemy-size decision) |
-| **3-6, 8** | Events you can see + Shrine · authored shapes · hidden rooms · branching routes · Elites | after phase 2 |
+| **2** | Biomes and props on every floor | ✅ **built 2026-10-31**: five biomes on every level, foes a full tile, saves stamped, manual layouts converted, the old look retired |
+| **3-6, 8** | Events you can see + Shrine · authored shapes · hidden rooms · branching routes · Elites | **next: phase 3** |
+| — | **No more room bar** (owner, 2026-10-31): every room action triggered by interacting with its object | after phases 2 and 3, when everything is migrated |
 | — | **More room events, and a pool per area** (owner, 2026-10-30) | backlog, later |
+| — | **Biome lights** (owner, 2026-10-31): a light mood per biome, torches that glow | post-demo, very late |
 
 ### [Polish, information and content](plans/POLISH_CONTENT.md)
 

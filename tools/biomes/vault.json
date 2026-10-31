@@ -1,0 +1,67 @@
+{
+  "key": "vault",
+  "folder": "Vault",
+  "grade": [
+    1.14,
+    0.98,
+    0.82
+  ],
+  "floor_lum": 42,
+  "wall_lum": 54,
+  "stone": "#3a3836",
+  "wood": "#7a5f28",
+  "strip_floor_props": [
+    "383130",
+    "302b2b",
+    "28272c",
+    "08070c",
+    "050308",
+    "120d16",
+    "0d0c10"
+  ],
+  "floor_prop_gain": 0.95,
+  "wall_prop_gain": 1.0,
+  "floors": [
+    4,
+    5,
+    6,
+    7
+  ],
+  "walls": [
+    10,
+    11,
+    8,
+    12,
+    14
+  ],
+  "floor_props": {
+    "coins_a": 2,
+    "coins_b": 5,
+    "coins_c": 9,
+    "coins_d": 14,
+    "ingot_a": 18,
+    "ingot_b": 21,
+    "gems_a": 25,
+    "gems_b": 26,
+    "goblet_a": 33,
+    "goblet_b": 36,
+    "sack_a": 41,
+    "sack_b": 46
+  },
+  "wall_props": {
+    "sconce_a": 1,
+    "sconce_b": 16,
+    "crest_a": 3,
+    "crest_b": 9,
+    "crest_c": 10,
+    "crest_d": 17,
+    "banner_a": 12,
+    "banner_b": 21,
+    "banner_c": 40,
+    "dial_a": 23,
+    "dial_b": 30,
+    "niche_a": 7,
+    "niche_b": 39
+  },
+  "source": "C:/Users/brain/AppData/Local/Temp/claude/C--Repos-Games-Merge-Card-Dungeon/0312e649-1eaa-4dcc-bdd2-b072d37e0548/scratchpad/vault"
+}

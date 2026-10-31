@@ -15,15 +15,12 @@
 1. **Graph generation** — Creates a tree of `RoomNode` connections
 2. **Room layout** — BFS placement on a 2D grid, resolving overlaps
 3. **Door placement** — Random door positions between connected adjacent rooms
-   - then **walls** (`WallGenerator`: 6px bands with a near-black 2px outer seam, so two neighbouring rooms are split by a dark channel even in the same stone) and the **backdrop** (`DungeonBackdrop`: one tiled bedrock sprite under the whole floor plus a 40-unit margin, sorting order -100, `LevelDefinitionSO.MapBackdrop` or `Resources/DungeonBackdrops/bedrock`). The backdrop is **uniform on purpose** — unexplored rooms are hidden by turning their renderers off, and anything drawn per room would show where they are. A replacement sprite must be imported Full Rect + Wrap Repeat, since it is tiled. Both run on the procedural and the manual path.
-   - **The floor** is `Floor.prefab` with `Sprites/Environment/floor-tile.png` (a neutral, low-contrast
-     32px flagstone tile, 2026-10-08), tinted per room by `Color.Lerp(white, RoomSO.Color, 0.5)` and
-     mirrored on a checkerboard of cells so the repeat does not show. Keep `RoomSO.Color` **muted** -
-     it tints stone; the old saturated test colours (pure blue, hot pink) were toned down that day.
-   - **Or a biome** (`BiomeSO`, the room-design spike of 2026-10-30, `docs/plans/DUNGEON_ROOMS.md`):
-     when `LevelDefinitionSO.Biome` or the sandbox's `DungeonManager.BiomeOverride` is set, the floor
-     is painted on per-room Tilemaps by `RoomTilePainter` from the pure `RoomTileOps` plan instead of
-     the tile prefab and `WallGenerator`. Each room gains **one row of north wall face** above its floor
+   - then the **backdrop** (`DungeonBackdrop`: one tiled bedrock sprite under the whole floor plus a 40-unit margin, sorting order -100, `LevelDefinitionSO.MapBackdrop` or `Resources/DungeonBackdrops/bedrock`). The backdrop is **uniform on purpose** — unexplored rooms are hidden by turning their renderers off, and anything drawn per room would show where they are. A replacement sprite must be imported Full Rect + Wrap Repeat, since it is tiled. Both run on the procedural and the manual path.
+   - **The floor is a biome** (`BiomeSO`, `docs/plans/DUNGEON_ROOMS.md`), required: `LevelDefinitionSO.Biome`,
+     or the sandbox's `DungeonManager.BiomeOverride`. A level with none throws, naming the level, and
+     `BiomeAssetTests` fails first. It is painted on per-room Tilemaps by `RoomTilePainter` from the pure
+     `RoomTileOps` plan; the thin walls are `WallGenerator`'s band sprites (6px with a near-black 2px outer
+     seam, so neighbouring rooms split). Each room has **one row of north wall face** above its floor
      (`Room.WallRows` / `FootprintHeight`): layout, overlap checks and vertical doors use the footprint,
      side-by-side doors still need the *floors* to overlap, and a north door is an archway in the face.
      A side door is `BiomeSO.DoorSide`, seen edge-on, painted by **both** rooms and offset half a tile onto
@@ -33,9 +30,9 @@
      open; `PartyWalk` waits for the swing. A door's tiles live on `Door.AddPlace`, **one set per room**,
      because each room's side-door tiles are offset from its own cell. Open doors are not saved.
      The floor itself (`RoomSO.Width x Height`, `GetCenter`, `ClaimSpot`) is unchanged. Props draw on
-     their own stream (`RoomTileOps.DecorSeed`), never the content stream. Generated floors only - a
-     manual layout keeps the old look, since its positions assume no wall row. **No campaign level sets
-     a biome yet.**
+     their own stream (`RoomTileOps.DecorSeed`), never the content stream. A manual layout works too: its
+     assets stay floors-only and `ManualLayoutOps.WithWallRows` adds the wall row past each north or south
+     door at build time.
 4. **Exit room** — BFS from start room, farthest room is designated `IsExit = true`; an exit marker sprite is placed in the room (see *Where things stand* below)
 5. **Contents, in this order** (all in `DungeonManager`, all drawing on the same seeded RNG stream, which is what lets a resumed dungeon reproduce them): `PlaceRoomKinds` → `EnemyManager.SpawnEnemies` → `PlaceBossIfConfigured` → `PlaceCaptiveIfConfigured` → `PlaceRoomEvents`. The order matters — events skip rooms that already hold a captive, and the boss has already claimed the exit room. Each pass is documented where it belongs: bosses and captives in `Assets/Scripts/Dungeon/CLAUDE.md`, events in `Assets/Scripts/Rooms/Events/CLAUDE.md`.
 6. **Seeding** — Supports custom seed for reproducible generation. Everything above is a pure function of the seed, so the same seed regenerates the same level; the dungeon save stores only what the player *changed* (rooms explored, enemies killed, events resolved), not the layout.
