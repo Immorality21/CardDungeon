@@ -1,0 +1,65 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56867968c6cadda4fa0871e6572f8249, type: 3}
+  m_Name: FireElementalPrince
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Enemies.EnemySO
+  Key: FireElementalPrince
+  Sprite: {fileID: 21300000, guid: b958a04d8c2526207d432dd8d97c3689, type: 3}
+  AnimationFrames:
+  - {fileID: -4302498115785199938, guid: 8fd8a23075cb0447772872d9e7638877, type: 3}
+  - {fileID: -2601255704998053450, guid: 8fd8a23075cb0447772872d9e7638877, type: 3}
+  - {fileID: 765798236893243309, guid: 8fd8a23075cb0447772872d9e7638877, type: 3}
+  AnimationFps: 4
+  HitFrames: []
+  IsBoss: 1
+  CombatScale: 1.8
+  Traits: 96
+  BaseStats:
+    Values:
+    - Type: 1
+      Amount: 8
+    - Type: 2
+      Amount: 6
+    - Type: 3
+      Amount: 6
+    - Type: 4
+      Amount: 8
+    - Type: 5
+      Amount: 5
+    - Type: 7
+      Amount: 110
+  XpReward: 140
+  GoldReward: 120
+  AttackDamageType: 1
+  Archetype: 4
+  Behavior: {fileID: 11400000, guid: f44cd441fff2fa54ba4ba21c6156acc7, type: 2}
+  Spells:
+  - Magic: {fileID: 11400000, guid: bd009311b97636c4d80e8990440636a6, type: 2}
+    CastWeight: 1
+  Resistances:
+  - DamageType: 1
+    Percent: 50
+  - DamageType: 2
+    Percent: -50
+  StatusImmunities: 
+  LootTable:
+  - Item: {fileID: 11400000, guid: c0de5211aa070000000000000000ab07, type: 2}
+    Chance: 1
+    MinQuantity: 2
+    MaxQuantity: 4
+  - Item: {fileID: 11400000, guid: ecb70ed487974753bcb7044b90ac66f4, type: 2}
+    Chance: 1
+    MinQuantity: 1
+    MaxQuantity: 2
+  SalvageTable: []
+  Triggers: []
+  Flinches: 0

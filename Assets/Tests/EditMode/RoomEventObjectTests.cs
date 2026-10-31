@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Assets.Scripts.Cards;
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.Enemies;
+using Assets.Scripts.Rooms;
 using Assets.Scripts.Rooms.Events;
 using NUnit.Framework;
 using UnityEditor;
@@ -49,6 +50,74 @@ namespace Tests.EditMode
                         $"{level.name}: list the rarest event first.");
                 }
             }
+        }
+
+        [Test]
+        public void BlockOf_NamesWhatIsMissing_FirstTheItem()
+        {
+            var key = ScriptableObject.CreateInstance<Assets.Scripts.Items.ItemSO>();
+            var door = new RoomEventOption { RequiredItem = key };
+            Assert.AreEqual(OptionBlock.NeedsItem, RoomEventResolver.BlockOf(door, false, true, 999));
+            Assert.AreEqual(OptionBlock.None, RoomEventResolver.BlockOf(door, true, false, 0));
+
+            var trade = new RoomEventOption { NeedsConsumable = true };
+            Assert.AreEqual(OptionBlock.NeedsConsumable, RoomEventResolver.BlockOf(trade, false, false, 0));
+            Assert.AreEqual(OptionBlock.None, RoomEventResolver.BlockOf(trade, false, true, 0));
+
+            var scale = new RoomEventOption { GoldCost = 120 };
+            Assert.AreEqual(OptionBlock.NeedsGold, RoomEventResolver.BlockOf(scale, false, false, 119));
+            Assert.AreEqual(OptionBlock.None, RoomEventResolver.BlockOf(scale, false, false, 120));
+            Assert.AreEqual(OptionRisk.Price, RoomEventResolver.RiskOf(scale), "A price is a price before any outcome.");
+        }
+
+        [Test]
+        public void CureLevelCurses_TakesTheFloorsCursesOnly()
+        {
+            var tracker = new LevelAfflictionTracker();
+            tracker.Add("hero", BuffType.Strength, -2);
+            tracker.Add("hero", BuffType.Agility, 3);
+            tracker.Add("hero", BuffType.Luck, -3, forRun: true);
+
+            Assert.AreEqual(1, tracker.CureLevelCurses());
+
+            var left = tracker.For("hero");
+            Assert.AreEqual(2, left.Count);
+            Assert.IsFalse(left.Exists(a => a.Buff == BuffType.Strength));
+        }
+
+        [Test]
+        public void Guards_MakeASideRoomDangerous_AndPlaceAtMostOnce()
+        {
+            var spec = new SideRoomSpec
+            {
+                Template = ScriptableObject.CreateInstance<RoomSO>(),
+                Guards = new List<EnemySO> { ScriptableObject.CreateInstance<EnemySO>() },
+                EnemyChancePercent = 0f
+            };
+            Assert.IsTrue(spec.HasFoes);
+            var option = new RoomEventOption { Success = new List<RoomEventOutcome> { new RoomEventOutcome { SideRoom = spec } } };
+            Assert.AreEqual(OptionRisk.Danger, RoomEventResolver.RiskOf(option));
+        }
+
+        [Test]
+        public void TheDoorOfFire_AsksForTheKey_TheCatalogueKnowsItsPool()
+        {
+            var events = "Assets/ScriptableObjects/RoomEvents/";
+            var door = AssetDatabase.LoadAssetAtPath<RoomEventSO>(events + "DoorOfFire.asset");
+            Assert.AreEqual(RoomEventPlacement.NorthWall, door.Placement);
+            Assert.AreEqual(Assets.Scripts.Items.ItemCategory.KeyItem, door.Options[0].RequiredItem.Category);
+            Assert.AreEqual(3, door.Options[0].Success[0].SideRoom.Guards.Count);
+            Assert.IsTrue(door.Options[0].Success[0].SideRoom.Guards[0].IsBoss, "The Prince leads, and is a boss.");
+
+            Assert.IsTrue(RoomEventSpawn.PaysPoolRecipe(AssetDatabase.LoadAssetAtPath<RoomEventSO>(events + "Catalogue.asset")));
+            Assert.IsFalse(RoomEventSpawn.PaysPoolRecipe(door));
+        }
+
+        [Test]
+        public void AllStatsBlessing_CountsAsLevelLong()
+        {
+            var candle = AssetDatabase.LoadAssetAtPath<RoomEventSO>("Assets/ScriptableObjects/RoomEvents/UndrownedCandle.asset");
+            Assert.IsTrue(RoomEventSpawn.HasLevelLongEffects(candle), "Beside the stairs a floor-long blessing lasts for nothing.");
         }
 
         [Test]

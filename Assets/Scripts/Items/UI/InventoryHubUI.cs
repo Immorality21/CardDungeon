@@ -1249,6 +1249,7 @@ namespace Assets.Scripts.Items.UI
             SetText(_listTitle, Loc.Get("items.inv.title.materials"));
 
             var materials = InventoryManager.Instance.GetMaterials();
+            materials.AddRange(InventoryManager.Instance.GetKeyItems());
 
             // One row per material key: several stacks of the same thing read as one pile.
             var totals = new Dictionary<string, int>();

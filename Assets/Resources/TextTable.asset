@@ -3332,57 +3332,6 @@ MonoBehaviour:
     - You keep your hands to yourself and wade on past.
     Reviewed: 0
     Note: 
-  - Key: event.musty-tome.title
-    Values:
-    - A Musty Tome
-    Reviewed: 0
-    Note: 
-  - Key: event.musty-tome.prompt
-    Values:
-    - A swollen leather tome lies open on a lectern, its pages furred with mould
-      and strung across with old web. Whatever is written in it was worth writing
-      down carefully. Something has been living in the spine for a long time.
-    Reviewed: 0
-    Note: 
-  - Key: event.musty-tome.option-1.label
-    Values:
-    - Ease it off the lectern
-    Reviewed: 0
-    Note: 
-  - Key: event.musty-tome.option-1.success-1.text
-    Values:
-    - You lift the cover clear, copy what matters, and leave the rest to the damp.
-      A collector will pay for this.
-    Reviewed: 0
-    Note: 
-  - Key: event.musty-tome.option-1.success-2.text
-    Values:
-    - You get the pages out intact - and the thing in the spine gets a piece of you
-      on the way past.
-    Reviewed: 0
-    Note: 
-  - Key: event.musty-tome.option-1.failure-1.text
-    Values:
-    - The spine splits, the web comes alive, and something long-legged sinks its
-      jaws in before you can pull back. The pages are ruined.
-    Reviewed: 0
-    Note: 
-  - Key: event.musty-tome.option-1.failure-2.text
-    Values:
-    - The lectern gives way. You come out of the mess with nothing but a lighter
-      pack.
-    Reviewed: 0
-    Note: 
-  - Key: event.musty-tome.option-2.label
-    Values:
-    - Leave it to rot
-    Reviewed: 0
-    Note: 
-  - Key: event.musty-tome.option-2.decline
-    Values:
-    - You leave the book to the damp. It has waited this long; it can wait longer.
-    Reviewed: 0
-    Note: 
   - Key: event.sealed-tomb.title
     Values:
     - A Sealed Tomb
@@ -10733,5 +10682,965 @@ MonoBehaviour:
   - Key: abilities.menu.meta-no-stack
     Values:
     - '{meta}  does not stack'
+    Reviewed: 0
+    Note: 
+  - Key: enemy.fire-elemental.name
+    Values:
+    - 'Fire Elemental'
+    Reviewed: 0
+    Note: 
+  - Key: enemy.fire-elemental-prince.name
+    Values:
+    - 'Fire Elemental Prince'
+    Reviewed: 0
+    Note: 
+  - Key: enemy.mimic.name
+    Values:
+    - 'Mimic'
+    Reviewed: 0
+    Note: 
+  - Key: set.sewerwalker.name
+    Values:
+    - 'Sewerwalker'
+    Reviewed: 0
+    Note: 
+  - Key: set.sewerwalker.tier-1.text
+    Values:
+    - '+8% Agility'
+    Reviewed: 0
+    Note: 
+  - Key: set.sewerwalker.tier-2.text
+    Values:
+    - '+15% Luck: more crits'
+    Reviewed: 0
+    Note: 
+  - Key: item.sewer-hood.name
+    Values:
+    - 'Sewer Hood'
+    Reviewed: 0
+    Note: 
+  - Key: item.sewer-hood.description
+    Values:
+    - 'Waxed hide, and it smells of it. Nobody hears you coming.'
+    Reviewed: 0
+    Note: 
+  - Key: item.sewer-jerkin.name
+    Values:
+    - 'Sewer Jerkin'
+    Reviewed: 0
+    Note: 
+  - Key: item.sewer-jerkin.description
+    Values:
+    - 'Cut close, for squeezing through grates.'
+    Reviewed: 0
+    Note: 
+  - Key: item.sewer-treads.name
+    Values:
+    - 'Sewer Treads'
+    Reviewed: 0
+    Note: 
+  - Key: item.sewer-treads.description
+    Values:
+    - 'Soft soles that grip wet stone.'
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-sewer-hood.name
+    Values:
+    - 'Recipe: Sewer Hood'
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-sewer-hood.description
+    Values:
+    - 'A rogue''s pattern, found behind a sluice.'
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-sewer-jerkin.name
+    Values:
+    - 'Recipe: Sewer Jerkin'
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-sewer-jerkin.description
+    Values:
+    - 'A rogue''s pattern, found behind a sluice.'
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-sewer-treads.name
+    Values:
+    - 'Recipe: Sewer Treads'
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-sewer-treads.description
+    Values:
+    - 'A rogue''s pattern, found behind a sluice.'
+    Reviewed: 0
+    Note: 
+  - Key: item.archivist-spectacles.name
+    Values:
+    - 'Archivist''s Spectacles'
+    Reviewed: 0
+    Note: 
+  - Key: item.archivist-spectacles.description
+    Values:
+    - 'The small print was always the important part.'
+    Reviewed: 0
+    Note: 
+  - Key: item.orrery-ring.name
+    Values:
+    - 'Orrery Ring'
+    Reviewed: 0
+    Note: 
+  - Key: item.orrery-ring.description
+    Values:
+    - 'Its tiny planet still keeps its orbit.'
+    Reviewed: 0
+    Note: 
+  - Key: item.palimpsest-robe.name
+    Values:
+    - 'Palimpsest Robe'
+    Reviewed: 0
+    Note: 
+  - Key: item.palimpsest-robe.description
+    Values:
+    - 'Written over so many times the cloth remembers.'
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-archivist-spectacles.name
+    Values:
+    - 'Recipe: Archivist''s Spectacles'
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-archivist-spectacles.description
+    Values:
+    - 'A card from the Catalogue.'
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-orrery-ring.name
+    Values:
+    - 'Recipe: Orrery Ring'
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-orrery-ring.description
+    Values:
+    - 'A card from the Catalogue.'
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-palimpsest-robe.name
+    Values:
+    - 'Recipe: Palimpsest Robe'
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-palimpsest-robe.description
+    Values:
+    - 'A card from the Catalogue, found by those who come back.'
+    Reviewed: 0
+    Note: 
+  - Key: item.heart-of-the-prince.name
+    Values:
+    - 'Heart of the Prince'
+    Reviewed: 0
+    Note: 
+  - Key: item.heart-of-the-prince.description
+    Values:
+    - 'It has not stopped burning. It may not know it should.'
+    Reviewed: 0
+    Note: 
+  - Key: item.parishioners-medal.name
+    Values:
+    - 'Parishioner''s Medal'
+    Reviewed: 0
+    Note: 
+  - Key: item.parishioners-medal.description
+    Values:
+    - 'She left it on the pew. It is still wet.'
+    Reviewed: 0
+    Note: 
+  - Key: item.key-of-flame.name
+    Values:
+    - 'Key of Flame'
+    Reviewed: 0
+    Note: 
+  - Key: item.key-of-flame.description
+    Values:
+    - 'Warm to the touch. Somewhere, a door is waiting for it.'
+    Reviewed: 0
+    Note: 
+  - Key: event.turning-arm.title
+    Values:
+    - 'The Turning Arm'
+    Reviewed: 0
+    Note: 
+  - Key: event.turning-arm.prompt
+    Values:
+    - 'It has been tracking a planet that no longer exists. It comes around every few seconds, very fast.'
+    Reviewed: 0
+    Note: 
+  - Key: event.turning-arm.option-1.label
+    Values:
+    - 'Snatch the gem'
+    Reviewed: 0
+    Note: 
+  - Key: event.turning-arm.option-1.success-1.text
+    Values:
+    - 'Your fingers close on it as it passes.'
+    Reviewed: 0
+    Note: 
+  - Key: event.turning-arm.option-1.success-2.text
+    Values:
+    - 'The gem comes free, setting and all.'
+    Reviewed: 0
+    Note: 
+  - Key: event.turning-arm.option-1.failure-1.text
+    Values:
+    - 'The arm comes round again, sooner than it should.'
+    Reviewed: 0
+    Note: 
+  - Key: event.turning-arm.option-2.label
+    Values:
+    - 'Leave it'
+    Reviewed: 0
+    Note: 
+  - Key: event.turning-arm.option-2.decline
+    Values:
+    - 'You let it finish its orbit.'
+    Reviewed: 0
+    Note: 
+  - Key: event.book-reads-back.title
+    Values:
+    - 'The Book That Reads Back'
+    Reviewed: 0
+    Note: 
+  - Key: event.book-reads-back.prompt
+    Values:
+    - 'It stops turning when you look at it. Then, slowly, it turns towards you.'
+    Reviewed: 0
+    Note: 
+  - Key: event.book-reads-back.option-1.label
+    Values:
+    - 'Let it read you'
+    Reviewed: 0
+    Note: 
+  - Key: event.book-reads-back.option-1.success-1.text
+    Values:
+    - 'It reads every one of you, and leaves something behind.'
+    Reviewed: 0
+    Note: 
+  - Key: event.book-reads-back.option-1.failure-1.text
+    Values:
+    - 'It does not like what it finds, and it calls for help.'
+    Reviewed: 0
+    Note: 
+  - Key: event.book-reads-back.option-2.label
+    Values:
+    - 'Shut it'
+    Reviewed: 0
+    Note: 
+  - Key: event.book-reads-back.option-2.decline
+    Values:
+    - 'You close the cover without reading a word.'
+    Reviewed: 0
+    Note: 
+  - Key: event.catalogue.title
+    Values:
+    - 'The Catalogue'
+    Reviewed: 0
+    Note: 
+  - Key: event.catalogue.prompt
+    Values:
+    - 'Thousands of small cards scattered about. There may be something valuable in here.'
+    Reviewed: 0
+    Note: 
+  - Key: event.catalogue.option-1.label
+    Values:
+    - 'Search the drawers'
+    Reviewed: 0
+    Note: 
+  - Key: event.catalogue.option-1.success-1.text
+    Values:
+    - 'One card is not like the others.'
+    Reviewed: 0
+    Note: 
+  - Key: event.catalogue.option-1.failure-1.text
+    Values:
+    - 'Hours of index cards, and nothing on any of them.'
+    Reviewed: 0
+    Note: 
+  - Key: event.catalogue.option-2.label
+    Values:
+    - 'Leave it'
+    Reviewed: 0
+    Note: 
+  - Key: event.catalogue.option-2.decline
+    Values:
+    - 'It has kept this long.'
+    Reviewed: 0
+    Note: 
+  - Key: event.cooling-crucible.title
+    Values:
+    - 'A Cooling Crucible'
+    Reviewed: 0
+    Note: 
+  - Key: event.cooling-crucible.prompt
+    Values:
+    - 'Someone poured this and walked away. Whatever is in it is nearly cool enough to touch.'
+    Reviewed: 0
+    Note: 
+  - Key: event.cooling-crucible.option-1.label
+    Values:
+    - 'Reach in'
+    Reviewed: 0
+    Note: 
+  - Key: event.cooling-crucible.option-1.success-1.text
+    Values:
+    - 'You pull it free of the slag.'
+    Reviewed: 0
+    Note: 
+  - Key: event.cooling-crucible.option-1.success-2.text
+    Values:
+    - 'It comes away in your hand, still warm.'
+    Reviewed: 0
+    Note: 
+  - Key: event.cooling-crucible.option-1.failure-1.text
+    Values:
+    - 'It was not cool enough.'
+    Reviewed: 0
+    Note: 
+  - Key: event.cooling-crucible.option-2.label
+    Values:
+    - 'Leave it'
+    Reviewed: 0
+    Note: 
+  - Key: event.cooling-crucible.option-2.decline
+    Values:
+    - 'You leave it to the slag.'
+    Reviewed: 0
+    Note: 
+  - Key: event.chained-bellows.title
+    Values:
+    - 'The Chained Bellows'
+    Reviewed: 0
+    Note: 
+  - Key: event.chained-bellows.prompt
+    Values:
+    - 'Every forge on this level breathes through these. One good pull and all of them will wake.'
+    Reviewed: 0
+    Note: 
+  - Key: event.chained-bellows.option-1.label
+    Values:
+    - 'Work the bellows'
+    Reviewed: 0
+    Note: 
+  - Key: event.chained-bellows.option-1.success-1.text
+    Values:
+    - 'The whole level breathes in, and so do you.'
+    Reviewed: 0
+    Note: 
+  - Key: event.chained-bellows.option-1.failure-1.text
+    Values:
+    - 'The vents answer first.'
+    Reviewed: 0
+    Note: 
+  - Key: event.chained-bellows.option-2.label
+    Values:
+    - 'Leave them'
+    Reviewed: 0
+    Note: 
+  - Key: event.chained-bellows.option-2.decline
+    Values:
+    - 'You leave them chained.'
+    Reviewed: 0
+    Note: 
+  - Key: event.key-of-flame-pit.title
+    Values:
+    - 'Key of Flame'
+    Reviewed: 0
+    Note: 
+  - Key: event.key-of-flame-pit.prompt
+    Values:
+    - 'You see a key dangling above a pit of fire.'
+    Reviewed: 0
+    Note: 
+  - Key: event.key-of-flame-pit.option-1.label
+    Values:
+    - 'Try and grab it'
+    Reviewed: 0
+    Note: 
+  - Key: event.key-of-flame-pit.option-1.success-1.text
+    Values:
+    - 'You come away with the key and most of your eyebrows.'
+    Reviewed: 0
+    Note: 
+  - Key: event.key-of-flame-pit.option-1.failure-1.text
+    Values:
+    - 'It burns you, and the key drops into the fire.'
+    Reviewed: 0
+    Note: 
+  - Key: event.key-of-flame-pit.option-2.label
+    Values:
+    - 'Leave it'
+    Reviewed: 0
+    Note: 
+  - Key: event.key-of-flame-pit.option-2.decline
+    Values:
+    - 'You leave the key where it hangs.'
+    Reviewed: 0
+    Note: 
+  - Key: event.door-of-fire.title
+    Values:
+    - 'The Door of Fire'
+    Reviewed: 0
+    Note: 
+  - Key: event.door-of-fire.prompt
+    Values:
+    - 'You see a big metal door with a fire emblem on it. You notice a keyhole.'
+    Reviewed: 0
+    Note: 
+  - Key: event.door-of-fire.option-1.label
+    Values:
+    - 'Use the Key of Flame'
+    Reviewed: 0
+    Note: 
+  - Key: event.door-of-fire.option-1.success-1.text
+    Values:
+    - 'The key melts into the lock, and the door swings in. Something is waiting.'
+    Reviewed: 0
+    Note: 
+  - Key: event.door-of-fire.option-2.label
+    Values:
+    - 'Leave it'
+    Reviewed: 0
+    Note: 
+  - Key: event.door-of-fire.option-2.decline
+    Values:
+    - 'The door stays shut.'
+    Reviewed: 0
+    Note: 
+  - Key: event.reed-cage.title
+    Values:
+    - 'A Cage of Reeds'
+    Reviewed: 0
+    Note: 
+  - Key: event.reed-cage.prompt
+    Values:
+    - 'The reeds are knotted the way the bog folk knot them. The satchel in the cage is not theirs.'
+    Reviewed: 0
+    Note: 
+  - Key: event.reed-cage.option-1.label
+    Values:
+    - 'Climb out to it'
+    Reviewed: 0
+    Note: 
+  - Key: event.reed-cage.option-1.success-1.text
+    Values:
+    - 'You get the satchel down dry.'
+    Reviewed: 0
+    Note: 
+  - Key: event.reed-cage.option-1.failure-1.text
+    Values:
+    - 'The reeds give way, and you go into the mud.'
+    Reviewed: 0
+    Note: 
+  - Key: event.reed-cage.option-2.label
+    Values:
+    - 'Leave it'
+    Reviewed: 0
+    Note: 
+  - Key: event.reed-cage.option-2.decline
+    Values:
+    - 'It can hang.'
+    Reviewed: 0
+    Note: 
+  - Key: event.bog-lantern.title
+    Values:
+    - 'A Light on the Mire'
+    Reviewed: 0
+    Note: 
+  - Key: event.bog-lantern.prompt
+    Values:
+    - 'It bobs just out of reach and waits for you to follow.'
+    Reviewed: 0
+    Note: 
+  - Key: event.bog-lantern.option-1.label
+    Values:
+    - 'Follow it'
+    Reviewed: 0
+    Note: 
+  - Key: event.bog-lantern.option-1.success-1.text
+    Values:
+    - 'It leads you to an old drowned purse, and goes out.'
+    Reviewed: 0
+    Note: 
+  - Key: event.bog-lantern.option-1.failure-1.text
+    Values:
+    - 'It leads you in circles, and then into the deep part.'
+    Reviewed: 0
+    Note: 
+  - Key: event.bog-lantern.option-2.label
+    Values:
+    - 'Ignore it'
+    Reviewed: 0
+    Note: 
+  - Key: event.bog-lantern.option-2.decline
+    Values:
+    - 'You keep to the path.'
+    Reviewed: 0
+    Note: 
+  - Key: event.sunken-bell.title
+    Values:
+    - 'The Sunken Bell'
+    Reviewed: 0
+    Note: 
+  - Key: event.sunken-bell.prompt
+    Values:
+    - 'The chapel it came from is a mile off. Nobody knows how it got here, and the rope still hangs dry.'
+    Reviewed: 0
+    Note: 
+  - Key: event.sunken-bell.option-1.label
+    Values:
+    - 'Ring it'
+    Reviewed: 0
+    Note: 
+  - Key: event.sunken-bell.option-1.success-1.text
+    Values:
+    - 'One note, and something shakes loose from the bell.'
+    Reviewed: 0
+    Note: 
+  - Key: event.sunken-bell.option-1.failure-1.text
+    Values:
+    - 'One note, and everything nearby wakes.'
+    Reviewed: 0
+    Note: 
+  - Key: event.sunken-bell.option-2.label
+    Values:
+    - 'Leave it'
+    Reviewed: 0
+    Note: 
+  - Key: event.sunken-bell.option-2.decline
+    Values:
+    - 'You leave the rope alone.'
+    Reviewed: 0
+    Note: 
+  - Key: event.drowned-font.title
+    Values:
+    - 'The Drowned Font'
+    Reviewed: 0
+    Note: 
+  - Key: event.drowned-font.prompt
+    Values:
+    - 'Everything else in this building has gone black. This water is still clean.'
+    Reviewed: 0
+    Note: 
+  - Key: event.drowned-font.option-1.label
+    Values:
+    - 'Wash'
+    Reviewed: 0
+    Note: 
+  - Key: event.drowned-font.option-1.success-1.text
+    Values:
+    - 'The water takes it all, and the font cracks.'
+    Reviewed: 0
+    Note: 
+  - Key: event.drowned-font.option-2.label
+    Values:
+    - 'Leave it'
+    Reviewed: 0
+    Note: 
+  - Key: event.drowned-font.option-2.decline
+    Values:
+    - 'You leave the water clean.'
+    Reviewed: 0
+    Note: 
+  - Key: event.undrowned-candle.title
+    Values:
+    - 'A Candle Under Water'
+    Reviewed: 0
+    Note: 
+  - Key: event.undrowned-candle.prompt
+    Values:
+    - 'It should not be burning. It is warm against your hand before you touch it.'
+    Reviewed: 0
+    Note: 
+  - Key: event.undrowned-candle.option-1.label
+    Values:
+    - 'Lift it out'
+    Reviewed: 0
+    Note: 
+  - Key: event.undrowned-candle.option-1.success-1.text
+    Values:
+    - 'It burns on in your hand, and you feel it in every limb.'
+    Reviewed: 0
+    Note: 
+  - Key: event.undrowned-candle.option-1.failure-1.text
+    Values:
+    - 'It goes out.'
+    Reviewed: 0
+    Note: 
+  - Key: event.undrowned-candle.option-2.label
+    Values:
+    - 'Leave it'
+    Reviewed: 0
+    Note: 
+  - Key: event.undrowned-candle.option-2.decline
+    Values:
+    - 'You leave it burning.'
+    Reviewed: 0
+    Note: 
+  - Key: event.last-parishioner.title
+    Values:
+    - 'The Last Parishioner'
+    Reviewed: 0
+    Note: 
+  - Key: event.last-parishioner.prompt
+    Values:
+    - 'She has not noticed the water. She asks if the service has ended.'
+    Reviewed: 0
+    Note: 
+  - Key: event.last-parishioner.option-1.label
+    Values:
+    - 'Tell her it has'
+    Reviewed: 0
+    Note: 
+  - Key: event.last-parishioner.option-1.success-1.text
+    Values:
+    - 'She nods, and is gone. Something is left on the pew.'
+    Reviewed: 0
+    Note: 
+  - Key: event.last-parishioner.option-1.failure-1.text
+    Values:
+    - 'She turns, and she is not alone.'
+    Reviewed: 0
+    Note: 
+  - Key: event.last-parishioner.option-2.label
+    Values:
+    - 'Sit with her'
+    Reviewed: 0
+    Note: 
+  - Key: event.last-parishioner.option-2.success-1.text
+    Values:
+    - 'You sit a while, and when you stand, nothing hurts. She does not look up.'
+    Reviewed: 0
+    Note: 
+  - Key: event.last-parishioner.option-3.label
+    Values:
+    - 'Leave her'
+    Reviewed: 0
+    Note: 
+  - Key: event.last-parishioner.option-3.decline
+    Values:
+    - 'You leave her to the service.'
+    Reviewed: 0
+    Note: 
+  - Key: event.stopped-sluice.title
+    Values:
+    - 'A Stopped Sluice'
+    Reviewed: 0
+    Note: 
+  - Key: event.stopped-sluice.prompt
+    Values:
+    - 'You notice the iron grate on the wall. The wheel still turns, a little.'
+    Reviewed: 0
+    Note: 
+  - Key: event.stopped-sluice.option-1.label
+    Values:
+    - 'Force the wheel'
+    Reviewed: 0
+    Note: 
+  - Key: event.stopped-sluice.option-1.success-1.text
+    Values:
+    - 'The water drops, and the grate swings open.'
+    Reviewed: 0
+    Note: 
+  - Key: event.stopped-sluice.option-1.failure-1.text
+    Values:
+    - 'The wheel breaks, and the grate stays shut.'
+    Reviewed: 0
+    Note: 
+  - Key: event.stopped-sluice.option-2.label
+    Values:
+    - 'Leave it'
+    Reviewed: 0
+    Note: 
+  - Key: event.stopped-sluice.option-2.decline
+    Values:
+    - 'You leave the wheel alone.'
+    Reviewed: 0
+    Note: 
+  - Key: event.pipe-eggs.title
+    Values:
+    - 'Eggs in the Pipe'
+    Reviewed: 0
+    Note: 
+  - Key: event.pipe-eggs.prompt
+    Values:
+    - 'Something laid these here for the warmth. They are worth a lot to the right alchemist, if they do not hatch.'
+    Reviewed: 0
+    Note: 
+  - Key: event.pipe-eggs.option-1.label
+    Values:
+    - 'Harvest them'
+    Reviewed: 0
+    Note: 
+  - Key: event.pipe-eggs.option-1.success-1.text
+    Values:
+    - 'You lift them out one at a time.'
+    Reviewed: 0
+    Note: 
+  - Key: event.pipe-eggs.option-1.failure-1.text
+    Values:
+    - 'They were closer to hatching than they looked.'
+    Reviewed: 0
+    Note: 
+  - Key: event.pipe-eggs.option-2.label
+    Values:
+    - 'Leave them'
+    Reviewed: 0
+    Note: 
+  - Key: event.pipe-eggs.option-2.decline
+    Values:
+    - 'You leave them to the warmth.'
+    Reviewed: 0
+    Note: 
+  - Key: event.weighing-scale.title
+    Values:
+    - 'The Weighing Scale'
+    Reviewed: 0
+    Note: 
+  - Key: event.weighing-scale.prompt
+    Values:
+    - 'One pan holds a covered dish. The other waits for whatever you think it is worth.'
+    Reviewed: 0
+    Note: 
+  - Key: event.weighing-scale.option-1.label
+    Values:
+    - 'Pay 120 gold'
+    Reviewed: 0
+    Note: 
+  - Key: event.weighing-scale.option-1.success-1.text
+    Values:
+    - 'The pans settle, and the dish uncovers itself.'
+    Reviewed: 0
+    Note: 
+  - Key: event.weighing-scale.option-2.label
+    Values:
+    - 'Leave it'
+    Reviewed: 0
+    Note: 
+  - Key: event.weighing-scale.option-2.decline
+    Values:
+    - 'You keep your gold.'
+    Reviewed: 0
+    Note: 
+  - Key: event.gilded-mimic.title
+    Values:
+    - 'The Gilded Chest'
+    Reviewed: 0
+    Note: 
+  - Key: event.gilded-mimic.prompt
+    Values:
+    - 'Everything else here has been looted. This has not, and the lid just moved.'
+    Reviewed: 0
+    Note: 
+  - Key: event.gilded-mimic.option-1.label
+    Values:
+    - 'Open it'
+    Reviewed: 0
+    Note: 
+  - Key: event.gilded-mimic.option-1.success-1.text
+    Values:
+    - 'It is only a chest, and it is full.'
+    Reviewed: 0
+    Note: 
+  - Key: event.gilded-mimic.option-1.failure-1.text
+    Values:
+    - 'It bites.'
+    Reviewed: 0
+    Note: 
+  - Key: event.gilded-mimic.option-2.label
+    Values:
+    - 'Leave it'
+    Reviewed: 0
+    Note: 
+  - Key: event.gilded-mimic.option-2.decline
+    Values:
+    - 'You back away from the chest.'
+    Reviewed: 0
+    Note: 
+  - Key: event.fence-stall.title
+    Values:
+    - 'The Fence''s Table'
+    Reviewed: 0
+    Note: 
+  - Key: event.fence-stall.prompt
+    Values:
+    - 'Nobody is here, and there is a note: leave something, take something.'
+    Reviewed: 0
+    Note: 
+  - Key: event.fence-stall.option-1.label
+    Values:
+    - 'Swap a consumable'
+    Reviewed: 0
+    Note: 
+  - Key: event.fence-stall.option-1.success-1.text
+    Values:
+    - 'You leave something, and take something.'
+    Reviewed: 0
+    Note: 
+  - Key: event.fence-stall.option-2.label
+    Values:
+    - 'Leave it'
+    Reviewed: 0
+    Note: 
+  - Key: event.fence-stall.option-2.decline
+    Values:
+    - 'You leave the table as it is.'
+    Reviewed: 0
+    Note: 
+  - Key: event.rigged-plate.title
+    Values:
+    - 'A Rigged Plate'
+    Reviewed: 0
+    Note: 
+  - Key: event.rigged-plate.prompt
+    Values:
+    - 'The purse is obvious. That is the point of it.'
+    Reviewed: 0
+    Note: 
+  - Key: event.rigged-plate.option-1.label
+    Values:
+    - 'Lift the purse'
+    Reviewed: 0
+    Note: 
+  - Key: event.rigged-plate.option-1.success-1.text
+    Values:
+    - 'You lift it off before the plate can rise.'
+    Reviewed: 0
+    Note: 
+  - Key: event.rigged-plate.option-1.failure-1.text
+    Values:
+    - 'The darts were not obvious.'
+    Reviewed: 0
+    Note: 
+  - Key: event.rigged-plate.option-2.label
+    Values:
+    - 'Leave it'
+    Reviewed: 0
+    Note: 
+  - Key: event.rigged-plate.option-2.decline
+    Values:
+    - 'You leave the purse on the plate.'
+    Reviewed: 0
+    Note: 
+  - Key: event.musty-tome.title
+    Values:
+    - 'A Musty Tome'
+    Reviewed: 0
+    Note: 
+  - Key: event.musty-tome.prompt
+    Values:
+    - 'A swollen leather tome lies open on a pedestal. Its pages are covered in mould and web.'
+    Reviewed: 0
+    Note: 
+  - Key: event.musty-tome.option-1.label
+    Values:
+    - 'Read it'
+    Reviewed: 0
+    Note: 
+  - Key: event.musty-tome.option-1.success-1.text
+    Values:
+    - 'Some of it stays with you, and your hands remember how.'
+    Reviewed: 0
+    Note: 
+  - Key: event.musty-tome.option-1.failure-1.text
+    Values:
+    - 'It reads badly, and the reading stays with you.'
+    Reviewed: 0
+    Note: 
+  - Key: event.musty-tome.option-2.label
+    Values:
+    - 'Clean it'
+    Reviewed: 0
+    Note: 
+  - Key: event.musty-tome.option-2.success-1.text
+    Values:
+    - 'Under the mould, something spits out onto the pedestal.'
+    Reviewed: 0
+    Note: 
+  - Key: event.musty-tome.option-2.failure-1.text
+    Values:
+    - 'The tome explodes.'
+    Reviewed: 0
+    Note: 
+  - Key: event.musty-tome.option-3.label
+    Values:
+    - 'Leave it'
+    Reviewed: 0
+    Note: 
+  - Key: event.musty-tome.option-3.decline
+    Values:
+    - 'You leave the book to the damp.'
+    Reviewed: 0
+    Note: 
+  - Key: event.treasury-hoard-small.title
+    Values:
+    - 'The Treasury'
+    Reviewed: 0
+    Note: 
+  - Key: event.treasury-hoard-small.prompt
+    Values:
+    - 'Strongboxes line the walls, prised open and emptied a long time ago. There is loose coin in the corners, and one gilded chest nobody has touched.'
+    Reviewed: 0
+    Note: 
+  - Key: room.event.tag.needs-item
+    Values:
+    - 'needs {item}'
+    Reviewed: 0
+    Note: 
+  - Key: room.event.tag.needs-consumable
+    Values:
+    - 'needs a consumable'
+    Reviewed: 0
+    Note: 
+  - Key: room.event.tag.needs-gold
+    Values:
+    - 'needs {amount} gold'
+    Reviewed: 0
+    Note: 
+  - Key: event-text.report.paid-gold
+    Values:
+    - 'Paid {amount} gold.'
+    Reviewed: 0
+    Note: 
+  - Key: event-text.report.used-item
+    Values:
+    - 'Used {item}.'
+    Reviewed: 0
+    Note: 
+  - Key: event-text.report.xp
+    Values:
+    - 'Every hero gains {amount} XP.'
+    Reviewed: 0
+    Note: 
+  - Key: event-text.report.charges
+    Values:
+    - '{amount} ability charges restored.'
+    Reviewed: 0
+    Note: 
+  - Key: event-text.report.charges-full
+    Values:
+    - 'Every ability was already full.'
+    Reviewed: 0
+    Note: 
+  - Key: event-text.report.cured
+    Values:
+    - 'Every curse on this floor is gone.'
+    Reviewed: 0
+    Note: 
+  - Key: event-text.report.nothing-to-cure
+    Values:
+    - 'There was nothing to wash away.'
+    Reviewed: 0
+    Note: 
+  - Key: event-text.report.all-stats
+    Values:
+    - '{hero}: every stat +{percent}% for this floor.'
     Reviewed: 0
     Note: 

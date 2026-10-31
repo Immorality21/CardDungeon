@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69b3836c2cb69fc4b815c96944749c08, type: 3}
+  m_Name: ParishionersMedal
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Items.ItemSO
+  Key: ParishionersMedal
+  Icon: {fileID: 21300000, guid: 1c5459fd110bf61bbcab62d13b9f2c02, type: 3}
+  Rarity: 1
+  ItemLevel: 6
+  FindChanceScale: 0
+  Category: 0
+  SlotType: 6
+  Bonuses:
+  - StatType: 5
+    BonusType: 0
+    Value: 7
+  - StatType: 7
+    BonusType: 0
+    Value: 12
+  Resistances: []
+  Triggers: []
+  Milestones: []
+  Set: {fileID: 0}
+  CraftOnly: 0
+  CraftResult: {fileID: 0}
+  CraftBase: {fileID: 0}
+  CraftMaterials: []
+  CraftGold: 0
+  KnownWithForge: 0
+  ConsumableEffect: 0
+  ConsumableAmount: 0
+  ConsumableCharges: 0
+  ConsumablePercent: 0
+  MaxStack: 1
+  RevisitFear: -1
+  RevisitRun: 

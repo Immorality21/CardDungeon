@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Assets.Scripts.Items;
 using UnityEngine;
 using ImmoralityGaming.Localization;
 
@@ -39,6 +40,18 @@ namespace Assets.Scripts.Rooms.Events
         public string LabelKey;
 
         public RoomEventOptionKind Kind = RoomEventOptionKind.StatCheck;
+
+        [Header("Who can choose this")]
+        [Tooltip("Shown but not selectable unless the party carries this item, and it is spent on " +
+                 "choosing: the key to a door.")]
+        public ItemSO RequiredItem;
+
+        [Tooltip("Shown but not selectable while the party carries no consumable: a trade needs " +
+                 "something to trade.")]
+        public bool NeedsConsumable;
+
+        [Tooltip("Paid from the gold found on this floor, and not selectable while there is less.")]
+        [Min(0)] public int GoldCost;
 
         [System.NonSerialized] private string _declineText;
 

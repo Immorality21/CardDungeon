@@ -24,7 +24,15 @@ MonoBehaviour:
   MomentumBias: 0.498
   TreasureRooms: 0
   RestRooms: 0
-  RoomEvents: []
+  RoomEvents:
+  - Event: {fileID: 11400000, guid: 3ee0344fb8ae2663633707634548482a, type: 2}
+    ChancePercent: 1
+  - Event: {fileID: 11400000, guid: b731fb0552a046489a7988e04a9a52fc, type: 2}
+    ChancePercent: 10
+  - Event: {fileID: 11400000, guid: bcde414097f3871e5fdfe308907624ae, type: 2}
+    ChancePercent: 10
+  - Event: {fileID: 11400000, guid: af3410ec2a3afd0e2aee0eb0a6dd0b36, type: 2}
+    ChancePercent: 12
   MaterialTable:
   - Item: {fileID: 11400000, guid: c0de5211aa020000000000000000ab02, type: 2}
     Chance: 0.6
@@ -36,6 +44,9 @@ MonoBehaviour:
     MaxQuantity: 2
   GuaranteedMaterials: []
   RecipeTable: []
+  EventRecipes:
+  - {fileID: 11400000, guid: 81bef47b0ebde7e978f5978283a24d4f, type: 2}
+  - {fileID: 11400000, guid: d8176e862cd9cb2faefdefbc352be007, type: 2}
   CombatBackground: {fileID: 21300000, guid: f274a8fe29ba42bdb3715699714536a3, type: 3}
   MapBackdrop: {fileID: 0}
   Biome: {fileID: 11400000, guid: 85a270acbc970c24e81c1e576867e4b7, type: 2}

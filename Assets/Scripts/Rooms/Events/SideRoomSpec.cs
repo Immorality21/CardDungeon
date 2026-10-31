@@ -23,6 +23,9 @@ namespace Assets.Scripts.Rooms.Events
                  "object becomes a way in and a way back, walked through as often as the party likes.")]
         public bool Mandatory;
 
+        [Tooltip("Always here, every one of them: a boss and its escort. Separate from the roll below.")]
+        public List<EnemySO> Guards = new List<EnemySO>();
+
         [Range(0f, 100f)]
         [Tooltip("Percent chance anything is waiting in the room.")]
         public float EnemyChancePercent = 100f;
@@ -45,6 +48,16 @@ namespace Assets.Scripts.Rooms.Events
         public bool IsSet
         {
             get { return Template != null; }
+        }
+
+        /// <summary>Whether a fight can be waiting in the room.</summary>
+        public bool HasFoes
+        {
+            get
+            {
+                return (Guards != null && Guards.Count > 0)
+                    || (Enemies != null && Enemies.Count > 0 && EnemyChancePercent > 0f);
+            }
         }
 
         /// <summary>How many bodies wait in the room, from two rolls in [0, 1).</summary>

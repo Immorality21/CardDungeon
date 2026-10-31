@@ -13,9 +13,25 @@ clear. See `Assets/Scripts/Rooms/CLAUDE.md`.
   (`RoomEventObjectTests` guards it, and that every listed event has both sprites).
 - **Stronger versions on deeper levels are their own assets** sharing the art (`FallenScout`,
   `FallenScoutCatacombs`, `FallenScoutSepulchre`, `FallenScoutDeep`; `SealedTombDeep`).
-- **Only the Crypt has events for now.** The rest are `RoomEventSO.Parked` (`CeilingShaft`, `Cutpurse`,
-  `DrownedOffering`, `MustyTome`, `TreasuryHoard`): no level lists them, and the analyzer does not call
-  that a mistake. The design lives in the Room Event Workbook (`docs/plans/DUNGEON_ROOMS.md`).
+- **Every biome has its events** (built 2026-10-31 from the owner's filled-in workbook, listed on each
+  level). `CeilingShaft` and `DrownedOffering` were cut and stay `RoomEventSO.Parked`: no level lists
+  them, and the analyzer does not call that a mistake. The design lives in the Room Event Workbook
+  (`docs/plans/DUNGEON_ROOMS.md`). A level's chance is **per room**: on a big floor a small number is
+  not rare (2% on the 31-room Gilded Vault is about 40% a visit, so the Gilded Chest is 0.5% there).
+- **Options can have a condition** (`RoomEventOption.RequiredItem` / `NeedsConsumable` / `GoldCost`):
+  `RoomEventResolver.BlockOf` is the pure check. A blocked option stays in the list, greyed, its tag
+  saying what is missing. `RoomEventRunner.PayFor` takes the gold and spends the item.
+- **More outcomes**: `XpPerHero`, `ChargesRestored` (every ability), `CuresAfflictions` (this floor's
+  curses only, never a loss for the run), `PaysLevelMaterial` (a random `MaterialTable` entry),
+  `AllStatsPercent` (flat amounts worked out once, counted as level-long), `PaysPoolRecipe`.
+- **Recipe pool**: `LevelDefinitionSO.EventRecipes`, read by `DungeonManager.OpenEventRecipes`. A
+  recipe's `RevisitFear` sets the Fear level it opens at. An event that pays from the pool is not placed
+  once nothing in it is open.
+- **`RoomEventPlacement.NorthWall`**: the object hangs on the wall above a free floor tile
+  (`Room.FreeNorthWallTile`), claims no floor, and is used from below, by Enter or a click
+  (`RoomActionUI.TryWalkToWallEvent`). The Stopped Sluice and the Door of Fire.
+- **Key items** (`ItemCategory.KeyItem`): no direct use, opened by `RequiredItem`, kept between runs
+  until spent, listed with the materials. Banked on a level clear like any find.
 - **The object**: `RoomEventSO.WorldSprite` / `SpentSprite`, placed by `DungeonManager.PlaceEventMarker`,
   swapped in `Room.MarkEventResolved`, art in `Sprites/Environment/Events`.
 - **`LootOneOf`**: an outcome that always pays one item. With `AwakenedEnemies` it waits for the fight
@@ -25,10 +41,12 @@ clear. See `Assets/Scripts/Rooms/CLAUDE.md`.
   loss, for the run: `LevelAffliction.ForRun`, kept in `RunSaveData.RunAfflictions`.
 - **`SideRoom` (`SideRoomSpec`)**: a room off the floor's map, with no doors (`RoomManager.BuildSideRoom`,
   `DungeonManager.SideRoomFor`). It is not in `CurrentRooms`, has `RoomIndex` -1, and saving from one
-  saves its `HostRoom`. `Mandatory` (the Bone Choir) takes the party there at once and only resolves the
-  event when the fight is won, so quitting mid-fight leaves the event to do again. Otherwise (the Choked
-  Passage) the spent object is the way in, `Room.ReturnMarker` the way back, and `SideRoomCleared` is saved
-  on the host. **No Flee in a side room, and no map.**
+  saves its `HostRoom`. Every outcome that opens one walks the party in at once. `Mandatory` (the Bone
+  Choir) only resolves the event when the fight is won, so quitting mid-fight leaves the event to do
+  again. Otherwise (the Choked Passage, the Sluice, the Door of Fire) the spent object is the way back in,
+  `Room.ReturnMarker` the way out, and `SideRoomCleared` is saved on the host. `Guards` always stand there,
+  all of them, on top of the `Enemies` roll: the Prince and his escort. A chest's `ChestLoot` never pays a
+  recipe already known. **No Flee in a side room, and no map.**
 - **`SandboxConfigSO.RoomEvent`** stands any event in the encounter room (`Sandbox/CryptEvents.asset`).
 
 ## Files

@@ -226,6 +226,19 @@ namespace Assets.Scripts.Progression
             }
         }
 
+        /// <summary>Spends gold found on the current level. False, and nothing taken, when there is too little.</summary>
+        public bool SpendPendingGold(int amount, EconomySource source)
+        {
+            if (amount <= 0 || amount > _pendingRunGold)
+            {
+                return false;
+            }
+
+            _pendingRunGold -= amount;
+            Publish(Currency.Gold, -amount, source, pending: true);
+            return true;
+        }
+
         /// <summary>Forfeit the current level's accumulated gold (party death, leaving the dungeon).</summary>
         public void DiscardPendingGold()
         {

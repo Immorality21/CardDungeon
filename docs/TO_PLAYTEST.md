@@ -116,3 +116,13 @@ does (focus), so press them for real.
       and the hit); change both.
 - [ ] **The Hero Workbook** still says "Heal -> Renew" for the Paladin's healer branch; the game's copy
       now says "Holy Touch -> Renew".
+
+## Room events in every biome (added 2026-10-31)
+
+- **Choked Passage: crashed on WebGL (itch.io).** Clean in the editor. Copy the browser console (F12) when it happens again.
+- **Door of Fire on Emberfall:** can a party beat the Prince (308 health) and two Elementals (73 each)? Is the chest worth the key?
+- **Walking into opened rooms:** every event that opens a room now takes the party straight in. Does that read well?
+- **Wall objects:** do the Sluice and the Door read as part of the wall, at any spot on it?
+- **Weighing Scale at 120 gold:** usually affordable when the party reaches it?
+- **Sewerwalker on the Rogue:** does it feel like a rogue set?
+- **Event density:** Reed Cage and Crucible at 25% per room on small floors. Too many events a floor?

@@ -1,0 +1,67 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56867968c6cadda4fa0871e6572f8249, type: 3}
+  m_Name: Mimic
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Enemies.EnemySO
+  Key: Mimic
+  Sprite: {fileID: 21300000, guid: 577cafca5ea45dae34ea38516025171d, type: 3}
+  AnimationFrames:
+  - {fileID: -4141817773342777534, guid: 00366f94ac46a3ae69e64b3d57f82d45, type: 3}
+  - {fileID: 4119179973865602462, guid: 00366f94ac46a3ae69e64b3d57f82d45, type: 3}
+  - {fileID: 100827220157303006, guid: 00366f94ac46a3ae69e64b3d57f82d45, type: 3}
+  AnimationFps: 4
+  HitFrames:
+  - {fileID: 4904327379372963058, guid: 698bb28c0153a27c9027b8b65dcc800f, type: 3}
+  - {fileID: -2202159102496537776, guid: 698bb28c0153a27c9027b8b65dcc800f, type: 3}
+  IsBoss: 1
+  CombatScale: 1.4
+  Traits: 0
+  BaseStats:
+    Values:
+    - Type: 1
+      Amount: 7
+    - Type: 2
+      Amount: 8
+    - Type: 3
+      Amount: 4
+    - Type: 4
+      Amount: 2
+    - Type: 5
+      Amount: 3
+    - Type: 7
+      Amount: 70
+  XpReward: 70
+  GoldReward: 350
+  AttackDamageType: 0
+  Archetype: 4
+  Behavior: {fileID: 11400000, guid: 7e5ad131807424d44aa814f2953fa832, type: 2}
+  Spells:
+  - Magic: {fileID: 11400000, guid: 36201a51cb01429fbed42d98c1e23162, type: 2}
+    CastWeight: 1
+  - Magic: {fileID: 11400000, guid: 2ca64f0892a84f2181d73f56d8fdf4ef, type: 2}
+    CastWeight: 1
+  Resistances:
+  - DamageType: 3
+    Percent: 50
+  - DamageType: 0
+    Percent: 25
+  - DamageType: 1
+    Percent: -75
+  StatusImmunities: 
+  LootTable:
+  - Item: {fileID: 11400000, guid: c0de5211aa050000000000000000ab05, type: 2}
+    Chance: 1
+    MinQuantity: 2
+    MaxQuantity: 4
+  SalvageTable: []
+  Triggers: []
+  Flinches: 1

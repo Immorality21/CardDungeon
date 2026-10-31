@@ -319,6 +319,44 @@ namespace Assets.Scripts.Rooms
             return new Vector3(spot.x, spot.y, z);
         }
 
+        /// <summary>
+        /// The wall tile nearest the middle of the north wall with no door in it and its floor tile
+        /// free, so it can be walked up to. Null when the wall has none. The same answer until
+        /// something else claims a tile, so a resumed floor puts the object back where it was.
+        /// </summary>
+        public Vector2Int? FreeNorthWallTile()
+        {
+            int topRow = GridPosition.y + RoomSO.Height - 1;
+            var taken = new List<int>();
+            foreach (var door in Doors)
+            {
+                if (door != null && door.DirectionFrom(this) == Vector2Int.up)
+                {
+                    taken.Add(Mathf.RoundToInt(door.GetPositionInRoom(this).x));
+                }
+            }
+            foreach (var spot in _spots.Values)
+            {
+                if (Mathf.RoundToInt(spot.y) == topRow)
+                {
+                    taken.Add(Mathf.RoundToInt(spot.x));
+                }
+            }
+
+            int middle = GridPosition.x + RoomSO.Width / 2;
+            for (int offset = 0; offset < RoomSO.Width; offset++)
+            {
+                foreach (int x in new[] { middle - offset, middle + offset })
+                {
+                    if (x >= GridPosition.x && x < GridPosition.x + RoomSO.Width && !taken.Contains(x))
+                    {
+                        return new Vector2Int(x, topRow + 1);
+                    }
+                }
+            }
+            return null;
+        }
+
         /// <summary>Claims one exact tile, for what has its own place in a side room.</summary>
         public Vector3 ClaimTile(object owner, Vector2Int tile, float z)
         {

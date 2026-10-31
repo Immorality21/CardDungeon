@@ -87,6 +87,25 @@ namespace Assets.Scripts.Rooms.Events
             return true;
         }
 
+        /// <summary>Whether <paramref name="definition"/> pays from the level's recipe pool, so an
+        /// empty pool leaves it nothing to offer.</summary>
+        public static bool PaysPoolRecipe(RoomEventSO definition)
+        {
+            if (definition?.Options == null)
+            {
+                return false;
+            }
+
+            foreach (var option in definition.Options)
+            {
+                if (option?.Success != null && option.Success.Exists(o => o != null && o.PaysPoolRecipe))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         /// <summary>
         /// Whether every hero <paramref name="definition"/> can hand over is already owned - in which
         /// case it is not placed at all. An event whose point is meeting someone has nothing left to
@@ -168,6 +187,10 @@ namespace Assets.Scripts.Rooms.Events
 
                     foreach (var outcome in pool)
                     {
+                        if (outcome != null && outcome.AllStatsPercent > 0f)
+                        {
+                            return true;
+                        }
                         if (outcome?.Effects == null)
                         {
                             continue;

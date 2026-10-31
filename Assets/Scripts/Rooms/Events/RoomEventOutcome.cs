@@ -89,6 +89,25 @@ namespace Assets.Scripts.Rooms.Events
         [Tooltip("Added to the run's pending gold, so it is banked on level-clear and lost on death.")]
         public int Gold;
 
+        [Tooltip("XP for every hero in the party, committed on level clear like a kill's.")]
+        [Min(0)] public int XpPerHero;
+
+        [Tooltip("Charges given back to every ability of every hero, up to its maximum.")]
+        [Min(0)] public int ChargesRestored;
+
+        [Tooltip("Removes every curse the party carries for this floor. A loss for the whole run stays.")]
+        public bool CuresAfflictions;
+
+        [Tooltip("Pays one random entry of this level's MaterialTable.")]
+        public bool PaysLevelMaterial;
+
+        [Tooltip("Pays one recipe of this level's EventRecipes. The event is not placed once none is left.")]
+        public bool PaysPoolRecipe;
+
+        [Tooltip("Raises every stat of the targets by this percent for the rest of the level, held " +
+                 "as flat amounts like any affliction.")]
+        [Range(0f, 100f)] public float AllStatsPercent;
+
         [Tooltip("Spends one consumable from the belt, if the party is carrying any. The cheapest " +
                  "failure cost there is: it hurts most when the party is already thin.")]
         public bool LoseAConsumable;

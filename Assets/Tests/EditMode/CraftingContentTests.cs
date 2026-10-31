@@ -67,8 +67,19 @@ namespace Tests.EditMode
                 Add(enemy.LootTable);
                 Add(enemy.SalvageTable);
             }
+            foreach (var roomEvent in LoadAll<Assets.Scripts.Rooms.Events.RoomEventSO>())
+            {
+                foreach (var option in roomEvent.Options)
+                {
+                    foreach (var outcome in option.Success)
+                    {
+                        Add(outcome.SideRoom.ChestLoot.Select(i => new LootDrop { Item = i }));
+                    }
+                }
+            }
             foreach (var level in LoadAll<LevelDefinitionSO>())
             {
+                Add(level.EventRecipes.Select(i => new LootDrop { Item = i }));
                 Add(level.MaterialTable);
                 Add(level.GuaranteedMaterials);
                 Add(level.RecipeTable);

@@ -1,0 +1,77 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2774e2128e940c2ba863d0a3b1314ce, type: 3}
+  m_Name: StoppedSluice
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Rooms.Events.RoomEventSO
+  Key: StoppedSluice
+  GoverningStat: 1
+  WorldSprite: {fileID: 21300000, guid: 87b52ba839b9b38b9ceb92f2afb1ce88, type: 3}
+  SpentSprite: {fileID: 21300000, guid: 31ab9b796d040defcef45f4f667dd081, type: 3}
+  Placement: 1
+  Parked: 0
+  SpawnModifierStat: 0
+  SpawnModifierRate: 0
+  SpawnRequirements: []
+  Difficulty: 9
+  Options:
+  - LabelKey: event.stopped-sluice.option-1.label
+    Kind: 0
+    DeclineTextKey: 
+    Success:
+    - TextKey: event.stopped-sluice.option-1.success-1.text
+      Weight: 1
+      WeightModifierStat: 0
+      WeightModifierRate: 0
+      Effects: []
+      Targets: 0
+      LootTable: []
+      LootOneOf: []
+      RunStatLoss: 0
+      RunStatLossPercent: 0
+      SideRoom:
+        Template: {fileID: 11400000, guid: cae357e7460da5d45b806b7fdde53d54, type: 2}
+        Mandatory: 0
+        Guards: []
+        EnemyChancePercent: 0
+        Enemies: []
+        MinEnemies: 0
+        MaxEnemies: 0
+        Chest: 1
+        ChestLootChancePercent: 100
+        ChestLoot:
+        - {fileID: 11400000, guid: fde3095e56e2fa3045857d90513d0fa9, type: 2}
+        - {fileID: 11400000, guid: 979653d10f417b3551ff636c10bec049, type: 2}
+        - {fileID: 11400000, guid: ec469987af2b6854913b2ab1fd7287d1, type: 2}
+      Gold: 0
+      AwakenedEnemies: []
+      JoinsHero: {fileID: 0}
+    Failure:
+    - TextKey: event.stopped-sluice.option-1.failure-1.text
+      Weight: 1
+      WeightModifierStat: 0
+      WeightModifierRate: 0
+      Effects: []
+      Targets: 0
+      LootTable: []
+      LootOneOf: []
+      RunStatLoss: 0
+      RunStatLossPercent: 0
+      SideRoom:
+        Template: {fileID: 0}
+      Gold: 0
+      AwakenedEnemies: []
+      JoinsHero: {fileID: 0}
+  - LabelKey: event.stopped-sluice.option-2.label
+    Kind: 2
+    DeclineTextKey: event.stopped-sluice.option-2.decline
+    Success: []
+    Failure: []

@@ -5,6 +5,16 @@ using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Rooms.Events
 {
+    /// <summary>Where an event's object stands in its room.</summary>
+    public enum RoomEventPlacement
+    {
+        /// <summary>On a floor tile, solid, walked up to from any side.</summary>
+        Floor = 0,
+
+        /// <summary>On the north wall, above a free floor tile: a grate, a door.</summary>
+        NorthWall = 1
+    }
+
     /// <summary>
     /// A gamble the party's stats resolve, offered by a room. This is what turns
     /// <c>RoomSO.ExamineOptions</c> / <c>ActionOptions</c> from flavour strings into a decision:
@@ -56,6 +66,8 @@ namespace Assets.Scripts.Rooms.Events
 
         [Tooltip("What that object looks like once the event is resolved.")]
         public Sprite SpentSprite;
+
+        public RoomEventPlacement Placement = RoomEventPlacement.Floor;
 
         [Header("Turning up at all")]
         [Tooltip("Set aside until it is reworked: no level lists it, and the balance analyzer does " +

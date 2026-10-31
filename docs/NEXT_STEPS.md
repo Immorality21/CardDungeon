@@ -414,10 +414,10 @@ backlog.**
 | **1** | Spike: one biome (crypt) on one floor, sandbox only (`Sandbox/RoomSpike`) | ✅ **built 2026-10-30, signed off by the owner** |
 | **7** | **Tile walking, moved first** (owner, 2026-10-30): arrows/WASD walk, doors open by walking through them, doors drawn by the tilemap | ✅ **built 2026-10-30**: clicks walk, contents are solid and used with Enter, doors swing, all nine heroes have 4-direction walk cycles; **next: phase 2** |
 | **2** | Biomes and props on every floor | ✅ **built 2026-10-31**: five biomes on every level, foes a full tile, saves stamped, manual layouts converted, the old look retired |
-| **3** | Events you can see, per biome and level | ✅ **Crypt built 2026-10-31**, other biomes parked until defined; Shrine dropped for now (owner). **Next: the Crypt playtest** |
+| **3** | Events you can see, per biome and level | ✅ **all five biomes built 2026-10-31** from the owner's workbook; Shrine dropped for now (owner). **Next: the events playtest** (`TO_PLAYTEST.md`), and the Choked Passage's WebGL crash |
 | **4-6, 8** | Authored shapes · hidden rooms · branching routes · Elites | later |
 | — | **No more room bar** (owner, 2026-10-31): every room action triggered by interacting with its object | after phases 2 and 3, when everything is migrated |
-| — | **More room events, per biome** (owner, 2026-10-31) | [Room Event Workbook](https://claude.ai/artifact/94jVJSDSqNPnwWWqUD9z6H): Crypt done, four biomes to define |
+| — | **More room events, per biome** (owner, 2026-10-31) | ✅ [Room Event Workbook](https://claude.ai/artifact/94jVJSDSqNPnwWWqUD9z6H) built, 31 events. Open: **more curses on the Drowned Chapel's floors** (owner): A Candle Under Water's fail is the only one, so the Drowned Font usually has nothing to wash; it heals as well for now |
 | — | **Biome lights** (owner, 2026-10-31): a light mood per biome, torches that glow | post-demo, very late |
 
 ### [Polish, information and content](plans/POLISH_CONTENT.md)

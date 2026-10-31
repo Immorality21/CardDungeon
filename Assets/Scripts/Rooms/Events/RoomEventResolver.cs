@@ -40,6 +40,15 @@ namespace Assets.Scripts.Rooms.Events
         Danger = 2
     }
 
+    /// <summary>Why an option cannot be chosen right now.</summary>
+    public enum OptionBlock
+    {
+        None = 0,
+        NeedsItem = 1,
+        NeedsConsumable = 2,
+        NeedsGold = 3
+    }
+
     /// <summary>
     /// The maths behind a room event: how a stat becomes odds, how odds become words, and how a
     /// weighted outcome pool resolves. Deterministic - every roll is supplied by the caller - in the
@@ -48,10 +57,28 @@ namespace Assets.Scripts.Rooms.Events
     /// </summary>
     public static class RoomEventResolver
     {
+        /// <summary>What stands in the way of choosing <paramref name="option"/>, if anything.</summary>
+        public static OptionBlock BlockOf(RoomEventOption option, bool hasRequiredItem, bool hasConsumable, int pendingGold)
+        {
+            if (option == null)
+            {
+                return OptionBlock.None;
+            }
+            if (option.RequiredItem != null && !hasRequiredItem)
+            {
+                return OptionBlock.NeedsItem;
+            }
+            if (option.NeedsConsumable && !hasConsumable)
+            {
+                return OptionBlock.NeedsConsumable;
+            }
+            return pendingGold < option.GoldCost ? OptionBlock.NeedsGold : OptionBlock.None;
+        }
+
         /// <summary>The worst thing <paramref name="option"/>'s success pool can do.</summary>
         public static OptionRisk RiskOf(RoomEventOption option)
         {
-            var risk = OptionRisk.Safe;
+            var risk = option != null && option.GoldCost > 0 ? OptionRisk.Price : OptionRisk.Safe;
             if (option?.Success == null)
             {
                 return risk;
@@ -65,8 +92,7 @@ namespace Assets.Scripts.Rooms.Events
                 }
 
                 bool fight = (outcome.AwakenedEnemies != null && outcome.AwakenedEnemies.Count > 0)
-                    || (outcome.SideRoom != null && outcome.SideRoom.IsSet && outcome.SideRoom.Enemies != null
-                        && outcome.SideRoom.Enemies.Count > 0 && outcome.SideRoom.EnemyChancePercent > 0f);
+                    || (outcome.SideRoom != null && outcome.SideRoom.IsSet && outcome.SideRoom.HasFoes);
                 bool hurts = outcome.Effects != null
                     && outcome.Effects.Exists(e => e != null && e.EffectType == Cards.SpellEffectType.Damage);
                 if (fight || hurts)

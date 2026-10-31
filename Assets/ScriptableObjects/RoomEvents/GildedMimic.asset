@@ -1,0 +1,66 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2774e2128e940c2ba863d0a3b1314ce, type: 3}
+  m_Name: GildedMimic
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Rooms.Events.RoomEventSO
+  Key: GildedMimic
+  GoverningStat: 6
+  WorldSprite: {fileID: 21300000, guid: b24c664b0bbcada90da4f405e1923834, type: 3}
+  SpentSprite: {fileID: 21300000, guid: b02053db33a7bc9c686cfa8c160ac930, type: 3}
+  Placement: 0
+  Parked: 0
+  SpawnModifierStat: 0
+  SpawnModifierRate: 0
+  SpawnRequirements: []
+  Difficulty: 14
+  Options:
+  - LabelKey: event.gilded-mimic.option-1.label
+    Kind: 0
+    DeclineTextKey: 
+    Success:
+    - TextKey: event.gilded-mimic.option-1.success-1.text
+      Weight: 1
+      WeightModifierStat: 0
+      WeightModifierRate: 0
+      Effects: []
+      Targets: 0
+      LootTable: []
+      LootOneOf: []
+      RunStatLoss: 0
+      RunStatLossPercent: 0
+      SideRoom:
+        Template: {fileID: 0}
+      Gold: 400
+      AwakenedEnemies: []
+      JoinsHero: {fileID: 0}
+    Failure:
+    - TextKey: event.gilded-mimic.option-1.failure-1.text
+      Weight: 1
+      WeightModifierStat: 0
+      WeightModifierRate: 0
+      Effects: []
+      Targets: 0
+      LootTable: []
+      LootOneOf: []
+      RunStatLoss: 0
+      RunStatLossPercent: 0
+      SideRoom:
+        Template: {fileID: 0}
+      Gold: 0
+      AwakenedEnemies:
+      - {fileID: 11400000, guid: b5f9431c9678a46ab3e2803e0508f3ea, type: 2}
+      JoinsHero: {fileID: 0}
+  - LabelKey: event.gilded-mimic.option-2.label
+    Kind: 2
+    DeclineTextKey: event.gilded-mimic.option-2.decline
+    Success: []
+    Failure: []

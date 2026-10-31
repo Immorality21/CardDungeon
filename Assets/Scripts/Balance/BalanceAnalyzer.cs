@@ -521,9 +521,71 @@ namespace Assets.Scripts.Balance
                             result[enemy] = level.Party;
                         }
                     }
+                    foreach (var enemy in EventEnemies(level.Entry))
+                    {
+                        if (enemy != null && !result.ContainsKey(enemy))
+                        {
+                            result[enemy] = level.Party;
+                        }
+                    }
                 }
             }
             return result;
+        }
+
+        /// <summary>
+        /// What a level's room events can put in front of the party: what they wake, and what stands
+        /// in the rooms they open. An enemy met only this way is measured against the party that
+        /// reaches that floor, not the starting one.
+        /// </summary>
+        private static IEnumerable<EnemySO> EventEnemies(RunLevelEntry entry)
+        {
+            var level = entry != null ? entry.LevelTemplate : null;
+            if (level == null || level.RoomEvents == null)
+            {
+                yield break;
+            }
+
+            foreach (var listed in level.RoomEvents)
+            {
+                if (listed?.Event?.Options == null)
+                {
+                    continue;
+                }
+                foreach (var option in listed.Event.Options)
+                {
+                    foreach (var pool in new[] { option?.Success, option?.Failure })
+                    {
+                        if (pool == null)
+                        {
+                            continue;
+                        }
+                        foreach (var outcome in pool)
+                        {
+                            if (outcome == null)
+                            {
+                                continue;
+                            }
+                            foreach (var enemy in outcome.AwakenedEnemies)
+                            {
+                                yield return enemy;
+                            }
+                            if (outcome.SideRoom == null)
+                            {
+                                continue;
+                            }
+                            foreach (var enemy in outcome.SideRoom.Guards)
+                            {
+                                yield return enemy;
+                            }
+                            foreach (var enemy in outcome.SideRoom.Enemies)
+                            {
+                                yield return enemy;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>The party the run curve meets this placement with (its run and floor), or null for an

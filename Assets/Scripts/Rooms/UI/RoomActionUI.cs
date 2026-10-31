@@ -759,7 +759,15 @@ namespace Assets.Scripts.Rooms
                 text.AddToClassList("cd-event-option__text");
                 btn.Add(text);
                 // Which choices are gambles, on the row itself rather than in prose above the list.
-                var tag = new Label(OptionTag(option, roomEvent, band, clarity, out string tone)) { pickingMode = PickingMode.Ignore };
+                var block = BlockOf(option);
+                string tagText = OptionTag(option, roomEvent, band, clarity, out string tone);
+                if (block != Events.OptionBlock.None)
+                {
+                    btn.SetEnabled(false);
+                    tagText = BlockedTag(option, block);
+                    tone = "bad";
+                }
+                var tag = new Label(tagText) { pickingMode = PickingMode.Ignore };
                 tag.AddToClassList("cd-event-tag");
                 tag.AddToClassList("cd-event-tag--" + tone);
                 btn.Add(tag);
@@ -777,6 +785,29 @@ namespace Assets.Scripts.Rooms
 
             _eventNav?.Reset();
             SetShown(_eventWindow, true);
+        }
+
+        private static Events.OptionBlock BlockOf(Events.RoomEventOption option)
+        {
+            var inventory = InventoryManager.HasInstance ? InventoryManager.Instance : null;
+            return Events.RoomEventResolver.BlockOf(option,
+                inventory != null && inventory.Holds(option.RequiredItem),
+                inventory != null && inventory.HasAnyConsumable(),
+                MetaProgressManager.HasInstance ? MetaProgressManager.Instance.PendingRunGold : 0);
+        }
+
+        /// <summary>What a greyed-out choice is waiting for, in its right-hand tag.</summary>
+        private static string BlockedTag(Events.RoomEventOption option, Events.OptionBlock block)
+        {
+            switch (block)
+            {
+                case Events.OptionBlock.NeedsItem:
+                    return Loc.Format("room.event.tag.needs-item", ("item", option.RequiredItem.DisplayName));
+                case Events.OptionBlock.NeedsConsumable:
+                    return Loc.Get("room.event.tag.needs-consumable");
+                default:
+                    return Loc.Format("room.event.tag.needs-gold", ("amount", option.GoldCost));
+            }
         }
 
         /// <summary>
@@ -865,6 +896,11 @@ namespace Assets.Scripts.Rooms
             }
 
             var option = _currentEvent.Options[optionIndex];
+            if (BlockOf(option) != Events.OptionBlock.None)
+            {
+                return;
+            }
+
             SetShown(_eventWindow, false);
             _eventDecline = null;
 
@@ -892,6 +928,7 @@ namespace Assets.Scripts.Rooms
                 pool, UnityEngine.Random.Range(0f, 1f), _eventActingHero);
             var outcome = outcomeIndex >= 0 ? pool[outcomeIndex] : null;
 
+            var paid = _eventRunner.PayFor(option);
             var report = _eventRunner.Apply(
                 outcome,
                 succeeded,
@@ -899,6 +936,7 @@ namespace Assets.Scripts.Rooms
                 GameManager.Instance.Party,
                 _eventActingHero,
                 DungeonManager.HasInstance ? DungeonManager.Instance.Afflictions : null);
+            report.Lines.InsertRange(0, paid);
 
             // The party window reports what the outcome did at once, not after the dialog is dismissed.
             RefreshPartyStatus();
@@ -919,8 +957,10 @@ namespace Assets.Scripts.Rooms
                 }
             }
 
+            // A room the outcome opened is walked into at once; afterwards the object is the way back in.
+            bool opensRoom = outcome != null && outcome.SideRoom != null && outcome.SideRoom.IsSet;
             ShowEventResult(report, option.Kind == Events.RoomEventOptionKind.StatCheck ? (bool?)succeeded : null,
-                arena ? outcome : null);
+                opensRoom ? outcome : null);
         }
 
         private void ShowEventResult(Events.RoomEventOutcomeReport report, bool? checkPassed = null, Events.RoomEventOutcome arena = null)
@@ -951,7 +991,7 @@ namespace Assets.Scripts.Rooms
 
                 if (arena != null)
                 {
-                    EnterSideRoom(_currentRoom, arena.SideRoom, arena.LootOneOf);
+                    EnterSideRoom(_currentRoom, arena.SideRoom, arena.SideRoom.Mandatory ? arena.LootOneOf : null);
                 }
                 else if (woken)
                 {
@@ -2429,6 +2469,11 @@ namespace Assets.Scripts.Rooms
                 return;
             }
 
+            if (TryWalkToWallEvent(world))
+            {
+                return;
+            }
+
             if (_currentRoom != null && _currentRoom.IsSideRoom)
             {
                 SetWalkGoal(null, _currentRoom, TileWalkOps.NearestFloorTile(FloorOf(_currentRoom), world));
@@ -2448,6 +2493,34 @@ namespace Assets.Scripts.Rooms
                 FloatingTextHandler.Instance.CreateFloatingText(
                     new Vector3(world.x, world.y, -2f), Loc.Get("room.map.no-safe-way"), new Color(1f, 0.75f, 0.45f));
             }
+        }
+
+        /// <summary>A click on an object on the wall walks to the floor tile below it and uses it.</summary>
+        private bool TryWalkToWallEvent(Vector2 world)
+        {
+            var marker = _currentRoom != null ? _currentRoom.EventMarker : null;
+            var party = GameManager.HasInstance ? GameManager.Instance.Party : null;
+            if (marker == null || party == null || _currentRoom.RoomEvent == null
+                || _currentRoom.RoomEvent.Placement != Events.RoomEventPlacement.NorthWall)
+            {
+                return false;
+            }
+
+            var tile = Vector2Int.RoundToInt(marker.transform.position);
+            if (Vector2Int.RoundToInt(world) != tile)
+            {
+                return false;
+            }
+
+            var below = tile + Vector2Int.down;
+            var path = TileWalkOps.Path(party.Tile, below, FloorOf(_currentRoom), _currentRoom.SolidTiles(party.Tile));
+            if (path == null)
+            {
+                return false;
+            }
+            _walkUseTile = tile;
+            _walk.Follow(path);
+            return true;
         }
 
         /// <summary>

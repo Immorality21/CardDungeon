@@ -54,6 +54,11 @@ namespace Assets.Scripts.Dungeon
                  "like every other gain. Enemy drop tables can carry recipes too.")]
         public List<LootDrop> RecipeTable = new List<LootDrop>();
 
+        [Tooltip("Recipes a room event can pay on this level (RoomEventOutcome.PaysPoolRecipe), found " +
+                 "no other way. A recipe's RevisitFear sets the Fear level it opens at. The event stops " +
+                 "turning up once the party knows all it can reach here.")]
+        public List<ItemSO> EventRecipes = new List<ItemSO>();
+
         [Tooltip("Optional per-level combat backdrop. When set, the battle stage uses this instead " +
                  "of the default Resources background — lets each level/biome look distinct.")]
         public Sprite CombatBackground;

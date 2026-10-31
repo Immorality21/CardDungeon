@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2774e2128e940c2ba863d0a3b1314ce, type: 3}
+  m_Name: PipeEggs
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Rooms.Events.RoomEventSO
+  Key: PipeEggs
+  GoverningStat: 4
+  WorldSprite: {fileID: 21300000, guid: 2ce7019fcb95af001e6ae6e8695558f4, type: 3}
+  SpentSprite: {fileID: 21300000, guid: 9069d88a17280dee62426617c5adad05, type: 3}
+  Placement: 0
+  Parked: 0
+  SpawnModifierStat: 0
+  SpawnModifierRate: 0
+  SpawnRequirements: []
+  Difficulty: 8
+  Options:
+  - LabelKey: event.pipe-eggs.option-1.label
+    Kind: 0
+    DeclineTextKey: 
+    Success:
+    - TextKey: event.pipe-eggs.option-1.success-1.text
+      Weight: 1
+      WeightModifierStat: 0
+      WeightModifierRate: 0
+      Effects: []
+      Targets: 0
+      LootTable: []
+      LootOneOf:
+      - {fileID: 11400000, guid: cc088177b14d42f4b859394c26b3c824, type: 2}
+      - {fileID: 11400000, guid: c0de5211aa080000000000000000ab08, type: 2}
+      RunStatLoss: 0
+      RunStatLossPercent: 0
+      SideRoom:
+        Template: {fileID: 0}
+      Gold: 0
+      AwakenedEnemies: []
+      JoinsHero: {fileID: 0}
+    Failure:
+    - TextKey: event.pipe-eggs.option-1.failure-1.text
+      Weight: 1
+      WeightModifierStat: 0
+      WeightModifierRate: 0
+      Effects: []
+      Targets: 0
+      LootTable: []
+      LootOneOf: []
+      RunStatLoss: 0
+      RunStatLossPercent: 0
+      SideRoom:
+        Template: {fileID: 0}
+      Gold: 0
+      AwakenedEnemies:
+      - {fileID: 11400000, guid: 9685597a4b344794c80f56087feb9731, type: 2}
+      - {fileID: 11400000, guid: 9685597a4b344794c80f56087feb9731, type: 2}
+      JoinsHero: {fileID: 0}
+  - LabelKey: event.pipe-eggs.option-2.label
+    Kind: 2
+    DeclineTextKey: event.pipe-eggs.option-2.decline
+    Success: []
+    Failure: []

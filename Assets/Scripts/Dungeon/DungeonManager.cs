@@ -949,6 +949,11 @@ namespace Assets.Scripts.Dungeon
                 return side;
             }
 
+            foreach (var guard in spec.Guards)
+            {
+                EnemyManager.Instance.SpawnSingle(guard, side);
+            }
+
             var rng = new System.Random(seed);
             int count = spec.RollEnemyCount(rng.NextDouble(), rng.NextDouble());
             for (int i = 0; i < count; i++)
@@ -1226,6 +1231,18 @@ namespace Assets.Scripts.Dungeon
                         continue;
                     }
 
+                    // A catalogue with nothing left in it is furniture.
+                    if (Rooms.Events.RoomEventSpawn.PaysPoolRecipe(candidate) && OpenEventRecipes().Count == 0)
+                    {
+                        continue;
+                    }
+
+                    // A grate needs a stretch of north wall with no door in it.
+                    if (candidate.Placement == Rooms.Events.RoomEventPlacement.NorthWall && room.FreeNorthWallTile() == null)
+                    {
+                        continue;
+                    }
+
                     // The gate first: no point rolling for a tome nobody can read.
                     if (!Rooms.Events.RoomEventSpawn.MeetsRequirements(candidate.SpawnRequirements, partyStats))
                     {
@@ -1246,6 +1263,21 @@ namespace Assets.Scripts.Dungeon
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// The recipes this level's events can still teach: not known yet, and open at this run's Fear
+        /// level (<see cref="LevelDefinitionSO.EventRecipes"/>).
+        /// </summary>
+        public List<Items.ItemSO> OpenEventRecipes()
+        {
+            var level = CurrentLevel;
+            if (level == null || level.EventRecipes == null || !InventoryManager.HasInstance)
+            {
+                return new List<Items.ItemSO>();
+            }
+            return level.EventRecipes.FindAll(r => r != null
+                && !RunFear.Current.Withholds(r) && !InventoryManager.Instance.AlreadyKnown(r));
         }
 
         /// <summary>Puts <paramref name="roomEvent"/> in the room in place of what it rolled: the sandbox's way in.</summary>
@@ -1275,7 +1307,13 @@ namespace Assets.Scripts.Dungeon
 
             var markerObj = new GameObject(room.RoomEvent.SaveKey + "Marker");
             markerObj.transform.SetParent(room.transform, false);
-            markerObj.transform.position = room.ClaimSpot(markerObj, -0.5f);
+            var wallTile = room.RoomEvent.Placement == Rooms.Events.RoomEventPlacement.NorthWall
+                ? room.FreeNorthWallTile()
+                : null;
+            // On the wall it claims no floor: it blocks nothing, and is used from the tile below.
+            markerObj.transform.position = wallTile.HasValue
+                ? new Vector3(wallTile.Value.x, wallTile.Value.y, -0.5f)
+                : room.ClaimSpot(markerObj, -0.5f);
             var sr = markerObj.AddComponent<SpriteRenderer>();
             sr.sprite = sprite;
             sr.sortingOrder = RoomMarkerSortOrder;

@@ -228,6 +228,21 @@ namespace Assets.Scripts.Cards
             return true;
         }
 
+        /// <summary>Gives every ability of every hero <paramref name="amount"/> charges back, capped at
+        /// its maximum. Returns how many charges that came to.</summary>
+        public int RestoreEveryAbility(int amount)
+        {
+            int restored = 0;
+            foreach (var slots in _heroSlots.Values)
+            {
+                for (int i = 0; i < slots.Count; i++)
+                {
+                    restored += RestoreCharges(slots, i, amount).Added;
+                }
+            }
+            return restored;
+        }
+
         /// <summary>
         /// Gives a hero's slot <paramref name="amount"/> charges back, capped at its maximum - what
         /// Life Tap does (<see cref="SpellEffectType.RestoreCharge"/>). <paramref name="slotIndex"/>

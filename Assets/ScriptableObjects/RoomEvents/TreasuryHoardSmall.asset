@@ -1,0 +1,191 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2774e2128e940c2ba863d0a3b1314ce, type: 3}
+  m_Name: TreasuryHoardSmall
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Rooms.Events.RoomEventSO
+  Key: TreasuryHoardSmall
+  GoverningStat: 6
+  WorldSprite: {fileID: 21300000, guid: ef58f1e32d5bcf54fcf234bb6d62896f, type: 3}
+  SpentSprite: {fileID: 21300000, guid: e45212cf762d0574fa3a3aba9be54670, type: 3}
+  Parked: 0
+  SpawnModifierStat: 6
+  SpawnModifierRate: 2
+  SpawnRequirements: []
+  Difficulty: 8
+  Options:
+  - LabelKey: event.treasury-hoard.option-1.label
+    Kind: 1
+    DeclineTextKey: 
+    Success:
+    - TextKey: event.treasury-hoard.option-1.success-1.text
+      Weight: 1
+      WeightModifierStat: 0
+      WeightModifierRate: 0
+      Effects: []
+      Targets: 0
+      LootTable: []
+      LootOneOf: []
+      RunStatLoss: 0
+      RunStatLossPercent: 0
+      SideRoom:
+        Template: {fileID: 0}
+        Mandatory: 0
+        EnemyChancePercent: 100
+        Enemies: []
+        MinEnemies: 1
+        MaxEnemies: 1
+        Chest: 0
+        ChestLootChancePercent: 0
+        ChestLoot: []
+      Gold: 7
+      LoseAConsumable: 0
+      AwakenedEnemies: []
+      JoinsHero: {fileID: 0}
+    Failure: []
+  - LabelKey: event.treasury-hoard.option-2.label
+    Kind: 0
+    DeclineTextKey: 
+    Success:
+    - TextKey: event.treasury-hoard.option-2.success-1.text
+      Weight: 3
+      WeightModifierStat: 6
+      WeightModifierRate: 5
+      Effects: []
+      Targets: 0
+      LootTable:
+      - {fileID: 11400000, guid: 48143a77cb3b71041a7cbf5a38862834, type: 2}
+      - {fileID: 11400000, guid: 77a107a8fa4807a4782e3b6cfa65505e, type: 2}
+      - {fileID: 11400000, guid: 49f583fd473ca6144819051f4d6a6f7d, type: 2}
+      LootOneOf: []
+      RunStatLoss: 0
+      RunStatLossPercent: 0
+      SideRoom:
+        Template: {fileID: 0}
+        Mandatory: 0
+        EnemyChancePercent: 100
+        Enemies: []
+        MinEnemies: 1
+        MaxEnemies: 1
+        Chest: 0
+        ChestLootChancePercent: 0
+        ChestLoot: []
+      Gold: 20
+      LoseAConsumable: 0
+      AwakenedEnemies: []
+      JoinsHero: {fileID: 0}
+    - TextKey: event.treasury-hoard.option-2.success-2.text
+      Weight: 1
+      WeightModifierStat: 0
+      WeightModifierRate: 0
+      Effects: []
+      Targets: 0
+      LootTable: []
+      LootOneOf: []
+      RunStatLoss: 0
+      RunStatLossPercent: 0
+      SideRoom:
+        Template: {fileID: 0}
+        Mandatory: 0
+        EnemyChancePercent: 100
+        Enemies: []
+        MinEnemies: 1
+        MaxEnemies: 1
+        Chest: 0
+        ChestLootChancePercent: 0
+        ChestLoot: []
+      Gold: 15
+      LoseAConsumable: 0
+      AwakenedEnemies: []
+      JoinsHero: {fileID: 0}
+    Failure:
+    - TextKey: event.treasury-hoard.option-2.failure-1.text
+      Weight: 2
+      WeightModifierStat: 6
+      WeightModifierRate: -5
+      Effects:
+      - EffectType: 0
+        Power: 4
+        PowerMode: 0
+        ScalingStat: 0
+        DamageType: 0
+        BuffType: 0
+        Duration: 3
+        UnlockLevel: 0
+        ApplyChance: 100
+        BonusVsTrait: 0
+        BonusPercent: 0
+        BonusVsStatus: 0
+        BonusPerDebuff: 0
+        DrainToParty: 0
+      - EffectType: 3
+        Power: 2
+        PowerMode: 0
+        ScalingStat: 0
+        DamageType: 0
+        BuffType: 1
+        Duration: 3
+        UnlockLevel: 0
+        ApplyChance: 100
+        BonusVsTrait: 0
+        BonusPercent: 0
+        BonusVsStatus: 0
+        BonusPerDebuff: 0
+        DrainToParty: 0
+      Targets: 0
+      LootTable: []
+      LootOneOf: []
+      RunStatLoss: 0
+      RunStatLossPercent: 0
+      SideRoom:
+        Template: {fileID: 0}
+        Mandatory: 0
+        EnemyChancePercent: 100
+        Enemies: []
+        MinEnemies: 1
+        MaxEnemies: 1
+        Chest: 0
+        ChestLootChancePercent: 0
+        ChestLoot: []
+      Gold: 0
+      LoseAConsumable: 0
+      AwakenedEnemies: []
+      JoinsHero: {fileID: 0}
+    - TextKey: event.treasury-hoard.option-2.failure-2.text
+      Weight: 1
+      WeightModifierStat: 0
+      WeightModifierRate: 0
+      Effects: []
+      Targets: 0
+      LootTable: []
+      LootOneOf: []
+      RunStatLoss: 0
+      RunStatLossPercent: 0
+      SideRoom:
+        Template: {fileID: 0}
+        Mandatory: 0
+        EnemyChancePercent: 100
+        Enemies: []
+        MinEnemies: 1
+        MaxEnemies: 1
+        Chest: 0
+        ChestLootChancePercent: 0
+        ChestLoot: []
+      Gold: 0
+      LoseAConsumable: 0
+      AwakenedEnemies:
+      - {fileID: 11400000, guid: ce571ba2b36e6c14bb37279e004b146c, type: 2}
+      JoinsHero: {fileID: 0}
+  - LabelKey: event.treasury-hoard.option-3.label
+    Kind: 2
+    DeclineTextKey: event.treasury-hoard.option-3.decline
+    Success: []
+    Failure: []

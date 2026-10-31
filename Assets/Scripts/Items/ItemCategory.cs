@@ -27,6 +27,13 @@ namespace Assets.Scripts.Items
         /// never uses it up, and a known recipe stops dropping. Never equipped or used in the field.
         /// See <see cref="CraftingOps"/>.
         /// </summary>
-        Recipe
+        Recipe,
+
+        /// <summary>
+        /// Has no direct use: it only opens something a room event asks for
+        /// (<c>RoomEventOption.RequiredItem</c>), which spends it. Kept between runs until then, and
+        /// listed with the materials. Banked on a level clear like every other find.
+        /// </summary>
+        KeyItem
     }
 }

@@ -135,6 +135,15 @@ namespace Assets.Scripts.Rooms.Events
             _entries.Clear();
         }
 
+        /// <summary>
+        /// Removes the curses held for this floor and leaves its blessings and any loss for the run.
+        /// Returns how many went.
+        /// </summary>
+        public int CureLevelCurses()
+        {
+            return _entries.RemoveAll(entry => entry.Amount < 0 && !entry.ForRun);
+        }
+
         /// <summary>Snapshot for the dungeon save.</summary>
         public List<LevelAffliction> GetSaveData()
         {

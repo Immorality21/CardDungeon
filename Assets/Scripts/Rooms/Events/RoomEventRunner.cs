@@ -30,6 +30,12 @@ namespace Assets.Scripts.Rooms.Events
         private static readonly Color DamageColor = new Color(1f, 0.35f, 0.35f);
         private static readonly Color HealColor = Color.green;
 
+        private static readonly StatType[] AllStats =
+        {
+            StatType.Strength, StatType.Endurance, StatType.Agility,
+            StatType.Intelligence, StatType.Spirit, StatType.Luck
+        };
+
         private readonly EffectExecutorFactory _factory = new EffectExecutorFactory();
 
         /// <summary>
@@ -56,15 +62,46 @@ namespace Assets.Scripts.Rooms.Events
             }
 
             ApplyEffects(outcome, party, actingHero, afflictions, report);
+            ApplyCure(outcome, afflictions, report);
+            ApplyAllStats(outcome, party, actingHero, afflictions, report);
             ApplyGold(outcome, report);
+            ApplyXp(outcome, party, report);
+            ApplyCharges(outcome, report);
             ApplyRunStatLoss(outcome, actingHero, afflictions, report);
             ApplyLoot(outcome, report);
             ApplyGuaranteedLoot(outcome, room, report);
+            ApplyLevelMaterial(outcome, report);
+            ApplyPoolRecipe(outcome, report);
             ApplyConsumableLoss(outcome, report);
             ApplyAwakenedEnemies(outcome, room, report);
             ApplyJoin(outcome, report);
 
             return report;
+        }
+
+        /// <summary>
+        /// Takes what choosing <paramref name="option"/> costs, ahead of its outcome: the floor's gold
+        /// and the item that opens it. One line per thing paid.
+        /// </summary>
+        public List<string> PayFor(RoomEventOption option)
+        {
+            var lines = new List<string>();
+            if (option == null)
+            {
+                return lines;
+            }
+
+            if (option.GoldCost > 0 && MetaProgressManager.HasInstance
+                && MetaProgressManager.Instance.SpendPendingGold(option.GoldCost, EconomySource.RoomEvent))
+            {
+                lines.Add(Loc.Format("event-text.report.paid-gold", ("amount", option.GoldCost)));
+            }
+            if (option.RequiredItem != null && InventoryManager.HasInstance
+                && InventoryManager.Instance.RemoveOne(option.RequiredItem, ItemRemovalReason.Used))
+            {
+                lines.Add(Loc.Format("event-text.report.used-item", ("item", option.RequiredItem.DisplayName)));
+            }
+            return lines;
         }
 
         // ============================================================
@@ -272,6 +309,111 @@ namespace Assets.Scripts.Rooms.Events
             report.Lines.Add(Loc.Format("event-text.report.gold", ("amount", outcome.Gold)));
         }
 
+        private void ApplyXp(RoomEventOutcome outcome, Party party, RoomEventOutcomeReport report)
+        {
+            if (outcome.XpPerHero <= 0 || party == null)
+            {
+                return;
+            }
+
+            party.DistributeXp(outcome.XpPerHero * party.Heroes.Count, EconomySource.RoomEvent);
+            report.Lines.Add(Loc.Format("event-text.report.xp", ("amount", outcome.XpPerHero)));
+        }
+
+        private void ApplyCharges(RoomEventOutcome outcome, RoomEventOutcomeReport report)
+        {
+            if (outcome.ChargesRestored <= 0 || !DungeonManager.HasInstance)
+            {
+                return;
+            }
+
+            int restored = DungeonManager.Instance.MagicState.RestoreEveryAbility(outcome.ChargesRestored);
+            report.Lines.Add(restored > 0
+                ? Loc.Format("event-text.report.charges", ("amount", restored))
+                : Loc.Get("event-text.report.charges-full"));
+        }
+
+        private void ApplyCure(RoomEventOutcome outcome, LevelAfflictionTracker afflictions, RoomEventOutcomeReport report)
+        {
+            if (!outcome.CuresAfflictions || afflictions == null)
+            {
+                return;
+            }
+
+            report.Lines.Add(afflictions.CureLevelCurses() > 0
+                ? Loc.Get("event-text.report.cured")
+                : Loc.Get("event-text.report.nothing-to-cure"));
+        }
+
+        /// <summary>Every stat a share higher for the level, worked out once and held as flat amounts.</summary>
+        private void ApplyAllStats(
+            RoomEventOutcome outcome,
+            Party party,
+            Hero actingHero,
+            LevelAfflictionTracker afflictions,
+            RoomEventOutcomeReport report)
+        {
+            if (outcome.AllStatsPercent <= 0f || afflictions == null)
+            {
+                return;
+            }
+
+            foreach (var target in ResolveTargets(outcome.Targets, party, actingHero))
+            {
+                var hero = target as Hero;
+                if (hero == null)
+                {
+                    continue;
+                }
+
+                foreach (var stat in AllStats)
+                {
+                    int gain = LevelAfflictionTracker.PercentLoss(hero.GetEffectiveStat(stat), outcome.AllStatsPercent);
+                    if (gain > 0 && System.Enum.TryParse(stat.ToString(), out BuffType buff))
+                    {
+                        afflictions.Add(hero.HeroKey, buff, gain);
+                    }
+                }
+                report.Lines.Add(Loc.Format("event-text.report.all-stats", ("hero", hero.DisplayName), ("percent", outcome.AllStatsPercent)));
+            }
+        }
+
+        private void ApplyLevelMaterial(RoomEventOutcome outcome, RoomEventOutcomeReport report)
+        {
+            if (!outcome.PaysLevelMaterial || !InventoryManager.HasInstance || !DungeonManager.HasInstance)
+            {
+                return;
+            }
+
+            var level = DungeonManager.Instance.CurrentLevel;
+            var options = level != null && level.MaterialTable != null
+                ? level.MaterialTable.FindAll(d => d != null && d.Item != null && !RunFear.Current.Withholds(d.Item))
+                : new List<LootDrop>();
+            if (options.Count == 0)
+            {
+                report.Lines.Add(Loc.Get("event-text.report.found-nothing"));
+                return;
+            }
+
+            var drop = options[Random.Range(0, options.Count)];
+            int quantity = Random.Range(drop.MinQuantity, drop.MaxQuantity + 1);
+            InventoryManager.Instance.AddItem(drop.Item, quantity, EconomySource.RoomEvent);
+            report.Lines.Add(Loc.Format("event-text.report.found", ("item", drop.Item.DisplayName)));
+        }
+
+        private void ApplyPoolRecipe(RoomEventOutcome outcome, RoomEventOutcomeReport report)
+        {
+            if (!outcome.PaysPoolRecipe || !DungeonManager.HasInstance)
+            {
+                return;
+            }
+
+            var item = GrantOneOf(DungeonManager.Instance.OpenEventRecipes());
+            report.Lines.Add(item != null
+                ? Loc.Format("event-text.report.found", ("item", item.DisplayName))
+                : Loc.Get("event-text.report.found-nothing"));
+        }
+
         private void ApplyLoot(RoomEventOutcome outcome, RoomEventOutcomeReport report)
         {
             if (outcome.LootTable == null || outcome.LootTable.Count == 0 || !InventoryManager.HasInstance)
@@ -332,14 +474,20 @@ namespace Assets.Scripts.Rooms.Events
             }
         }
 
-        /// <summary>Hands over one item of <paramref name="items"/>, or null when there is none to give.</summary>
+        /// <summary>Hands over one item of <paramref name="items"/>, never a recipe already known, or
+        /// null when there is none to give.</summary>
         public static ItemSO GrantOneOf(List<ItemSO> items)
         {
-            if (items == null || items.Count == 0 || !InventoryManager.HasInstance)
+            if (items == null || !InventoryManager.HasInstance)
             {
                 return null;
             }
-            var item = items[Random.Range(0, items.Count)];
+            var open = items.FindAll(i => i != null && !InventoryManager.Instance.AlreadyKnown(i));
+            if (open.Count == 0)
+            {
+                return null;
+            }
+            var item = open[Random.Range(0, open.Count)];
             if (item != null)
             {
                 InventoryManager.Instance.AddItem(item, 1, EconomySource.RoomEvent);

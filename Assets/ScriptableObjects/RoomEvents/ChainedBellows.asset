@@ -1,0 +1,83 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2774e2128e940c2ba863d0a3b1314ce, type: 3}
+  m_Name: ChainedBellows
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Rooms.Events.RoomEventSO
+  Key: ChainedBellows
+  GoverningStat: 1
+  WorldSprite: {fileID: 21300000, guid: 16d02294014614a202407304cd2e8c72, type: 3}
+  SpentSprite: {fileID: 21300000, guid: dc406da9c0ea047889baf0859274a913, type: 3}
+  Placement: 0
+  Parked: 0
+  SpawnModifierStat: 0
+  SpawnModifierRate: 0
+  SpawnRequirements: []
+  Difficulty: 10
+  Options:
+  - LabelKey: event.chained-bellows.option-1.label
+    Kind: 0
+    DeclineTextKey: 
+    Success:
+    - TextKey: event.chained-bellows.option-1.success-1.text
+      Weight: 1
+      WeightModifierStat: 0
+      WeightModifierRate: 0
+      Effects:
+      - EffectType: 2
+        Power: 3
+        PowerMode: 0
+        ScalingStat: 0
+        DamageType: 0
+        BuffType: 1
+        Duration: 3
+        UnlockLevel: 0
+        ApplyChance: 100
+      Targets: 1
+      LootTable: []
+      LootOneOf: []
+      RunStatLoss: 0
+      RunStatLossPercent: 0
+      SideRoom:
+        Template: {fileID: 0}
+      Gold: 0
+      AwakenedEnemies: []
+      JoinsHero: {fileID: 0}
+    Failure:
+    - TextKey: event.chained-bellows.option-1.failure-1.text
+      Weight: 1
+      WeightModifierStat: 0
+      WeightModifierRate: 0
+      Effects:
+      - EffectType: 0
+        Power: 8
+        PowerMode: 0
+        ScalingStat: 0
+        DamageType: 1
+        BuffType: 0
+        Duration: 3
+        UnlockLevel: 0
+        ApplyChance: 100
+      Targets: 1
+      LootTable: []
+      LootOneOf: []
+      RunStatLoss: 0
+      RunStatLossPercent: 0
+      SideRoom:
+        Template: {fileID: 0}
+      Gold: 0
+      AwakenedEnemies: []
+      JoinsHero: {fileID: 0}
+  - LabelKey: event.chained-bellows.option-2.label
+    Kind: 2
+    DeclineTextKey: event.chained-bellows.option-2.decline
+    Success: []
+    Failure: []

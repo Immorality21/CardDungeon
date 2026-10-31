@@ -261,6 +261,39 @@ namespace Assets.Scripts.Items
         }
 
         /// <summary>Total carried quantity of one material across stacks (0 if none).</summary>
+        public List<ItemSaveData> GetKeyItems()
+        {
+            return _saveData.Items.Where(i => IsCategory(i, ItemCategory.KeyItem)).ToList();
+        }
+
+        /// <summary>Whether the bags hold at least one of <paramref name="item"/>.</summary>
+        public bool Holds(ItemSO item)
+        {
+            return item != null && _saveData.Items.Any(i => i.ItemKey == item.Key && i.Quantity > 0);
+        }
+
+        /// <summary>Takes one of <paramref name="item"/> out of the bags: what an event's key costs.</summary>
+        public bool RemoveOne(ItemSO item, ItemRemovalReason reason)
+        {
+            var stack = item != null ? _saveData.Items.FirstOrDefault(i => i.ItemKey == item.Key && i.Quantity > 0) : null;
+            if (stack == null)
+            {
+                return false;
+            }
+
+            stack.Quantity--;
+            if (stack.Quantity <= 0)
+            {
+                _saveData.Items.Remove(stack);
+            }
+            if (!_deferSaves)
+            {
+                Save();
+            }
+            GameEvents.Publish(new ItemRemoved { Item = item, Quantity = 1, Reason = reason });
+            return true;
+        }
+
         public int GetMaterialQuantity(string itemKey)
         {
             return InventoryOperations.GetMaterialQuantity(_saveData.Items, itemKey, GetItemSO);

@@ -170,6 +170,6 @@ namespace Assets.Scripts.Items
         /// piles onto the first instead of taking a row (it never drops once known anyway).
         /// </summary>
         public bool Stacks => Category == ItemCategory.Consumable || Category == ItemCategory.Material
-            || Category == ItemCategory.Recipe;
+            || Category == ItemCategory.Recipe || Category == ItemCategory.KeyItem;
     }
 }

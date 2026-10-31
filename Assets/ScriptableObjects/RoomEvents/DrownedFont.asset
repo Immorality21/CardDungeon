@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2774e2128e940c2ba863d0a3b1314ce, type: 3}
+  m_Name: DrownedFont
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Rooms.Events.RoomEventSO
+  Key: DrownedFont
+  GoverningStat: 1
+  WorldSprite: {fileID: 21300000, guid: 481e9c4eae78c5d1d555ca11c63e29e5, type: 3}
+  SpentSprite: {fileID: 21300000, guid: e1c0f7dc2441cecaefac398c90456f42, type: 3}
+  Placement: 0
+  Parked: 0
+  SpawnModifierStat: 0
+  SpawnModifierRate: 0
+  SpawnRequirements: []
+  Difficulty: 0
+  Options:
+  - LabelKey: event.drowned-font.option-1.label
+    Kind: 1
+    DeclineTextKey: 
+    Success:
+    - TextKey: event.drowned-font.option-1.success-1.text
+      Weight: 1
+      WeightModifierStat: 0
+      WeightModifierRate: 0
+      Effects:
+      - EffectType: 1
+        Power: 20
+        PowerMode: 0
+        ScalingStat: 0
+        DamageType: 0
+        BuffType: 0
+        Duration: 3
+        UnlockLevel: 0
+        ApplyChance: 100
+      Targets: 1
+      LootTable: []
+      LootOneOf: []
+      RunStatLoss: 0
+      RunStatLossPercent: 0
+      SideRoom:
+        Template: {fileID: 0}
+      Gold: 0
+      CuresAfflictions: 1
+      AwakenedEnemies: []
+      JoinsHero: {fileID: 0}
+    Failure: []
+  - LabelKey: event.drowned-font.option-2.label
+    Kind: 2
+    DeclineTextKey: event.drowned-font.option-2.decline
+    Success: []
+    Failure: []

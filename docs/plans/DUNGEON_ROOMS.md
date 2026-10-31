@@ -278,6 +278,20 @@ Step's fight is the Lich. New gear copies an existing item's numbers: not balanc
 **Next from here:** the Crypt playtest; the workbook's other biomes; and the *Cleanup* below, which needs only the
 room bar's Search, Rest and Descend moved, since events no longer use it.
 
+## Phase 3: the other four biomes (2026-10-31)
+
+**Built from the owner's filled-in workbook:** 22 more events, so 31 in all across Crypt, Swamp, Ember, Archive and
+Vault, with their chances on 17 more levels. The rules they needed are in `Assets/Scripts/Rooms/Events/CLAUDE.md`.
+**The owner's decisions:** behind the Door of Fire stand a Fire Elemental Prince (a boss) and 2 Fire Elementals
+guarding a chest; the Stopped Sluice's chest pays one recipe of the new Sewerwalker set (rogues: Agility and Luck,
+which is what crits read); the Key of Flame stays until used; the Gilded Chest and the Key on Emberfall are 0.5%
+per room; Drowned Offering and Ceiling Shaft stay cut.
+
+**Filled in without the owner, to confirm:** the Prince's chest pays a new necklace, Heart of the Prince. The
+Catalogue's pool is three new recipes (Archivist's Spectacles, Orrery Ring, and at Fear 1 the Palimpsest Robe). All
+gold, damage, XP and stats on the new events, units and gear are first guesses. **The Prince's fight was started in
+a sandbox, not fought out:** on Emberfall he has 308 health and each Elemental 73.
+
 ## Phase 3: where to start (written 2026-10-31)
 
 **Changed by the owner, 2026-10-31:** the Shrine is off for now. Events come first, and each event belongs to one biome, its chance and reward tuned per level

@@ -549,3 +549,5 @@ For a stat with no entry it draws a **`+` button** rather than an int field: a f
 `PartyBaseline.CloneUnits` resets each clone to full health explicitly. `SimUnit.Clone` copies the
 whole `Stats` including current health, so the "fresh, full-health" guarantee in the name would
 otherwise depend on nobody ever wounding a baseline unit.
+
+**Enemies met only through room events** (woken, or standing in a side room) are measured against the party that reaches the floor listing the event (`BalanceAnalyzer.EventEnemies`), not the starting party. Without that the Fire Elemental Prince read as a critical finding. They still carry no level tuning in that row, so it reads their template numbers.
