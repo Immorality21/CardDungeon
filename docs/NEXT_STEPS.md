@@ -305,7 +305,8 @@ backlog.**
   Focus), the charge lasts the run, one Ultra free per hero with more in some branches, old Ultra nodes
   decided hero by hero; taking damage fills fastest; starting Ultras picked (§13). **Built
   2026-10-30:** starting Ultras moved to the trunk (free), the gauge kept for the run and filled by
-  taken/dealt/healed. To do: see it in play (sandbox); decide the remaining Ultra nodes hero by hero.
+  taken/dealt/healed. To do: see it in play. **The remaining Ultra nodes on the grid are later on the
+  roadmap** (owner, 2026-10-31), hero by hero; they do not block anything.
 - **No way back to town mid-run** (owner, 2026-10-30) — ✅ **built the same day**: a mid-run level
   clear offers only Continue, the pause menu's Leave became **Quit to Title** (the title's Continue
   goes straight back down), and the Threshold is three runs (Dungeon Entrance → Upper Halls → The
@@ -313,7 +314,9 @@ backlog.**
   `Tools ▸ Tutorial`. The split nudged the Lich's boss room to 6.02x its trash (ceiling 6.0x: the
   model's party goes home twice more in the tutorial); the owner dropped one of its two Skeleton adds.
   `plans/POLISH_CONTENT.md` §20, `TUTORIAL.md`.
-- **Boss balancing** (owner, 2026-10-28). The late runs' bosses were left at their old numbers
+- **Boss balancing** (owner, 2026-10-28) — ✅ **first pass 2026-10-31**: all 11 bosses harder, none easier
+  (`BALANCING.md` §5aq). Open: the 6x ratio ceiling caps the late bosses, so going further needs their floors'
+  trash raised too, and the Altar barely answers to its boss. Original note: the late runs' bosses were left at their old numbers
   in the last pass (Emberfall 30% wipes; the Hollow Vault, Red Cloister, Altar of the Last Initiate and
   Mother Pool 0%). Tune each boss by its own absolute numbers (`EnemyTuning.Overrides` per floor; bosses
   are met once) and leave percentage modifiers to the Fear levels. Health and strength barely move a
@@ -327,6 +330,9 @@ backlog.**
 
 ### Later, small
 
+- **The balance tool reads some bosses wrong** (owner, 2026-10-31, from playtesting): some bosses were harder in
+  play than the simulator says. Which ones is not recorded yet. Owner will look at it later; until then read
+  boss wipe rates and ending health as approximate. `BALANCING.md`, live warnings and §5aq.
 - **Delete the dead combat log** (2026-10-30): no screen shows it, but `CombatManager` still builds it
   (`_lastTurnLog`, `CombatResult.Log`, ~90 lines, the `combat.log.*` texts). Do it with the planned
   `CombatManager` split (Rooms guide), not on its own.

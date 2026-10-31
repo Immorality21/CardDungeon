@@ -6,6 +6,12 @@ it has been played; anything that turns out wrong becomes a backlog item in `NEX
 Most of it came out of playtest 3 (2026-10-26 to 2026-10-28); the first section is the outside
 playtest's fixes (2026-10-30).
 
+## Bosses a little harder (2026-10-31)
+
+- [ ] **Every boss** - harder than before, none easier (`BALANCING.md` §5aq). The numbers are from the
+      simulator. Agility is the lever that moved most, so watch for a boss acting too often to answer,
+      above all the Lich and the Counting Room.
+
 ## No more room bar (2026-10-31)
 
 - [ ] **Chest, campfire, stairs** - Enter while facing one, and a click from across the room. The campfire

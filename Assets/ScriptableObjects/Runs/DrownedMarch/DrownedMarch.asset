@@ -16,6 +16,7 @@ MonoBehaviour:
   SequenceIndex: 3
   Repeatable: 1
   Challenge: 0
+  ReplayHintOnWipe: 0
   JoinsOnClear: {fileID: 11400000, guid: 8572c8c8edc04a8ea398ee885ba38e88, type: 2}
   Levels:
   - LevelTemplate: {fileID: 11400000, guid: 6e31f43ba8574e244840406384d1b907, type: 2}
@@ -101,9 +102,11 @@ MonoBehaviour:
         Stats:
           Values:
           - Type: 7
-            Amount: 170
+            Amount: 195
           - Type: 1
-            Amount: 18
+            Amount: 20
+          - Type: 3
+            Amount: 11
         XpReward: 0
         GoldReward: 0
     RescueHero: {fileID: 0}

@@ -31,6 +31,7 @@ number was arrived at.
 |---|---|
 | ⚠️ **The magic half of the model is about to be wrong** *(2026-09-04)* | `docs/plans/SPECIALIZATION.md` §9b **scraps Draw**. `ProgressionMap` — the unlock timeline, the availability matrix, every *unreachable magic* finding — is built entirely on Draw tables (enemy × level × run) and will be measuring a route that no longer exists. `BalanceRegressionTests` asserts the old model and **will go red**. Do not act on an Elements & Unlocks finding until that section lands. |
 | ⚠️ **Grids are about to get much bigger** *(2026-09-04)* | §4c re-authors all seven grids and grows them well past ~30 nodes. `MinGridShareForLastFloor` is a **share**, so it re-derives itself when the denominator moves; and §5s priced nodes *by depth*, so a bigger grid is not simply more nodes at the same cost. |
+| ⚠️ **The simulator can read a boss easier than it plays** *(owner, 2026-10-31)* | From playtesting, some bosses were harder than the tool says. Which ones and why is not known yet; the owner will look later. §5aq's numbers come from this tool, so treat boss wipe rates and ending health as approximate. |
 | ⚠️ **§5i's headline is wrong** | "Party width gates, XP does not." **§5j corrects it** — both axes work and the right unit is a *frontier*. §5k is what shipped. |
 
 ### Two repricings that make older numbers incomparable
@@ -3332,3 +3333,43 @@ moved. The model's party now visits town (spends XP, refills charges and the bel
 the tutorial, which reaches the Catacombs a touch stronger: the Lich's Sepulchre boss room went from
 inside the band to **6.016x** its level's trash (ceiling 6.0x). Owner's call: **drop one of the Lich's
 two Skeleton adds** (`Catacombs` level 3 `BossAdds` Count 2 -> 1). Suite green after.
+
+## §5aq — Every boss a little harder, and what limits it (2026-10-31)
+
+Owner: "make them a little bit harder (nothing should be made easier at this point)". Only the bosses' own
+`EnemyTuning.Overrides` moved, so XP, trash and adds are untouched. Adaptive floor sim, wipes / ending health,
+health/strength/agility:
+
+| floor | before | after | was | now |
+|---|---|---|---|---|
+| Sunken Depths | 100/12/4 | 110/12/5 | 0% / 74% | 0% / 69% |
+| The Broken Orrery | 85/11/3 | 97/12/5 | 0% / 73% | 0% / 60% |
+| The Counting Room | 70/10/3 | 80/11/4 | 10% / 38% | 18% / 34% |
+| The Lich's Sepulchre | 80/8/8 | 92/9/9 | 0% / 70% | 8% / 63% |
+| The Mire Throne | 170/18/10 | 195/20/11 | 8% / 47% | 13% / 42% |
+| Emberfall | 88/12/15 | 132/18/15 | 7% / 47% | 15% / 44% |
+| The Drowned Choir | 160/20/12 | 180/22/17 | 0% / 79% | 0% / 74% |
+| The Hollow Vault | 112/16/8 | 168/24/14 | 0% / 71% | 3% / 65% |
+| The Red Cloister | 200/19/10 | 300/30/20 | 0% / 97% | 0% / 85% |
+| The Altar of the Last Initiate | 280/21/12 | 420/31/18 | 0% / 77% | 0% / 74% |
+| The Mother Pool | 240/22/9 | 270/26/15 | 0% / 85% | 0% / 78% |
+
+What this pass learned:
+- **Agility is the boss lever on early and mid floors, and it is steep.** +2 took Sunken Depths from 74% to
+  59% and the Lich from 0% to 12% wipes; +6 on the Lich reached 43%. On the late floors it did little alone:
+  +3 and +6 left Emberfall (15), the Drowned Choir (12) and the Altar (12) within 3 points, and +50% health and
+  strength alone moved late floors 0-4 points; the Choir and the Vault moved with both together.
+- **The 6x ratio ceiling, not the party, now caps the late bosses.** The Pool and the Cloister could go much
+  further (x2 and +12 still at most 1% wipes), but they read 8x their level's trash. Raising those floors'
+  `Difficulty` should give room, since the trash is the denominator (not tried: it changes trash too, so it
+  was left for the owner).
+- **The Altar barely answers to its boss:** x2 stats and +12 Agility moved ending health 77% -> 74%. What
+  costs the party health on that floor is not the boss. Its 50% rise is close to cosmetic.
+- **These numbers are the tool's, and the owner doubts it on bosses** (see the live warning above): some bosses
+  were harder in play than it said, measured before this pass raised them.
+- **The finale wipe bands were not a target.** `TierFloorBands` ask 30-100% from the third tier up, and the
+  highest wipe rate here is 18%. Which floor sits in which tier was not checked.
+- **Measuring gotcha:** `StatBlock`'s indexer writes an explicit entry, and an override entry wins over the
+  template, so "restoring" an absent stat with `ov.Stats[stat] = 0` sets it to 0 for real (every boss read
+  Agility 0, and +25% health read as *easier*). Remove the entry instead. Check a sweep by re-measuring the
+  baseline after it.
