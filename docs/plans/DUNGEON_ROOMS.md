@@ -275,8 +275,8 @@ through the spent object, not by a real door on the floor's map. **Stand-ins to 
 "rats" are a Ghoul (no rat enemy), the statue is a Stone Sentinel, the Apprentice's wraith is a Wight, the Thirteenth
 Step's fight is the Lich. New gear copies an existing item's numbers: not balanced yet.
 
-**Next from here:** the Crypt playtest; the workbook's other biomes; and the *Cleanup* below, which needs only the
-room bar's Search, Rest and Descend moved, since events no longer use it.
+**Next from here:** the events playtest (`docs/TO_PLAYTEST.md`), the other biomes being built (below); and the *Cleanup*
+below, which needs only the room bar's Search, Rest and Descend moved, since events no longer use it.
 
 ## Phase 3: the other four biomes (2026-10-31)
 
