@@ -100,6 +100,7 @@ Detailed docs live in a `CLAUDE.md` inside each subsystem folder and load automa
 - **Runtime/visual validation via the Unity MCP** (drive the running game, capture screenshots) → `docs/GAMEPLAY_VALIDATION.md`
 - **The tutorial** (what is guided, the promises floor 1 must keep, learnings, todos) → `docs/TUTORIAL.md`
 - **Sandbox — quick-test a party against an encounter** (`Tools ▸ Sandbox`: chosen heroes with XP/grid unlocks/abilities, a floor, up to five enemies next door, against a throwaway save folder; `SandboxLauncher.Launch` from a script or the MCP) → `docs/SANDBOX.md` — use it instead of hand-spawning enemies when validating heroes, abilities, enemies or formations
+- **The bot — whole playthroughs without anyone at the keyboard** (`BotLauncher.Launch`: a new save, floors, fights, events, the town, by profile, about 90 seconds per early campaign; one JSON report, `tools/bot_summary.py`) → `docs/BOT.md` — use it instead of driving the game press by press through the MCP
 - **Sprites and pixel art** (PixelLab MCP generation, sizes per unit type, idle strips, importing, verifying in combat, the no-generations fallback) → `docs/PIXEL_ART.md` — read it before generating or replacing any sprite
 
 ### Key Patterns

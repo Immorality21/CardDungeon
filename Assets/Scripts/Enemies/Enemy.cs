@@ -124,8 +124,12 @@ namespace Assets.Scripts.Enemies
         /// </summary>
         public float MagicPowerScale => LevelEnemyTuning.MagicPowerScaleFor(Definition, Tuning);
 
-        /// <summary>Whether this enemy is a boss (from its definition) — drives boss-only combat/UI.</summary>
-        public bool IsBoss => Definition != null && Definition.IsBoss;
+        /// <summary>Set on the enemy a level places as its boss: an ordinary enemy on most floors can
+        /// be a floor's finale, as the Stone Sentinel is on The Broken Orrery.</summary>
+        public bool PlacedAsBoss { get; set; }
+
+        /// <summary>Whether this enemy is a boss (from its definition, or placed as one) — drives boss-only combat/UI.</summary>
+        public bool IsBoss => PlacedAsBoss || (Definition != null && Definition.IsBoss);
 
         private SpriteRenderer _spriteRenderer;
         private SpriteAnimator _spriteAnimator;

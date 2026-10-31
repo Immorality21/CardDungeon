@@ -755,7 +755,11 @@ namespace Assets.Scripts.Dungeon
 
             // The boss lands first so it takes the room's preferred position and the adds arrange
             // themselves around it (Room.ClaimSpot keeps clear of what is already placed).
-            EnemyManager.Instance.SpawnSingle(boss, exitRoom);
+            var placed = EnemyManager.Instance.SpawnSingle(boss, exitRoom);
+            if (placed != null)
+            {
+                placed.PlacedAsBoss = true;
+            }
 
             foreach (var add in entry.EnumerateBossAdds())
             {

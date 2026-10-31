@@ -1,0 +1,80 @@
+# The bot: playing the real game without anyone at the keyboard
+
+`Assets/Scripts/Sandbox/Bot/` plays whole playthroughs in play mode: a new save, floors, fights,
+events, the town, the next run. It is the real game at high speed, so it tests combat, events, saves
+and the hub. **It does not test the keyboard or how a fight feels.** An early-campaign playthrough
+takes about a minute and a half.
+
+No LLM is in the loop. An agent launches a batch, waits, and reads one JSON report, so a batch costs
+three tool calls rather than one per button press.
+
+## Running a batch
+
+From a script or the Unity MCP (scripts must be compiled, and no play mode running):
+
+```csharp
+Assets.Scripts.Sandbox.Editor.BotLauncher.Launch(new BotSettings
+{
+    Games = 5,                                   // per profile, each from a new save
+    FirstSeed = 2000,
+    ReportName = "early-runs",
+    Runs = BotLauncher.EarlyRuns,                // run asset names, in play order
+    Profiles = BotLauncher.AllProfiles(),
+});
+```
+
+Play stops by itself when the batch ends. The report is rewritten after every attempt at
+`persistentDataPath/bot_reports/<ReportName>.json`, so a batch that dies keeps what it had:
+
+```
+python tools/bot_summary.py "<path to the report>"
+```
+
+Do not edit scripts while it runs: a recompile resets the save-folder override.
+
+## Profiles
+
+A profile is an event habit and a route.
+
+| event habit | |
+|---|---|
+| `Everything` | every event, whatever the odds; the gamble over the sure thing |
+| `OddsOnly` | gambles at 50% or better; sure things unless they mean a fight |
+| `Safe` | sure things with nothing to lose, or a gamble at 80% or better |
+
+| route | |
+|---|---|
+| `ClearEverything` | every room, chest and allowed event; a refuge is gone back to when hurt |
+| `ToTheExit` | presses on until it finds the stairs. It uses what is in rooms it passes and makes no detour. It does not know where the stairs are |
+
+`GearGoldShare` (0.5, the balance model's own assumption) splits the gold in hand between gear and
+buildings. The odds used are the true chance, which can be better than the player can read.
+
+## What it plays
+
+- **Fights** (`BotCombat`) in the order of the balance model's Adaptive policy, so a gap between the
+  bot and the model is the model's and not a different way of playing: heal whoever is at 45% or
+  under, Ultra when ready, damaging abilities while charges last, attack the weakest.
+- **Town** (`BotHub`): places what it can pay for, fields everyone the party cap allows, buys and
+  wears gear, spends XP with `SphereGridOps.GreedySpend`, starts the next open run on the list.
+- **It retries** a run it wiped on, like a player, up to `MaxAttemptsPerRun`.
+
+**Not played yet:** summons, non-damaging abilities (buffs, debuffs, shields), the Forge, crafting,
+the potion belt, swapping abilities by hand, revisits (it retries a run it wiped on, but never replays one it cleared). Expect it to play a little worse than a
+player in those respects, and to have no judgement: it never saves an Ultra or charges for a boss.
+
+## How it is wired
+
+- `BotLauncher` leaves the batch in `SessionState`; `BotSession` reads it before the first scene,
+  points every save at `persistentDataPath/savedata_bot` and starts `BotPlayer`, the same pattern as
+  the sandbox. It is editor-only, so it cannot ship and cannot touch the real save.
+- `BotPlayer` survives scene loads and looks each frame at what is on screen. `RoomActionUI`'s `BOT`
+  region is the seam: what is up, and what a press does. It calls the handlers the buttons call.
+- **Stuck detection counts progress, not movement** (rooms seen, windows, turns). Walking does not
+  reset it, or a bot pacing between two rooms never counts as stuck. A stuck game goes in the report
+  with its state, and the batch moves on.
+
+## Found by it so far
+
+- **A side room trapped the party.** `_doorsLive` needed at least one door and a side room has none,
+  so walking, Enter and clicks all stopped inside one (fixed 2026-10-31).

@@ -6,6 +6,12 @@ it has been played; anything that turns out wrong becomes a backlog item in `NEX
 Most of it came out of playtest 3 (2026-10-26 to 2026-10-28); the first section is the outside
 playtest's fixes (2026-10-30).
 
+## Side rooms (2026-10-31)
+
+- [ ] **The Choked Passage, for real** - walking inside a side room and leaving it. A side room has no
+      doors, which switched walking off, so it trapped the party until the bot found it. The WebGL
+      "crash" below may or may not be this.
+
 ## Bosses a little harder (2026-10-31)
 
 - [ ] **Every boss** - harder than before, none easier (`BALANCING.md` §5aq). The numbers are from the

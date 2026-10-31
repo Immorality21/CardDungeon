@@ -23,7 +23,7 @@ MonoBehaviour:
   ChainBias: 0.667
   MomentumBias: 0.498
   TreasureRooms: 0
-  RestRooms: 0
+  RestRooms: 1
   RoomEvents:
   - Event: {fileID: 11400000, guid: 3ee0344fb8ae2663633707634548482a, type: 2}
     ChancePercent: 1

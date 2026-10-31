@@ -171,6 +171,9 @@ namespace Assets.Scripts.Hub
         private static float _completedRewardMultiplier = 1f;
 
         /// <summary>The title screen's New Game: start the tutorial on arrival.</summary>
+        /// <summary>Every hero in the game, for the bot's visits to town (docs/BOT.md).</summary>
+        public PartyRosterSO Roster => _partyRoster;
+
         public static void RequestNewGame()
         {
             _newGameRequested = true;

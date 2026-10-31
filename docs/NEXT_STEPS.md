@@ -291,6 +291,12 @@ Then the balance pass, starting with what this pass already showed:
 
 ---
 
+### Before any balance pass: design first, dials second *(owner, 2026-10-31)*
+
+We are open to rethinking how levels are tuned. A pass should not only dial values up and down: first ask
+whether the problem is a design gap a dial is hiding, and whether there is an easier way to tune a level.
+This is a direction for the next pass, not a task of its own.
+
 ## The backlog
 
 Every item, one line each, grouped by the plan file that holds it. **Open the plan, not the whole
@@ -298,6 +304,10 @@ backlog.**
 
 ### Next up
 
+- **Agility is too strong: rethink the formula — first** (owner, 2026-10-31). A few points have a huge
+  impact. Measured in `BALANCING.md` §5aq: +2 on the Lich took a floor from 0% to 12% wipes and +6 to 43%,
+  far steeper than +50% health and strength. Look at the algorithm (how Agility turns into turns in
+  `TurnManager`), not at individual numbers. Re-measure the bosses afterwards: §5aq leaned on Agility.
 - **Rethink Ultras — first** (owner, 2026-10-30). The gauge should **keep its charge between fights**
   (today it empties at the end of each), and Ultras should be **unlocked from the start** instead of
   bought on the sphere grid. A broader rethink, not a tweak: `plans/COMBAT_DEPTH.md` §13. **Decided
@@ -330,9 +340,10 @@ backlog.**
 
 ### Later, small
 
-- **The balance tool reads some bosses wrong** (owner, 2026-10-31, from playtesting): some bosses were harder in
-  play than the simulator says. Which ones is not recorded yet. Owner will look at it later; until then read
-  boss wipe rates and ending health as approximate. `BALANCING.md`, live warnings and §5aq.
+- **The balance tool reads some floors wrong** (owner, 2026-10-31, from playtesting): some were harder in play than
+  the simulator says. The bot agrees on The Broken Orrery (0% against 27% wipes) and The Counting Room (18% against
+  51%, mostly one five-body room, not the boss); Sunken Depths and the Lich match. To separate party from model, run the
+  model's party through the bot. `BALANCING.md` §5ar, `docs/BOT.md`.
 - **Delete the dead combat log** (2026-10-30): no screen shows it, but `CombatManager` still builds it
   (`_lastTurnLog`, `CombatResult.Log`, ~90 lines, the `combat.log.*` texts). Do it with the planned
   `CombatManager` split (Rooms guide), not on its own.

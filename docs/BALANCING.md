@@ -31,6 +31,8 @@ number was arrived at.
 |---|---|
 | ⚠️ **The magic half of the model is about to be wrong** *(2026-09-04)* | `docs/plans/SPECIALIZATION.md` §9b **scraps Draw**. `ProgressionMap` — the unlock timeline, the availability matrix, every *unreachable magic* finding — is built entirely on Draw tables (enemy × level × run) and will be measuring a route that no longer exists. `BalanceRegressionTests` asserts the old model and **will go red**. Do not act on an Elements & Unlocks finding until that section lands. |
 | ⚠️ **Grids are about to get much bigger** *(2026-09-04)* | §4c re-authors all seven grids and grows them well past ~30 nodes. `MinGridShareForLastFloor` is a **share**, so it re-derives itself when the denominator moves; and §5s priced nodes *by depth*, so a bigger grid is not simply more nodes at the same cost. |
+| ⚠️ **Design first, dials second** *(owner, 2026-10-31)* | We are open to rethinking how levels are tuned. Before turning a dial, ask whether it is hiding a design gap, and whether a level could be easier to tune at all. |
+| ⚠️ **Agility is too strong** *(owner, 2026-10-31)* | A few points have a huge impact (§5aq). Its formula is first on the roadmap, so do not lean on it as a tuning lever until that is done. |
 | ⚠️ **The simulator can read a boss easier than it plays** *(owner, 2026-10-31)* | From playtesting, some bosses were harder than the tool says. Which ones and why is not known yet; the owner will look later. §5aq's numbers come from this tool, so treat boss wipe rates and ending health as approximate. |
 | ⚠️ **§5i's headline is wrong** | "Party width gates, XP does not." **§5j corrects it** — both axes work and the right unit is a *frontier*. §5k is what shipped. |
 
@@ -3373,3 +3375,51 @@ What this pass learned:
   template, so "restoring" an absent stat with `ov.Stats[stat] = 0` sets it to 0 for real (every boss read
   Agility 0, and +25% health read as *easier*). Remove the entry instead. Check a sweep by re-measuring the
   baseline after it.
+
+## §5ar — The first bot batch against the simulator (2026-10-31)
+
+`docs/BOT.md`: 30 playthroughs of the early campaign on the real game (6 profiles, 5 games each, seeds 2000-2004,
+54 minutes, none stuck), after §5aq's boss numbers. Each row pools every attempt of every profile. The
+simulator column is §5aq's, for its own reference party:
+
+| floor | simulator: wipes / ending health | bot: wipes / ending health (survivors) |
+|---|---|---|
+| Sunken Depths | 0% / 69% | 3% (1 of 31) / 68% |
+| The Lich's Sepulchre | 8% / 63% | 10% (3 of 30) / 62% |
+| The Broken Orrery | 0% / 60% | 27% (11 of 41) / 42% |
+| The Counting Room | 18% / 34% | 51% (30 of 59) / 51% |
+
+**Not a clean test of the model yet:** the bot's party is not the model's. It earned its own XP and gear, buys no
+potion belt (the model assumes it maxed), and plays no summons or buffs. So the two rows that differ may be the party
+and not the fight. Running the model's party through the bot is what would separate them.
+
+What the batch showed:
+- **The two floors that disagree are the owner's complaint, and the risk is not where the tool looks.** Of the Counting
+  Room's 30 wipes only 9 were to the Hoarder; 17 were to one five-body room (Floating Eye, Drakeling, three Gilded
+  Motes), usually around the tenth fight of the floor. 10 of the Orrery's 11 were to its finale
+  (Stone Sentinel, Hex Weaver, Floating Eye). The simulator fights an *expected* room mix (§5ai), so a floor's bad
+  rooms read milder than they play.
+- **The Stone Sentinel is not `IsBoss`.** The model treats it as the Orrery's boss; the game does not (no banner, Flee
+  offered), and the bot's boss table leaves it out.
+- **The route mattered more than the event habit:** 27 wipes on ClearEverything against 39 on ToTheExit, and all 3 playthroughs
+  given up were ToTheExit. By habit: Everything 22, OddsOnly 24, Safe 20, so gambling on every event did no visible
+  harm. Five games a profile is few: read these as a direction.
+- **Safe almost never takes an event** (17 of 175 seen): its rules may be stricter than a careful player's.
+- **Heroes lost carry over:** the Lich's room was entered with 2 or fewer heroes in 14 of 30 plays.
+
+**The fix (same day, owner: tweak what the playtest said):** a refuge on The Counting Room and The Broken Orrery
+(`RestRooms` 0 -> 1; neither had one, on 14 and 7 rooms), the Sunken Depths fix again, and no enemy's numbers touched. A
+level's placed boss is now a boss even when its template is not (`Enemy.PlacedAsBoss`), so the Sentinel gets the
+banner and no Flee on the Orrery. Retest: 6 games, one per profile, seed 3000, so read it as a direction:
+
+| floor | wipes before | wipes after | health into the boss | ending health |
+|---|---|---|---|---|
+| The Broken Orrery | 27% (11 of 41) | 14% (1 of 7) | 59% -> 73% | 42% -> 57% |
+| The Counting Room | 51% (30 of 59) | 25% (2 of 8) | 51% -> 66% | 51% -> 57% |
+
+The Bone Galleries read 4 wipes in 10 here against 7 in 37 before; one game accounts for much of it, so it is
+watched, not acted on.
+
+**What still reads too easy, with a bot weaker than a player:** no wipes in 30 games and 79-83% ending health on
+Dungeon Entrance, Collapsed Caverns, The Ash Stacks and Warren Tunnels (`TierFloorBands` asks 50-75% on early floors).
+**The bot does no revisits**, so a replaying player sits above everything in this section.

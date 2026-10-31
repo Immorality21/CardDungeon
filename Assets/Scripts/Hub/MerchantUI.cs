@@ -29,7 +29,7 @@ namespace Assets.Scripts.Hub
     /// </summary>
     public class MerchantUI
     {
-        private const int StockSize = 4;
+        public const int StockSize = 4;
         private const int RestockCost = 25;
         private const string PotionItemKey = "HealingPotion";
 
@@ -763,7 +763,7 @@ namespace Assets.Scripts.Hub
             }
         }
 
-        private List<string> GenerateStock(int count)
+        public static List<string> GenerateStock(int count)
         {
             var catalog = UnityEngine.Resources.Load<ItemCatalogSO>(ItemCatalogSO.ResourcePath);
             var pool = catalog != null
