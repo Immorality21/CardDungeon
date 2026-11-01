@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Smite
   m_EditorClassIdentifier: 
   Key: Smite
-  Icon: {fileID: 21300000, guid: bdcb49df4fab46dcbd7da883b5760765, type: 3}
+  Icon: {fileID: 21300000, guid: 67b4c98e1ce047a8ad0747713c34a7bb, type: 3}
   Delivery: 1
   ProjectileArtAngle: 0
   TargetType: 0

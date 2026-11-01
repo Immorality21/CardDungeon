@@ -25,47 +25,20 @@ changelog.
 
 ---
 
-## Start here — the live thread (as of 2026-09-04)
+## Start here — where things stand (2026-11-01)
 
-**A direction was set on 2026-09-04** (whiteboard session; recorded in §9b, §4c and §5b). It settles
-the question §9b raised the day before and pulls several queued sections into a single thread:
-**Draw is scrapped, magic moves onto the sphere grid, and the grid becomes the place a hero
-*specializes*.** Read **§9b → §4c → §5b** in that order before starting any of it — §4c changes the
-most and is the reason the other two are shaped the way they are.
+**The 2026-09-04 direction has landed.** Draw is gone, magic and specialization live on the sphere
+grid, the tavern is gone and heroes are unlocks: all nine have a source, every grid is authored and
+every hero has summons (or mechs), Ultras and a two-ability start (`plans/SPECIALIZATION.md`). Status
+effects, threat, enemy verbs and the health/event plumbing are in (`plans/COMBAT_DEPTH.md`,
+`plans/EVENTS.md`).
 
-Three threads are live:
+What is live now:
 
-1. **The specialization rebuild** (§9b, §4c, §5b, feeding §4b and §7) — added 2026-09-04. The
-   largest of the three and the one the others now bend around. It removes a shipped mechanic
-   (Draw), re-authors every sphere grid, deletes the tavern, and makes a hero a progression unlock
-   that the campaign can gate on.
-
-   **§9b shipped the same day** — Draw is gone, magic is learned on the grid, and the kit is chosen
-   at the hub. **§4c and §5b are not started**, and §4c is now the bottleneck: the grids carry a
-   *stopgap* kit (a cheap signature plus one spell per branch tip) that keeps every magic obtainable
-   but prices most of it past what a campaign pays. §9b's "What the refactor actually left behind"
-   has the measured numbers and the three findings it produced — read it before starting §4c.
-   **§5b's unlock half shipped 2026-09-06** — the solo start is back, heroes arrive by rescue, and
-   `CampaignNodeEntry.RequiresHeroes` makes a hero a key the campaign can gate on. **All seven have
-   an unlock source since 2026-09-30**: the Tinkerer joins on clearing the Drowned March, the Rogue is
-   a room-event gamble in The Warrens, and the Cleric is the captive of a new secret run, **The Drowned
-   Chapel**, the first node keyed on a hero. The **Warlock** (the Cultist until 2026-10-04) is the captive at the bottom of **The
-   Blood Stair** *(2026-09-28)*, a challenge run meant for late parties (`RunDefinitionSO.Challenge`). The **Mage** joined
-   *2026-10-07* as an early unlock: the captive of **The Sealed Archive**, a new two-floor run on the
-   main line between the Threshold and the Drowned March.
-2. **Balance / losability** (§0–§0g) — making the campaign losable and gating depth behind
-   investment. The gate ladder exists and the frontier is measured per floor. Mature; mostly
-   decisions waiting on the user now. **Caveat updated 2026-09-04:** §9b's model rework landed with
-   it — `ProgressionMap` measures *grid* supply now and the whole suite is green — but every number
-   that involved magic moved, so re-measure before acting on anything written before that date.
-   Deliberately paused: no tuning until the rest of the specialization refactor is in.
-3. **Combat depth** (§9–§13) — added 2026-09-03 after a broad scan. The systems layer is far deeper
-   than the *verbs* sitting on it. **§9 (status effects) shipped the same day**: damage-over-time,
-   Silence, regeneration and the cure loop. **§10 (Defend) was deleted on 2026-09-06** — not
-   dropped, *relocated*: Defend is an **ability**, granted by a grid branch like every other command
-   (§13), so it is authored content rather than a sixth hard-coded verb. The combat menu now reads
-   Attack / **Ability** / Item / Inspect / Skip. §11's threat model **shipped 2026-09-28** (biased,
-   never certain); the balance model still assumes even targeting, which is its open follow-up.
+1. **Playtest** — `TO_PLAYTEST.md`, including the events playtest.
+2. **Balance** (§0–§0g, `BALANCING.md`) — passes keep running; a pass starts from design, not dials
+   (below). The balance tool's misread floors are under "Later, small".
+3. **The backlog below** — "Next up" first.
 
 **Reading order for the balance thread:** `docs/BALANCING.md` §5g → §5t, in order. The later ones
 **correct** the earlier ones — §5i's headline ("party width gates, XP does not") is **wrong**, §5j
@@ -141,13 +114,9 @@ In order. The balance pass starts only when this list is empty.
 5. ~~**Commit** the pass (owner).~~ *Done 2026-10-12.*
 
 Then the balance pass, starting with what this pass already showed:
-- **Full-grid heroes are far too fast** - a full-grid party took ~500 turns to the hounds' 13
-  (Agility on the grids vs enemy speed). Blind and other statuses that count down on the victim's turn
-  last almost forever as a result.
+- ~~**Full-grid heroes are far too fast**~~ *Fixed 2026-11-01*: speed is 15 + Agility (`BALANCING.md` §5as).
 - **Full-grid damage one-shots rooms** (Flushing Shot on a marked hound: 200; Cleric, Mage the same).
-- **`BalanceRegressionTests.RunDifficultyEscalates` fails**: The Blood Stair, Ossuary Gate -> Red
-  Cloister, attrition 0.28 -> 0.58 (ceiling 75%). A baseline without the 2026-10-11 pass is green, so
-  the new branches moved the modelled party.
+- ~~**`BalanceRegressionTests.RunDifficultyEscalates` fails**~~ Green since (suite 1,794 / 0, 2026-11-01).
 - Every number of the 2026-10-11 pass is a first draft.
 
 ### Decisions already taken — do not relitigate
@@ -340,13 +309,6 @@ backlog.**
   the simulator says. The bot agrees on The Broken Orrery (0% against 27% wipes) and The Counting Room (18% against
   51%, mostly one five-body room, not the boss); Sunken Depths and the Lich match. To separate party from model, run the
   model's party through the bot. `BALANCING.md` §5ar, `docs/BOT.md`.
-- **Localization follow-ups** (2026-10-30) — `plans/POLISH_CONTENT.md` §22: enum names still shown
-  raw, English grammar in code, grid nodes showing raw ability keys.
-- **Own icons for Divine Protection and Smite** (2026-10-30): they borrow Sacred Shield's and Divine
-  Bolt's.
-- **Warlock head size — small, later** (owner, 2026-10-28): the Warrior, Ranger and Rogue were redrawn
-  to the Paladin's smaller head (playtest 3 finding 17, `PIXEL_ART.md`'s proportion rule); the Warlock
-  may need the same. Owner to judge in play first.
 - **Resistance potions for the belt — later** (owner, 2026-10-28): a *resistance* potion type
   (Frost Resistance first, then Fire, ...) sharing one type's slot and upgrades, unlocked through
   quests once quests exist. The typed belt is built for it (`PotionBeltSO.Types`; a type's potion
@@ -360,10 +322,10 @@ backlog.**
 | **4c** | Specialization — the grid is where a hero becomes an archetype | ✅ **done** — all seven grids authored 2026-09-05; branch *readability* **dropped** 2026-09-08 |
 | **5b** | Heroes are unlocked, not bought — the tavern is removed | ✅ **done** — shipped 2026-09-06; **every hero has a source since 2026-09-30** (run clear, room event, secret run) |
 | **5** | Roster — open questions | open; the party-cap bullet **resolved 2026-09-17** by deleting the purchase |
-| **4b** | Summons — the capability the deep grid pays out | **both kinds shipped 2026-09-28** (the Warrior's Boar and Golem); **the Paladin's three 2026-09-30** — Aegis Lion (taunt), Judgement Seraph (hitter replacement), Dawn Stag (mass heal), one per branch; **the Ranger's two 2026-10-01** — Galewing (a hawk: 2 hits to all + Endurance cut) and Exatrix (party replacement whose Attack **delays** — the new `TurnDelay` effect). **The Tinkerer 2026-10-07** — rebuilt from the owner's vision: Disassemble at the root, three branches each ending in a **mech Ultra** (the new `Mount` kind) instead of a summon, two machine enemies to take apart (`plans/SPECIALIZATION.md`, "The Tinkerer"; open: the mechs need the balance pass). **Next, in unlock order:** Cleric, Rogue; then measure the per-summon frontier. **Blocked on hero visions:** the Cleric and Rogue have no defined identity yet. Define each in `Tools ▸ Hero Vision` (`HeroSO.Vision`) before designing its summons |
+| **4b** | Summons — the capability the deep grid pays out | **both kinds shipped 2026-09-28** (the Warrior's Boar and Golem); **the Paladin's three 2026-09-30** — Aegis Lion (taunt), Judgement Seraph (hitter replacement), Dawn Stag (mass heal), one per branch; **the Ranger's two 2026-10-01** — Galewing (a hawk: 2 hits to all + Endurance cut) and Exatrix (party replacement whose Attack **delays** — the new `TurnDelay` effect). **The Tinkerer 2026-10-07** — rebuilt from the owner's vision: Disassemble at the root, three branches each ending in a **mech Ultra** (the new `Mount` kind) instead of a summon, two machine enemies to take apart (`plans/SPECIALIZATION.md`, "The Tinkerer"; open: the mechs need the balance pass). **The Cleric, Rogue, Mage and Cultist followed: every hero has theirs.** **Next:** measure the per-summon frontier |
 | **4d** | **Every hero starts with two abilities** (owner, 2026-10-29) | ✅ **done** 2026-11-01. Second free ability beside the root: Warrior Sunder, Paladin Holy Touch, Cleric Divine Bolt, Ranger Snare, Rogue Steal, Tinkerer Rivet Gun, Warlock Drain Life, Cultist Whisper of Madness. **The Mage is the exception**: three abilities and a free third slot. Everyone else buys the third slot beside the root for 20 XP; fourth and higher slots stay on the branches. The node each ability left is now an upgrade of it. `Heroes/CLAUDE.md`, `BALANCING.md` §5az |
-| **4** | Sphere grid — follow-ups | mostly superseded by §4c. **Ability upgrades (`MagicUpgrade`) built 2026-10-09** with the Ranger as showcase; other heroes' spurs wait on the Hero Workbook. **Outside playtest 2026-10-30:** "+3 to a stat is boring" - make upgrades meaningful (nothing major yet, owner); Cairn Golem's upgrade sits on the far side of the Warrior tree - fix in the grid rework |
-| — | **The Warlock and the Cultist** | ✅ **both built** (Warlock 2026-10-04, Cultist 2026-10-05; the plan file was retired 2026-10-05 - mechanics in the Magic guide, numbers in `BALANCING.md` §5aa). **Still to pick up:** (1) **Felguards / bigger demon troops** - deferred until the Warlock grid has room; **material-gated** when they come (owner, 2026-10-04) so a third tier cannot spike the army early. `SummonOps.SquadFor` promotes the *weakest* troop first, so a third tier appears only once every troop is a Succubus: a Felguard node should add promotions on top of that or be a dedicated "promote one troop to the top tier" kind. (2) **A Cultist balance pass** - every number is a first draft; run the summon budget harness (§5aa) over Writhing Spawn, The Watcher, the Abyssal Nightmare, the Blood Idol (its 20% blood price and threat) and the Sacrifice horror. (3) **Life Tap's charge restore for the Cleric** - `SpellEffectType.RestoreCharge` was built to serve both; the Cleric does not use it yet. (4) ~~Ultras for the other six heroes~~ - every hero has Ultras since the 2026-10-11 workbook pass (the Mage's is MultiCast) |
+| **4** | Sphere grid — follow-ups | mostly superseded by §4c. **Ability upgrades (`MagicUpgrade`) built 2026-10-09** with the Ranger as showcase; the Warlock has them too, the rest one or two so far (the Mage none). **Outside playtest 2026-10-30:** "+3 to a stat is boring" - make upgrades meaningful (nothing major yet, owner); Cairn Golem's upgrade sits on the far side of the Warrior tree - fix in the grid rework |
+| — | **The Warlock and the Cultist** | ✅ **both built** (Warlock 2026-10-04, Cultist 2026-10-05; the plan file was retired 2026-10-05 - mechanics in the Magic guide, numbers in `BALANCING.md` §5aa). **Still to pick up:** (1) **Felguards / bigger demon troops** - deferred until the Warlock grid has room; **material-gated** when they come (owner, 2026-10-04) so a third tier cannot spike the army early. `SummonOps.SquadFor` promotes the *weakest* troop first, so a third tier appears only once every troop is a Succubus: a Felguard node should add promotions on top of that or be a dedicated "promote one troop to the top tier" kind. (2) **A Cultist balance pass** - every number is a first draft; run the summon budget harness (§5aa) over Writhing Spawn, The Watcher, the Abyssal Nightmare, the Blood Idol (its 20% blood price and threat) and the Sacrifice horror. (3) ~~Life Tap's charge restore for the Cleric~~ - she has it: Inspire and Miracle of Hope, both `RestoreCharge`, no health price. (4) ~~Ultras for the other six heroes~~ - every hero has Ultras since the 2026-10-11 workbook pass (the Mage's is MultiCast) |
 | — | **The Mage — an elemental caster** | ✅ **on the roster 2026-10-07** — rescued in the new **Sealed Archive** (main line, before the March); three-branch grid (storm / frost / fire, Fire Cloak early for the Ashen Deep), new Chain Lightning. **Open:** his signature and Ultra are MultiCast (spend Focus to cast 2-4 times, owner 2026-10-07, details open); summons are drafts in the hero workbook |
 | — | **Future heroes (long term)** | not started: **the Pirate** (owner, 2026-10-11), name only so far. Comes after the current hero pass and the balance pass; needs a vision first (§5, "Future heroes") |
 
@@ -380,9 +342,9 @@ backlog.**
 
 | § | | state |
 |---|---|---|
-| — | **Item/enemy/summon-specific rules as data** — `HealthOps` (the one health writer), one death path, `CombatEvents` per fight shared with the simulator, `TriggeredEffect` reactions on items/enemies/summons, `GameEvents` with a required `EconomySource`, item counters + milestones | ✅ **plumbing shipped 2026-10-07**; no content uses reactions or milestones yet. Open: gear pricing ignores reactions (the gauge and threat read the health stream since 2026-10-07) |
-| — | **Scaling items** — items that grow with use (`ItemSO.Milestones`: "after 50 kills, +3 STR"; counters per copy in the save) | mechanism ✅ 2026-10-07; **no item uses it yet**. The hub shows grown stats since 2026-10-07 (`GearPiece`: every hub stat total and swap preview reads each copy's own counters; a grown copy gets its own Storehouse row). To do: author the first scaling items |
-| — | **Reactions** — items, enemies and summons that act on their own when something happens in a fight (`TriggeredEffect`): a sword that heals its wearer on a kill, an imp that explodes when it dies, armour that may poison whoever hits it, an orc that enrages when an ally falls | mechanism ✅ 2026-10-07; **first three enemy reactions ✅ 2026-10-07** - Cinder Imp *Cinder Burst* (explodes on death), Slag Hound *Pack Fury* (enrages when an ally falls), Gilded Hoarder *Molten Gold* (burns back whoever hits it with fire); seen firing in play (`Sandbox/EnemyReactions`). **They make Emberfall's finale harder (wipes 0.21 → 0.45), accepted by the owner - retune the floor in the balance pass** (`BALANCING.md` §5ac). To do: reactions on gear and summons; decide whether a reaction is described on the item card / Bestiary (ignored for now, owner 2026-10-07) |
+| — | **Item/enemy/summon-specific rules as data** — `HealthOps` (the one health writer), one death path, `CombatEvents` per fight shared with the simulator, `TriggeredEffect` reactions on items/enemies/summons, `GameEvents` with a required `EconomySource`, item counters + milestones | ✅ **plumbing shipped 2026-10-07**, content since (the two rows below). Open: gear pricing ignores reactions (the gauge and threat read the health stream since 2026-10-07) |
+| — | **Scaling items** — items that grow with use (`ItemSO.Milestones`: "after 50 kills, +3 STR"; counters per copy in the save) | mechanism ✅ 2026-10-07; **four items use it** (Oak Staff, Runed Blade, Swift Boots, the Delver's Blade). The hub shows grown stats since 2026-10-07 (`GearPiece`: every hub stat total and swap preview reads each copy's own counters; a grown copy gets its own Storehouse row). |
+| — | **Reactions** — items, enemies and summons that act on their own when something happens in a fight (`TriggeredEffect`): a sword that heals its wearer on a kill, an imp that explodes when it dies, armour that may poison whoever hits it, an orc that enrages when an ally falls | mechanism ✅ 2026-10-07; **first three enemy reactions ✅ 2026-10-07** - Cinder Imp *Cinder Burst* (explodes on death), Slag Hound *Pack Fury* (enrages when an ally falls), Gilded Hoarder *Molten Gold* (burns back whoever hits it with fire); seen firing in play (`Sandbox/EnemyReactions`). **They make Emberfall's finale harder (wipes 0.21 → 0.45), accepted by the owner - retune the floor in the balance pass** (`BALANCING.md` §5ac). **27 gear pieces carry reactions.** To do: reactions on summons (none yet); decide whether a reaction is described on the item card / Bestiary (ignored for now, owner 2026-10-07) |
 | — | **Passive sphere-grid nodes** — a node grants a `TriggeredEffect` list | decided yes (owner, 2026-10-07); **after the first real demo**. One appended `SphereNodeKind`, read by `Hero.GetTriggers` |
 | — | **Achievements and hub quests** | not started; they listen to `GameEvents` (`Events/CLAUDE.md`: count kept changes, or hold a tally until `LevelCleared`). Bounties are `HUB.md` §3d |
 
@@ -395,7 +357,7 @@ backlog.**
 | **7c** | **Combo upgrades at the Forge** — left as they are; how they should work is to be rethought (owner, 2026-10-29) | open |
 | **7d** | **Recipes from quests** — a third source beside drops and floor clears (owner, 2026-10-29) | waits for hub quests |
 | **3** | Sharpen hub sinks | open |
-| **3c** | **Essence is the revisit currency** — only revisits pay it; it buys Essence-priced grid nodes (**awakenings**) and combo upgrades; the Forge's ability upgrades are retired | ✅ **built 2026-10-06**; the Warrior has two awakenings. Next: awakenings for the other seven heroes, priced from `RevisitModel` |
+| **3c** | **Essence is the revisit currency** — only revisits pay it; it buys Essence-priced grid nodes (**awakenings**) and combo upgrades; the Forge's ability upgrades are retired | ✅ **built 2026-10-06**; the Warrior has two awakenings. Every hero has awakenings but the Rogue (his two are the workbook's "Maybe" rows, Ambush and Coup de Grace) |
 | **3d** | **Bounties** — rotating contracts on cleared runs paying named materials | opened 2026-10-06; depends on Revisits |
 
 ### [Revisits](plans/REVISITS.md)
@@ -445,13 +407,16 @@ backlog.**
 | **17** | Content volume is the biggest single gap | not started |
 | **18** | Item and consumable depth | **healing repaired 2026-09-17** (§18b, `BALANCING.md` §5v); gear trade-offs, party-wide healing and *selling consumables at all* still open; **§18c the potion belt — overhaul or re-evaluate** (opened 2026-09-28); **set bonuses deferred** (owner unsure they make sense, 2026-10-07) — the 4-piece Shadowweave set is authored, no set logic (§18a-sets); **§18d gear restrictions** — equipment types on items + per-hero eligibilities, so a mage wears cloth and wands, not plate (opened 2026-10-29, owner; not started, four decisions open) |
 | **19** | Shipping surface | not started |
-| **22** | **Localization follow-ups** — after the 2026-10-30 text system | open: enum names on screen, English grammar in code, raw keys on grid nodes |
+| **22** | **Localization follow-ups** — after the 2026-10-30 text system | ✅ **done 2026-11-01** |
 | **21** | **Art pass** — every outdated sprite | **enemies done 2026-09-29** (the five still enemies redrawn + animated, both bosses at Warden size, a 32 px Dark Jailor); menu backdrops, combat backgrounds, floor rock and item icons done 2026-09-28. **all seven heroes in one style 2026-09-29** (Warrior, Cultist, Cleric, Ranger, Tinkerer redone). **2026-10-08: every floor has a biome combat background** (four new: Threshold halls and caverns, the Archive, the Drowned Chapel), **a pixel-art window frame** on every window, **a painted death screen**, **a calm flagstone dungeon floor**, and the title menu docked over the stairs. Left (deferred to polish by the owner): attack/hit animations; a title logo (the title is a placeholder); the parked `productName` / save-folder rename |
 
 ---
 
 ## Shipped ledger
 
+- **Localization follow-ups, two icons, the Warlock's head** (2026-11-01) — `plans/POLISH_CONTENT.md` §22, `PIXEL_ART.md`.
+  Enum names, raw grid keys and English grammar in code are gone from the screen; Smite and Divine Protection have
+  their own icons, and ten weak icons were redone; the Warlock and his Demon Form were redrawn to the Paladin's proportions.
 - **The battle screen, FFIV-style** (2026-11-01, owner) — the Combat guide, `plans/POLISH_CONTENT.md` §1, `PIXEL_ART.md`
   §8f. A menu band over the bottom 27%, ten new backgrounds, units placed by their feet with shadows.
 - **`CombatManager` and `RoomActionUI` split by job** (2026-11-01) — partial classes, one file per job (Rooms guide).

@@ -1,4 +1,5 @@
 using System;
+using ImmoralityGaming.Localization;
 
 namespace Assets.Scripts.Combat
 {
@@ -46,6 +47,45 @@ namespace Assets.Scripts.Combat
 
     public static class UnitTraitOps
     {
+        /// <summary>The traits' names, joined when there are several: "Undead/Demon".</summary>
+        public static string DisplayName(UnitTraits traits)
+        {
+            var names = new System.Collections.Generic.List<string>();
+            foreach (UnitTraits trait in Enum.GetValues(typeof(UnitTraits)))
+            {
+                if (trait != UnitTraits.None && (traits & trait) != 0)
+                {
+                    names.Add(TraitName(trait));
+                }
+            }
+            return string.Join(Loc.Get("combat.trait.separator"), names);
+        }
+
+        private static string TraitName(UnitTraits trait)
+        {
+            switch (trait)
+            {
+                case UnitTraits.Mechanical:
+                    return Loc.Get("combat.trait.mechanical");
+                case UnitTraits.Construct:
+                    return Loc.Get("combat.trait.construct");
+                case UnitTraits.Undead:
+                    return Loc.Get("combat.trait.undead");
+                case UnitTraits.Flying:
+                    return Loc.Get("combat.trait.flying");
+                case UnitTraits.Beast:
+                    return Loc.Get("combat.trait.beast");
+                case UnitTraits.Demon:
+                    return Loc.Get("combat.trait.demon");
+                case UnitTraits.Elemental:
+                    return Loc.Get("combat.trait.elemental");
+                case UnitTraits.Bloodless:
+                    return Loc.Get("combat.trait.bloodless");
+                default:
+                    return trait.ToString();
+            }
+        }
+
         /// <summary>Whether <paramref name="unit"/> has every trait in <paramref name="traits"/>.</summary>
         public static bool Has(ICombatUnit unit, UnitTraits traits)
         {

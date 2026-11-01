@@ -219,12 +219,12 @@ namespace Assets.Scripts.Cards
                     return Loc.Format("abilities.describe.intercept", ("percent", effect.Power));
                 case SpellEffectType.Retaliate:
                     return effect.DamageType != DamageType.Normal
-                        ? Loc.Format("abilities.describe.retaliate-element", ("amount", Magnitude(effect, caster, buffTracker, powerBonus)), ("element", effect.DamageType))
+                        ? Loc.Format("abilities.describe.retaliate-element", ("amount", Magnitude(effect, caster, buffTracker, powerBonus)), ("element", DamageTypeNames.Of(effect.DamageType)))
                         : Loc.Format("abilities.describe.retaliate", ("amount", Magnitude(effect, caster, buffTracker, powerBonus)));
                 case SpellEffectType.Thorns:
                     return effect.Duration > 0
-                        ? Loc.Format("abilities.describe.thorns-turns", ("percent", effect.Power), ("element", effect.DamageType), ("turns", effect.Duration))
-                        : Loc.Format("abilities.describe.thorns", ("percent", effect.Power), ("element", effect.DamageType));
+                        ? Loc.Format("abilities.describe.thorns-turns", ("percent", effect.Power), ("element", DamageTypeNames.Of(effect.DamageType)), ("turns", effect.Duration))
+                        : Loc.Format("abilities.describe.thorns", ("percent", effect.Power), ("element", DamageTypeNames.Of(effect.DamageType)));
                 case SpellEffectType.Execute:
                     return Loc.Format("abilities.describe.execute", ("target", TraitName(effect.BonusVsTrait, Loc.Get("abilities.describe.execute-any-foe"))), ("percent", effect.Power));
                 case SpellEffectType.Steal:
@@ -253,8 +253,7 @@ namespace Assets.Scripts.Cards
         /// <summary>"Undead" for a trait, or <paramref name="none"/> when there is none.</summary>
         private static string TraitName(UnitTraits trait, string none)
         {
-            // A combined mask ("Undead, Demon") reads as either: "Undead/Demon".
-            return trait == UnitTraits.None ? none : trait.ToString().Replace(", ", "/");
+            return trait == UnitTraits.None ? none : UnitTraitOps.DisplayName(trait);
         }
 
         private static string DamageLine(SpellEffect effect, ICombatUnit caster, CombatBuffTracker buffTracker, int powerBonus)
@@ -263,13 +262,13 @@ namespace Assets.Scripts.Cards
             if (effect.PowerMode == PowerMode.PercentOfMaxHealth)
             {
                 return elemental
-                    ? Loc.Format("abilities.describe.damage-percent-element", ("percent", effect.Power), ("element", effect.DamageType))
+                    ? Loc.Format("abilities.describe.damage-percent-element", ("percent", effect.Power), ("element", DamageTypeNames.Of(effect.DamageType)))
                     : Loc.Format("abilities.describe.damage-percent", ("percent", effect.Power));
             }
 
             int amount = Magnitude(effect, caster, buffTracker, powerBonus);
             string line = elemental
-                ? Loc.Format("abilities.describe.damage-element", ("amount", amount), ("element", effect.DamageType))
+                ? Loc.Format("abilities.describe.damage-element", ("amount", amount), ("element", DamageTypeNames.Of(effect.DamageType)))
                 : Loc.Format("abilities.describe.damage", ("amount", amount));
             if (effect.BonusPercent != 0 && effect.BonusVsTrait != UnitTraits.None)
             {
@@ -283,7 +282,7 @@ namespace Assets.Scripts.Cards
             }
             else if (effect.BonusPercent != 0 && effect.BonusVsStatus != BuffType.None)
             {
-                string status = effect.BonusVsStatus.ToString().ToLowerInvariant();
+                string status = BuffNames.Versus(effect.BonusVsStatus);
                 line = effect.BonusPercent == 100
                     ? Loc.Format("abilities.describe.bonus-double", ("line", line), ("versus", status))
                     : Loc.Format("abilities.describe.bonus-percent", ("line", line), ("percent", effect.BonusPercent), ("versus", status));
@@ -316,17 +315,16 @@ namespace Assets.Scripts.Cards
             if (effect.PowerMode == PowerMode.PercentOfTargetStat)
             {
                 // A percentage of each target's own stat: the number depends on who it lands on.
-                // "+20 Strength" -> "+20% Strength".
-                text = handler.GetDisplayText(sign * effect.Power).TrimEnd('!');
-                int space = text.IndexOf(' ');
-                text = space > 0 ? text.Insert(space, "%") : text + "%";
+                text = handler is StatBuffHandler stat
+                    ? stat.GetPercentText(sign * effect.Power)
+                    : Loc.Format("abilities.describe.status-percent", ("status", BuffNames.Of(effect.BuffType)), ("percent", sign * effect.Power));
             }
             else
             {
                 if (effect.PowerMode == PowerMode.PercentOfMaxHealth)
                 {
                     // A share of each target's own bar (a barrier): "Barrier of 25% max HP".
-                    text = Loc.Format("abilities.describe.status-max-hp", ("status", handler.GetDisplayText(0).Replace(" 0", "")), ("percent", effect.Power));
+                    text = Loc.Format("abilities.describe.status-max-hp", ("status", BuffNames.Of(effect.BuffType)), ("percent", effect.Power));
                 }
                 else
                 {

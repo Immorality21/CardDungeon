@@ -421,7 +421,7 @@ namespace Assets.Scripts.Items
         /// <summary>"Physical" for Normal, the element's own name otherwise.</summary>
         public static string DamageTypeName(DamageType type)
         {
-            return type == DamageType.Normal ? Loc.Get("items.damage-type.physical") : type.ToString();
+            return DamageTypeNames.Of(type);
         }
 
         private static void AddTo(Dictionary<DamageType, float> totals, Resistance resistance)

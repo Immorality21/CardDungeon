@@ -6,6 +6,12 @@ it has been played; anything that turns out wrong becomes a backlog item in `NEX
 Most of it came out of playtest 3 (2026-10-26 to 2026-10-28); the first section is the outside
 playtest's fixes (2026-10-30).
 
+## Texts, icons and the Warlock (2026-11-01)
+
+- [ ] **The new Warlock** - idle, wince, fall and walk at the Paladin's proportions. Demon Form too. Your call on the look.
+- [ ] **New icons** - Smite, Divine Protection, the three cloaks, Sacred Shield, Ward, Mesmerize, Hamstring, Twin Strike, Earthsplitter, the Flamethrower Mech.
+- [ ] **Grid node lines** - abilities, summons and Ultras by name, resistances saying Physical.
+
 ## Two starting abilities (2026-11-01)
 
 - [ ] **The grid's root** - the new free ability and slot beside each root. Positions checked by distance only, not seen on screen.

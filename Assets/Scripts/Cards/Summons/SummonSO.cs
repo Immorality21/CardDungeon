@@ -53,7 +53,7 @@ namespace Assets.Scripts.Cards
     public class SummonSO : ScriptableObject
     {
         [Tooltip("Stable identifier. Grid nodes name the summon they teach or upgrade by this key.")]
-        [TextKeys("summon", "name", "description")]
+        [TextKeys("summon", "name", "description", "plural", "indefinite")]
         public string Key;
 
         [System.NonSerialized] private string _displayName;
@@ -63,6 +63,26 @@ namespace Assets.Scripts.Cards
         {
             get { return _displayName ?? Loc.AssetText("summon", Key, this, "name"); }
             set { _displayName = value; }
+        }
+
+        /// <summary>A squad's "Imps", from the text table (<c>summon.{key}.plural</c>); the name if it has none.</summary>
+        public string PluralName
+        {
+            get
+            {
+                string plural = Loc.AssetText("summon", Key, this, "plural");
+                return string.IsNullOrEmpty(plural) ? Label : plural;
+            }
+        }
+
+        /// <summary>A squad's "an Imp", from the text table (<c>summon.{key}.indefinite</c>); the name if it has none.</summary>
+        public string IndefiniteName
+        {
+            get
+            {
+                string indefinite = Loc.AssetText("summon", Key, this, "indefinite");
+                return string.IsNullOrEmpty(indefinite) ? Label : indefinite;
+            }
         }
 
         [System.NonSerialized] private string _description;

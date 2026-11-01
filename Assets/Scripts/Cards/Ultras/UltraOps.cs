@@ -409,7 +409,7 @@ namespace Assets.Scripts.Cards
             }
             if (ultra.AttackDamageType != Combat.DamageType.Normal)
             {
-                parts.Add(Loc.Format("abilities.ultra.transform-attack", ("element", ultra.AttackDamageType)));
+                parts.Add(Loc.Format("abilities.ultra.transform-attack", ("element", Combat.DamageTypeNames.Of(ultra.AttackDamageType))));
             }
             if (ultra.Abilities != null)
             {

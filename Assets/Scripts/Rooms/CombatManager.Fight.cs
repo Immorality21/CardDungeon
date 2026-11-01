@@ -427,7 +427,7 @@ namespace Assets.Scripts.Rooms
                 Won = outcome == CombatOutcome.Victory,
                 HadBoss = _currentCombatHadBoss,
                 HeroKeys = _fielded.Where(h => h != null).Select(h => h.HeroKey).ToList(),
-                FoesStanding = room.Enemies.Where(e => e != null && e.IsAlive).Select(e => e.DisplayName).ToList()
+                FoesStanding = room.Enemies.Where(e => e != null && e.IsAlive).Select(e => e.Definition.SaveKey).ToList()
             });
             Events = null;
             _calculator.Events = null;

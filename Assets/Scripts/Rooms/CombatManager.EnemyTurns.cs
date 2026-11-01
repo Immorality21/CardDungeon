@@ -342,7 +342,7 @@ namespace Assets.Scripts.Rooms
             SpellVfx.Afflict(target, SpellVfx.HarmColor, true);
             yield return new WaitForSeconds(SpellVfx.AfflictLands);
             BuffTracker.ApplyBuff(target, stat, -amount, duration);
-            ShowFloatingLabel(target.Transform.position, Loc.Format("combat.float.stat-down", ("amount", amount), ("stat", stat)), new Color(0.7f, 0.4f, 1f));
+            ShowFloatingLabel(target.Transform.position, Loc.Format("combat.float.stat-down", ("amount", amount), ("stat", StatCatalog.ShortName(stat))), new Color(0.7f, 0.4f, 1f));
             yield return new WaitForSeconds(_turnDelay);
         }
 

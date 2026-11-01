@@ -1,3 +1,4 @@
+using Assets.Scripts.Cards.Buffs;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -125,17 +126,17 @@ namespace Assets.Scripts.Cards
                 {
                     case SpellEffectType.Damage:
                         sb.Append(effect.DamageType != DamageType.Normal
-                            ? Loc.Format("abilities.summary.damage-element", ("power", power), ("element", effect.DamageType))
+                            ? Loc.Format("abilities.summary.damage-element", ("power", power), ("element", DamageTypeNames.Of(effect.DamageType)))
                             : Loc.Format("abilities.summary.damage", ("power", power)));
                         break;
                     case SpellEffectType.Heal:
                         sb.Append(Loc.Format("abilities.summary.heal", ("power", power)));
                         break;
                     case SpellEffectType.Buff:
-                        sb.Append(Loc.Format("abilities.summary.buff", ("status", effect.BuffType)));
+                        sb.Append(Loc.Format("abilities.summary.buff", ("status", BuffNames.Of(effect.BuffType))));
                         break;
                     case SpellEffectType.Debuff:
-                        sb.Append(Loc.Format("abilities.summary.debuff", ("status", effect.BuffType)));
+                        sb.Append(Loc.Format("abilities.summary.debuff", ("status", BuffNames.Of(effect.BuffType))));
                         break;
                     case SpellEffectType.HealthCost:
                         sb.Append(Loc.Format("abilities.summary.health-cost", ("power", power)));
@@ -153,7 +154,7 @@ namespace Assets.Scripts.Cards
                         sb.Append(Loc.Get("abilities.summary.disassemble"));
                         break;
                     case SpellEffectType.Thorns:
-                        sb.Append(Loc.Format("abilities.summary.thorns", ("percent", effect.Power), ("element", effect.DamageType)));
+                        sb.Append(Loc.Format("abilities.summary.thorns", ("percent", effect.Power), ("element", DamageTypeNames.Of(effect.DamageType))));
                         break;
                 }
             }

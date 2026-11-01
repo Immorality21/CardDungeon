@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: DivineProtection
   m_EditorClassIdentifier: 
   Key: DivineProtection
-  Icon: {fileID: 21300000, guid: 28a3daf7d9134cdfbb7e3a15028d9910, type: 3}
+  Icon: {fileID: 21300000, guid: a6371f8bed7347d78468e3b9dd495ad2, type: 3}
   Delivery: 0
   ProjectileArtAngle: 0
   TargetType: 3

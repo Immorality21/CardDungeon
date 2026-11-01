@@ -93,7 +93,7 @@ Jobs are async: queue them in parallel, then `wait_for_jobs` (free) instead of p
 
 - **Enemies (pixflux, 64×64):** subject + materials + silhouette props + "full body front view,
   boss monster for a dark fantasy dungeon RPG". Two seeds per enemy gave a real choice.
-- **Heroes now share the PALADIN's proportions, not big chibi heads** (owner, 2026-10-27, playtest 3 finding 18: "the Rogue, Ranger and Warrior have a bigger head than the Paladin"). About 2.5 heads tall with a neck, shoulders and longer legs - the Paladin, Cleric, Mage, Tinkerer and Cultist. The Warrior, Ranger and Rogue were redrawn to it; the Warlock is still big-headed, pending the owner. **The paragraph below is the superseded 2026-09-29 rule**, kept for how its prompt worked:
+- **Heroes now share the PALADIN's proportions, not big chibi heads** (owner, 2026-10-27, playtest 3 finding 18: "the Rogue, Ranger and Warrior have a bigger head than the Paladin"). About 2.5 heads tall with a neck, shoulders and longer legs - the Paladin, Cleric, Mage, Tinkerer and Cultist. The Warrior, Ranger, Rogue and (2026-11-01) Warlock, Demon Form included, were redrawn to it. **The paragraph below is the superseded 2026-09-29 rule**, kept for how its prompt worked:
 - ~~**Heroes (pixen, 32×32): heroes have BIG heads** (owner's rule, 2026-09-29).~~ The reference is
   the **Rogue**: its hood/head fills rows 0–19 of 32 — about **60% of the sprite's height**, ~26 px
   wide — over a small body, and that head is where the detail (the face) lives. "Cute chibi, big
@@ -424,9 +424,20 @@ rounds of five cost 5-10.
 92 new 32x32 icons (PixelLab, 115 generations), one per player ability that had none of its own or
 shared one, named `Sprites/Abilities/<MagicSO.Key>.png`. Fireball, Ice Shard, Lightning Bolt and Shield
 Up now use their namesake files. Mend, Slash, War Cry and Water Splash keep their older sprite-sheet
-icons. Enemy-only abilities still share. Weaker ones to redo some day: the three elemental cloaks
-(all a hooded figure), Aegis vs Sacred Shield (both gold discs), Watcher Gaze vs Mesmerize (both eyes),
-Ward, Mug, Hamstring vs Maim, Twin Strike (swords, not daggers).
+icons. Enemy-only abilities still share. The weak ones were redone 2026-11-01 (the cloaks, Sacred Shield,
+Ward, Mesmerize, Hamstring, Twin Strike), overwritten in place. **"Empty cloak, no person"** keeps a
+figure out; Mug's new prompt came back a portrait, so it kept its old icon.
+
+Smite and Divine Protection got theirs on 2026-11-01. `Smite.png` had been Divine Bolt's art: it moved to
+`DivineBolt.png` (GUID kept), so a new `Smite.png` could take the name.
+
+## The Warlock's redraw (2026-11-01)
+
+The pixen prompt that landed the Paladin's proportions: *"... small head, tall slim adult proportions like a
+paladin sprite ..."*, four candidates. From the chosen frame, the idle, wince, fall and walk came from the steps
+above: 12 generations in all. A lying pose asked of pixen came back as **two bodies stacked on the canvas**: clear
+the upper one before pinning it as the last frame. In the fall, the frame before the pinned pose read better than
+the pose itself, so it is the one held.
 
 ## Ultra icons (2026-10-30)
 
@@ -436,7 +447,8 @@ to its first frame. Pixen, seed 9001 for the set, `no_background`, `single color
 `medium detail`, prompt *"<what it shows>, dark fantasy RPG special attack skill icon, single symbol
 centered, clean readable silhouette"* (mechs and bags: "single object"). Metas copied from
 `Abilities/AimedShot.png.meta` with fresh GUIDs. 24 generations, no rerolls. Weaker ones to redo some
-day: Earthsplitter and the Flamethrower Mech (figures, not symbols), Pack Hunt (one wolf, not three).
+day: Pack Hunt (one wolf, not three; a reroll was muddier). Earthsplitter and the Flamethrower Mech were
+redone 2026-11-01.
 
 ## Dungeon tiles and props — the 2026-10-30 room spike
 

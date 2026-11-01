@@ -136,7 +136,7 @@ namespace Assets.Scripts.Events
         public List<string> HeroKeys = new List<string>();
 
         /// <summary>
-        /// Display names of the enemies still standing when it ended - on a loss, who the party fell
+        /// Save keys of the enemies still standing when it ended - on a loss, who the party fell
         /// to (the run history's "fell to", docs/plans/POLISH_CONTENT.md §15). Empty on a win.
         /// </summary>
         public List<string> FoesStanding = new List<string>();

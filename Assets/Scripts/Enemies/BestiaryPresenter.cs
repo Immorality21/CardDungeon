@@ -88,23 +88,7 @@ namespace Assets.Scripts.Enemies
         /// <summary><see cref="DamageType.Normal"/> reads as "Physical"; every other type is its own name.</summary>
         public static string DamageTypeLabel(DamageType type)
         {
-            switch (type)
-            {
-                case DamageType.Normal:
-                    return Loc.Get("bestiary.element.physical");
-                case DamageType.Fire:
-                    return Loc.Get("bestiary.element.fire");
-                case DamageType.Ice:
-                    return Loc.Get("bestiary.element.ice");
-                case DamageType.Lightning:
-                    return Loc.Get("bestiary.element.lightning");
-                case DamageType.Holy:
-                    return Loc.Get("bestiary.element.holy");
-                case DamageType.Shadow:
-                    return Loc.Get("bestiary.element.shadow");
-                default:
-                    return type.ToString();
-            }
+            return DamageTypeNames.Of(type);
         }
 
         // ============================================================
@@ -407,31 +391,7 @@ namespace Assets.Scripts.Enemies
         /// <summary>A status effect's name as the player meets it on the HP bar and in combat text.</summary>
         public static string StatusLabel(Cards.BuffType type)
         {
-            switch (type)
-            {
-                case Cards.BuffType.Bleeding:
-                    return Loc.Get("bestiary.status.bleed");
-                case Cards.BuffType.Poisoned:
-                    return Loc.Get("bestiary.status.poison");
-                case Cards.BuffType.Burning:
-                    return Loc.Get("bestiary.status.burn");
-                case Cards.BuffType.Regenerating:
-                    return Loc.Get("bestiary.status.regen");
-                case Cards.BuffType.Silenced:
-                    return Loc.Get("bestiary.status.silence");
-                case Cards.BuffType.Blinded:
-                    return Loc.Get("bestiary.status.blind");
-                case Cards.BuffType.Leeched:
-                    return Loc.Get("bestiary.status.leech");
-                case Cards.BuffType.Confused:
-                    return Loc.Get("bestiary.status.confuse");
-                case Cards.BuffType.Marked:
-                    return Loc.Get("bestiary.status.mark");
-                case Cards.BuffType.DeathMarked:
-                    return Loc.Get("bestiary.status.death-mark");
-                default:
-                    return type.ToString();
-            }
+            return Cards.Buffs.BuffNames.Of(type);
         }
 
         /// <summary>Kill tally. Zero is a real answer once met - fled from, or survived.</summary>

@@ -19,7 +19,7 @@ namespace Assets.Scripts.Enemies
                  "what the player has learned about it (resistances seen, weaknesses discovered). " +
                  "Never shown to the player. Changing it orphans every save that references the old " +
                  "value, so treat it as write-once. Same contract as HeroSO.Key.")]
-        [TextKeys("enemy", "name")]
+        [TextKeys("enemy", "name", "plural")]
         public string Key;
 
         [System.NonSerialized] private string _displayName;
@@ -29,6 +29,16 @@ namespace Assets.Scripts.Enemies
         {
             get { return _displayName ?? Loc.AssetText("enemy", Key, this, "name"); }
             set { _displayName = value; }
+        }
+
+        /// <summary>"Bog Shamans", from the text table (<c>enemy.{key}.plural</c>); the name if it has none.</summary>
+        public string PluralName
+        {
+            get
+            {
+                string plural = Loc.AssetText("enemy", Key, this, "plural");
+                return string.IsNullOrEmpty(plural) ? Label : plural;
+            }
         }
 
         public Sprite Sprite;

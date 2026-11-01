@@ -210,8 +210,8 @@ namespace Assets.Scripts.Rooms.Events
 
                 afflictions.Add(hero.HeroKey, effect.BuffType, signed);
                 lines.Add(signed < 0
-                    ? Loc.Format("event-text.affliction.minus", ("hero", hero.DisplayName), ("buff", effect.BuffType), ("amount", signed))
-                    : Loc.Format("event-text.affliction.plus", ("hero", hero.DisplayName), ("buff", effect.BuffType), ("amount", signed)));
+                    ? Loc.Format("event-text.affliction.minus", ("hero", hero.DisplayName), ("buff", Cards.Buffs.BuffNames.Of(effect.BuffType)), ("amount", signed))
+                    : Loc.Format("event-text.affliction.plus", ("hero", hero.DisplayName), ("buff", Cards.Buffs.BuffNames.Of(effect.BuffType)), ("amount", signed)));
             }
         }
 

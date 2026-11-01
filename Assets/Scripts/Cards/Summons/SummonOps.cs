@@ -1,3 +1,4 @@
+using Assets.Scripts.Cards.Buffs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -452,11 +453,11 @@ namespace Assets.Scripts.Cards
         {
             var groups = troops.Where(t => t != null)
                 .GroupBy(t => t.Label)
-                .Select(g => new { Name = g.Key, Count = g.Count(), Index = troops.IndexOf(g.First()) })
+                .Select(g => new { Troop = g.First(), Count = g.Count(), Index = troops.IndexOf(g.First()) })
                 .OrderBy(g => g.Index)
                 .Select(g => g.Count == 1
-                    ? Loc.Format("abilities.summon.squad-one", ("article", Article(g.Name)), ("name", g.Name))
-                    : Loc.Format("abilities.summon.squad-many", ("count", g.Count), ("name", Plural(g.Name))))
+                    ? g.Troop.IndefiniteName
+                    : Loc.Format("abilities.summon.squad-many", ("count", g.Count), ("name", g.Troop.PluralName)))
                 .ToList();
             if (groups.Count <= 1)
             {
@@ -465,20 +466,6 @@ namespace Assets.Scripts.Cards
             return Loc.Format("abilities.summon.squad-list",
                 ("list", string.Join(Loc.Get("abilities.summon.effect-separator"), groups.Take(groups.Count - 1))),
                 ("last", groups[groups.Count - 1]));
-        }
-
-        private static string Article(string name)
-        {
-            return name.Length > 0 && "AEIOUaeiou".IndexOf(name[0]) >= 0 ? Loc.Get("abilities.summon.article-an") : Loc.Get("abilities.summon.article-a");
-        }
-
-        private static string Plural(string name)
-        {
-            if (name.EndsWith("us"))
-            {
-                return name.Substring(0, name.Length - 2) + "i";   // Succubus -> Succubi
-            }
-            return name.EndsWith("s") ? name + "es" : name + "s";
         }
 
         /// <summary>Repeated identical lines read as one with a count: two equal hits are "AGI damage ×2",
@@ -517,28 +504,28 @@ namespace Assets.Scripts.Cards
                             : Timed("abilities.summon.effect.barrier", "abilities.summon.effect.barrier-turns", timed, effect, ("amount", effect.Power));
                     }
                     return effect.PowerMode == PowerMode.PercentOfTargetStat
-                        ? Timed("abilities.summon.effect.buff-percent", "abilities.summon.effect.buff-percent-turns", timed, effect, ("percent", effect.Power), ("status", effect.BuffType))
-                        : Timed("abilities.summon.effect.buff", "abilities.summon.effect.buff-turns", timed, effect, ("amount", effect.Power), ("status", effect.BuffType));
+                        ? Timed("abilities.summon.effect.buff-percent", "abilities.summon.effect.buff-percent-turns", timed, effect, ("percent", effect.Power), ("status", BuffNames.Of(effect.BuffType)))
+                        : Timed("abilities.summon.effect.buff", "abilities.summon.effect.buff-turns", timed, effect, ("amount", effect.Power), ("status", BuffNames.Of(effect.BuffType)));
                 case SpellEffectType.Debuff:
-                    return Timed("abilities.summon.effect.debuff", "abilities.summon.effect.debuff-turns", timed, effect, ("amount", effect.Power), ("status", effect.BuffType));
+                    return Timed("abilities.summon.effect.debuff", "abilities.summon.effect.debuff-turns", timed, effect, ("amount", effect.Power), ("status", BuffNames.Of(effect.BuffType)));
                 case SpellEffectType.Damage:
                 {
                     bool elemental = effect.DamageType != DamageType.Normal;
                     if (!StatCatalog.CanScalePower(effect.ScalingStat) || effect.PowerMode != PowerMode.BasePower)
                     {
                         return elemental
-                            ? Loc.Format("abilities.describe.damage-element", ("amount", effect.Power), ("element", effect.DamageType))
+                            ? Loc.Format("abilities.describe.damage-element", ("amount", effect.Power), ("element", DamageTypeNames.Of(effect.DamageType)))
                             : Loc.Format("abilities.describe.damage", ("amount", effect.Power));
                     }
                     string stat = StatCatalog.ShortName(effect.ScalingStat);
                     if (effect.Power > 0)
                     {
                         return elemental
-                            ? Loc.Format("abilities.summon.effect.damage-plus-stat-element", ("amount", effect.Power), ("stat", stat), ("element", effect.DamageType))
+                            ? Loc.Format("abilities.summon.effect.damage-plus-stat-element", ("amount", effect.Power), ("stat", stat), ("element", DamageTypeNames.Of(effect.DamageType)))
                             : Loc.Format("abilities.summon.effect.damage-plus-stat", ("amount", effect.Power), ("stat", stat));
                     }
                     return elemental
-                        ? Loc.Format("abilities.summon.effect.damage-stat-element", ("stat", stat), ("element", effect.DamageType))
+                        ? Loc.Format("abilities.summon.effect.damage-stat-element", ("stat", stat), ("element", DamageTypeNames.Of(effect.DamageType)))
                         : Loc.Format("abilities.summon.effect.damage-stat", ("stat", stat));
                 }
                 case SpellEffectType.TurnDelay:

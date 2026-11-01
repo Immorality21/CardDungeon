@@ -5358,8 +5358,8 @@ MonoBehaviour:
     Values:
     - '{count} {name}'
     Reviewed: 0
-    Note: Run history foe list, repeated enemy; {count} = how many, {name} = enemy
-      name made plural by code (English rules)
+    Note: Run history foe list, repeated enemy; {count} = how many, {name} = enemy's
+      plural text (enemy.<key>.plural)
   - Key: dungeon.history.foes.list
     Values:
     - '{first} and {last}'
@@ -6515,33 +6515,16 @@ MonoBehaviour:
     - '{ability} as it leaves'
     Reviewed: 0
     Note: summon description part; ability = parting ability name
-  - Key: abilities.summon.squad-one
-    Values:
-    - '{article} {name}'
-    Reviewed: 0
-    Note: squad troop group of one; article = abilities.summon.article-a/an, name
-      = troop name
   - Key: abilities.summon.squad-many
     Values:
     - '{count} {name}'
     Reviewed: 0
-    Note: squad troop group; name = troop name made plural in code (English suffix
-      rules)
+    Note: squad troop group; name = the troop's plural text (summon.<key>.plural)
   - Key: abilities.summon.squad-list
     Values:
     - '{list} and {last}'
     Reviewed: 0
     Note: squad troop groups; list = all but the last joined
-  - Key: abilities.summon.article-an
-    Values:
-    - an
-    Reviewed: 0
-    Note: article before a troop name starting with a vowel
-  - Key: abilities.summon.article-a
-    Values:
-    - a
-    Reviewed: 0
-    Note: article before a troop name
   - Key: abilities.summon.repeat
     Values:
     - "{effect} \xD7{count}"
@@ -7512,11 +7495,6 @@ MonoBehaviour:
     - Restores {percent}% of the drinker's maximum health.
     Reviewed: 0
     Note: heal effect; percent = % of max HP
-  - Key: items.damage-type.physical
-    Values:
-    - Physical
-    Reviewed: 0
-    Note: name of the Normal damage type in item resistance lines
   - Key: hub.lot.level-upgrade
     Values:
     - "Level {level} \xB7 upgrade {cost}g"
@@ -11733,3 +11711,267 @@ MonoBehaviour:
     - You found a recipe. It needs a Forge.
     Reviewed: 0
     Note: 
+  - Key: bestiary.status.frozen
+    Values:
+    - Frozen
+    Reviewed: 0
+    Note: Status name
+  - Key: bestiary.status.slow
+    Values:
+    - Slow
+    Reviewed: 0
+    Note: Status name
+  - Key: bestiary.status.haste
+    Values:
+    - Haste
+    Reviewed: 0
+    Note: Status name
+  - Key: bestiary.status.hidden
+    Values:
+    - Hidden
+    Reviewed: 0
+    Note: Status name
+  - Key: bestiary.status.evasive
+    Values:
+    - Evasive
+    Reviewed: 0
+    Note: Status name
+  - Key: bestiary.status.guard
+    Values:
+    - Guarded
+    Reviewed: 0
+    Note: Status name
+  - Key: bestiary.status.barrier
+    Values:
+    - Barrier
+    Reviewed: 0
+    Note: Status name
+  - Key: bestiary.status.divine-protection
+    Values:
+    - Divine Protection
+    Reviewed: 0
+    Note: Status name
+  - Key: bestiary.status.resistance
+    Values:
+    - '{element} resistance'
+    Reviewed: 0
+    Note: Resistance buff name; {element} = damage type name
+  - Key: abilities.describe.versus-marked
+    Values:
+    - marked
+    Reviewed: 0
+    Note: 'After ''vs'' in an ability''s bonus line: a target carrying Hunter''s
+      Mark'
+  - Key: abilities.describe.status-percent
+    Values:
+    - '{status} {percent}%'
+    Reviewed: 0
+    Note: 'Ability effect line: a status sized as a percentage of the target; {percent}
+      is signed'
+  - Key: combat.status.stat-up-percent
+    Values:
+    - +{power}% {stat}
+    Reviewed: 0
+    Note: 'Buff text: stat raised by a percentage; {power} = percent, {stat} = stat
+      display name'
+  - Key: combat.status.stat-down-percent
+    Values:
+    - '{power}% {stat}'
+    Reviewed: 0
+    Note: 'Buff text: stat lowered by a percentage; {power} = signed percent, {stat}
+      = stat display name'
+  - Key: combat.trait.mechanical
+    Values:
+    - Mechanical
+    Reviewed: 0
+    Note: What a unit is
+  - Key: combat.trait.construct
+    Values:
+    - Construct
+    Reviewed: 0
+    Note: What a unit is
+  - Key: combat.trait.undead
+    Values:
+    - Undead
+    Reviewed: 0
+    Note: What a unit is
+  - Key: combat.trait.flying
+    Values:
+    - Flying
+    Reviewed: 0
+    Note: What a unit is
+  - Key: combat.trait.beast
+    Values:
+    - Beast
+    Reviewed: 0
+    Note: What a unit is
+  - Key: combat.trait.demon
+    Values:
+    - Demon
+    Reviewed: 0
+    Note: What a unit is
+  - Key: combat.trait.elemental
+    Values:
+    - Elemental
+    Reviewed: 0
+    Note: What a unit is
+  - Key: combat.trait.bloodless
+    Values:
+    - Bloodless
+    Reviewed: 0
+    Note: What a unit is
+  - Key: combat.trait.separator
+    Values:
+    - /
+    Reviewed: 0
+    Note: 'Between trait names: Undead/Demon'
+  - Key: enemy.abyssal-warden.plural
+    Values:
+    - Abyssal Wardens
+    Reviewed: 0
+    Note: 'Enemy name, plural: the run history''s ''2 Bog Shamans'''
+  - Key: enemy.bile-slime.plural
+    Values:
+    - Bile Slimes
+    Reviewed: 0
+    Note: 'Enemy name, plural: the run history''s ''2 Bog Shamans'''
+  - Key: enemy.bog-shaman.plural
+    Values:
+    - Bog Shamans
+    Reviewed: 0
+    Note: 'Enemy name, plural: the run history''s ''2 Bog Shamans'''
+  - Key: enemy.bone-golem.plural
+    Values:
+    - Bone Golems
+    Reviewed: 0
+    Note: 'Enemy name, plural: the run history''s ''2 Bog Shamans'''
+  - Key: enemy.cinder-imp.plural
+    Values:
+    - Cinder Imps
+    Reviewed: 0
+    Note: 'Enemy name, plural: the run history''s ''2 Bog Shamans'''
+  - Key: enemy.cinder-tyrant.plural
+    Values:
+    - Cinder Tyrants
+    Reviewed: 0
+    Note: 'Enemy name, plural: the run history''s ''2 Bog Shamans'''
+  - Key: enemy.clockwork-sentry.plural
+    Values:
+    - Clockwork Sentries
+    Reviewed: 0
+    Note: 'Enemy name, plural: the run history''s ''2 Bog Shamans'''
+  - Key: enemy.dark-jailor.plural
+    Values:
+    - Dark Jailors
+    Reviewed: 0
+    Note: 'Enemy name, plural: the run history''s ''2 Bog Shamans'''
+  - Key: enemy.dragon.plural
+    Values:
+    - Drakelings
+    Reviewed: 0
+    Note: 'Enemy name, plural: the run history''s ''2 Bog Shamans'''
+  - Key: enemy.eye-ball.plural
+    Values:
+    - Floating Eyes
+    Reviewed: 0
+    Note: 'Enemy name, plural: the run history''s ''2 Bog Shamans'''
+  - Key: enemy.fire-elemental.plural
+    Values:
+    - Fire Elementals
+    Reviewed: 0
+    Note: 'Enemy name, plural: the run history''s ''2 Bog Shamans'''
+  - Key: enemy.fire-elemental-prince.plural
+    Values:
+    - Fire Elemental Princes
+    Reviewed: 0
+    Note: 'Enemy name, plural: the run history''s ''2 Bog Shamans'''
+  - Key: enemy.ghoul.plural
+    Values:
+    - Ghouls
+    Reviewed: 0
+    Note: 'Enemy name, plural: the run history''s ''2 Bog Shamans'''
+  - Key: enemy.gilded-hoarder.plural
+    Values:
+    - Gilded Hoarders
+    Reviewed: 0
+    Note: 'Enemy name, plural: the run history''s ''2 Bog Shamans'''
+  - Key: enemy.gilded-mote.plural
+    Values:
+    - Gilded Motes
+    Reviewed: 0
+    Note: 'Enemy name, plural: the run history''s ''2 Bog Shamans'''
+  - Key: enemy.hex-weaver.plural
+    Values:
+    - Hex Weavers
+    Reviewed: 0
+    Note: 'Enemy name, plural: the run history''s ''2 Bog Shamans'''
+  - Key: enemy.lich.plural
+    Values:
+    - Liches
+    Reviewed: 0
+    Note: 'Enemy name, plural: the run history''s ''2 Bog Shamans'''
+  - Key: enemy.mimic.plural
+    Values:
+    - Mimics
+    Reviewed: 0
+    Note: 'Enemy name, plural: the run history''s ''2 Bog Shamans'''
+  - Key: enemy.mirefather.plural
+    Values:
+    - Mirefathers
+    Reviewed: 0
+    Note: 'Enemy name, plural: the run history''s ''2 Bog Shamans'''
+  - Key: enemy.mother-ooze.plural
+    Values:
+    - Mother Oozes
+    Reviewed: 0
+    Note: 'Enemy name, plural: the run history''s ''2 Bog Shamans'''
+  - Key: enemy.skeleton.plural
+    Values:
+    - Skeletons
+    Reviewed: 0
+    Note: 'Enemy name, plural: the run history''s ''2 Bog Shamans'''
+  - Key: enemy.slag-hound.plural
+    Values:
+    - Slag Hounds
+    Reviewed: 0
+    Note: 'Enemy name, plural: the run history''s ''2 Bog Shamans'''
+  - Key: enemy.spore-bloater.plural
+    Values:
+    - Spore Bloaters
+    Reviewed: 0
+    Note: 'Enemy name, plural: the run history''s ''2 Bog Shamans'''
+  - Key: enemy.steam-automaton.plural
+    Values:
+    - Steam Automatons
+    Reviewed: 0
+    Note: 'Enemy name, plural: the run history''s ''2 Bog Shamans'''
+  - Key: enemy.stone-sentinel.plural
+    Values:
+    - Stone Sentinels
+    Reviewed: 0
+    Note: 'Enemy name, plural: the run history''s ''2 Bog Shamans'''
+  - Key: enemy.wight.plural
+    Values:
+    - Wights
+    Reviewed: 0
+    Note: 'Enemy name, plural: the run history''s ''2 Bog Shamans'''
+  - Key: summon.imp.plural
+    Values:
+    - Imps
+    Reviewed: 0
+    Note: 'Troop name, plural: a squad''s ''3 Imps'''
+  - Key: summon.imp.indefinite
+    Values:
+    - an Imp
+    Reviewed: 0
+    Note: 'Troop name with its article: a squad''s ''an Imp'''
+  - Key: summon.succubus.plural
+    Values:
+    - Succubi
+    Reviewed: 0
+    Note: 'Troop name, plural: a squad''s ''3 Imps'''
+  - Key: summon.succubus.indefinite
+    Values:
+    - a Succubus
+    Reviewed: 0
+    Note: 'Troop name with its article: a squad''s ''an Imp'''

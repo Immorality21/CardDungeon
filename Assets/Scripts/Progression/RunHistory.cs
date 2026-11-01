@@ -57,7 +57,7 @@ namespace Assets.Scripts.Progression
         public int EssenceKept;
         public int ItemsKept;
 
-        /// <summary>The foes still standing when the party fell. Empty unless the attempt fell.</summary>
+        /// <summary>Save keys of the foes still standing when the party fell. Empty unless the attempt fell.</summary>
         public List<string> FellTo = new List<string>();
 
         // The current floor's provisional share - folded in on its clear, dropped on its forfeit.
@@ -361,33 +361,34 @@ namespace Assets.Scripts.Progression
             }
         }
 
-        /// <summary>Groups repeats: "Mirefather and 2 Bog Shamans".</summary>
-        public static string DescribeFoes(IList<string> names)
+        /// <summary>Groups repeats: "Mirefather and 2 Bog Shamans". Takes enemy save keys, so a record
+        /// reads in the current language.</summary>
+        public static string DescribeFoes(IList<string> keys)
         {
-            if (names == null || names.Count == 0)
+            if (keys == null || keys.Count == 0)
             {
                 return string.Empty;
             }
             var order = new List<string>();
             var counts = new Dictionary<string, int>();
-            foreach (var name in names)
+            foreach (var key in keys)
             {
-                if (string.IsNullOrEmpty(name))
+                if (string.IsNullOrEmpty(key))
                 {
                     continue;
                 }
-                if (!counts.ContainsKey(name))
+                if (!counts.ContainsKey(key))
                 {
-                    counts[name] = 0;
-                    order.Add(name);
+                    counts[key] = 0;
+                    order.Add(key);
                 }
-                counts[name]++;
+                counts[key]++;
             }
             var parts = new List<string>();
-            foreach (var name in order)
+            foreach (var key in order)
             {
-                int n = counts[name];
-                parts.Add(n == 1 ? name : Loc.Format("dungeon.history.foes.counted", ("count", n), ("name", Plural(name))));
+                int n = counts[key];
+                parts.Add(n == 1 ? FoeText(key, "name") : Loc.Format("dungeon.history.foes.counted", ("count", n), ("name", FoeText(key, "plural"))));
             }
             if (parts.Count == 1)
             {
@@ -396,17 +397,10 @@ namespace Assets.Scripts.Progression
             return Loc.Format("dungeon.history.foes.list", ("first", string.Join(Loc.Get("dungeon.history.foes.separator"), parts.GetRange(0, parts.Count - 1))), ("last", parts[parts.Count - 1]));
         }
 
-        private static string Plural(string name)
+        private static string FoeText(string key, string field)
         {
-            if (name.EndsWith("s") || name.EndsWith("x") || name.EndsWith("sh") || name.EndsWith("ch"))
-            {
-                return name + "es";
-            }
-            if (name.EndsWith("y") && name.Length > 1 && "aeiou".IndexOf(name[name.Length - 2]) < 0)
-            {
-                return name.Substring(0, name.Length - 1) + "ies";
-            }
-            return name + "s";
+            string text = Loc.AssetText("enemy", key, null, field);
+            return string.IsNullOrEmpty(text) ? key : text;
         }
     }
 }

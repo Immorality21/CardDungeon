@@ -368,22 +368,15 @@ reports it, rather than adding content ad hoc.
 Also thin and worth naming: **no run declares its own room-event pool**, so every biome draws on the
 same six.
 
-### 22. Localization follow-ups *(added 2026-10-30)*
+### 22. Localization follow-ups *(added 2026-10-30, done 2026-11-01)*
 
-The text system (root `CLAUDE.md`, `Localization/`) moved every text into the table with the English
-unchanged. Left for a later pass, found while moving them:
-
-- **Enum names still on screen**: damage types ("Normal" rather than "Physical" on grid resistance
-  nodes), some statuses in the Bestiary (Frozen, Slow, Haste), `BuffType` in affliction lines,
-  `StatType` in the enemy Weaken log ("MaxHealth"). They are passed as placeholder values; give them
-  keys (`StatCatalog` already has them for stats).
-- **English grammar in code**: summon plurals (`SummonOps.Plural`), "a"/"an", enemy-name plurals in run
-  history (`RunHistory.Plural`). Fine in English, a rework before a second language.
-- **Grid nodes show the raw ability/summon/Ultra key** in some payload lines (`SphereGridPresenter`).
-- **`AbilityDescriber.StatusLine` edits a handler's text after lookup** (`.Insert("%")`,
-  `.Replace(" 0", "")`) - breaks once that wording changes.
-- The Texts window's Unused filter cannot see keys built entirely at runtime; name keys in full or end a
-  stem with a dot.
+Done 2026-11-01: damage types (`DamageTypeNames`), buffs and statuses (`BuffNames`) and traits
+(`UnitTraitOps.DisplayName`) have one named source each, and grid nodes name what they teach. Plurals and
+articles moved into the table (`enemy.<key>.plural`, `summon.<key>.plural`, `summon.<key>.indefinite`), and
+a run record holds enemy save keys, so it reads in the current language. `StatusLine` no longer edits a
+handler's text. `LocFollowUpTests`. Left, and small: the describer still trims a popup's "!" (`TrimEnd`), and
+the Texts window's Unused filter cannot see keys built entirely at runtime, so name keys in full or end a
+stem with a dot.
 
 ### 21. Art pass — menu backdrops and every outdated sprite *(added 2026-09-28)*
 

@@ -1,3 +1,4 @@
+using Assets.Scripts.Combat;
 using System;
 using System.Collections.Generic;
 using Assets.Scripts.Items;
@@ -312,7 +313,7 @@ namespace Assets.Scripts.Heroes.UI
 
             if (node.Kind == SphereNodeKind.Resistance)
             {
-                return Loc.Format("grid.payload.resistance", ("element", node.ResistType), ("percent", node.ResistPercent.ToString("0")));
+                return Loc.Format("grid.payload.resistance", ("element", DamageTypeNames.Of(node.ResistType)), ("percent", node.ResistPercent.ToString("0")));
             }
             if (node.Kind == SphereNodeKind.MagicSlot)
             {
@@ -324,26 +325,26 @@ namespace Assets.Scripts.Heroes.UI
                 // *learned*, not automatically carried - it still has to win a slot on the Spells
                 // screen - and the charge count, which is the whole run's allowance of it and so is
                 // as much the payload as the spell name is.
-                string name = string.IsNullOrEmpty(node.GrantedMagicKey) ? Loc.Get("grid.payload.unset") : node.GrantedMagicKey;
+                string name = NameOf("ability", node.GrantedMagicKey);
                 return Loc.Format("grid.payload.learns", ("ability", name), ("charges", Mathf.Max(1, node.GrantedCharges)));
             }
             if (node.Kind == SphereNodeKind.MagicAwaken)
             {
-                string from = string.IsNullOrEmpty(node.GrantedMagicKey) ? Loc.Get("grid.payload.unset") : node.GrantedMagicKey;
-                string to = string.IsNullOrEmpty(node.AwakenedMagicKey) ? Loc.Get("grid.payload.unset") : node.AwakenedMagicKey;
+                string from = NameOf("ability", node.GrantedMagicKey);
+                string to = NameOf("ability", node.AwakenedMagicKey);
                 return Loc.Format("grid.payload.awakens", ("from", from), ("to", to));
             }
             if (node.Kind == SphereNodeKind.MagicUpgrade)
             {
-                string name = string.IsNullOrEmpty(node.GrantedMagicKey) ? Loc.Get("grid.payload.unset") : node.GrantedMagicKey;
+                string name = NameOf("ability", node.GrantedMagicKey);
                 return Loc.Format("grid.payload.ability-upgrade", ("ability", name), ("upgrade", DescribeUpgrade(node.UpgradeType, node.UpgradeAmount)));
             }
             if (node.Kind == SphereNodeKind.Ultra)
             {
-                string ultra = string.IsNullOrEmpty(node.GrantedUltraKey) ? Loc.Get("grid.payload.unset") : node.GrantedUltraKey;
+                string ultra = NameOf("ultra", node.GrantedUltraKey);
                 return Loc.Format("grid.payload.ultra", ("ultra", ultra));
             }
-            string summon = string.IsNullOrEmpty(node.GrantedSummonKey) ? Loc.Get("grid.payload.unset") : node.GrantedSummonKey;
+            string summon = NameOf("summon", node.GrantedSummonKey);
             if (node.Kind == SphereNodeKind.Summon)
             {
                 // Always carried - a summon takes no ability slot - and cast from its own command.
@@ -395,6 +396,18 @@ namespace Assets.Scripts.Heroes.UI
                 }
             }
             return parts.Count > 0 ? string.Join(" · ", parts) : Loc.Get("grid.payload.nothing");
+        }
+
+        /// <summary>What a node teaches, by the name the player knows it by. Nodes name assets by key
+        /// (Heroes does not depend on Cards), so the name comes off the text table directly.</summary>
+        private static string NameOf(string area, string key)
+        {
+            if (string.IsNullOrEmpty(key))
+            {
+                return Loc.Get("grid.payload.unset");
+            }
+            string name = Loc.AssetText(area, key, null, "name");
+            return string.IsNullOrEmpty(name) ? key : name;
         }
 
         /// <summary>

@@ -159,9 +159,9 @@ namespace Tests.EditMode
         public void DescribeFoes_GroupsRepeats()
         {
             Assert.AreEqual("Mirefather and 2 Bog Shamans",
-                RunHistoryOps.DescribeFoes(new List<string> { "Mirefather", "Bog Shaman", "Bog Shaman" }));
+                RunHistoryOps.DescribeFoes(new List<string> { "Mirefather", "BogShaman", "BogShaman" }));
             Assert.AreEqual("2 Floating Eyes, Hex Weaver and 3 Cinder Imps",
-                RunHistoryOps.DescribeFoes(new List<string> { "Floating Eye", "Hex Weaver", "Floating Eye", "Cinder Imp", "Cinder Imp", "Cinder Imp" }));
+                RunHistoryOps.DescribeFoes(new List<string> { "EyeBall", "HexWeaver", "EyeBall", "CinderImp", "CinderImp", "CinderImp" }));
             Assert.AreEqual(string.Empty, RunHistoryOps.DescribeFoes(null));
         }
 

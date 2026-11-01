@@ -22,6 +22,14 @@ namespace Assets.Scripts.Cards.Buffs
             buffTracker.ApplyBuff(target, _stat, power, duration);
         }
 
+        /// <summary>A percentage of each target's own stat: "+20% Strength".</summary>
+        public string GetPercentText(int percent)
+        {
+            return percent >= 0
+                ? Loc.Format("combat.status.stat-up-percent", ("power", percent), ("stat", StatCatalog.DisplayName(_stat)))
+                : Loc.Format("combat.status.stat-down-percent", ("power", percent), ("stat", StatCatalog.DisplayName(_stat)));
+        }
+
         public string GetDisplayText(int power)
         {
             if (power >= 0)
