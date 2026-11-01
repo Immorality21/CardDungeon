@@ -74,6 +74,22 @@ namespace Assets.Scripts.Rooms
             TickHud();
             PublishHudLayout();
 
+            // The band follows the stage rather than the fight: it stays up behind the victory window
+            // and the party window goes with it, back to its corner for the walk. A picker lives in
+            // another document, drawn under this one, and fills the band's left window itself, so the
+            // band steps aside for it.
+            bool stageUp = CombatStage.HasInstance && CombatStage.Instance.IsRaised;
+            bool bandUp = stageUp && (_magicSelection == null || !_magicSelection.IsPickerOpen);
+            if (IsShown(_combatBand) != bandUp)
+            {
+                SetShown(_combatBand, bandUp);
+            }
+            if (_partyStatus != null && _partyStatus.ClassListContains("cd-party-status--band") != stageUp)
+            {
+                _partyStatus.EnableInClassList("cd-party-status--band", stageUp);
+                _navHint?.EnableInClassList("cd-nav-hint--band", stageUp);
+            }
+
             // The scrim follows the dialogs rather than being set at each of the many places one
             // opens, so no path can leave the room dimmed or a dialog undimmed.
             bool dialogUp = IsShown(_eventWindow) || IsShown(_detailWindow) || IsShown(_mapWindow) || IsShown(_pauseWindow)

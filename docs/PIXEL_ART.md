@@ -362,6 +362,26 @@ candidate each, every one used first time.
   half is deep shadow and plain wall") and dock the dialog on the empty side.
 - No baked borders this time - still check the corners.
 
+## 8f. Battle backgrounds, floor in front - the 2026-11-01 pass
+
+All ten combat backgrounds were redrawn for the FFIV-style stage: `create_image_pro` at **416x176**, 15
+generations each, `no_background: false`, every first candidate used. They overwrote the old files, so
+the levels' references and the importer settings stayed.
+
+- **Why 416x176**: the art fills the screen above the menu band, and at that size one art pixel is one
+  hero pixel (a hero is 32 px over 1.5 units). The old 320x180 at 1.3x was about twice as coarse as the
+  units standing on it, which is half of why they looked pasted on.
+- **Prompt shape**: *"side-view JRPG battle backdrop ... in the style of Final Fantasy IV and VI battle
+  screens: <place>. The upper 40 percent of the image is the far back wall: <4-5 props>. The lower 60
+  percent is one wide open empty floor seen from slightly above: <surface>, receding toward the wall,
+  even lighting, nothing tall standing on it. The horizon line ... runs straight across the whole image
+  at 40 percent from the top. No characters, no creatures, no <the place's tall prop> in the foreground,
+  no border. <palette>."* The model lands the horizon nearer 50%; every row of a formation stands below
+  that, so plan on 50.
+- **A set in one style, cheaply**: generate one, then pass its download URL as `style_image_url` with
+  `style_copy: ["outline", "detail", "shading"]` and name the palette in the prompt. No inline base64.
+- **Eight jobs at a time**: a ninth is refused; wait for one to finish.
+
 ## 9. Unused designs
 
 Every generation is kept in the PixelLab gallery. The armoured-guardian Warden candidate became the

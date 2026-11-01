@@ -3,8 +3,8 @@
 
     <ui:VisualElement name="root" class="cd-root" picking-mode="Ignore">
 
-        <!-- Ability / slot list window (docked bottom-left, styled like the command menu) -->
-        <ui:VisualElement name="magic-list-panel" class="cd-window cd-window--combat cd-window--picker cd-dock-bottom-left cd-hidden">
+        <!-- Ability / slot list window (the left of the band, where the command menu sits) -->
+        <ui:VisualElement name="magic-list-panel" class="cd-window cd-window--combat cd-window--picker cd-dock-band cd-hidden">
             <ui:Label name="list-title" text="#ui.combat.list-title" class="cd-command-window__header" />
             <!-- The description sits BESIDE the list (2026-09-30): stacked under it, the picker grew
                  tall enough to cover the acting hero. -->
@@ -17,7 +17,7 @@
         </ui:VisualElement>
 
         <!-- Target picker window (cast target / attack target) -->
-        <ui:VisualElement name="target-panel" class="cd-window cd-window--combat cd-window--picker cd-dock-bottom-left cd-hidden">
+        <ui:VisualElement name="target-panel" class="cd-window cd-window--combat cd-window--picker cd-dock-band cd-hidden">
             <ui:Label name="target-prompt" text="#ui.combat.target-prompt" class="cd-command-window__header" />
             <ui:ScrollView name="target-scroll" class="cd-select-scroll" mode="Vertical" />
             <ui:Label name="target-desc" text="" class="cd-sel-desc cd-picker-desc cd-hidden" />

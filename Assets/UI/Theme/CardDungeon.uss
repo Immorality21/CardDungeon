@@ -193,6 +193,37 @@
     right: 16px;
 }
 
+/* ---- The fight's menu band: the bottom 27% of the screen (CombatStage.MenuBandShare states the
+   same figure, for the world side; change them together). A plain window the width of the screen,
+   the command menu and pickers over its left third, the party over the rest, as FFIV's two windows. */
+.cd-combat-band {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 27%;
+    background-color: var(--cd-parchment);
+    background-image: url("project://database/Assets/UI/Frames/window_frame.png");
+    -unity-slice-left: 6;
+    -unity-slice-right: 6;
+    -unity-slice-top: 6;
+    -unity-slice-bottom: 6;
+    -unity-slice-scale: 3px;
+}
+
+/* Rules below the generic window ones, so the band's sizes win. */
+.cd-dock-band,
+.cd-window--combat.cd-dock-band {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 36%;
+    max-width: 36%;
+    height: 27%;
+    max-height: 27%;
+    margin: 0;
+}
+
 /* Compact target/slot picker docked into the command-box corner during combat.
    Padding 0 + overflow hidden so the dark header bar sits flush like the command window. */
 .cd-window--combat {
@@ -204,13 +235,27 @@
     overflow: hidden;
 }
 
-/* The ability / item / target pickers: wider than the command menu, so an ability's description
-   wraps to fewer lines and the window stays low. Its height is what matters - the heroes stand
-   in a column right above the bottom-left dock, and a tall picker covers the one whose turn it is. */
+/* The ability / item / target pickers: the band's left window, list and description side by side. */
 .cd-window--picker {
     width: 640px;
     max-width: 52%;
     max-height: 40%;
+}
+
+/* The band is low, so the list gets all of it: Back moves up beside the title, rows tighten. */
+.cd-window--picker .cd-button--narrow {
+    position: absolute;
+    top: 4px;
+    right: 8px;
+    width: 96px;
+    height: 30px;
+    margin: 0;
+    padding: 0;
+}
+
+.cd-window--picker .cd-sel-row {
+    height: 34px;
+    margin: 1px 0;
 }
 
 /* List and description side by side, so the picker stays as low as the command menu. */
@@ -262,6 +307,69 @@
     background-color: var(--cd-frame);
     -unity-text-align: middle-center;
     padding: 6px 10px;
+}
+
+/* In a fight the party window is the band's right-hand part: one line per hero, FFIV's list. */
+.cd-party-status--band,
+.cd-party-status.cd-party-status--band.cd-dock-bottom-right {
+    position: absolute;
+    left: 36%;
+    right: 0;
+    bottom: 0;
+    height: 27%;
+    min-width: 0;
+    justify-content: center;
+}
+
+.cd-party-status--band .cd-party-status__header {
+    display: none;
+}
+
+.cd-party-status--band .cd-party-row {
+    height: 44px;
+    flex-shrink: 0;
+    padding: 0 12px;
+    margin: 0;
+    align-items: center;
+}
+
+.cd-party-status--band .cd-party-row__portrait {
+    margin-right: 12px;
+}
+
+.cd-party-status--band .cd-party-row__main {
+    flex-direction: row;
+    align-items: center;
+}
+
+.cd-party-status--band .cd-party-row__top {
+    width: 300px;
+    flex-shrink: 0;
+    margin-right: 20px;
+}
+
+.cd-party-status--band .cd-party-row__name,
+.cd-party-status--band .cd-party-row__hp {
+    font-size: 19px;
+}
+
+.cd-party-status--band .cd-party-row__bars {
+    flex-grow: 1;
+    flex-basis: 0;
+    max-width: 260px;
+}
+
+.cd-party-status--band .cd-party-row__bar {
+    height: 8px;
+    margin-top: 0;
+}
+
+.cd-party-status--band .cd-party-row__gauge {
+    height: 5px;
+}
+
+.cd-party-status--band .cd-party-row__afflictions {
+    margin-left: 12px;
 }
 
 .cd-party-status__rows {
@@ -355,9 +463,18 @@
 }
 
 /* ---- Command menu: cursor-driven vertical selection list (FFX-style) ---- */
+/* Two columns, top to bottom then across, so the list fits the band however many commands a hero
+   knows. Four rows a column: RoomActionUI.CommandRowsPerColumn. */
 .cd-command-list {
+    flex-direction: column;
+    flex-wrap: wrap;
+    height: 136px;
     padding: 4px 6px 6px 4px;
     min-width: 170px;
+}
+
+.cd-command-list .cd-cmd-row {
+    width: 50%;
 }
 
 .cd-cmd-row {
@@ -3003,7 +3120,8 @@
 .cd-scan-window {
     width: 760px;
     max-width: 72%;
-    max-height: 82%;
+    /* Ends above the menu band, which draws over this document; the body scrolls past that. */
+    max-height: 64%;
 }
 
 /* Docked left, not centred: the enemies stand in the right half of the stage, and a centred page
@@ -4671,6 +4789,12 @@
     font-size: 16px;
     color: var(--cd-text-dark);
     opacity: 0.7;
+}
+
+/* In a fight the hint sits in the band's left window, under the commands: the party's rows need the
+   middle of the screen. */
+.cd-nav-hint--band {
+    right: 64%;
 }
 
 /* While the pause overlay is up, the Fight/Flee bar, the command menu and the hint under them are hidden

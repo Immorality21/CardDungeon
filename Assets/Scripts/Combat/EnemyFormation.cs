@@ -139,7 +139,8 @@ namespace Assets.Scripts.Combat
 
         /// <summary>
         /// Evenly spaced heights centred on 0, top first:
-        /// <c>min(halfH × 0.5, halfH × 1.3 / count)</c> apart. The same rule the hero column uses.
+        /// <c>min(halfH × 0.44, halfH × 0.96 / count)</c> apart, which keeps three rows on the floor
+        /// between the back wall and the menu band. The same rule the hero column uses.
         /// </summary>
         public static List<float> ColumnYs(int count, float halfH)
         {
@@ -159,7 +160,7 @@ namespace Assets.Scripts.Combat
 
         public static float ColumnSpacing(int count, float halfH)
         {
-            return Mathf.Min(halfH * 0.5f, (halfH * 1.3f) / Mathf.Max(1, count));
+            return Mathf.Min(halfH * 0.44f, (halfH * 0.96f) / Mathf.Max(1, count));
         }
     }
 }

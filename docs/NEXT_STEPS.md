@@ -434,7 +434,7 @@ backlog.**
 
 | § | | state |
 |---|---|---|
-| **1** | Battle polish — remaining follow-ups | tiers 1–4 shipped; the art pass moved to §21. **Battle layout** (outside playtest 2026-10-30): units should stand on a floor with the area behind them, not float over a picture |
+| **1** | Battle polish — remaining follow-ups | tiers 1–4 shipped; the art pass moved to §21. **Battle layout ✅ 2026-11-01** (FFIV-style: menu band, units on a floor) |
 | **2** | Room variety — the branching half has not shipped | **moved to [DUNGEON_ROOMS.md](plans/DUNGEON_ROOMS.md)** (2026-10-30): branching routes, Elite/Shrine kinds and markers are phases 3 and 7 there |
 | **6** | Stats — one open note (`BuffType` is a second per-stat list) | structural |
 | **8** | Migrate to the new Input System | *nice to have* |
@@ -452,6 +452,8 @@ backlog.**
 
 ## Shipped ledger
 
+- **The battle screen, FFIV-style** (2026-11-01, owner) — the Combat guide, `plans/POLISH_CONTENT.md` §1, `PIXEL_ART.md`
+  §8f. A menu band over the bottom 27%, ten new backgrounds, units placed by their feet with shadows.
 - **`CombatManager` and `RoomActionUI` split by job** (2026-11-01) — partial classes, one file per job (Rooms guide).
   The dead combat log went with it: `CombatResult.Log`, the `combat.log.*` texts, `GetSkipTurnMessage`.
 - **The belt is decided** (2026-11-01, owner): free, restocked when a run starts from town. We want players to use

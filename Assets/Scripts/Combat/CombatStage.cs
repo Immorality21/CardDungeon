@@ -10,9 +10,9 @@ using UnityEngine;
 namespace Assets.Scripts.Combat
 {
     /// <summary>
-    /// Presents combat as a Final-Fantasy-style side-view battle stage: heroes formed up in a
-    /// left column, enemies in a right column, over a full-viewport background that hides the
-    /// dungeon. It relocates the existing unit Transforms into fixed slots (rather than
+    /// Presents combat as a Final-Fantasy-style side-view battle stage: a menu band along the bottom
+    /// of the screen, and above it a backdrop whose floor the units stand on, heroes left and enemies
+    /// right, placed by their feet so a boss and a rat share a floor. It relocates the existing unit Transforms into fixed slots (rather than
     /// building a new render layer), so the world-space HP bars, hit-flash, floating damage
     /// text, and lunge animation all keep working at the new positions with no changes.
     /// Auto-creates on first use (no scene wiring), mirroring <see cref="CombatFeedback"/>.
@@ -25,11 +25,29 @@ namespace Assets.Scripts.Combat
         // sortingOrder 5, i.e. *below* the background, and would otherwise be hidden.
         private const int BackgroundSortOrder = 400;
 
-        // How much larger than a plain cover-fit the battle art is drawn, bottom-anchored, so its floor
-        // band meets the formation rather than sitting under the command menu (RaiseBackground).
-        private const float BackgroundFloorLift = 1.3f;
+        // Behind the art, so a screen shake that lifts its bottom edge shows dark, never the dungeon.
+        private const int BackingSortOrder = 399;
+
+        /// <summary>
+        /// The share of the screen's height the menu band takes. The band itself is UI, so
+        /// <c>.cd-combat-band</c> and the windows docked in it state the same figure in the stylesheet:
+        /// change them together.
+        /// </summary>
+        public const float MenuBandShare = 0.27f;
+
+        // How far the art runs past the stage's edges, in world units: under the band at the bottom,
+        // over the top of the view above, so a shake never shows its edge.
+        private const float BackgroundUnderlap = 0.3f;
+        private const float BackgroundOverscan = 0.5f;
+
         private const int UnitSortOrder = 600;
-        private const int MaxRanks = 2; // EnemyFormation ranks 0..2 sort at 602..600
+        private const int MaxRanks = 2; // EnemyFormation ranks 0..2 break a tie, the nearer on top
+
+        // A lower row stands nearer the camera and draws over the row behind it. Rows are told apart
+        // to a tenth of a unit, over the heights a formation can reach. The band stays under the
+        // effects drawn over a unit (850).
+        private const float RowSortSpan = 2.5f;
+        private const int RowSortsPerUnit = 10;
         private const float CombatUnitScale = 1.5f;
 
         // Battle backdrop loaded from Resources (drop a sprite here to replace the solid fill).
@@ -51,6 +69,7 @@ namespace Assets.Scripts.Combat
 
         private readonly List<UnitRestore> _restores = new List<UnitRestore>();
         private GameObject _backgroundGo;
+        private GameObject _backingGo;
         private bool _panBeforeStage = true;
         private SpriteRenderer _backgroundSr;
         private Material _backgroundMaterial;
@@ -61,6 +80,8 @@ namespace Assets.Scripts.Combat
 
         // Where the hero column stands, kept from Begin so a party-replacing summon can take it.
         private float _heroColumnX;
+
+        // The floor line the formations are measured from: a slot's y is where its unit's feet go.
         private float _centerY;
 
         // The stage's frame, kept from Begin so a summoned ally can be placed in the vanguard.
@@ -68,8 +89,17 @@ namespace Assets.Scripts.Combat
         private float _halfW;
         private float _halfH;
 
-        /// <summary>How far above the camera's centre the formation is centred, as a share of the half-height.</summary>
-        private const float StageCenterLift = 0.26f;
+        /// <summary>How far above the camera's centre the formation's floor line sits, as a share of the
+        /// half-height. Far enough up that the lowest row's plate clears the band, and low enough that
+        /// the highest row still stands on the floor rather than the wall.</summary>
+        private const float StageFeetLift = 0f;
+
+        /// <summary>Sideways step per unit of height, so ranks lean in toward the horizon the way the
+        /// party stands in FFIV and FFVI: a lower row further out, on both sides.</summary>
+        private const float FloorLean = 0.25f;
+
+        /// <summary>True while the battle stage is up, which is what the menu band follows.</summary>
+        public bool IsRaised => _backgroundGo != null && _backgroundGo.activeSelf;
 
         // Hero sprites hidden while a summon has taken the party's place, shown again when it leaves.
         private readonly List<SpriteRenderer> _hidden = new List<SpriteRenderer>();
@@ -152,22 +182,13 @@ namespace Assets.Scripts.Combat
             var heroes = party.Heroes.Where(h => h != null && h.IsAlive).Cast<ICombatUnit>().ToList();
             var enemies = room.Enemies.Where(e => e != null && e.IsAlive).Cast<ICombatUnit>().ToList();
 
-            // Above the middle, because the bottom of the screen belongs to the UI: the command menu
-            // and the ability pickers dock bottom-left, right under the hero column, and the party
-            // window bottom-right. At 0.15 the lowest hero stood inside that band and a picker covered
-            // the very hero whose turn it was (playtest 2026-09-28, raised with the UI scale).
-            float centerY = anchor.y + halfH * StageCenterLift;
             // Where a party-replacing summon stands: the single column's spot, whatever the party's shape.
             _heroColumnX = anchor.x + halfW * HeroFormation.SingleColumnX;
-            _centerY = centerY;
+            _centerY = anchor.y + halfH * StageFeetLift;
             _anchorX = anchor.x;
             _halfW = halfW;
             _halfH = halfH;
-            var heroSlots = new List<Vector3>(heroes.Count);
-            foreach (var offset in HeroFormation.Layout(heroes.Count, halfW, halfH))
-            {
-                heroSlots.Add(new Vector3(anchor.x + offset.x, centerY + offset.y, -1f));
-            }
+            var heroSlots = HeroFormation.Layout(heroes.Count, halfW, halfH);
 
             // Enemies rank up FF-style: one column up to three, front 2 / back 3 beyond that, and a
             // boss alone at the back with its escort in front (see EnemyFormation).
@@ -180,16 +201,36 @@ namespace Assets.Scripts.Combat
             party.HidePartyForCombat();
             for (int i = 0; i < heroes.Count; i++)
             {
-                PlaceUnit(heroes[i], heroSlots[i], faceRight: true, isHero: true, scale: 1.5f, sortingOrder: UnitSortOrder);
+                PlaceUnit(heroes[i], heroSlots[i], faceRight: true, isHero: true, scale: 1.5f, sortingOrder: FloorOrder(heroSlots[i].y));
             }
             for (int i = 0; i < enemies.Count; i++)
             {
                 var slot = enemySlots[i];
-                var position = new Vector3(anchor.x + slot.Offset.x, centerY + slot.Offset.y, -1f);
-                // A nearer rank draws over the one behind it, where a large boss overlaps its escort.
-                PlaceUnit(enemies[i], position, faceRight: false, isHero: false,
-                    scale: EnemyStageScale(enemies[i]), sortingOrder: UnitSortOrder + MaxRanks - slot.Rank);
+                PlaceUnit(enemies[i], slot.Offset, faceRight: false, isHero: false,
+                    scale: EnemyStageScale(enemies[i]), sortingOrder: FloorOrder(slot.Offset.y, slot.Rank));
             }
+        }
+
+        /// <summary>
+        /// Where <paramref name="tr"/> goes for its feet to stand on a slot: <paramref name="offset"/> is
+        /// a formation's, x from the stage's centre and y from its floor line. Read after the unit
+        /// has its stage scale, since the height of a sprite decides how far above its feet its pivot is.
+        /// </summary>
+        private Vector3 StandOnFloor(Transform tr, Vector2 offset)
+        {
+            float lean = offset.y * FloorLean * (offset.x < 0f ? 1f : -1f);
+            var sr = tr.GetComponent<SpriteRenderer>();
+            float feetToPivot = sr != null && sr.sprite != null
+                ? -sr.sprite.bounds.min.y * Mathf.Abs(tr.lossyScale.y)
+                : 0f;
+            return new Vector3(_anchorX + offset.x + lean, _centerY + offset.y + feetToPivot, -1f);
+        }
+
+        /// <summary>The sorting order for a slot's height: lower on the floor draws in front.</summary>
+        private static int FloorOrder(float offsetY, int rank = 0)
+        {
+            int row = Mathf.Max(0, Mathf.RoundToInt((RowSortSpan - offsetY) * RowSortsPerUnit));
+            return UnitSortOrder + row * (MaxRanks + 1) + MaxRanks - rank;
         }
 
         /// <summary>An enemy keeps its out-of-combat size on the stage, times its CombatScale.</summary>
@@ -227,6 +268,7 @@ namespace Assets.Scripts.Combat
                 {
                     continue; // destroyed (e.g. an enemy killed during combat)
                 }
+                UnitGroundShadow.Remove(rec.Sr.transform);
                 rec.Sr.sortingOrder = rec.OrigSortingOrder;
                 rec.Sr.flipX = rec.OrigFlipX;
                 rec.Sr.transform.localScale = rec.OrigScale;
@@ -240,6 +282,10 @@ namespace Assets.Scripts.Combat
             if (_backgroundGo != null)
             {
                 _backgroundGo.SetActive(false);
+            }
+            if (_backingGo != null)
+            {
+                _backingGo.SetActive(false);
             }
             if (MainCamera.HasInstance)
             {
@@ -274,12 +320,13 @@ namespace Assets.Scripts.Combat
                 return;
             }
             var tr = summon.transform;
-            tr.position = new Vector3(_heroColumnX, _centerY, -1f);
             tr.localScale = Vector3.one * SummonScale;
+            tr.position = StandOnFloor(tr, new Vector2(_heroColumnX - _anchorX, 0f));
+            UnitGroundShadow.Attach(tr);
             var sr = summon.GetComponent<SpriteRenderer>();
             if (sr != null)
             {
-                sr.sortingOrder = UnitSortOrder + MaxRanks + 1;
+                sr.sortingOrder = FloorOrder(0f);
                 // Art faces right, toward the enemies.
                 sr.flipX = summon.Summon != null && summon.Summon.Facing == Cards.SummonFacing.Party;
             }
@@ -304,12 +351,13 @@ namespace Assets.Scripts.Combat
                 {
                     continue;
                 }
-                troop.transform.position = new Vector3(_anchorX + slots[i].x, _centerY + slots[i].y, -1f);
                 troop.transform.localScale = Vector3.one * CombatUnitScale;
+                troop.transform.position = StandOnFloor(troop.transform, slots[i]);
+                UnitGroundShadow.Attach(troop.transform);
                 var sr = troop.GetComponent<SpriteRenderer>();
                 if (sr != null)
                 {
-                    sr.sortingOrder = UnitSortOrder + MaxRanks + 1;
+                    sr.sortingOrder = FloorOrder(slots[i].y);
                     sr.flipX = troop.Summon != null && troop.Summon.Facing == Cards.SummonFacing.Party;
                 }
             }
@@ -338,11 +386,16 @@ namespace Assets.Scripts.Combat
                     continue;
                 }
                 var tr = ally.transform;
-                var spot = new Vector3(_anchorX + slots[i].x, _centerY + slots[i].y, -1f);
-                if (ReferenceEquals(ally, arriving))
+                bool arrives = ReferenceEquals(ally, arriving);
+                if (arrives)
+                {
+                    tr.localScale = Vector3.one * CombatUnitScale;
+                }
+                var spot = StandOnFloor(tr, slots[i]);
+                if (arrives)
                 {
                     tr.position = spot;
-                    tr.localScale = Vector3.one * CombatUnitScale;
+                    UnitGroundShadow.Attach(tr);
                 }
                 else if ((tr.position - spot).sqrMagnitude > 0.0001f)
                 {
@@ -351,8 +404,7 @@ namespace Assets.Scripts.Combat
                 var sr = ally.GetComponent<SpriteRenderer>();
                 if (sr != null)
                 {
-                    // In front of the hero ranks, so an ally that overlaps a hero's edge reads as nearer.
-                    sr.sortingOrder = UnitSortOrder + MaxRanks + 1;
+                    sr.sortingOrder = FloorOrder(slots[i].y);
                     sr.flipX = ally.Summon != null && ally.Summon.Facing == Cards.SummonFacing.Party;
                 }
             }
@@ -391,14 +443,14 @@ namespace Assets.Scripts.Combat
                 {
                     continue;
                 }
-                var spot = new Vector3(_anchorX + slots[i].Offset.x, _centerY + slots[i].Offset.y, -1f);
-                int sorting = UnitSortOrder + MaxRanks - slots[i].Rank;
+                int sorting = FloorOrder(slots[i].Offset.y, slots[i].Rank);
                 if (arriving != null && arriving.Contains(unit))
                 {
-                    PlaceUnit(unit, spot, faceRight: false, isHero: false,
+                    PlaceUnit(unit, slots[i].Offset, faceRight: false, isHero: false,
                         scale: EnemyStageScale(unit), sortingOrder: sorting);
                     continue;
                 }
+                var spot = StandOnFloor(unit.Transform, slots[i].Offset);
                 if ((unit.Transform.position - spot).sqrMagnitude > 0.0001f)
                 {
                     StartCoroutine(Glide(unit.Transform, spot));
@@ -497,10 +549,11 @@ namespace Assets.Scripts.Combat
             }
             unit.transform.position = spot;
             unit.transform.localScale = Vector3.one * CombatUnitScale;
+            UnitGroundShadow.Attach(unit.transform);
             var sr = unit.GetComponent<SpriteRenderer>();
             if (sr != null)
             {
-                sr.sortingOrder = UnitSortOrder + MaxRanks + 1;
+                sr.sortingOrder = FloorOrder(spot.y - _centerY);
                 sr.flipX = unit.Summon != null && unit.Summon.Facing == Cards.SummonFacing.Party;
             }
         }
@@ -552,8 +605,9 @@ namespace Assets.Scripts.Combat
             }
         }
 
+        /// <param name="offset">The formation's slot, see <see cref="StandOnFloor"/>.</param>
         /// <param name="scale">Multiplier on the unit's out-of-combat scale.</param>
-        private void PlaceUnit(ICombatUnit unit, Vector3 slot, bool faceRight, bool isHero, float scale, int sortingOrder)
+        private void PlaceUnit(ICombatUnit unit, Vector2 offset, bool faceRight, bool isHero, float scale, int sortingOrder)
         {
             var tr = unit.Transform;
             var sr = tr.GetComponent<SpriteRenderer>();
@@ -574,10 +628,10 @@ namespace Assets.Scripts.Combat
 
             _restores.Add(rec);
 
-            tr.position = slot;
-
             // Make unit larger during combat
             tr.localScale = rec.OrigScale * scale;
+            tr.position = StandOnFloor(tr, offset);
+            UnitGroundShadow.Attach(tr);
 
             if (sr != null)
             {
@@ -634,23 +688,44 @@ namespace Assets.Scripts.Combat
 
             float coverW = halfW * 2f + 2f;
             float coverH = halfH * 2f + 2f;
+            RaiseBacking(camTransform, coverW, coverH);
             if (art != null)
             {
-                // Uniform cover-fit so real art keeps its aspect (crops overflow, no stretch).
+                // The art covers the stage, not the screen: from just under the band's top edge to
+                // just over the top of the view. Uniform cover-fit so it keeps its aspect, anchored at
+                // the bottom so a wider screen crops the wall and never the floor.
+                float bandTop = -halfH + halfH * 2f * MenuBandShare;
+                float stageBottom = bandTop - BackgroundUnderlap;
+                float stageH = halfH + BackgroundOverscan - stageBottom;
                 var size = art.bounds.size;
-                float scale = Mathf.Max(coverW / Mathf.Max(0.01f, size.x), coverH / Mathf.Max(0.01f, size.y))
-                              * BackgroundFloorLift;
+                float scale = Mathf.Max(coverW / Mathf.Max(0.01f, size.x), stageH / Mathf.Max(0.01f, size.y));
                 _backgroundGo.transform.localScale = new Vector3(scale, scale, 1f);
-                // Bottom-anchored: the extra size crops the ceiling, never the floor, and lifts the art's
-                // floor band (its bottom third) up to where the formation stands - the stage sits above
-                // the middle to clear the command menu, which put every unit on the back wall.
-                _backgroundGo.transform.localPosition = new Vector3(0f, size.y * scale * 0.5f - coverH * 0.5f, 10f);
+                _backgroundGo.transform.localPosition = new Vector3(0f, stageBottom + size.y * scale * 0.5f, 10f);
             }
             else
             {
                 _backgroundGo.transform.localScale = new Vector3(coverW, coverH, 1f);
             }
             _backgroundGo.SetActive(true);
+        }
+
+        /// <summary>A dark sheet behind the art, the size of the view, so the dungeon stays hidden
+        /// under the band however the camera moves.</summary>
+        private void RaiseBacking(Transform camTransform, float coverW, float coverH)
+        {
+            if (_backingGo == null)
+            {
+                _backingGo = new GameObject("BattleBacking");
+                var sr = _backingGo.AddComponent<SpriteRenderer>();
+                sr.sprite = SolidSprite();
+                sr.color = new Color(0.04f, 0.03f, 0.07f);
+                sr.sortingOrder = BackingSortOrder;
+            }
+            _backingGo.transform.SetParent(camTransform, false);
+            _backingGo.transform.localPosition = new Vector3(0f, 0f, 10f);
+            _backingGo.transform.localRotation = Quaternion.identity;
+            _backingGo.transform.localScale = new Vector3(coverW, coverH, 1f);
+            _backingGo.SetActive(true);
         }
 
         private static Sprite SolidSprite()

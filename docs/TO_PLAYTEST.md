@@ -152,3 +152,9 @@ does (focus), so press them for real.
 - **Weighing Scale at 120 gold:** usually affordable when the party reaches it?
 - **Sewerwalker on the Rogue:** does it feel like a rogue set?
 - **Event density:** Reed Cage and Crucible at 25% per room on small floors. Too many events a floor?
+
+## The battle screen (2026-11-01)
+
+- A fight on every biome: do the units read as standing on the floor? Is 27% the right height for the band?
+- The command menu's two columns with the keyboard: Up/Down through the list, Left/Right across.
+- A party-replacing summon, a squad and an ally column on the new floor.

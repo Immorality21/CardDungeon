@@ -17,9 +17,11 @@ in favour of per-unit sprite idles, and the stage gained FF ranks and large boss
 - **The art pass** moved to **§21** (2026-09-28), which now holds every outdated sprite together
   with the menu backdrops.
 
-- **Battle layout** (outside playtest 2026-10-30, owner): heroes and enemies should stand **on a floor**
-  (e.g. a muddy cave road) with **the area behind them** (the cave wall, or the cave going deeper),
-  not float over a background picture. Fits the biome art of `plans/DUNGEON_ROOMS.md`.
+- ~~**Battle layout**~~ *Built 2026-11-01 (owner's FFIV and FFVI references)*: a menu band over the bottom 27%
+  (command menu and pickers left, the party one line per hero right), ten new 416x176 backgrounds at the
+  heroes' pixel density, wall behind and floor in front, units placed by their feet with ground shadows,
+  ranks leaning toward the horizon. Combat guide, `PIXEL_ART.md` §8f. Open: normal enemies are 1 unit
+  tall to a hero's 1.5, which reads smaller now that they share a floor (`EnemySO.CombatScale`).
 
 - **A dedicated heal/buff flourish.** Heals still just show green rising text.
 - **Element-tinted damage numbers** per `DamageType`, and richer per-element cast visuals. Pair with

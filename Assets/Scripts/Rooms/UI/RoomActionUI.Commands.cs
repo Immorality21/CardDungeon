@@ -528,6 +528,29 @@ namespace Assets.Scripts.Rooms
             }
         }
 
+        /// <summary>Rows per column of the command menu, as <c>.cd-command-list</c>'s height lays it out.</summary>
+        private const int CommandRowsPerColumn = 4;
+
+        /// <summary>
+        /// The other column: the same row, or the last row a shorter column has. A greyed row there
+        /// leaves the cursor where it is, as the up/down cursor never lands on one either.
+        /// </summary>
+        private void MoveCommandColumn(int direction)
+        {
+            int target = _selectedCommand + direction * CommandRowsPerColumn;
+            if (direction > 0)
+            {
+                target = Mathf.Min(target, _commands.Count - 1);
+            }
+            bool sameColumn = target / CommandRowsPerColumn == _selectedCommand / CommandRowsPerColumn;
+            if (target < 0 || sameColumn || !_commands[target].Enabled)
+            {
+                return;
+            }
+            SetSelectedCommand(target);
+            CombatAudio.Play(CombatSound.CursorMove);
+        }
+
         private void ConfirmCommand()
         {
             if (_selectedCommand < 0 || _selectedCommand >= _commands.Count || !_commands[_selectedCommand].Enabled)
@@ -746,6 +769,14 @@ namespace Assets.Scripts.Rooms
                         break;
                     case KeyCode.DownArrow:
                         MoveCommandCursor(1);
+                        evt.StopPropagation();
+                        break;
+                    case KeyCode.LeftArrow:
+                        MoveCommandColumn(-1);
+                        evt.StopPropagation();
+                        break;
+                    case KeyCode.RightArrow:
+                        MoveCommandColumn(1);
                         evt.StopPropagation();
                         break;
                     case KeyCode.Return:

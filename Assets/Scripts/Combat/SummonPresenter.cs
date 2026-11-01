@@ -36,7 +36,7 @@ namespace Assets.Scripts.Combat
             var cam = Camera.main;
             Vector3 centre = cam != null ? cam.transform.position : Vector3.zero;
             float halfH = cam != null ? cam.orthographicSize : 5f;
-            // The stage's centre line (CombatStage forms units at anchor.y + halfH * 0.15).
+            // A little above the camera's centre, clear of the menu band.
             centre = new Vector3(centre.x, centre.y + halfH * 0.15f, -1f);
 
             var frames = summon != null && summon.AnimationFrames != null

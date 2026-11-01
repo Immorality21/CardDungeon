@@ -1,6 +1,7 @@
 using System.Linq;
 using Assets.Scripts.Combat;
 using NUnit.Framework;
+using UnityEngine;
 
 namespace Tests.EditMode
 {
@@ -9,6 +10,19 @@ namespace Tests.EditMode
         // The default camera: orthographic size 5 at 16:9.
         private const float HalfH = 5f;
         private const float HalfW = 5f * 1.78f;
+
+        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(3)]
+        public void ColumnYs_AnyColumn_StaysOnTheFloor(int count)
+        {
+            // Feet on these rows: the top one under the art's horizon, the bottom one with room for
+            // its plate above the menu band.
+            foreach (float y in EnemyFormation.ColumnYs(count, HalfH))
+            {
+                Assert.LessOrEqual(Mathf.Abs(y), 1.6f, $"{count} rows");
+            }
+        }
 
         [Test]
         public void Layout_NoEnemies_IsEmpty()

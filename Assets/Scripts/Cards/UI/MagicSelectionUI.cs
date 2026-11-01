@@ -1557,6 +1557,16 @@ namespace Assets.Scripts.Cards.UI
             get { return _inspectPanel != null && _inspectPanel.style.display == DisplayStyle.Flex; }
         }
 
+        /// <summary>
+        /// Whether a list or target picker is up. <c>RoomActionUI</c> takes the menu band away while it
+        /// is: the band lives in that document, which draws over this one, and the picker stands in
+        /// the band's left window.
+        /// </summary>
+        public bool IsPickerOpen
+        {
+            get { return IsShown(_listPanel) || IsShown(_targetPanel); }
+        }
+
         private static void ShowPanel(VisualElement panel)
         {
             if (panel != null)

@@ -184,26 +184,32 @@ passes. Full rationale: `docs/plans/COMBAT_DEPTH.md` §11.
 
 - **CombatStage** (singleton, `Combat/CombatStage.cs`): presents combat as a Final-Fantasy
   side-view battle. `Begin(party, room)` snaps + **freezes the camera** (`GameManager.SetCameraFollow(false)`),
-  raises a full-viewport **background** (sortingOrder 400, parented to the camera; solid fill or
-  a `_backgroundArt` sprite) that hides the dungeon, and relocates alive units into columns:
+  raises the **stage** (a dark full-view backing at 399 and the art at 400, both parented to the
+  camera) that hides the dungeon, and relocates alive units:
   **heroes left (facing right), enemies right (facing left)**, bumping their sprite sortingOrder
   to **600+** (mandatory — enemies default to 5, *below* the background).
+  **The screen is FFIV's since 2026-11-01** (`docs/plans/POLISH_CONTENT.md` §1): the bottom
+  `MenuBandShare` (27%) is the **menu band**, UI, and the art covers only what is above it. The figure
+  lives twice, in `CombatStage.MenuBandShare` and in the stylesheet (`.cd-combat-band`, `.cd-dock-band`,
+  `.cd-party-status--band`): change them together. **A slot's `y` is where the unit's feet go**
+  (`StandOnFloor`, measured from the floor line `StageFeetLift`), so a boss and a rat share a floor; ranks
+  lean toward the horizon (`FloorLean`: a lower row further out, on both sides, in the stage rather than
+  the formations, which stay plain columns); a lower row draws over a higher one (`FloorOrder`, rank
+  breaks a tie, the whole band under the 850 effects). **`UnitGroundShadow`** puts a shadow under each
+  unit: a child, so it follows a lunge, and it hides with the unit's sprite.
   **Hero formation** is `HeroFormation.Layout` (pure, `HeroFormationTests`, 2026-09-28): up to 2
   heroes in one column; **3 or 4 in two ranks** (2 + 1, 2 + 2 — since 2026-09-29, when a column of
   three put the third hero on the command menu), the party's first two in front, nearest the
   enemies — the mirror of the enemy side. A single column of four packed every HP bar onto the hero
-  above it and put the lowest hero inside the bottom-left band where the command menu and the ability
-  pickers dock, so the picker hid the hero choosing from it. The whole formation is centred
-  `StageCenterLift` (0.26) of the half-height above the camera centre for the same reason: the bottom
-  of the screen belongs to the UI. A party-replacing summon still stands on the single column's spot.
+  above it. A party-replacing summon still stands on the single column's spot.
   **Enemy formation** is `EnemyFormation.Layout` (pure, `EnemyFormationTests`): up to 3 enemies in
   one column; 4–5 in FF ranks — a **front** rank of 2 nearest the party and a **back** rank of the
   rest, filled in `room.Enemies` order; a **boss** (`EnemySO.IsBoss`) alone at the back, centred,
   with its escort ranked in front (one column up to 3, 2 + 2 for four). The escort is placed
   **relative to the boss's measured width** (`EscortGap` 0.4 from its edge), not at a fixed screen
   column, so a lone add stands beside the boss instead of floating mid-stage. The boss sits at 62%
-  of the half-width, clear of the default background's right-hand pillar. Nearer ranks sort higher
-  (602/601/600) so they draw over a large boss. Enemies are scaled by **`EnemySO.CombatScale`**
+  of the half-width, clear of the default background's right-hand pillar. A nearer rank wins a tie in
+  `FloorOrder`. Enemies are scaled by **`EnemySO.CombatScale`**
   (1 by default; the Abyssal Warden is 1.8 ≈ 3 units tall). Five bodies is the design size —
   `BalanceRulesSO.MaxBodiesPerRoom`. It moves the existing
   unit Transforms rather than making new sprites, so `UnitHealthBar`, `CombatFeedback`,
@@ -253,7 +259,7 @@ parting blow. `EffectPresenter` also plays a target's status entries **after** t
 - **Combo flourish**: when a cast triggers a combo (`EffectResult.ComboName`), `ExecuteCastAction` adds a camera punch + brief hit-stop (the combo name already floats up in orange from `EffectResolver`).
 - **Camera zoom-punch** (`MainCamera.ZoomPunch`): every impact (`CombatFeedback.PlayImpact`) briefly dips the orthographic size (zoom **in** only — never exposes the camera-parented battle background) then eases back, scaled by the hit's weight. Applied in `MainCamera.LateUpdate` alongside the shake.
 - **ScreenFade** (`Combat/ScreenFade.cs`): a full-viewport colour overlay (auto-created, camera-parented, sorting 1100 — under the UITK panels). `Flash` punctuates victory with a quick warm pop; `FadeTo` lays a lingering somber tint on defeat (approximates a desaturate; true grayscale would need post-processing). Wired in `CombatManager`'s victory/defeat branches.
-- **Per-level combat background**: `LevelDefinitionSO.CombatBackground` (optional) overrides the stage backdrop per level/biome. Precedence in `CombatStage.RaiseBackground`: level background → inspector `_backgroundArt` → `Resources/CombatBackgrounds/battle` → solid fill. `DungeonManager.CurrentLevel` exposes the active level. **Every authored floor has one since 2026-10-08.** The art is drawn **bottom-anchored at `BackgroundFloorLift` (1.3x) a plain cover-fit**: the formation stands above the middle to clear the command menu, so a plain cover-fit put every unit on the art's back wall; the extra size crops ceiling, never floor, and lifts the floor band to the units' feet. Paint new backgrounds with the floor in the bottom ~third, as the existing set does.
+- **Per-level combat background**: `LevelDefinitionSO.CombatBackground` (optional) overrides the stage backdrop per level/biome. Precedence in `CombatStage.RaiseBackground`: level background → inspector `_backgroundArt` → `Resources/CombatBackgrounds/battle` → solid fill. `DungeonManager.CurrentLevel` exposes the active level. **Every authored floor has one since 2026-10-08.** The art covers the stage, cover-fit and **bottom-anchored on the band**, so a wider screen crops wall, never floor. **Paint new backgrounds 416x176 with the horizon at about half height or lower** (`docs/PIXEL_ART.md` §8f): that size lands on the heroes' pixel density, and every row of a formation must stand below the horizon.
 - **Audio lives in its own subsystem now**: `Assets/Scripts/Audio/` (namespace `Assets.Scripts.Audio`), moved out of `Combat/Audio` when the music bed arrived — the bed and the volume dials serve the hub as much as they serve a fight. `CombatAudio.Play(CombatSound.X)` is still the one-shot call from `CombatManager` (attacks/cast/item/heal/boss wind-up/death/victory/defeat) and `RoomActionUI` (command-menu cursor + confirm); combat also drives the music bed — `LevelMusic.PlayCombat(hasBoss)` on the way in, `MusicPlayer.Stop` on victory/defeat, `LevelMusic.PlayExploration()` when the victory summary is dismissed. Full details (banks, tracks, the Master-on-the-listener rule, why a track with no clips fades to silence, and the fact that **no music files exist yet**) → `Assets/Scripts/Audio/CLAUDE.md`.
 
 ## One stat accessor

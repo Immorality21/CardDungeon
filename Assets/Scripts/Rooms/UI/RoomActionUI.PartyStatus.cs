@@ -71,12 +71,17 @@ namespace Assets.Scripts.Rooms
                 top.Add(hp);
                 main.Add(top);
 
+                // Bars in a group of their own, so the fight's one-line row can stand them beside the name.
+                var bars = new VisualElement { pickingMode = PickingMode.Ignore };
+                bars.AddToClassList("cd-party-row__bars");
+                main.Add(bars);
+
                 var bar = new VisualElement { pickingMode = PickingMode.Ignore };
                 bar.AddToClassList("cd-party-row__bar");
                 var fill = new VisualElement { pickingMode = PickingMode.Ignore };
                 fill.AddToClassList("cd-party-row__fill");
                 bar.Add(fill);
-                main.Add(bar);
+                bars.Add(bar);
 
                 // The Ultra gauge, under the health bar, only for a hero who knows an Ultra.
                 if (hero.KnownUltras.Count > 0)
@@ -86,7 +91,7 @@ namespace Assets.Scripts.Rooms
                     var gaugeFill = new VisualElement { pickingMode = PickingMode.Ignore };
                     gaugeFill.AddToClassList("cd-party-row__gauge-fill");
                     gauge.Add(gaugeFill);
-                    main.Add(gauge);
+                    bars.Add(gauge);
                     _partyGaugeFills[hero] = gaugeFill;
                 }
 

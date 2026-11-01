@@ -31,6 +31,7 @@ namespace Assets.Scripts.Rooms
         private VisualElement _root;
         private VisualElement _combatBar;
         private VisualElement _heroBar;
+        private VisualElement _combatBand;
         private VisualElement _detailWindow;
         private VisualElement _eventWindow;
         private VisualElement _partyStatus;
@@ -221,6 +222,7 @@ namespace Assets.Scripts.Rooms
             _detailChip = root.Q<Label>("detail-chip");
             _detailRows = root.Q<VisualElement>("detail-rows");
             _heroBar = root.Q<VisualElement>("hero-bar");
+            _combatBand = root.Q<VisualElement>("combat-band");
             _detailWindow = root.Q<VisualElement>("detail-window");
             _eventWindow = root.Q<VisualElement>("event-window");
             _partyStatus = root.Q<VisualElement>("party-status");

@@ -7,6 +7,11 @@
              First child, so every window below draws over them. -->
         <ui:VisualElement name="nameplate-layer" class="cd-nameplate-layer" picking-mode="Ignore" />
 
+        <!-- The fight's menu band: the bottom of the screen, FF-style. A plain window behind the command
+             menu, the pickers and the party, so it stays whole on the enemies' turns. Follows
+             CombatStage.IsRaised. -->
+        <ui:VisualElement name="combat-band" class="cd-combat-band cd-hidden" picking-mode="Ignore" />
+
         <!-- Dungeon HUD (top-left while walking): level, run + level N of M, gold found on this floor,
              and the map's explored line. Filled by RoomActionUI.RefreshHud / TickHud. -->
         <ui:VisualElement name="dungeon-hud" class="cd-hud cd-dock-top-left cd-hidden" picking-mode="Ignore">
@@ -56,8 +61,8 @@
             <ui:VisualElement name="party-status-rows" class="cd-party-status__rows" />
         </ui:VisualElement>
 
-        <!-- Hero turn command menu (FFX-style, bottom-left): a cursor-driven selection list -->
-        <ui:VisualElement name="hero-bar" class="cd-command-window cd-dock-bottom-left cd-hidden">
+        <!-- Hero turn command menu, left of the band: a cursor-driven list in two columns -->
+        <ui:VisualElement name="hero-bar" class="cd-command-window cd-dock-band cd-hidden">
             <ui:Label name="hero-title" text="" class="cd-command-window__header" />
             <ui:VisualElement name="command-list" class="cd-command-list" />
         </ui:VisualElement>

@@ -34,7 +34,7 @@ namespace Assets.Scripts.Rooms.UI
     public sealed class UnitNameplates : VisualElement
     {
         /// <summary>Panel pixels between the bottom of the enemy's sprite and the top of its plate.</summary>
-        private const float FeetGap = 2f;
+        private const float FeetGap = 8f; // clears the unit's ground shadow
 
         private sealed class Plate
         {
