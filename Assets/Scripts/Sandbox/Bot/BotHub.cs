@@ -18,7 +18,7 @@ namespace Assets.Scripts.Sandbox.Bot
     /// everyone the party cap allows, buys and wears gear, spends XP the way the balance model does
     /// (<c>SphereGridOps.GreedySpend</c>), and points the run save at the next run.
     ///
-    /// <para><b>Not played:</b> the Forge, crafting, the potion belt and swapping abilities by hand.</para>
+    /// <para><b>Not played:</b> combo upgrades, the potion belt and swapping abilities by hand.</para>
     /// </summary>
     public static class BotHub
     {
@@ -29,9 +29,13 @@ namespace Assets.Scripts.Sandbox.Bot
 
             Build(hub, profile, visit, MetaProgressManager.Instance.Gold - goldForGear);
             var heroes = Field(roster);
+            if (IsBuilt(hub, HubService.Forge))
+            {
+                Craft(visit);
+            }
             if (IsBuilt(hub, HubService.Merchant))
             {
-                BuyGear(heroes, goldForGear, visit);
+                BuyGear(heroes, Mathf.Min(goldForGear, MetaProgressManager.Instance.Gold), visit);
             }
             WearBest(heroes, visit);
             InventoryManager.Instance.Save();
@@ -232,6 +236,25 @@ namespace Assets.Scripts.Sandbox.Bot
                 budget -= price;
                 visit.ItemsBought++;
                 visit.GoldSpentOnGear += price;
+            }
+        }
+
+        /// <summary>Makes one of everything it can, best first, skipping the Forge's commons: crafting
+        /// is the game's main gold sink, so it goes before the shop.</summary>
+        private static void Craft(BotHubVisit visit)
+        {
+            var inventory = InventoryManager.Instance;
+            var recipes = CraftingOps.Recipes(inventory.AllItems())
+                .Where(r => CraftingOps.IsKnown(r, inventory.GetItems()) && r.CraftResult.Rarity != ItemRarity.Common)
+                .OrderByDescending(r => r.CraftResult.ItemLevel);
+            foreach (var recipe in recipes.ToList())
+            {
+                bool owned = inventory.GetItems().Any(i => i.ItemKey == recipe.CraftResult.Key);
+                if (!owned && inventory.TryCraft(recipe, out _))
+                {
+                    visit.ItemsCrafted++;
+                    visit.GoldSpentOnCrafting += recipe.CraftGold;
+                }
             }
         }
 

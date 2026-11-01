@@ -32,7 +32,7 @@ MonoBehaviour:
     Amount: 3
   - Material: {fileID: 11400000, guid: c0de5211aa040000000000000000ab04, type: 2}
     Amount: 2
-  CraftGold: 60
+  CraftGold: 200
   KnownWithForge: 0
   ConsumableEffect: 0
   ConsumableAmount: 0

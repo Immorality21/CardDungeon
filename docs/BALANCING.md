@@ -3624,3 +3624,19 @@ the Cistern.** The bot does not replay earlier runs, so its Ashen wall is the wa
 
 The other five profiles in that report are not a clean read: `_passedOver` carried between games, so each skipped runs an earlier game
 had given up on, and they went in with less XP. Fixed in `BotPlayer`, not re-run.
+
+## §5ay — Crafting as the gold sink, and what it does to the late game (2026-11-01)
+
+Owner: recipes are the main gold sink. 14 late recipes added, 250-600 gold each (`plans/HUB.md`). The bot crafts now, one of each
+non-common it can pay for, ahead of the shop. Same profile and seed as §5ax:
+
+| | before | with crafting |
+|---|---|---|
+| gold spent crafting | 0 | 3,060 (9 items) |
+| gold spent at the Merchant | 1,072 | 1,200 |
+| Ashen Deep | gave up after 4 tries | cleared on try 3 |
+| Chapel, Vault, Blood Stair, Cistern | Blood Stair 2 tries, others 1 | all first try, ending on 63-92% |
+
+**The sink works and the late drop partly came back.** Crafted gear is real power at item level 5-7, past the shop's 4, and the balance
+model leaves `CraftOnly` gear out, so §5ax's clear rates no longer describe a player who crafts. One game only. Open: fold crafted
+gear into the model, or tune the late floors against a crafting party.

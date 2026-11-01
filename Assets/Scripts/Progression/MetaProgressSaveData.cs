@@ -97,6 +97,10 @@ namespace Assets.Scripts.Progression
         // challenge warning"). Not derivable from the rest of the save, so it is stored.
         public bool ChallengeWarned;
 
+        // The Forge has been opened once a found recipe was in the bags, which ends the town's one
+        // line about it. Not derivable from the rest of the save, so it is stored.
+        public bool RecipeNudgeDone;
+
         // The death screen has said once, after a wipe in a run flagged RunDefinitionSO.ReplayHintOnWipe,
         // that replaying earlier runs makes the party stronger (playtest 2026-10-30, the Catacombs).
         public bool ReplayHintShown;

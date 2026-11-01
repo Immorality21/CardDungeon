@@ -64,6 +64,25 @@ namespace Assets.Scripts.Items
             return false;
         }
 
+        /// <summary>Whether <paramref name="items"/> hold a recipe that was found rather than taught by
+        /// the Forge, which is what the town's one line about the Forge waits for.</summary>
+        public static bool HasFoundRecipe(IList<ItemSaveData> items, Func<string, ItemSO> resolve)
+        {
+            if (items == null || resolve == null)
+            {
+                return false;
+            }
+            foreach (var entry in items)
+            {
+                var item = entry != null ? resolve(entry.ItemKey) : null;
+                if (item != null && item.Category == ItemCategory.Recipe && !item.KnownWithForge)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         /// <summary>
         /// Whether a drop of <paramref name="item"/> should be skipped because it would teach nothing: a
         /// recipe already known. Every drop site asks it beside <c>RunFear.Withholds</c>, so a rare recipe

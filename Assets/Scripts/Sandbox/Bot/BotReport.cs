@@ -69,6 +69,8 @@ namespace Assets.Scripts.Sandbox.Bot
         public int XpLeft;
         public int ItemsBought;
         public int GoldSpentOnGear;
+        public int ItemsCrafted;
+        public int GoldSpentOnCrafting;
         public int ItemsEquipped;
         public string Built;
         public int GoldLeft;

@@ -3514,12 +3514,13 @@ MonoBehaviour:
     Note: 
   - Key: tutorial.build-merchant-in-town.text
     Values:
-    - 'The Threshold''s spoils are enough for the Merchant. Build it: your potion belt can do more.'
+    - 'The Threshold''s spoils are enough for the Merchant. Build it: your potion
+      belt can do more.'
     Reviewed: 0
     Note: 
   - Key: tutorial.build-merchant-on-panel.text
     Values:
-    - 'Build the Merchant.'
+    - Build the Merchant.
     Reviewed: 0
     Note: 
   - Key: tutorial.open-merchant-in-town.text
@@ -3529,42 +3530,43 @@ MonoBehaviour:
     Note: 
   - Key: tutorial.enter-merchant-on-panel.text
     Values:
-    - 'Enter the Merchant.'
+    - Enter the Merchant.
     Reviewed: 0
     Note: 
   - Key: tutorial.upgrade-belt.text
     Values:
-    - 'Buy this step to carry one more Healing potion on every run.'
+    - Buy this step to carry one more Healing potion on every run.
     Reviewed: 0
     Note: 
   - Key: tutorial.belt-upgraded.text
     Values:
-    - 'You also found the Energy potion recipe. Go back, then pack it at the campfire.'
+    - You also found the Energy potion recipe. Go back, then pack it at the campfire.
     Reviewed: 0
     Note: 
   - Key: tutorial.open-campfire-in-town.text
     Values:
-    - 'Visit the campfire to pack your new potion.'
+    - Visit the campfire to pack your new potion.
     Reviewed: 0
     Note: 
   - Key: tutorial.enter-campfire-on-panel.text
     Values:
-    - 'Enter the campfire.'
+    - Enter the campfire.
     Reviewed: 0
     Note: 
   - Key: tutorial.equip-potion.text
     Values:
-    - 'Click the empty belt slot to pack Energy. It restores an ability charge in a fight.'
+    - Click the empty belt slot to pack Energy. It restores an ability charge in
+      a fight.
     Reviewed: 0
     Note: 
   - Key: tutorial.belt-packed.text
     Values:
-    - 'Packed. The belt refills at the start of each run. Go back when you are ready.'
+    - Packed. The belt refills at the start of each run. Go back when you are ready.
     Reviewed: 0
     Note: 
   - Key: tutorial.belt-ready.text
     Values:
-    - 'Your belt is ready. Choose The Story to carry on.'
+    - Your belt is ready. Choose The Story to carry on.
     Reviewed: 0
     Note: 
   - Key: tutorial.go-on.text
@@ -4400,37 +4402,37 @@ MonoBehaviour:
     Note: 
   - Key: ui.room.potion-title
     Values:
-    - 'Potions'
+    - Potions
     Reviewed: 0
     Note: 
   - Key: ui.room.potion-hint
     Values:
-    - 'Arrows choose · Enter drink · Esc back'
+    - "Arrows choose \xB7 Enter drink \xB7 Esc back"
     Reviewed: 0
     Note: 
   - Key: ui.room.pause-potions
     Values:
-    - 'Potions (P)'
+    - Potions (P)
     Reviewed: 0
     Note: 
   - Key: room.potions.pick-potion
     Values:
-    - 'Drink which potion?'
+    - Drink which potion?
     Reviewed: 0
     Note: 
   - Key: room.potions.pick-hero
     Values:
-    - 'Who drinks {potion}?'
+    - Who drinks {potion}?
     Reviewed: 0
     Note: 
   - Key: room.potions.none
     Values:
-    - 'No potions to drink here.'
+    - No potions to drink here.
     Reviewed: 0
     Note: 
   - Key: room.potions.potion-row
     Values:
-    - '{potion} ×{count}'
+    - "{potion} \xD7{count}"
     Reviewed: 0
     Note: 
   - Key: room.potions.hero-row
@@ -10401,27 +10403,27 @@ MonoBehaviour:
     Note: 
   - Key: enemy.fire-elemental.name
     Values:
-    - 'Fire Elemental'
+    - Fire Elemental
     Reviewed: 0
     Note: 
   - Key: enemy.fire-elemental-prince.name
     Values:
-    - 'Fire Elemental Prince'
+    - Fire Elemental Prince
     Reviewed: 0
     Note: 
   - Key: enemy.mimic.name
     Values:
-    - 'Mimic'
+    - Mimic
     Reviewed: 0
     Note: 
   - Key: set.sewerwalker.name
     Values:
-    - 'Sewerwalker'
+    - Sewerwalker
     Reviewed: 0
     Note: 
   - Key: set.sewerwalker.tier-1.text
     Values:
-    - '+8% Agility'
+    - +8% Agility
     Reviewed: 0
     Note: 
   - Key: set.sewerwalker.tier-2.text
@@ -10431,32 +10433,32 @@ MonoBehaviour:
     Note: 
   - Key: item.sewer-hood.name
     Values:
-    - 'Sewer Hood'
+    - Sewer Hood
     Reviewed: 0
     Note: 
   - Key: item.sewer-hood.description
     Values:
-    - 'Waxed hide, and it smells of it. Nobody hears you coming.'
+    - Waxed hide, and it smells of it. Nobody hears you coming.
     Reviewed: 0
     Note: 
   - Key: item.sewer-jerkin.name
     Values:
-    - 'Sewer Jerkin'
+    - Sewer Jerkin
     Reviewed: 0
     Note: 
   - Key: item.sewer-jerkin.description
     Values:
-    - 'Cut close, for squeezing through grates.'
+    - Cut close, for squeezing through grates.
     Reviewed: 0
     Note: 
   - Key: item.sewer-treads.name
     Values:
-    - 'Sewer Treads'
+    - Sewer Treads
     Reviewed: 0
     Note: 
   - Key: item.sewer-treads.description
     Values:
-    - 'Soft soles that grip wet stone.'
+    - Soft soles that grip wet stone.
     Reviewed: 0
     Note: 
   - Key: item.recipe-sewer-hood.name
@@ -10466,7 +10468,7 @@ MonoBehaviour:
     Note: 
   - Key: item.recipe-sewer-hood.description
     Values:
-    - 'A rogue''s pattern, found behind a sluice.'
+    - A rogue's pattern, found behind a sluice.
     Reviewed: 0
     Note: 
   - Key: item.recipe-sewer-jerkin.name
@@ -10476,7 +10478,7 @@ MonoBehaviour:
     Note: 
   - Key: item.recipe-sewer-jerkin.description
     Values:
-    - 'A rogue''s pattern, found behind a sluice.'
+    - A rogue's pattern, found behind a sluice.
     Reviewed: 0
     Note: 
   - Key: item.recipe-sewer-treads.name
@@ -10486,37 +10488,37 @@ MonoBehaviour:
     Note: 
   - Key: item.recipe-sewer-treads.description
     Values:
-    - 'A rogue''s pattern, found behind a sluice.'
+    - A rogue's pattern, found behind a sluice.
     Reviewed: 0
     Note: 
   - Key: item.archivist-spectacles.name
     Values:
-    - 'Archivist''s Spectacles'
+    - Archivist's Spectacles
     Reviewed: 0
     Note: 
   - Key: item.archivist-spectacles.description
     Values:
-    - 'The small print was always the important part.'
+    - The small print was always the important part.
     Reviewed: 0
     Note: 
   - Key: item.orrery-ring.name
     Values:
-    - 'Orrery Ring'
+    - Orrery Ring
     Reviewed: 0
     Note: 
   - Key: item.orrery-ring.description
     Values:
-    - 'Its tiny planet still keeps its orbit.'
+    - Its tiny planet still keeps its orbit.
     Reviewed: 0
     Note: 
   - Key: item.palimpsest-robe.name
     Values:
-    - 'Palimpsest Robe'
+    - Palimpsest Robe
     Reviewed: 0
     Note: 
   - Key: item.palimpsest-robe.description
     Values:
-    - 'Written over so many times the cloth remembers.'
+    - Written over so many times the cloth remembers.
     Reviewed: 0
     Note: 
   - Key: item.recipe-archivist-spectacles.name
@@ -10526,7 +10528,7 @@ MonoBehaviour:
     Note: 
   - Key: item.recipe-archivist-spectacles.description
     Values:
-    - 'A card from the Catalogue.'
+    - A card from the Catalogue.
     Reviewed: 0
     Note: 
   - Key: item.recipe-orrery-ring.name
@@ -10536,7 +10538,7 @@ MonoBehaviour:
     Note: 
   - Key: item.recipe-orrery-ring.description
     Values:
-    - 'A card from the Catalogue.'
+    - A card from the Catalogue.
     Reviewed: 0
     Note: 
   - Key: item.recipe-palimpsest-robe.name
@@ -10546,642 +10548,650 @@ MonoBehaviour:
     Note: 
   - Key: item.recipe-palimpsest-robe.description
     Values:
-    - 'A card from the Catalogue, found by those who come back.'
+    - A card from the Catalogue, found by those who come back.
     Reviewed: 0
     Note: 
   - Key: item.heart-of-the-prince.name
     Values:
-    - 'Heart of the Prince'
+    - Heart of the Prince
     Reviewed: 0
     Note: 
   - Key: item.heart-of-the-prince.description
     Values:
-    - 'It has not stopped burning. It may not know it should.'
+    - It has not stopped burning. It may not know it should.
     Reviewed: 0
     Note: 
   - Key: item.parishioners-medal.name
     Values:
-    - 'Parishioner''s Medal'
+    - Parishioner's Medal
     Reviewed: 0
     Note: 
   - Key: item.parishioners-medal.description
     Values:
-    - 'She left it on the pew. It is still wet.'
+    - She left it on the pew. It is still wet.
     Reviewed: 0
     Note: 
   - Key: item.key-of-flame.name
     Values:
-    - 'Key of Flame'
+    - Key of Flame
     Reviewed: 0
     Note: 
   - Key: item.key-of-flame.description
     Values:
-    - 'Warm to the touch. Somewhere, a door is waiting for it.'
+    - Warm to the touch. Somewhere, a door is waiting for it.
     Reviewed: 0
     Note: 
   - Key: event.turning-arm.title
     Values:
-    - 'The Turning Arm'
+    - The Turning Arm
     Reviewed: 0
     Note: 
   - Key: event.turning-arm.prompt
     Values:
-    - 'It has been tracking a planet that no longer exists. It comes around every few seconds, very fast.'
+    - It has been tracking a planet that no longer exists. It comes around every
+      few seconds, very fast.
     Reviewed: 0
     Note: 
   - Key: event.turning-arm.option-1.label
     Values:
-    - 'Snatch the gem'
+    - Snatch the gem
     Reviewed: 0
     Note: 
   - Key: event.turning-arm.option-1.success-1.text
     Values:
-    - 'Your fingers close on it as it passes.'
+    - Your fingers close on it as it passes.
     Reviewed: 0
     Note: 
   - Key: event.turning-arm.option-1.success-2.text
     Values:
-    - 'The gem comes free, setting and all.'
+    - The gem comes free, setting and all.
     Reviewed: 0
     Note: 
   - Key: event.turning-arm.option-1.failure-1.text
     Values:
-    - 'The arm comes round again, sooner than it should.'
+    - The arm comes round again, sooner than it should.
     Reviewed: 0
     Note: 
   - Key: event.turning-arm.option-2.label
     Values:
-    - 'Leave it'
+    - Leave it
     Reviewed: 0
     Note: 
   - Key: event.turning-arm.option-2.decline
     Values:
-    - 'You let it finish its orbit.'
+    - You let it finish its orbit.
     Reviewed: 0
     Note: 
   - Key: event.book-reads-back.title
     Values:
-    - 'The Book That Reads Back'
+    - The Book That Reads Back
     Reviewed: 0
     Note: 
   - Key: event.book-reads-back.prompt
     Values:
-    - 'It stops turning when you look at it. Then, slowly, it turns towards you.'
+    - It stops turning when you look at it. Then, slowly, it turns towards you.
     Reviewed: 0
     Note: 
   - Key: event.book-reads-back.option-1.label
     Values:
-    - 'Let it read you'
+    - Let it read you
     Reviewed: 0
     Note: 
   - Key: event.book-reads-back.option-1.success-1.text
     Values:
-    - 'It reads every one of you, and leaves something behind.'
+    - It reads every one of you, and leaves something behind.
     Reviewed: 0
     Note: 
   - Key: event.book-reads-back.option-1.failure-1.text
     Values:
-    - 'It does not like what it finds, and it calls for help.'
+    - It does not like what it finds, and it calls for help.
     Reviewed: 0
     Note: 
   - Key: event.book-reads-back.option-2.label
     Values:
-    - 'Shut it'
+    - Shut it
     Reviewed: 0
     Note: 
   - Key: event.book-reads-back.option-2.decline
     Values:
-    - 'You close the cover without reading a word.'
+    - You close the cover without reading a word.
     Reviewed: 0
     Note: 
   - Key: event.catalogue.title
     Values:
-    - 'The Catalogue'
+    - The Catalogue
     Reviewed: 0
     Note: 
   - Key: event.catalogue.prompt
     Values:
-    - 'Thousands of small cards scattered about. There may be something valuable in here.'
+    - Thousands of small cards scattered about. There may be something valuable in
+      here.
     Reviewed: 0
     Note: 
   - Key: event.catalogue.option-1.label
     Values:
-    - 'Search the drawers'
+    - Search the drawers
     Reviewed: 0
     Note: 
   - Key: event.catalogue.option-1.success-1.text
     Values:
-    - 'One card is not like the others.'
+    - One card is not like the others.
     Reviewed: 0
     Note: 
   - Key: event.catalogue.option-1.failure-1.text
     Values:
-    - 'Hours of index cards, and nothing on any of them.'
+    - Hours of index cards, and nothing on any of them.
     Reviewed: 0
     Note: 
   - Key: event.catalogue.option-2.label
     Values:
-    - 'Leave it'
+    - Leave it
     Reviewed: 0
     Note: 
   - Key: event.catalogue.option-2.decline
     Values:
-    - 'It has kept this long.'
+    - It has kept this long.
     Reviewed: 0
     Note: 
   - Key: event.cooling-crucible.title
     Values:
-    - 'A Cooling Crucible'
+    - A Cooling Crucible
     Reviewed: 0
     Note: 
   - Key: event.cooling-crucible.prompt
     Values:
-    - 'Someone poured this and walked away. Whatever is in it is nearly cool enough to touch.'
+    - Someone poured this and walked away. Whatever is in it is nearly cool enough
+      to touch.
     Reviewed: 0
     Note: 
   - Key: event.cooling-crucible.option-1.label
     Values:
-    - 'Reach in'
+    - Reach in
     Reviewed: 0
     Note: 
   - Key: event.cooling-crucible.option-1.success-1.text
     Values:
-    - 'You pull it free of the slag.'
+    - You pull it free of the slag.
     Reviewed: 0
     Note: 
   - Key: event.cooling-crucible.option-1.success-2.text
     Values:
-    - 'It comes away in your hand, still warm.'
+    - It comes away in your hand, still warm.
     Reviewed: 0
     Note: 
   - Key: event.cooling-crucible.option-1.failure-1.text
     Values:
-    - 'It was not cool enough.'
+    - It was not cool enough.
     Reviewed: 0
     Note: 
   - Key: event.cooling-crucible.option-2.label
     Values:
-    - 'Leave it'
+    - Leave it
     Reviewed: 0
     Note: 
   - Key: event.cooling-crucible.option-2.decline
     Values:
-    - 'You leave it to the slag.'
+    - You leave it to the slag.
     Reviewed: 0
     Note: 
   - Key: event.chained-bellows.title
     Values:
-    - 'The Chained Bellows'
+    - The Chained Bellows
     Reviewed: 0
     Note: 
   - Key: event.chained-bellows.prompt
     Values:
-    - 'Every forge on this level breathes through these. One good pull and all of them will wake.'
+    - Every forge on this level breathes through these. One good pull and all of
+      them will wake.
     Reviewed: 0
     Note: 
   - Key: event.chained-bellows.option-1.label
     Values:
-    - 'Work the bellows'
+    - Work the bellows
     Reviewed: 0
     Note: 
   - Key: event.chained-bellows.option-1.success-1.text
     Values:
-    - 'The whole level breathes in, and so do you.'
+    - The whole level breathes in, and so do you.
     Reviewed: 0
     Note: 
   - Key: event.chained-bellows.option-1.failure-1.text
     Values:
-    - 'The vents answer first.'
+    - The vents answer first.
     Reviewed: 0
     Note: 
   - Key: event.chained-bellows.option-2.label
     Values:
-    - 'Leave them'
+    - Leave them
     Reviewed: 0
     Note: 
   - Key: event.chained-bellows.option-2.decline
     Values:
-    - 'You leave them chained.'
+    - You leave them chained.
     Reviewed: 0
     Note: 
   - Key: event.key-of-flame-pit.title
     Values:
-    - 'Key of Flame'
+    - Key of Flame
     Reviewed: 0
     Note: 
   - Key: event.key-of-flame-pit.prompt
     Values:
-    - 'You see a key dangling above a pit of fire.'
+    - You see a key dangling above a pit of fire.
     Reviewed: 0
     Note: 
   - Key: event.key-of-flame-pit.option-1.label
     Values:
-    - 'Try and grab it'
+    - Try and grab it
     Reviewed: 0
     Note: 
   - Key: event.key-of-flame-pit.option-1.success-1.text
     Values:
-    - 'You come away with the key and most of your eyebrows.'
+    - You come away with the key and most of your eyebrows.
     Reviewed: 0
     Note: 
   - Key: event.key-of-flame-pit.option-1.failure-1.text
     Values:
-    - 'It burns you, and the key drops into the fire.'
+    - It burns you, and the key drops into the fire.
     Reviewed: 0
     Note: 
   - Key: event.key-of-flame-pit.option-2.label
     Values:
-    - 'Leave it'
+    - Leave it
     Reviewed: 0
     Note: 
   - Key: event.key-of-flame-pit.option-2.decline
     Values:
-    - 'You leave the key where it hangs.'
+    - You leave the key where it hangs.
     Reviewed: 0
     Note: 
   - Key: event.door-of-fire.title
     Values:
-    - 'The Door of Fire'
+    - The Door of Fire
     Reviewed: 0
     Note: 
   - Key: event.door-of-fire.prompt
     Values:
-    - 'You see a big metal door with a fire emblem on it. You notice a keyhole.'
+    - You see a big metal door with a fire emblem on it. You notice a keyhole.
     Reviewed: 0
     Note: 
   - Key: event.door-of-fire.option-1.label
     Values:
-    - 'Use the Key of Flame'
+    - Use the Key of Flame
     Reviewed: 0
     Note: 
   - Key: event.door-of-fire.option-1.success-1.text
     Values:
-    - 'The key melts into the lock, and the door swings in. Something is waiting.'
+    - The key melts into the lock, and the door swings in. Something is waiting.
     Reviewed: 0
     Note: 
   - Key: event.door-of-fire.option-2.label
     Values:
-    - 'Leave it'
+    - Leave it
     Reviewed: 0
     Note: 
   - Key: event.door-of-fire.option-2.decline
     Values:
-    - 'The door stays shut.'
+    - The door stays shut.
     Reviewed: 0
     Note: 
   - Key: event.reed-cage.title
     Values:
-    - 'A Cage of Reeds'
+    - A Cage of Reeds
     Reviewed: 0
     Note: 
   - Key: event.reed-cage.prompt
     Values:
-    - 'The reeds are knotted the way the bog folk knot them. The satchel in the cage is not theirs.'
+    - The reeds are knotted the way the bog folk knot them. The satchel in the cage
+      is not theirs.
     Reviewed: 0
     Note: 
   - Key: event.reed-cage.option-1.label
     Values:
-    - 'Climb out to it'
+    - Climb out to it
     Reviewed: 0
     Note: 
   - Key: event.reed-cage.option-1.success-1.text
     Values:
-    - 'You get the satchel down dry.'
+    - You get the satchel down dry.
     Reviewed: 0
     Note: 
   - Key: event.reed-cage.option-1.failure-1.text
     Values:
-    - 'The reeds give way, and you go into the mud.'
+    - The reeds give way, and you go into the mud.
     Reviewed: 0
     Note: 
   - Key: event.reed-cage.option-2.label
     Values:
-    - 'Leave it'
+    - Leave it
     Reviewed: 0
     Note: 
   - Key: event.reed-cage.option-2.decline
     Values:
-    - 'It can hang.'
+    - It can hang.
     Reviewed: 0
     Note: 
   - Key: event.bog-lantern.title
     Values:
-    - 'A Light on the Mire'
+    - A Light on the Mire
     Reviewed: 0
     Note: 
   - Key: event.bog-lantern.prompt
     Values:
-    - 'It bobs just out of reach and waits for you to follow.'
+    - It bobs just out of reach and waits for you to follow.
     Reviewed: 0
     Note: 
   - Key: event.bog-lantern.option-1.label
     Values:
-    - 'Follow it'
+    - Follow it
     Reviewed: 0
     Note: 
   - Key: event.bog-lantern.option-1.success-1.text
     Values:
-    - 'It leads you to an old drowned purse, and goes out.'
+    - It leads you to an old drowned purse, and goes out.
     Reviewed: 0
     Note: 
   - Key: event.bog-lantern.option-1.failure-1.text
     Values:
-    - 'It leads you in circles, and then into the deep part.'
+    - It leads you in circles, and then into the deep part.
     Reviewed: 0
     Note: 
   - Key: event.bog-lantern.option-2.label
     Values:
-    - 'Ignore it'
+    - Ignore it
     Reviewed: 0
     Note: 
   - Key: event.bog-lantern.option-2.decline
     Values:
-    - 'You keep to the path.'
+    - You keep to the path.
     Reviewed: 0
     Note: 
   - Key: event.sunken-bell.title
     Values:
-    - 'The Sunken Bell'
+    - The Sunken Bell
     Reviewed: 0
     Note: 
   - Key: event.sunken-bell.prompt
     Values:
-    - 'The chapel it came from is a mile off. Nobody knows how it got here, and the rope still hangs dry.'
+    - The chapel it came from is a mile off. Nobody knows how it got here, and the
+      rope still hangs dry.
     Reviewed: 0
     Note: 
   - Key: event.sunken-bell.option-1.label
     Values:
-    - 'Ring it'
+    - Ring it
     Reviewed: 0
     Note: 
   - Key: event.sunken-bell.option-1.success-1.text
     Values:
-    - 'One note, and something shakes loose from the bell.'
+    - One note, and something shakes loose from the bell.
     Reviewed: 0
     Note: 
   - Key: event.sunken-bell.option-1.failure-1.text
     Values:
-    - 'One note, and everything nearby wakes.'
+    - One note, and everything nearby wakes.
     Reviewed: 0
     Note: 
   - Key: event.sunken-bell.option-2.label
     Values:
-    - 'Leave it'
+    - Leave it
     Reviewed: 0
     Note: 
   - Key: event.sunken-bell.option-2.decline
     Values:
-    - 'You leave the rope alone.'
+    - You leave the rope alone.
     Reviewed: 0
     Note: 
   - Key: event.drowned-font.title
     Values:
-    - 'The Drowned Font'
+    - The Drowned Font
     Reviewed: 0
     Note: 
   - Key: event.drowned-font.prompt
     Values:
-    - 'Everything else in this building has gone black. This water is still clean.'
+    - Everything else in this building has gone black. This water is still clean.
     Reviewed: 0
     Note: 
   - Key: event.drowned-font.option-1.label
     Values:
-    - 'Wash'
+    - Wash
     Reviewed: 0
     Note: 
   - Key: event.drowned-font.option-1.success-1.text
     Values:
-    - 'The water takes it all, and the font cracks.'
+    - The water takes it all, and the font cracks.
     Reviewed: 0
     Note: 
   - Key: event.drowned-font.option-2.label
     Values:
-    - 'Leave it'
+    - Leave it
     Reviewed: 0
     Note: 
   - Key: event.drowned-font.option-2.decline
     Values:
-    - 'You leave the water clean.'
+    - You leave the water clean.
     Reviewed: 0
     Note: 
   - Key: event.undrowned-candle.title
     Values:
-    - 'A Candle Under Water'
+    - A Candle Under Water
     Reviewed: 0
     Note: 
   - Key: event.undrowned-candle.prompt
     Values:
-    - 'It should not be burning. It is warm against your hand before you touch it.'
+    - It should not be burning. It is warm against your hand before you touch it.
     Reviewed: 0
     Note: 
   - Key: event.undrowned-candle.option-1.label
     Values:
-    - 'Lift it out'
+    - Lift it out
     Reviewed: 0
     Note: 
   - Key: event.undrowned-candle.option-1.success-1.text
     Values:
-    - 'It burns on in your hand, and you feel it in every limb.'
+    - It burns on in your hand, and you feel it in every limb.
     Reviewed: 0
     Note: 
   - Key: event.undrowned-candle.option-1.failure-1.text
     Values:
-    - 'It goes out.'
+    - It goes out.
     Reviewed: 0
     Note: 
   - Key: event.undrowned-candle.option-2.label
     Values:
-    - 'Leave it'
+    - Leave it
     Reviewed: 0
     Note: 
   - Key: event.undrowned-candle.option-2.decline
     Values:
-    - 'You leave it burning.'
+    - You leave it burning.
     Reviewed: 0
     Note: 
   - Key: event.last-parishioner.title
     Values:
-    - 'The Last Parishioner'
+    - The Last Parishioner
     Reviewed: 0
     Note: 
   - Key: event.last-parishioner.prompt
     Values:
-    - 'She has not noticed the water. She asks if the service has ended.'
+    - She has not noticed the water. She asks if the service has ended.
     Reviewed: 0
     Note: 
   - Key: event.last-parishioner.option-1.label
     Values:
-    - 'Tell her it has'
+    - Tell her it has
     Reviewed: 0
     Note: 
   - Key: event.last-parishioner.option-1.success-1.text
     Values:
-    - 'She nods, and is gone. Something is left on the pew.'
+    - She nods, and is gone. Something is left on the pew.
     Reviewed: 0
     Note: 
   - Key: event.last-parishioner.option-1.failure-1.text
     Values:
-    - 'She turns, and she is not alone.'
+    - She turns, and she is not alone.
     Reviewed: 0
     Note: 
   - Key: event.last-parishioner.option-2.label
     Values:
-    - 'Sit with her'
+    - Sit with her
     Reviewed: 0
     Note: 
   - Key: event.last-parishioner.option-2.success-1.text
     Values:
-    - 'You sit a while, and when you stand, nothing hurts. She does not look up.'
+    - You sit a while, and when you stand, nothing hurts. She does not look up.
     Reviewed: 0
     Note: 
   - Key: event.last-parishioner.option-3.label
     Values:
-    - 'Leave her'
+    - Leave her
     Reviewed: 0
     Note: 
   - Key: event.last-parishioner.option-3.decline
     Values:
-    - 'You leave her to the service.'
+    - You leave her to the service.
     Reviewed: 0
     Note: 
   - Key: event.stopped-sluice.title
     Values:
-    - 'A Stopped Sluice'
+    - A Stopped Sluice
     Reviewed: 0
     Note: 
   - Key: event.stopped-sluice.prompt
     Values:
-    - 'You notice the iron grate on the wall. The wheel still turns, a little.'
+    - You notice the iron grate on the wall. The wheel still turns, a little.
     Reviewed: 0
     Note: 
   - Key: event.stopped-sluice.option-1.label
     Values:
-    - 'Force the wheel'
+    - Force the wheel
     Reviewed: 0
     Note: 
   - Key: event.stopped-sluice.option-1.success-1.text
     Values:
-    - 'The water drops, and the grate swings open.'
+    - The water drops, and the grate swings open.
     Reviewed: 0
     Note: 
   - Key: event.stopped-sluice.option-1.failure-1.text
     Values:
-    - 'The wheel breaks, and the grate stays shut.'
+    - The wheel breaks, and the grate stays shut.
     Reviewed: 0
     Note: 
   - Key: event.stopped-sluice.option-2.label
     Values:
-    - 'Leave it'
+    - Leave it
     Reviewed: 0
     Note: 
   - Key: event.stopped-sluice.option-2.decline
     Values:
-    - 'You leave the wheel alone.'
+    - You leave the wheel alone.
     Reviewed: 0
     Note: 
   - Key: event.pipe-eggs.title
     Values:
-    - 'Eggs in the Pipe'
+    - Eggs in the Pipe
     Reviewed: 0
     Note: 
   - Key: event.pipe-eggs.prompt
     Values:
-    - 'Something laid these here for the warmth. They are worth a lot to the right alchemist, if they do not hatch.'
+    - Something laid these here for the warmth. They are worth a lot to the right
+      alchemist, if they do not hatch.
     Reviewed: 0
     Note: 
   - Key: event.pipe-eggs.option-1.label
     Values:
-    - 'Harvest them'
+    - Harvest them
     Reviewed: 0
     Note: 
   - Key: event.pipe-eggs.option-1.success-1.text
     Values:
-    - 'You lift them out one at a time.'
+    - You lift them out one at a time.
     Reviewed: 0
     Note: 
   - Key: event.pipe-eggs.option-1.failure-1.text
     Values:
-    - 'They were closer to hatching than they looked.'
+    - They were closer to hatching than they looked.
     Reviewed: 0
     Note: 
   - Key: event.pipe-eggs.option-2.label
     Values:
-    - 'Leave them'
+    - Leave them
     Reviewed: 0
     Note: 
   - Key: event.pipe-eggs.option-2.decline
     Values:
-    - 'You leave them to the warmth.'
+    - You leave them to the warmth.
     Reviewed: 0
     Note: 
   - Key: event.weighing-scale.title
     Values:
-    - 'The Weighing Scale'
+    - The Weighing Scale
     Reviewed: 0
     Note: 
   - Key: event.weighing-scale.prompt
     Values:
-    - 'One pan holds a covered dish. The other waits for whatever you think it is worth.'
+    - One pan holds a covered dish. The other waits for whatever you think it is
+      worth.
     Reviewed: 0
     Note: 
   - Key: event.weighing-scale.option-1.label
     Values:
-    - 'Pay 120 gold'
+    - Pay 120 gold
     Reviewed: 0
     Note: 
   - Key: event.weighing-scale.option-1.success-1.text
     Values:
-    - 'The pans settle, and the dish uncovers itself.'
+    - The pans settle, and the dish uncovers itself.
     Reviewed: 0
     Note: 
   - Key: event.weighing-scale.option-2.label
     Values:
-    - 'Leave it'
+    - Leave it
     Reviewed: 0
     Note: 
   - Key: event.weighing-scale.option-2.decline
     Values:
-    - 'You keep your gold.'
+    - You keep your gold.
     Reviewed: 0
     Note: 
   - Key: event.gilded-mimic.title
     Values:
-    - 'The Gilded Chest'
+    - The Gilded Chest
     Reviewed: 0
     Note: 
   - Key: event.gilded-mimic.prompt
     Values:
-    - 'Everything else here has been looted. This has not, and the lid just moved.'
+    - Everything else here has been looted. This has not, and the lid just moved.
     Reviewed: 0
     Note: 
   - Key: event.gilded-mimic.option-1.label
     Values:
-    - 'Open it'
+    - Open it
     Reviewed: 0
     Note: 
   - Key: event.gilded-mimic.option-1.success-1.text
     Values:
-    - 'It is only a chest, and it is full.'
+    - It is only a chest, and it is full.
     Reviewed: 0
     Note: 
   - Key: event.gilded-mimic.option-1.failure-1.text
     Values:
-    - 'It bites.'
+    - It bites.
     Reviewed: 0
     Note: 
   - Key: event.gilded-mimic.option-2.label
     Values:
-    - 'Leave it'
+    - Leave it
     Reviewed: 0
     Note: 
   - Key: event.gilded-mimic.option-2.decline
     Values:
-    - 'You back away from the chest.'
+    - You back away from the chest.
     Reviewed: 0
     Note: 
   - Key: event.fence-stall.title
     Values:
-    - 'The Fence''s Table'
+    - The Fence's Table
     Reviewed: 0
     Note: 
   - Key: event.fence-stall.prompt
@@ -11191,147 +11201,149 @@ MonoBehaviour:
     Note: 
   - Key: event.fence-stall.option-1.label
     Values:
-    - 'Swap a consumable'
+    - Swap a consumable
     Reviewed: 0
     Note: 
   - Key: event.fence-stall.option-1.success-1.text
     Values:
-    - 'You leave something, and take something.'
+    - You leave something, and take something.
     Reviewed: 0
     Note: 
   - Key: event.fence-stall.option-2.label
     Values:
-    - 'Leave it'
+    - Leave it
     Reviewed: 0
     Note: 
   - Key: event.fence-stall.option-2.decline
     Values:
-    - 'You leave the table as it is.'
+    - You leave the table as it is.
     Reviewed: 0
     Note: 
   - Key: event.rigged-plate.title
     Values:
-    - 'A Rigged Plate'
+    - A Rigged Plate
     Reviewed: 0
     Note: 
   - Key: event.rigged-plate.prompt
     Values:
-    - 'The purse is obvious. That is the point of it.'
+    - The purse is obvious. That is the point of it.
     Reviewed: 0
     Note: 
   - Key: event.rigged-plate.option-1.label
     Values:
-    - 'Lift the purse'
+    - Lift the purse
     Reviewed: 0
     Note: 
   - Key: event.rigged-plate.option-1.success-1.text
     Values:
-    - 'You lift it off before the plate can rise.'
+    - You lift it off before the plate can rise.
     Reviewed: 0
     Note: 
   - Key: event.rigged-plate.option-1.failure-1.text
     Values:
-    - 'The darts were not obvious.'
+    - The darts were not obvious.
     Reviewed: 0
     Note: 
   - Key: event.rigged-plate.option-2.label
     Values:
-    - 'Leave it'
+    - Leave it
     Reviewed: 0
     Note: 
   - Key: event.rigged-plate.option-2.decline
     Values:
-    - 'You leave the purse on the plate.'
+    - You leave the purse on the plate.
     Reviewed: 0
     Note: 
   - Key: event.musty-tome.title
     Values:
-    - 'A Musty Tome'
+    - A Musty Tome
     Reviewed: 0
     Note: 
   - Key: event.musty-tome.prompt
     Values:
-    - 'A swollen leather tome lies open on a pedestal. Its pages are covered in mould and web.'
+    - A swollen leather tome lies open on a pedestal. Its pages are covered in mould
+      and web.
     Reviewed: 0
     Note: 
   - Key: event.musty-tome.option-1.label
     Values:
-    - 'Read it'
+    - Read it
     Reviewed: 0
     Note: 
   - Key: event.musty-tome.option-1.success-1.text
     Values:
-    - 'Some of it stays with you, and your hands remember how.'
+    - Some of it stays with you, and your hands remember how.
     Reviewed: 0
     Note: 
   - Key: event.musty-tome.option-1.failure-1.text
     Values:
-    - 'It reads badly, and the reading stays with you.'
+    - It reads badly, and the reading stays with you.
     Reviewed: 0
     Note: 
   - Key: event.musty-tome.option-2.label
     Values:
-    - 'Clean it'
+    - Clean it
     Reviewed: 0
     Note: 
   - Key: event.musty-tome.option-2.success-1.text
     Values:
-    - 'Under the mould, something spits out onto the pedestal.'
+    - Under the mould, something spits out onto the pedestal.
     Reviewed: 0
     Note: 
   - Key: event.musty-tome.option-2.failure-1.text
     Values:
-    - 'The tome explodes.'
+    - The tome explodes.
     Reviewed: 0
     Note: 
   - Key: event.musty-tome.option-3.label
     Values:
-    - 'Leave it'
+    - Leave it
     Reviewed: 0
     Note: 
   - Key: event.musty-tome.option-3.decline
     Values:
-    - 'You leave the book to the damp.'
+    - You leave the book to the damp.
     Reviewed: 0
     Note: 
   - Key: event.treasury-hoard-small.title
     Values:
-    - 'The Treasury'
+    - The Treasury
     Reviewed: 0
     Note: 
   - Key: event.treasury-hoard-small.prompt
     Values:
-    - 'Strongboxes line the walls, prised open and emptied a long time ago. There is loose coin in the corners, and one gilded chest nobody has touched.'
+    - Strongboxes line the walls, prised open and emptied a long time ago. There
+      is loose coin in the corners, and one gilded chest nobody has touched.
     Reviewed: 0
     Note: 
   - Key: room.event.tag.needs-item
     Values:
-    - 'needs {item}'
+    - needs {item}
     Reviewed: 0
     Note: 
   - Key: room.event.tag.needs-consumable
     Values:
-    - 'needs a consumable'
+    - needs a consumable
     Reviewed: 0
     Note: 
   - Key: room.event.tag.needs-gold
     Values:
-    - 'needs {amount} gold'
+    - needs {amount} gold
     Reviewed: 0
     Note: 
   - Key: event-text.report.paid-gold
     Values:
-    - 'Paid {amount} gold.'
+    - Paid {amount} gold.
     Reviewed: 0
     Note: 
   - Key: event-text.report.used-item
     Values:
-    - 'Used {item}.'
+    - Used {item}.
     Reviewed: 0
     Note: 
   - Key: event-text.report.xp
     Values:
-    - 'Every hero gains {amount} XP.'
+    - Every hero gains {amount} XP.
     Reviewed: 0
     Note: 
   - Key: event-text.report.charges
@@ -11341,21 +11353,383 @@ MonoBehaviour:
     Note: 
   - Key: event-text.report.charges-full
     Values:
-    - 'Every ability was already full.'
+    - Every ability was already full.
     Reviewed: 0
     Note: 
   - Key: event-text.report.cured
     Values:
-    - 'Every curse on this floor is gone.'
+    - Every curse on this floor is gone.
     Reviewed: 0
     Note: 
   - Key: event-text.report.nothing-to-cure
     Values:
-    - 'There was nothing to wash away.'
+    - There was nothing to wash away.
     Reviewed: 0
     Note: 
   - Key: event-text.report.all-stats
     Values:
     - '{hero}: every stat +{percent}% for this floor.'
+    Reviewed: 0
+    Note: 
+  - Key: item.mire-hide-coat.name
+    Values:
+    - Mire-Hide Coat
+    Reviewed: 0
+    Note: 
+  - Key: item.mire-hide-coat.description
+    Values:
+    - Layered hide off the Mirefather's own flank. Nothing that bites it comes back
+      for more.
+    Reviewed: 0
+    Note: 
+  - Key: item.mire-hide-coat.reaction-1.text
+    Values:
+    - 'When hurt: 20% chance of +4 Endurance until the next turn.'
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-mire-hide-coat.name
+    Values:
+    - Recipe - Mire-Hide Coat
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-mire-hide-coat.description
+    Values:
+    - A tanner's notes, written by someone who met the Mirefather and lived.
+    Reviewed: 0
+    Note: 
+  - Key: item.reedbound-boots.name
+    Values:
+    - Reedbound Boots
+    Reviewed: 0
+    Note: 
+  - Key: item.reedbound-boots.description
+    Values:
+    - Woven tight enough to keep the march out, and light enough to outrun it.
+    Reviewed: 0
+    Note: 
+  - Key: item.reedbound-boots.reaction-1.text
+    Values:
+    - 'After a dodge: +3 Agility for 2 turns.'
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-reedbound-boots.name
+    Values:
+    - Recipe - Reedbound Boots
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-reedbound-boots.description
+    Values:
+    - A weaving pattern scratched on a strip of bark.
+    Reviewed: 0
+    Note: 
+  - Key: item.slag-cleaver.name
+    Values:
+    - Slag Cleaver
+    Reviewed: 0
+    Note: 
+  - Key: item.slag-cleaver.description
+    Values:
+    - An iron sword drowned in slag and pulled out heavier. It still runs hot.
+    Reviewed: 0
+    Note: 
+  - Key: item.slag-cleaver.reaction-1.text
+    Values:
+    - 'On a hit: 25% chance to Burn the target.'
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-slag-cleaver.name
+    Values:
+    - Recipe - Slag Cleaver
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-slag-cleaver.description
+    Values:
+    - Foundry notes on folding slag into a plain iron blade.
+    Reviewed: 0
+    Note: 
+  - Key: item.cinderglass-pendant.name
+    Values:
+    - Cinderglass Pendant
+    Reviewed: 0
+    Note: 
+  - Key: item.cinderglass-pendant.description
+    Values:
+    - A bead of black glass that drinks what would burn you.
+    Reviewed: 0
+    Note: 
+  - Key: item.cinderglass-pendant.reaction-1.text
+    Values:
+    - 'When hurt by Fire: heal 5% of max health.'
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-cinderglass-pendant.name
+    Values:
+    - Recipe - Cinderglass Pendant
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-cinderglass-pendant.description
+    Values:
+    - A glassblower's warning, with the method underneath.
+    Reviewed: 0
+    Note: 
+  - Key: item.emberplate-hauberk.name
+    Values:
+    - Emberplate Hauberk
+    Reviewed: 0
+    Note: 
+  - Key: item.emberplate-hauberk.description
+    Values:
+    - Rings of ember iron that never quite cool. Whoever strikes it learns that.
+    Reviewed: 0
+    Note: 
+  - Key: item.emberplate-hauberk.reaction-1.text
+    Values:
+    - 'When struck by a blow or ability: 20% chance to Burn the attacker.'
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-emberplate-hauberk.name
+    Values:
+    - Recipe - Emberplate Hauberk
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-emberplate-hauberk.description
+    Values:
+    - An armourer's drawing, singed at every edge.
+    Reviewed: 0
+    Note: 
+  - Key: item.choir-vestment.name
+    Values:
+    - Choir Vestment
+    Reviewed: 0
+    Note: 
+  - Key: item.choir-vestment.description
+    Values:
+    - Still damp. The hymn stitched into its hem has not stopped.
+    Reviewed: 0
+    Note: 
+  - Key: item.choir-vestment.reaction-1.text
+    Values:
+    - 'After an ability: 15% chance it costs no charge (once per fight).'
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-choir-vestment.name
+    Values:
+    - Recipe - Choir Vestment
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-choir-vestment.description
+    Values:
+    - A hymn sheet, and on its back, a tailor's measurements.
+    Reviewed: 0
+    Note: 
+  - Key: item.drowned-censer.name
+    Values:
+    - Drowned Censer
+    Reviewed: 0
+    Note: 
+  - Key: item.drowned-censer.description
+    Values:
+    - It burns underwater. Nobody in the chapel could say on what.
+    Reviewed: 0
+    Note: 
+  - Key: item.drowned-censer.reaction-1.text
+    Values:
+    - 'When hurt by Shadow: heal 8% of max health.'
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-drowned-censer.name
+    Values:
+    - Recipe - Drowned Censer
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-drowned-censer.description
+    Values:
+    - A sexton's list of what the censer must never be filled with.
+    Reviewed: 0
+    Note: 
+  - Key: item.gilded-crown.name
+    Values:
+    - Gilded Crown
+    Reviewed: 0
+    Note: 
+  - Key: item.gilded-crown.description
+    Values:
+    - 'The Hoarder''s idea of a crown: gold leaf over more gold leaf, all the way
+      down.'
+    Reviewed: 0
+    Note: 
+  - Key: item.gilded-crown.reaction-1.text
+    Values:
+    - 'On a kill: heal 5% of max health (once per turn).'
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-gilded-crown.name
+    Values:
+    - Recipe - Gilded Crown
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-gilded-crown.description
+    Values:
+    - An inventory of one crown, priced to the last flake.
+    Reviewed: 0
+    Note: 
+  - Key: item.hoarders-grip.name
+    Values:
+    - Hoarder's Grip
+    Reviewed: 0
+    Note: 
+  - Key: item.hoarders-grip.description
+    Values:
+    - Gloves made for holding on. They have never once let go of anything.
+    Reviewed: 0
+    Note: 
+  - Key: item.hoarders-grip.reaction-1.text
+    Values:
+    - 'After a dodge: +2 Agility for 2 turns.'
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-hoarders-grip.name
+    Values:
+    - Recipe - Hoarder's Grip
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-hoarders-grip.description
+    Values:
+    - A ledger page on keeping what is yours.
+    Reviewed: 0
+    Note: 
+  - Key: item.sanguine-edge.name
+    Values:
+    - Sanguine Edge
+    Reviewed: 0
+    Note: 
+  - Key: item.sanguine-edge.description
+    Values:
+    - The Blood Sword after the Stair has finished with it. It remembers being fed.
+    Reviewed: 0
+    Note: 
+  - Key: item.sanguine-edge.reaction-1.text
+    Values:
+    - 'On a kill: heal 8% of max health (once per turn).'
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-sanguine-edge.name
+    Values:
+    - Recipe - Sanguine Edge
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-sanguine-edge.description
+    Values:
+    - A rite in the Last Initiate's hand. The steps are numbered in red.
+    Reviewed: 0
+    Note: 
+  - Key: item.wardens-greathelm.name
+    Values:
+    - Warden's Greathelm
+    Reviewed: 0
+    Note: 
+  - Key: item.wardens-greathelm.description
+    Values:
+    - A warden's helm rebuilt around the one who still stands when the others fall.
+    Reviewed: 0
+    Note: 
+  - Key: item.wardens-greathelm.reaction-1.text
+    Values:
+    - 'When an ally falls: +6 Endurance for 3 turns.'
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-wardens-greathelm.name
+    Values:
+    - Recipe - Warden's Greathelm
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-wardens-greathelm.description
+    Values:
+    - A cloister's order for one helm, signed by a warden long dead.
+    Reviewed: 0
+    Note: 
+  - Key: item.knife-saint-gloves.name
+    Values:
+    - Knife-Saint's Gloves
+    Reviewed: 0
+    Note: 
+  - Key: item.knife-saint-gloves.description
+    Values:
+    - Worn thin at the fingertips by long devotion to one small blade.
+    Reviewed: 0
+    Note: 
+  - Key: item.knife-saint-gloves.reaction-1.text
+    Values:
+    - 'On a hit: 15% chance to Burn the target.'
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-knife-saint-gloves.name
+    Values:
+    - Recipe - Knife-Saint's Gloves
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-knife-saint-gloves.description
+    Values:
+    - A pilgrim's note on how the saints held their knives.
+    Reviewed: 0
+    Note: 
+  - Key: item.oozebound-waders.name
+    Values:
+    - Oozebound Waders
+    Reviewed: 0
+    Note: 
+  - Key: item.oozebound-waders.description
+    Values:
+    - Sealed with something the Mother Pool left behind. It has not finished setting.
+    Reviewed: 0
+    Note: 
+  - Key: item.oozebound-waders.reaction-1.text
+    Values:
+    - 'When hurt: 15% chance of +3 Endurance until the next turn.'
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-oozebound-waders.name
+    Values:
+    - Recipe - Oozebound Waders
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-oozebound-waders.description
+    Values:
+    - A cistern keeper's method for staying dry, more or less.
+    Reviewed: 0
+    Note: 
+  - Key: item.sump-lantern.name
+    Values:
+    - Sump Lantern
+    Reviewed: 0
+    Note: 
+  - Key: item.sump-lantern.description
+    Values:
+    - A shuttered lantern on a stave. It gives little light, and stops a lot of teeth.
+    Reviewed: 0
+    Note: 
+  - Key: item.sump-lantern.reaction-1.text
+    Values:
+    - 'On a kill: heal 3% of max health (once per turn).'
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-sump-lantern.name
+    Values:
+    - Recipe - Sump Lantern
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-sump-lantern.description
+    Values:
+    - A maintenance note for the lanterns of the lower sump.
+    Reviewed: 0
+    Note: 
+  - Key: hub.recipe-nudge.forge
+    Values:
+    - You found a recipe. The Forge can make it.
+    Reviewed: 0
+    Note: 
+  - Key: hub.recipe-nudge.no-forge
+    Values:
+    - You found a recipe. It needs a Forge.
     Reviewed: 0
     Note: 

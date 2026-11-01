@@ -303,6 +303,19 @@ under the item it is made from (`RecipeTreeOps`), and a recipe not yet found sho
 "???" row in its true place. The owner chose that over hiding unfound recipes *"because later, we
 can add a hint on that record to guide the player"*.
 
+**Crafting is the main gold sink (owner, 2026-11-01).** The second half of the campaign paid far more
+gold than anything could take: 3,237 unspent at the end of a full bot game, against 1,160 to make all
+14 recipes. So 14 more, none in the shop: Mire-Hide Coat and Reedbound Boots (Drowned March), Slag
+Cleaver, Cinderglass Pendant and Emberplate Hauberk (Ashen Deep), Choir Vestment and Drowned Censer
+(Drowned Chapel), Gilded Crown and Hoarder's Grip (Hollow Vault), Sanguine Edge, Warden's Greathelm and
+Knife-Saint's Gloves (Blood Stair), Oozebound Waders and Sump Lantern (Seeping Cistern). All come off
+floor clears (`LevelDefinitionSO.RecipeTable`, 30-50%), cost 250-600 gold, 6,000 in all, and sit at
+item level 5-7, past the shop's top level of 4, each with a reaction. Late recipes priced for early
+gold went up: Voidforged Blade 450, Flaming Short Sword 200, Hexsilk Gloves 200, Bog Hood 120.
+**The town says one line** once a found recipe is in the bags, until the Forge is opened with one
+(`HubManager.RecipeNudge`, `RecipeNudgeDone`). It does not say where recipes come from: that stays the
+Hall's hint to come. The texts are agent drafts, not reviewed.
+
 **Next, from the same notes:** that hint (where a rare recipe drops), unlocked by **upgrading the
 Hall**, which is a level granting *information*, so it fits the phase-6 rule. And **quests** become a
 third recipe source.

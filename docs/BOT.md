@@ -73,7 +73,7 @@ buildings. The odds used are the true chance, which can be better than the playe
   wears gear, spends XP with `SphereGridOps.GreedySpend`, starts the next open run on the list.
 - **It retries** a run it wiped on, like a player, up to `MaxAttemptsPerRun`.
 
-**Not played yet:** summons, non-damaging abilities (buffs, debuffs, shields), the Forge, crafting,
+**Not played yet:** summons, non-damaging abilities (buffs, debuffs, shields), combo upgrades,
 the potion belt, swapping abilities by hand, revisits (it retries a run it wiped on, but never replays one it cleared). Expect it to play a little worse than a
 player in those respects, and to have no judgement: it never saves an Ultra or charges for a boss.
 

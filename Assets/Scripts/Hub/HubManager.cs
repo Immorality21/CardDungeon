@@ -1788,6 +1788,10 @@ namespace Assets.Scripts.Hub
             {
                 text = _challengeWarning;
             }
+            if (string.IsNullOrEmpty(text) && screen == TutorialScreen.Town)
+            {
+                text = RecipeNudge();
+            }
             if (_tutorialText.text != text)
             {
                 _tutorialText.text = text;
@@ -1797,6 +1801,23 @@ namespace Assets.Scripts.Hub
             {
                 SetShown(_tutorialBanner, shown);
             }
+        }
+
+        /// <summary>The town's one line about a found recipe, until the Forge has been opened with one
+        /// in the bags. Only this: where recipes come from stays for the player to discover.</summary>
+        private string RecipeNudge()
+        {
+            var meta = MetaProgressManager.Instance;
+            var inventory = InventoryManager.Instance;
+            if (!meta.TutorialFinished || meta.RecipeNudgeDone
+                || !CraftingOps.HasFoundRecipe(inventory.GetItems(), inventory.GetItemSO))
+            {
+                return string.Empty;
+            }
+            var forge = _hub != null ? _hub.Buildings.Find(b => b != null && b.Service == HubService.Forge) : null;
+            return forge != null && BuildingOps.IsBuilt(forge, Progress())
+                ? Loc.Get("hub.recipe-nudge.forge")
+                : Loc.Get("hub.recipe-nudge.no-forge");
         }
 
         private TutorialScreen CurrentTutorialScreen()
@@ -2003,6 +2024,11 @@ namespace Assets.Scripts.Hub
             CoverTown();
             SetShown(_lotView, false);
             _forge.Show();
+            var inventory = InventoryManager.Instance;
+            if (CraftingOps.HasFoundRecipe(inventory.GetItems(), inventory.GetItemSO))
+            {
+                MetaProgressManager.Instance.MarkRecipeNudgeDone();
+            }
             ResetKeyboardNavigation();
         }
 

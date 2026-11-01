@@ -43,7 +43,12 @@ MonoBehaviour:
     MinQuantity: 1
     MaxQuantity: 1
   GuaranteedMaterials: []
-  RecipeTable: []
+  RecipeTable:
+  - Item: {fileID: 11400000, guid: 2c9e226c2d137c6418b3e3da56ab3c53, type: 2}
+    Chance: 0.4
+    MinQuantity: 1
+    MaxQuantity: 1
+  EventRecipes: []
   CombatBackground: {fileID: 21300000, guid: aea25effd64f4edda624fdb853863c12, type: 3}
   MapBackdrop: {fileID: 21300000, guid: 58b5b449785e4890a72af983ff807143, type: 3}
   Biome: {fileID: 11400000, guid: 38dccbf0dbe1999418724f231eb5553f, type: 2}

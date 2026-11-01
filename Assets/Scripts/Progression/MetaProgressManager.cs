@@ -589,6 +589,20 @@ namespace Assets.Scripts.Progression
             Save();
         }
 
+        /// <summary>Whether the town has stopped pointing at the Forge for a found recipe.</summary>
+        public bool RecipeNudgeDone => _saveData.RecipeNudgeDone;
+
+        /// <summary>The Forge was opened with a found recipe in the bags. Persists immediately.</summary>
+        public void MarkRecipeNudgeDone()
+        {
+            if (_saveData.RecipeNudgeDone)
+            {
+                return;
+            }
+            _saveData.RecipeNudgeDone = true;
+            Save();
+        }
+
         /// <summary>Whether the story map has already warned that a challenge run is open.</summary>
         public bool ChallengeWarned => _saveData.ChallengeWarned;
 

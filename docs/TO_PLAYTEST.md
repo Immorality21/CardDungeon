@@ -6,6 +6,12 @@ it has been played; anything that turns out wrong becomes a backlog item in `NEX
 Most of it came out of playtest 3 (2026-10-26 to 2026-10-28); the first section is the outside
 playtest's fixes (2026-10-30).
 
+## Crafting as the gold sink (2026-11-01)
+
+- [ ] **The Forge line in town** - after the first found recipe, one line on the town screen, gone once the Forge is opened. Not seen on
+      screen yet: only its rule is tested.
+- [ ] **The 14 late recipes** - does a late run feel worth chasing, are their prices fair, and do the agent-written texts read right?
+
 ## Side rooms (2026-10-31)
 
 - [ ] **The Choked Passage, for real** - walking inside a side room and leaving it. A side room has no

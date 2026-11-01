@@ -84,6 +84,17 @@ namespace Tests.EditMode
         }
 
         [Test]
+        public void HasFoundRecipe_CountsOnlyRecipesTheForgeDoesNotTeach()
+        {
+            var items = new List<ItemSaveData> { new ItemSaveData { ItemKey = _recipe.Key } };
+            Assert.IsTrue(CraftingOps.HasFoundRecipe(items, Resolve));
+
+            _recipe.KnownWithForge = true;
+            Assert.IsFalse(CraftingOps.HasFoundRecipe(items, Resolve));
+            Assert.IsFalse(CraftingOps.HasFoundRecipe(new List<ItemSaveData>(), Resolve));
+        }
+
+        [Test]
         public void IsKnown_ForgeRecipe_IsKnownWithNothingCarried()
         {
             _recipe.KnownWithForge = true;
