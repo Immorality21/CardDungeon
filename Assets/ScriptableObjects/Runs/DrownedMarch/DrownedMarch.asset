@@ -50,7 +50,7 @@ MonoBehaviour:
       Overrides: []
     RescueHero: {fileID: 11400000, guid: 77ccb730251741f08e684dabd9144b76, type: 2}
     AllowRoomEvents: 1
-    IntendedHard: 0
+    IntendedHard: 1
   - LevelTemplate: {fileID: 11400000, guid: e5eb9c2b5c392894fb55360a188283b2, type: 2}
     LevelNameKey: run.drowned-march.level-3.name
     ManualLayout: {fileID: 0}
@@ -66,7 +66,7 @@ MonoBehaviour:
       Overrides: []
     RescueHero: {fileID: 0}
     AllowRoomEvents: 1
-    IntendedHard: 0
+    IntendedHard: 1
   - LevelTemplate: {fileID: 11400000, guid: 14a21a6d544c0814c8f45f51376aebb6, type: 2}
     LevelNameKey: run.drowned-march.level-4.name
     ManualLayout: {fileID: 0}
@@ -82,7 +82,7 @@ MonoBehaviour:
       Overrides: []
     RescueHero: {fileID: 0}
     AllowRoomEvents: 1
-    IntendedHard: 0
+    IntendedHard: 1
   - LevelTemplate: {fileID: 11400000, guid: 98ab313d4419a5845a77a626e060d5b2, type: 2}
     LevelNameKey: run.drowned-march.level-5.name
     ManualLayout: {fileID: 0}

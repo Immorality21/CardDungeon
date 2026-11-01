@@ -2010,8 +2010,10 @@ namespace Assets.Scripts.Balance
 
                     // The step *onto* a gated finale is the gate. It is supposed to be a cliff for a
                     // party that has not paid for the tier, so measuring it against the ordinary
-                    // level-to-level ceiling reports the design as a defect.
-                    if (GateBudgetFor(run, run.Levels[i + 1], rules, tiers) >= 0)
+                    // level-to-level ceiling reports the design as a defect. A floor marked hard on
+                    // purpose is the same statement from the owner.
+                    var onto = run.Levels[i + 1];
+                    if (GateBudgetFor(run, onto, rules, tiers) >= 0 || (onto.Entry != null && onto.Entry.IntendedHard))
                     {
                         continue;
                     }
@@ -2023,8 +2025,8 @@ namespace Assets.Scripts.Balance
                         // real level after it is arithmetically a several-hundred-percent spike while
                         // being a couple of HP in absolute terms. Report it, but not as a warning:
                         // the honest reading is the absolute step, and that is inside every band.
-                        float fromLoad = run.Levels[i].AttritionLoad;
-                        float toLoad = run.Levels[i + 1].AttritionLoad;
+                        float fromLoad = run.Levels[i].FreshAttritionLoad;
+                        float toLoad = run.Levels[i + 1].FreshAttritionLoad;
                         bool baseTooLightToJudge = fromLoad < rules.MinAttritionForJumpCheck;
 
                         if (baseTooLightToJudge)
@@ -3518,7 +3520,8 @@ namespace Assets.Scripts.Balance
                 // Charges are a run resource: only floor 0 starts full. Granting every floor
                 // full charges is exactly the optimism the per-room simulation carries.
                 StartsWithFullCharges = level.Index == 0,
-                StartHealthFraction = entry.HealthShare
+                StartHealthFraction = entry.HealthShare,
+                RollRooms = () => RollFloorRooms(level)
             };
 
             // Same loadout rules as the per-room sims, so the two are comparable.
@@ -3636,39 +3639,93 @@ namespace Assets.Scripts.Balance
                 }
             }
 
-            if (level.Boss != null)
-            {
-                // Take the sealed exit room straight off the curve rather than rebuilding it from
-                // level.Boss: the room is the boss *and* its adds, and a floor that fought only the
-                // boss would under-price every finale the moment one gained an escort.
-                RoomEncounter bossRoom = null;
-                foreach (var room in level.Rooms)
-                {
-                    if (room != null && room.IsBossRoom)
-                    {
-                        bossRoom = room;
-                        break;
-                    }
-                }
+            AddBossRoom(level, rooms);
+            return rooms;
+        }
 
-                var units = bossRoom != null
-                    ? bossRoom.Expected.ToDiscreteUnits()
-                    : new List<SimUnit>();
-                if (units.Count == 0)
-                {
-                    var boss = SimUnit.FromEnemy(level.Boss, level.Tuning);
-                    if (boss != null)
-                    {
-                        units.Add(boss);
-                    }
-                }
+        /// <summary>
+        /// One floor as the game deals it: which rooms a generated floor drew and who each room
+        /// rolled. What <see cref="BuildFloorRooms"/> averages, sampled once per trial, because the
+        /// bad draws are what end a run and an average has none (BALANCING.md 5aw).
+        /// </summary>
+        private static List<IList<SimUnit>> RollFloorRooms(LevelCurve level)
+        {
+            var rooms = new List<IList<SimUnit>>();
+            var pool = level.Rooms.FindAll(r => r != null && r.IsCombatRoom && !r.IsBossRoom && r.Occurrences > 0f);
+            float total = 0f;
+            foreach (var room in pool)
+            {
+                total += room.Occurrences;
+            }
+
+            // A hand-drawn floor places each room; a generated one draws them, a fractional
+            // room count landing on either side of its value.
+            int seats = level.Layout != null
+                ? pool.Count
+                : Mathf.FloorToInt(total) + (UnityEngine.Random.Range(0f, 1f) < total - Mathf.Floor(total) ? 1 : 0);
+            for (int seat = 0; seat < seats; seat++)
+            {
+                var room = level.Layout != null ? pool[seat] : DrawRoom(pool, total);
+                var units = room.RollUnits();
                 if (units.Count > 0)
                 {
                     rooms.Add(units);
                 }
             }
 
+            AddBossRoom(level, rooms);
             return rooms;
+        }
+
+        private static RoomEncounter DrawRoom(List<RoomEncounter> pool, float total)
+        {
+            float roll = UnityEngine.Random.Range(0f, total);
+            foreach (var room in pool)
+            {
+                roll -= room.Occurrences;
+                if (roll <= 0f)
+                {
+                    return room;
+                }
+            }
+            return pool[pool.Count - 1];
+        }
+
+        /// <summary>The sealed exit room, taken straight off the curve rather than rebuilt from
+        /// level.Boss: the room is the boss *and* its adds, and a floor that fought only the boss would
+        /// under-price every finale the moment one gained an escort.</summary>
+        private static void AddBossRoom(LevelCurve level, List<IList<SimUnit>> rooms)
+        {
+            if (level.Boss == null)
+            {
+                return;
+            }
+
+            RoomEncounter bossRoom = null;
+            foreach (var room in level.Rooms)
+            {
+                if (room != null && room.IsBossRoom)
+                {
+                    bossRoom = room;
+                    break;
+                }
+            }
+
+            var units = bossRoom != null
+                ? bossRoom.Expected.ToDiscreteUnits()
+                : new List<SimUnit>();
+            if (units.Count == 0)
+            {
+                var boss = SimUnit.FromEnemy(level.Boss, level.Tuning);
+                if (boss != null)
+                {
+                    units.Add(boss);
+                }
+            }
+            if (units.Count > 0)
+            {
+                rooms.Add(units);
+            }
         }
 
         private static void EvaluateFloorSimulations(BalanceReport report, BalanceRulesSO rules, BalanceInput input)
@@ -4024,7 +4081,8 @@ namespace Assets.Scripts.Balance
 
                         // The straight-line party's health on arrival, whatever the sweep invests:
                         // simulating the run again per investment would multiply the sweep's cost.
-                        StartHealthFraction = entry.HealthShare
+                        StartHealthFraction = entry.HealthShare,
+                        RollRooms = () => RollFloorRooms(level)
                     }
                 };
 

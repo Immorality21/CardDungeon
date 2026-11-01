@@ -668,6 +668,7 @@ namespace Assets.Scripts.Balance
                 RestHealFraction = source.RestHealFraction,
                 StartsWithFullCharges = source.StartsWithFullCharges,
                 StartHealthFraction = source.StartHealthFraction,
+                RollRooms = source.RollRooms,
                 UseSummons = source.UseSummons
             };
         }

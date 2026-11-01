@@ -36,13 +36,13 @@ namespace Assets.Scripts.Balance
 
         [Header("Traversal — how much of a floor the player actually walks")]
         [Tooltip("A generated dungeon is a tree and the exit is its farthest room, so the route to " +
-                 "the exit is unique and every other room is optional. FullClear is what the model " +
-                 "assumed before 2026-08-29 and prices rooms the player may never open; Explorer is " +
-                 "what someone with no map is expected to walk; Beeline is the road to the exit alone.\n\n" +
-                 "Defaults to Beeline on purpose. It is the cheapest way through a floor, so tuning " +
-                 "against it can only make the real game harder than reported, never easier — the " +
-                 "same reason the reference party is modelled at the bought-out size cap.")]
-        public TraversalMode Traversal = TraversalMode.Beeline;
+                 "the exit is unique and every other room is optional. FullClear prices every room; " +
+                 "Explorer is what someone with no map is expected to walk; Beeline is the road to the " +
+                 "exit alone.\n\n" +
+                 "Defaults to FullClear (owner, 2026-11-01): the game pays for exploring in chests, " +
+                 "events, captives and XP, so the difficulty assumes it. Played by the bot with the " +
+                 "model's own party, full clear read closest of the three (BALANCING.md 5av).")]
+        public TraversalMode Traversal = TraversalMode.FullClear;
 
         [Tooltip("Layouts sampled when measuring a floor's traversal band. Higher is steadier and " +
                  "slower; 400 holds the mean inside about 1%.")]

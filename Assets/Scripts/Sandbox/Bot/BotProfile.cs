@@ -71,5 +71,30 @@ namespace Assets.Scripts.Sandbox.Bot
 
         /// <summary>Written into the report's file name.</summary>
         public string ReportName = "bot";
+
+        /// <summary>
+        /// When set, the batch plays each of these runs alone with the balance model's own party,
+        /// instead of a playthrough. A gap against the simulator is then the model's and not the
+        /// party's. <c>BotLauncher.ModelPartySettings</c> fills it from the analysis.
+        /// </summary>
+        public List<BotModelRun> ModelRuns = new List<BotModelRun>();
+    }
+
+    /// <summary>One run with the party the balance model measures it against.</summary>
+    [Serializable]
+    public class BotModelRun
+    {
+        public string Run;
+        public int HealingPotions;
+        public int PotencySteps;
+        public List<BotModelHero> Heroes = new List<BotModelHero>();
+    }
+
+    [Serializable]
+    public class BotModelHero
+    {
+        public string Key;
+        public List<string> Nodes = new List<string>();
+        public List<string> Gear = new List<string>();
     }
 }

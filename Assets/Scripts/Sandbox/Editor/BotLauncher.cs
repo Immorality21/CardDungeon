@@ -1,5 +1,8 @@
 using System.Collections.Generic;
+using Assets.Scripts.Balance;
+using Assets.Scripts.Balance.Editor;
 using Assets.Scripts.Dungeon;
+using Assets.Scripts.Items;
 using Assets.Scripts.Sandbox.Bot;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -44,6 +47,56 @@ namespace Assets.Scripts.Sandbox.Editor
                 Profiles = AllProfiles(), FirstSeed = firstSeed, ReportName = reportName, Runs = FullCampaign(),
                 PassOverWalls = true,
             };
+        }
+
+        /// <summary>
+        /// Each run played alone by the party the balance model measures it against, floor 1's party
+        /// since a run's party no longer grows: the test that separates the party from the model.
+        /// Safe/ClearEverything is the closest profile to the simulator, which fights every room and
+        /// takes no events. Pass run asset names to narrow it; none means every run.
+        /// </summary>
+        public static BotSettings ModelPartySettings(string reportName, int firstSeed, params string[] runs)
+        {
+            var rules = BalanceAssetCollector.LoadOrCreateRules(false);
+            var report = BalanceAnalyzer.Analyze(BalanceAssetCollector.Collect(rules, false, false));
+            var settings = new BotSettings
+            {
+                FirstSeed = firstSeed,
+                ReportName = reportName,
+                Profiles = new List<BotProfile> { new BotProfile { Events = BotEventHabit.Safe, Route = BotRoute.ClearEverything } },
+            };
+            foreach (var curve in report.Runs)
+            {
+                if (curve.Run == null || curve.Levels.Count == 0
+                    || (runs.Length > 0 && System.Array.IndexOf(runs, curve.Run.name) < 0))
+                {
+                    continue;
+                }
+                var party = curve.Levels[0].Party;
+                var model = new BotModelRun { Run = curve.Run.name, HealingPotions = party.PotionCount };
+                var healing = PotionBeltSO.Load()?.Find(PotionBeltState.HealingKey);
+                for (int step = 1; healing != null && step <= healing.PotencyTiers.Count; step++)
+                {
+                    if (PotionBeltOps.HealBonus(healing, step) <= party.PotionHealBonus + 0.001f)
+                    {
+                        model.PotencySteps = step;
+                    }
+                }
+                foreach (var hero in party.Heroes)
+                {
+                    var entry = new BotModelHero { Key = hero.Definition.SaveKey, Nodes = new List<string>(hero.ActivatedNodes) };
+                    foreach (var item in hero.Gear)
+                    {
+                        if (item != null)
+                        {
+                            entry.Gear.Add(item.Key);
+                        }
+                    }
+                    model.Heroes.Add(entry);
+                }
+                settings.ModelRuns.Add(model);
+            }
+            return settings;
         }
 
         [MenuItem("Tools/Bot/Early Runs (one game per profile)", false, 40)]

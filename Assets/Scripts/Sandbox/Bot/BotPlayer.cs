@@ -35,6 +35,7 @@ namespace Assets.Scripts.Sandbox.Bot
         private BotGame _game;
         private BotRun _run;
         private BotFloor _floor;
+        private BotModelRun _modelRun;
         private int _potionReserve = -1;
         private readonly List<string> _passedOver = new List<string>();
         private BotFight _fight;
@@ -80,7 +81,16 @@ namespace Assets.Scripts.Sandbox.Bot
                 for (int i = 0; i < _settings.Games; i++)
                 {
                     _profile = profile;
-                    yield return PlayGame(_settings.FirstSeed + i);
+                    if (_settings.ModelRuns.Count == 0)
+                    {
+                        yield return PlayGame(_settings.FirstSeed + i);
+                        continue;
+                    }
+                    foreach (var model in _settings.ModelRuns)
+                    {
+                        _modelRun = model;
+                        yield return PlayGame(_settings.FirstSeed + i);
+                    }
                 }
             }
 
@@ -110,7 +120,11 @@ namespace Assets.Scripts.Sandbox.Bot
             DungeonManager.ActiveRun = null;
             DungeonManager.RunLevelIndex = 0;
             DungeonManager.SeedToLoad = null;
-            HubManager.RequestNewGame();
+            // A model party skips the tutorial: it walks in on a save the model wrote.
+            if (_modelRun == null)
+            {
+                HubManager.RequestNewGame();
+            }
             SceneManager.LoadScene(HubScene);
             _lastActivity = Time.realtimeSinceStartup;
             yield return null;
@@ -161,6 +175,12 @@ namespace Assets.Scripts.Sandbox.Bot
             {
                 _run.Outcome = "cleared";
             }
+            if (_modelRun != null)
+            {
+                FieldModelRun();
+                yield break;
+            }
+
             var visit = new BotHubVisit { Before = _run != null ? _run.Run + " " + _run.Outcome : "start" };
             _game.Hub.Add(visit);
             BotHub.Visit(manager.Roster, _profile, visit);
@@ -183,6 +203,25 @@ namespace Assets.Scripts.Sandbox.Bot
             _lastActivity = Time.realtimeSinceStartup;
             _inHub = false;
             yield return null;
+        }
+
+        /// <summary>A model party plays its one run once: town before it, then the game is over.</summary>
+        private void FieldModelRun()
+        {
+            if (_run != null)
+            {
+                _run = null;
+                _game.Finished = "model run played";
+                _gameOver = true;
+                _inHub = false;
+                _report.Write(_settings.ReportName);
+                return;
+            }
+            BotHub.FieldModelParty(_modelRun);
+            BotHub.BeginRun(BotHub.RunNamed(_modelRun.Run));
+            SceneManager.LoadScene(GameScene);
+            _lastActivity = Time.realtimeSinceStartup;
+            _inHub = false;
         }
 
         /// <summary>The next run with tries left. A run without any ends the playthrough, or with

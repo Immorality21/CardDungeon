@@ -423,6 +423,11 @@ rooms and does not extend to dense ones** (§5k): on a floor of three-enemy room
 several times pessimistic, because it composes per enemy and never sees the party focus-firing a room
 down.
 
+**A floor simulation deals a fresh floor per trial** (2026-11-01, `RollFloorRooms`): the rooms drawn and every spawn row
+rolled, as the game rolls them, because the bad draws end runs and an average has none. `BuildFloorRooms` is still the
+average floor: the room count on the report, the damage mix a frontier buys gear for, and any test that wants the same
+floor every trial (`RollRooms` left null). The closed form and the per-room sims read the average too.
+
 **Two rounding rules the floor builder depends on.** `WeightedEnemyGroup.ToDiscreteUnits` rounds the
 group's *total* and apportions largest-remainder-first, and `BuildFloorRooms` does the same for room
 occurrences. Rounding the parts instead deletes whole rooms (`Bog Shaman 0.4 + Hex Weaver 0.5` → no

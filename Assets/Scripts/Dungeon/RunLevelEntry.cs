@@ -72,8 +72,8 @@ namespace Assets.Scripts.Dungeon
 
         [Tooltip("A floor the owner wants harder than one health bar comfortably covers. The balance " +
                  "analyzer still measures it and still reports the overrun, but as an Info rather than " +
-                 "a failure, so a deliberate wall does not fail the regression suite. Every other check " +
-                 "on the floor still applies.")]
+                 "a failure, so a deliberate wall does not fail the regression suite, and the step onto " +
+                 "it is not judged. Every other check on the floor still applies.")]
         public bool IntendedHard;
 
         /// <summary>

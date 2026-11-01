@@ -419,6 +419,38 @@ namespace Assets.Scripts.Balance
 
         public bool IsCombatRoom => !Expected.IsEmpty;
 
+        private struct SpawnRoll
+        {
+            public EnemySO Enemy;
+            public float Chance;
+            public int Evaluations;
+        }
+
+        private readonly List<SpawnRoll> _spawnRolls = new List<SpawnRoll>();
+
+        /// <summary>
+        /// One real roll of this room, as <c>EnemyManager.SpawnEnemies</c> rolls it: every evaluation
+        /// of every table row on its own. <see cref="Expected"/> is the average, which rounds a
+        /// 2.4-body room down to 2 every time, and danger is superlinear in bodies, so a floor of
+        /// averages reads far kinder than the floors the rolls deal (BALANCING.md 5aw).
+        /// </summary>
+        public List<SimUnit> RollUnits()
+        {
+            var units = new List<SimUnit>();
+            foreach (var roll in _spawnRolls)
+            {
+                var member = Expected.Members.Find(m => m.Definition == roll.Enemy && !m.IsSummoned);
+                for (int i = 0; member != null && i < roll.Evaluations; i++)
+                {
+                    if (Random.Range(0f, 1f) <= roll.Chance)
+                    {
+                        units.Add(member.Unit.Clone());
+                    }
+                }
+            }
+            return units;
+        }
+
         /// <summary>
         /// Builds the encounter model for a room. <paramref name="overrideTable"/> is the manual
         /// layout's per-room override when present; <paramref name="guaranteeAll"/> mirrors
@@ -468,6 +500,12 @@ namespace Assets.Scripts.Balance
 
                 encounter.Expected.Add(entry.Enemy, expected);
                 encounter.WorstCase.Add(entry.Enemy, evaluations);
+                encounter._spawnRolls.Add(new SpawnRoll
+                {
+                    Enemy = entry.Enemy,
+                    Chance = guaranteeAll ? 1f : entry.SpawnChance,
+                    Evaluations = evaluations
+                });
             }
 
             encounter.ExpectedDanger = encounter.Expected.DangerIndex(party);

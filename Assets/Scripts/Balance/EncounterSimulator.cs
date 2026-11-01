@@ -825,6 +825,10 @@ namespace Assets.Scripts.Balance
             /// average, so a hero who fell reads as everyone hurt, which errs easy.
             /// </summary>
             public float StartHealthFraction = 1f;
+
+            /// <summary>Deals a fresh floor per trial, as the game does. Null fights the rooms passed
+            /// in, the same every trial.</summary>
+            public System.Func<IList<IList<SimUnit>>> RollRooms;
         }
 
         /// <summary>Aggregated results over a batch of simulated floors.</summary>
@@ -986,6 +990,7 @@ namespace Assets.Scripts.Balance
                     RestHealFraction = settings.RestHealFraction,
                     StartsWithFullCharges = settings.StartsWithFullCharges,
                     StartHealthFraction = settings.StartHealthFraction,
+                    RollRooms = settings.RollRooms,
                     UseSummons = settings.UseSummons
                 };
                 results[policy] = RunFloor(party, rooms, perPolicy);
@@ -1013,6 +1018,7 @@ namespace Assets.Scripts.Balance
             FloorSimSettings settings)
         {
             var trial = new FloorTrial();
+            rooms = settings.RollRooms != null ? settings.RollRooms() : rooms;
 
             // Cloned once, then carried through every room: health, the dead, and charges all persist,
             // which is the whole point.

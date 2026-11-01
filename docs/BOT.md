@@ -30,6 +30,11 @@ last, and `PassOverWalls` on, so a run it cannot beat in `MaxAttemptsPerRun` tri
 `Finished` rather than ending the game. Set `Games` and `Profiles` on the result to change the size. The bot never
 revisits a run, so the late floors meet a party with less XP than a player who replays would have.
 
+**The model's party:** `BotLauncher.ModelPartySettings(name, seed, runs...)` plays each run alone with the party the
+balance model measures it against (heroes, nodes, gear, belt), floor by floor as usual, on the closest profile to the
+simulator. `Games` is the tries per run. A gap against `BalanceAnalyzer.SimulateRun` is then the model's, not the
+party's. The bot still plays no summons or buffs, and the model does.
+
 Play stops by itself when the batch ends. The report is rewritten after every attempt at
 `persistentDataPath/bot_reports/<ReportName>.json`, so a batch that dies keeps what it had:
 

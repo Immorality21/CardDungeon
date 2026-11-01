@@ -280,10 +280,11 @@ namespace Assets.Scripts.Balance
                 }
             }
 
-            // The XP loop, closed: each floor's expected income is banked per hero and greedy-spent
-            // on their grids before the next floor is measured, so the back half of a run is judged
-            // against a party that grew on the way there — hero power finally moves within a run,
-            // not just roster width.
+            // The XP loop: each floor's expected income is banked per hero, and spent only at the
+            // start of the next run. The town is reached only at a run's end (2026-10-30), so a party
+            // fights every floor of a run on the nodes it walked in with: `spendable` below. This grew
+            // the party floor by floor until 2026-11-01, measuring every long run against a party no
+            // player could have.
             var lifetime = new Dictionary<HeroSO, float>();
             foreach (var hero in roster)
             {
@@ -294,6 +295,7 @@ namespace Assets.Scripts.Balance
                 }
             }
             bool carriedIn = seedRoster != null || seedLifetimeXp != null;
+            var spendable = new Dictionary<HeroSO, float>(lifetime);
 
             for (int i = 0; i < run.Levels.Count; i++)
             {
@@ -304,7 +306,8 @@ namespace Assets.Scripts.Balance
                 }
 
                 // Level 0 reuses the caller's baseline so gear/save options are honoured; later
-                // levels are rebuilt from the grown roster at its accumulated XP.
+                // levels are rebuilt for the roster that has grown, each hero on what they could
+                // spend before the run. A rescued hero banks their XP and has spent nothing yet.
                 // Carried-in state beats the caller's baseline: that grown party is the truth here.
                 //
                 // The rebuild carries the baseline's *gear* forward, because gear is a between-run
@@ -315,7 +318,7 @@ namespace Assets.Scripts.Balance
                 var levelParty = i == 0 && !carriedIn
                     ? party
                     : PartyBaseline.Build(roster,
-                        h => Mathf.FloorToInt(lifetime.TryGetValue(h, out var xp) ? xp : 0f),
+                        h => Mathf.FloorToInt(spendable.TryGetValue(h, out var xp) ? xp : 0f),
                         party.GearLookup, party.PotionItem, party.PotionCount, null, party.PotionHealBonus);
 
                 var level = BuildLevel(i, entry, levelParty, rules, fear);

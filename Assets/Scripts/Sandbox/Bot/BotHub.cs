@@ -70,6 +70,60 @@ namespace Assets.Scripts.Sandbox.Bot
             return null;
         }
 
+        /// <summary>The run asset of that name on the campaign map.</summary>
+        public static RunDefinitionSO RunNamed(string name)
+        {
+            var campaign = UnityEngine.Resources.Load<CampaignSO>(CampaignSO.ResourcePath);
+            return campaign.Nodes.FirstOrDefault(n => n != null && n.Run != null && n.Run.name == name)?.Run;
+        }
+
+        /// <summary>Writes the balance model's party into this save: the heroes, their nodes, their gear
+        /// and the belt it assumes. Through the save, so the dungeon boots as it would for a player.</summary>
+        public static void FieldModelParty(BotModelRun model)
+        {
+            var files = new FileHandler();
+            var party = files.Load<PartySaveData>();
+            party.Heroes.Clear();
+            party.OwnedHeroKeys.Clear();
+            party.SelectedHeroKeys.Clear();
+            foreach (var hero in model.Heroes)
+            {
+                party.Heroes.Add(new HeroSaveData { HeroKey = hero.Key, ActivatedNodes = new List<string>(hero.Nodes) });
+                party.OwnedHeroKeys.Add(hero.Key);
+                party.SelectedHeroKeys.Add(hero.Key);
+            }
+            files.Save(party);
+
+            var inventory = InventoryManager.Instance;
+            foreach (var hero in model.Heroes)
+            {
+                foreach (var key in hero.Gear)
+                {
+                    var item = inventory.GetItemSO(key);
+                    if (item == null)
+                    {
+                        continue;
+                    }
+                    inventory.AddItem(item, 1, EconomySource.LevelClear);
+                    var entry = inventory.GetBagEquipment().FirstOrDefault(e => e.ItemKey == key && string.IsNullOrEmpty(e.EquippedHeroKey));
+                    if (entry != null)
+                    {
+                        inventory.Equip(entry, item.SlotType, hero.Key);
+                    }
+                }
+            }
+
+            var healing = PotionBeltSO.Load()?.Find(PotionBeltState.HealingKey);
+            if (healing != null)
+            {
+                PotionBeltState.SetCapacity(healing, model.HealingPotions);
+                for (int i = PotionBeltState.Potency(healing); i < model.PotencySteps; i++)
+                {
+                    PotionBeltState.AddPotency(healing);
+                }
+            }
+        }
+
         /// <summary>What <c>HubManager.OnRunChosen</c> and <c>OnEnterDungeon</c> leave behind.</summary>
         public static void BeginRun(RunDefinitionSO run)
         {

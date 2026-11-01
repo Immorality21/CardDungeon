@@ -2,7 +2,8 @@
     "name": "CardDungeon.Sandbox.Editor",
     "rootNamespace": "",
     "references": [
-        "CardDungeon"
+        "CardDungeon",
+        "CardDungeon.Balance.Editor"
     ],
     "includePlatforms": [
         "Editor"

@@ -254,6 +254,17 @@ namespace Tests.EditMode
         }
 
         [Test]
+        public void RollUnits_RollsEveryEvaluationOnItsOwn()
+        {
+            var goblin = Goblin();
+
+            Assert.AreEqual(3, RoomEncounter.Build(Room(goblin, 1f, 3), null, false, SturdyParty(), Rules()).RollUnits().Count);
+            Assert.AreEqual(0, RoomEncounter.Build(Room(goblin, 0f, 3), null, false, SturdyParty(), Rules()).RollUnits().Count);
+            Assert.AreEqual(3, RoomEncounter.Build(Room(goblin, 0f, 3), null, true, SturdyParty(), Rules()).RollUnits().Count,
+                "A guaranteed room spawns every evaluation.");
+        }
+
+        [Test]
         public void RunCurve_FlatCurve_RegistersNoGrowth()
         {
             var combat = Room(Goblin(), 1f, 1);

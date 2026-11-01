@@ -38,6 +38,8 @@ number was arrived at.
 
 ### Two repricings that make older numbers incomparable
 
+- ⚠️ **Priced at FullClear since 2026-11-01 (§5av)**: every floor number before that is priced at the beeline, with a
+  party that spent XP between floors.
 - **Beeline pricing (§5m, 2026-08-29).** Every floor number since is priced at the beeline. Anything
   written before it is not comparable.
 - **Grid depth-pricing (§5s, 2026-09-02).** One XP now buys **1/7.6** of the power it did. Every
@@ -3519,3 +3521,68 @@ the same rules (`PotionUse`).
 
 Wipes with both in: March 0 6 2 14 44 (45% clear), Ashen Deep 0 2 52 (47%), Blood Stair 0 9 32 0 4 (59%), Catacombs 0 2 8
 (90%), Warrens 0 37 (63%). The March still empties its belt by floor 3, through the emergency rule.
+
+## §5av — The model's own party through the bot: what the simulator was missing (2026-11-01)
+
+`BotLauncher.ModelPartySettings`: each run alone, with the party the model measures it against (heroes, nodes, gear, belt),
+Safe/ClearEverything, 5 tries a run, 60 games, none stuck. This is the test §5ar asked for, and it separates party from model.
+
+| run | bot cleared | model, Beeline (was the default) | model, FullClear |
+|---|---|---|---|
+| The Warrens | 0 of 5 | 63% | 3% |
+| Catacombs | 0 of 5 | 58% | 8% |
+| Drowned March | 0 of 5 (5 of 5 died on floor 1) | 0% | 0% |
+| Ashen Deep | 0 of 5 | 2% | 0% |
+| Sealed Archive | 5 of 5 | 100% | 97% |
+| Drowned Chapel | 5 of 5 | 100% | 100% |
+| Blood Stair | 0 of 5 | 51% | 100% |
+| Seeping Cistern | 1 of 5 | 98% | 98% |
+
+The bot played the Beeline party, and plays no summons or buffs, which the model does. So the last rows are not a clean
+read: the FullClear party is stronger (March 633 XP a hero against 420).
+
+What the model had wrong:
+- **It spent XP between floors**, which has been impossible since the town became a run's end (2026-10-30), and it spent a
+  rescued hero's bank at once. Fixed: `RunCurve.Build`'s `spendable`. The March went from 45% to 0% clears on this alone.
+  Every tuning number from before reads a party no player could have.
+- **It assumed the beeline** (§5m), about 60% of the fights and of the XP, which needs a map nobody has. Real floors have
+  50-100% more fights than it priced (Ash Stacks 4.4 against 2.2). **FullClear is the default now (owner).** Tuning against
+  the beeline punished exploring, which is where the game pays out.
+- **It fought an average room**, fixed the same day: §5aw.
+
+The Sump got a refuge: 4 of 10 clears with the model's party, against 1 of 5.
+
+**A floor has to be read at FullClear from here on, and the floors have not been retuned for it.** The next pass is mostly
+making floors easier.
+
+## §5aw — The floor simulator rolls real spawns (2026-11-01)
+
+The simulator fought `Expected.ToDiscreteUnits()`: one average floor, the same every trial. Silt Shallows read 2.0 bodies a fight
+and played 2.4+, and danger is superlinear in bodies, so a floor that killed the party 5 of 5 read 0%. **Each trial now deals its
+own floor** (`BalanceAnalyzer.RollFloorRooms`, `RoomEncounter.RollUnits`, `FloorSimSettings.RollRooms`): the rooms a generated
+floor drew, and every evaluation of every spawn row rolled on its own, as `EnemyManager.SpawnEnemies` rolls it. The per-room sims
+and the closed form still read the average. Frontier sweeps roll too.
+
+Owner: the game is meant to be a bit hard, so the simulator moves and the floors do not. Straight-line party, full clear, wipes:
+
+| run | average rooms | rolled rooms | clear rate |
+|---|---|---|---|
+| The Warrens | 0 97 | 0 94 | 5% |
+| Catacombs | 0 12 90 | 0 22 70 | 23% |
+| Drowned March | 0 5 60 98 100 | 26 82 100 100 100 | 0% |
+| Ashen Deep | 0 4 100 | 0 8 91 | 8% |
+| Sealed Archive | 0 3 | 0 4 | 96% |
+| The Threshold | 0 0 | 0 2 | 98% |
+
+Finale wipes after replaying the run before it, once / twice: Catacombs 2 / 0, the March **100 / 0**, Ashen Deep 0 / 0. Rolling
+turned the March's cliff into a two-replay step. The Catacombs and the Ashen Deep are still a switch.
+
+**The Warrens' Counting Room, Difficulty 2.19 -> 2.0 (owner: "only a little").** It has no replayable run before it. Measured on
+the way: 2.08 reads 82%, 1.97 82%, 1.86 70%, 1.75 68%. Its 5-15% band is still far off, on purpose.
+
+**The Reedcage, The Weeping Causeway and Rotwater Deep are `IntendedHard` (owner):** the March is meant to stop a straight-line
+party and be opened by replaying, so they stay reported and do not fail the suite, and the step onto such a floor is not judged
+either, as for a gated finale. They are not exempt from being looked at.
+
+**Still too kind where the bot said so:** the Blood Stair and the Seeping Cistern read 100% against 0 of 5 and 1 of 5 played, with
+a weaker party. Not re-measured with the bot since this change.
