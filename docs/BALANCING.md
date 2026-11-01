@@ -3640,3 +3640,22 @@ non-common it can pay for, ahead of the shop. Same profile and seed as §5ax:
 **The sink works and the late drop partly came back.** Crafted gear is real power at item level 5-7, past the shop's 4, and the balance
 model leaves `CraftOnly` gear out, so §5ax's clear rates no longer describe a player who crafts. One game only. Open: fold crafted
 gear into the model, or tune the late floors against a crafting party.
+
+## §5az — Two starting abilities (2026-11-01)
+
+Owner: every hero starts with two abilities, the Mage with three and the slot to carry them; the third slot sits beside the root for
+everyone else (`Heroes/CLAUDE.md`). Most heroes go from 2 charges a run to 4, the Cleric and Tinkerer from 3 to 5, the Mage from 4 to 6.
+The balance suite still passes with no tuning. Bot, Everything/ClearEverything, full campaign, seed 3000 against `full-campaign-4`, plus
+seeds 3001 and 3002:
+
+| | seed 3000 before | seed 3000 after | 3 games after |
+|---|---|---|---|
+| wipes | 4 | 3 | 9, three each |
+| Sunken Depths boss, health in / out | 66% / 23% | 100% / 68% | 85% / 49% |
+| The Counting Room boss, health in / out | 38% / 25% | 61% / 42% | 62% / 56% |
+| The Broken Orrery | 1 wipe | no wipe | no wipes |
+
+**The early game got easier, the walls did not move.** No wipe in any game before the Catacombs, and floors 3-5 ended with much more
+health, though the before column is one game. Emberfall is still the wall (3 of 6). The bot plays no ability that deals no damage, so
+Snare, Whisper of Madness and Steal are unmeasured: a player has more early power than these figures show. Open: whether
+the first bosses need tuning back up; do that after a human has played it.

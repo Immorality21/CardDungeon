@@ -111,12 +111,12 @@ MonoBehaviour:
     - mage-start
   - Key: mage-trunk-slot
     Kind: 2
-    XpCost: 65
-    UnlockedByDefault: 0
+    XpCost: 0
+    UnlockedByDefault: 1
     MaterialCosts: []
     EssenceCost: 0
     RequiredNodes: []
-    Position: {x: 60, y: -375}
+    Position: {x: 110, y: -45}
     Gains:
       Values: []
     ResistType: 0
@@ -130,7 +130,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - mage-trunk-2
+    - mage-sig
   - Key: mage-a-1
     Kind: 0
     XpCost: 65

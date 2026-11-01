@@ -111,12 +111,12 @@ MonoBehaviour:
     - warrior-start
   - Key: warrior-trunk-slot
     Kind: 2
-    XpCost: 65
+    XpCost: 20
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
     RequiredNodes: []
-    Position: {x: 60, y: -375}
+    Position: {x: 60, y: 100}
     Gains:
       Values: []
     ResistType: 0
@@ -130,7 +130,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - warrior-trunk-2
+    - warrior-slash
   - Key: warrior-a-1
     Kind: 0
     XpCost: 65
@@ -483,7 +483,7 @@ MonoBehaviour:
     - warrior-b-3
     - warrior-b-5
   - Key: warrior-b-3
-    Kind: 3
+    Kind: 12
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
@@ -498,7 +498,7 @@ MonoBehaviour:
     GrantedCharges: 2
     AwakenedMagicKey: 
     UpgradeType: 0
-    UpgradeAmount: 1
+    UpgradeAmount: 2
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -1356,3 +1356,25 @@ MonoBehaviour:
     SummonAmount: 50
     Neighbors:
     - warrior-b-edge
+  - Key: warrior-sunder-basic
+    Kind: 3
+    XpCost: 0
+    UnlockedByDefault: 1
+    MaterialCosts: []
+    EssenceCost: 0
+    RequiredNodes: []
+    Position: {x: -60, y: 100}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: Sunder
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - warrior-slash

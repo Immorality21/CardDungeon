@@ -111,12 +111,12 @@ MonoBehaviour:
     - tinkerer-patch
   - Key: tinkerer-trunk-slot
     Kind: 2
-    XpCost: 45
+    XpCost: 20
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
     RequiredNodes: []
-    Position: {x: 0, y: -270}
+    Position: {x: 60, y: 100}
     Gains:
       Values: []
     ResistType: 1
@@ -130,7 +130,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - tinkerer-start
+    - tinkerer-sig
   - Key: tinkerer-patch
     Kind: 3
     XpCost: 65
@@ -152,7 +152,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - tinkerer-trunk-slot
+    - tinkerer-trunk-3
   - Key: tinkerer-a-1
     Kind: 0
     XpCost: 65
@@ -176,7 +176,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - tinkerer-trunk-slot
+    - tinkerer-trunk-3
   - Key: tinkerer-a-2
     Kind: 0
     XpCost: 90
@@ -203,7 +203,7 @@ MonoBehaviour:
     - tinkerer-a-3
     - tinkerer-a-5
   - Key: tinkerer-a-3
-    Kind: 3
+    Kind: 12
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
@@ -218,12 +218,12 @@ MonoBehaviour:
     GrantedCharges: 2
     AwakenedMagicKey: 
     UpgradeType: 0
-    UpgradeAmount: 1
+    UpgradeAmount: 2
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - tinkerer-trunk-slot
+    - tinkerer-trunk-3
   - Key: tinkerer-a-4
     Kind: 0
     XpCost: 120
@@ -408,7 +408,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - tinkerer-trunk-slot
+    - tinkerer-trunk-3
   - Key: tinkerer-b-2
     Kind: 0
     XpCost: 90
@@ -454,7 +454,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - tinkerer-trunk-slot
+    - tinkerer-trunk-3
   - Key: tinkerer-b-4
     Kind: 0
     XpCost: 155
@@ -642,7 +642,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - tinkerer-trunk-slot
+    - tinkerer-trunk-3
   - Key: tinkerer-c-2
     Kind: 0
     XpCost: 90
@@ -688,7 +688,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - tinkerer-trunk-slot
+    - tinkerer-trunk-3
   - Key: tinkerer-c-4
     Kind: 0
     XpCost: 155
@@ -947,3 +947,49 @@ MonoBehaviour:
     SummonAmount: 1
     Neighbors:
     - tinkerer-c-6
+  - Key: tinkerer-trunk-3
+    Kind: 0
+    XpCost: 45
+    UnlockedByDefault: 0
+    MaterialCosts: []
+    EssenceCost: 0
+    RequiredNodes: []
+    Position: {x: 0, y: -270}
+    Gains:
+      Values:
+      - Type: 7
+        Amount: 4
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: 
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - tinkerer-start
+  - Key: tinkerer-rivet-basic
+    Kind: 3
+    XpCost: 0
+    UnlockedByDefault: 1
+    MaterialCosts: []
+    EssenceCost: 0
+    RequiredNodes: []
+    Position: {x: -60, y: 100}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: RivetGun
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - tinkerer-sig

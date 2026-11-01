@@ -240,11 +240,12 @@ namespace Tests.EditMode
         }
 
         [Test]
-        public void Rogue_HasStealOnTheTrunk_AndThreeBranchesOfHerOwn()
+        public void Rogue_StartsWithSteal_AndThreeBranchesOfHerOwn()
         {
             var grid = Grid("Rogue");
             var steal = grid.Nodes.Single(n => n.GrantedMagicKey == "Steal" && n.Kind == SphereNodeKind.MagicKnown);
-            Assert.That(steal.Neighbors, Does.Contain("rogue-trunk-1"));
+            Assert.IsTrue(steal.UnlockedByDefault, "Steal is the Rogue's second starting ability.");
+            Assert.That(steal.Neighbors, Does.Contain(grid.StartNodeKey));
 
             var known = Taught(grid, SphereNodeKind.MagicKnown);
             CollectionAssert.IsSubsetOf(new[] { "Backstab", "PoisonDart", "Eviscerate", "SmokeBomb", "Vanish", "Shadowstep", "Mug", "Maim", "Fence" }, known);
@@ -252,6 +253,44 @@ namespace Tests.EditMode
             CollectionAssert.DoesNotContain(known, "Hush", "Hush stays the Ranger's");
             CollectionAssert.AreEquivalent(new[] { "DarkTwin", "MurderOfCrows", "GoldenFerret" }, Taught(grid, SphereNodeKind.Summon));
             CollectionAssert.AreEquivalent(new[] { "DeathMark", "SmokeAndMirrors", "GrandHeist" }, Taught(grid, SphereNodeKind.Ultra));
+        }
+
+        /// <summary>
+        /// Every hero starts with two abilities and buys the third slot next to the root; the Mage
+        /// is the exception, starting with three and the slot to carry them (owner, 2026-11-01).
+        /// </summary>
+        [TestCase("Warrior", "Slash", "Sunder")]
+        [TestCase("Paladin", "HolyStrike", "HolyTouch")]
+        [TestCase("Cleric", "Mend", "DivineBolt")]
+        [TestCase("Ranger", "AimedShot", "Snare")]
+        [TestCase("Rogue", "Backstab", "Steal")]
+        [TestCase("Tinkerer", "Disassemble", "RivetGun")]
+        [TestCase("Warlock", "Bloodbolt", "DrainLife")]
+        [TestCase("Cultist", "EldritchLash", "WhisperOfMadness")]
+        public void EveryHero_StartsWithTwoAbilities_AndTheThirdSlotBesideTheRoot(string hero, string first, string second)
+        {
+            var grid = Grid(hero);
+            var none = new List<string>();
+
+            CollectionAssert.AreEquivalent(new[] { first, second },
+                SphereGridOps.KnownMagicForNodes(grid, none).Select(pair => pair.Key));
+            Assert.AreEqual(0, SphereGridOps.SlotBonusForNodes(grid, none));
+
+            var slot = SphereGridOps.FindNode(grid, hero.ToLowerInvariant() + "-trunk-slot");
+            Assert.AreEqual(SphereNodeKind.MagicSlot, slot.Kind);
+            Assert.That(slot.Neighbors, Does.Contain(grid.StartNodeKey));
+            Assert.Greater(slot.XpCost, 0);
+        }
+
+        [Test]
+        public void Mage_StartsWithThreeAbilities_AndTheSlotToCarryThem()
+        {
+            var grid = Grid("Mage");
+            var none = new List<string>();
+
+            CollectionAssert.AreEquivalent(new[] { "LightningBolt", "IceShard", "Fireball" },
+                SphereGridOps.KnownMagicForNodes(grid, none).Select(pair => pair.Key));
+            Assert.AreEqual(1, SphereGridOps.SlotBonusForNodes(grid, none));
         }
 
         [Test]

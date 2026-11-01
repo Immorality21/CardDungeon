@@ -6,6 +6,12 @@ it has been played; anything that turns out wrong becomes a backlog item in `NEX
 Most of it came out of playtest 3 (2026-10-26 to 2026-10-28); the first section is the outside
 playtest's fixes (2026-10-30).
 
+## Two starting abilities (2026-11-01)
+
+- [ ] **The grid's root** - the new free ability and slot beside each root. Positions checked by distance only, not seen on screen.
+- [ ] **The first fights** - does the second ability give a real choice, and are floors 3-5 still a fight? Their bosses got softer.
+- [ ] **The Mage's three** - all three carried from his rescue.
+
 ## Crafting as the gold sink (2026-11-01)
 
 - [ ] **The Forge line in town** - after the first found recipe, one line on the town screen, gone once the Forge is opened. Not seen on

@@ -111,12 +111,12 @@ MonoBehaviour:
     - cleric-start
   - Key: cleric-trunk-slot
     Kind: 2
-    XpCost: 65
+    XpCost: 20
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
     RequiredNodes: []
-    Position: {x: 60, y: -375}
+    Position: {x: 60, y: 100}
     Gains:
       Values: []
     ResistType: 1
@@ -130,7 +130,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - cleric-trunk-2
+    - cleric-sig
   - Key: cleric-a-1
     Kind: 0
     XpCost: 65
@@ -946,7 +946,7 @@ MonoBehaviour:
     Neighbors:
     - cleric-c-3
   - Key: cleric-c-3
-    Kind: 3
+    Kind: 12
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
@@ -961,7 +961,7 @@ MonoBehaviour:
     GrantedCharges: 2
     AwakenedMagicKey: 
     UpgradeType: 0
-    UpgradeAmount: 1
+    UpgradeAmount: 2
     GrantedSummonKey: 
     GrantedUltraKey: 
     SummonAmount: 1
@@ -1269,3 +1269,25 @@ MonoBehaviour:
     SummonAmount: 1
     Neighbors:
     - cleric-archon-stay
+  - Key: cleric-bolt-basic
+    Kind: 3
+    XpCost: 0
+    UnlockedByDefault: 1
+    MaterialCosts: []
+    EssenceCost: 0
+    RequiredNodes: []
+    Position: {x: -60, y: 100}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: DivineBolt
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cleric-sig

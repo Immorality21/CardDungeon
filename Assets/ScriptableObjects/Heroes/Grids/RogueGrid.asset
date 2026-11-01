@@ -111,12 +111,12 @@ MonoBehaviour:
     - rogue-start
   - Key: rogue-trunk-slot
     Kind: 2
-    XpCost: 65
+    XpCost: 20
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
     RequiredNodes: []
-    Position: {x: 60, y: -375}
+    Position: {x: 60, y: 100}
     Gains:
       Values: []
     ResistType: 0
@@ -130,7 +130,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - rogue-trunk-2
+    - rogue-sig
   - Key: rogue-a-1
     Kind: 0
     XpCost: 65
@@ -573,12 +573,12 @@ MonoBehaviour:
     - rogue-b-7
   - Key: rogue-steal
     Kind: 3
-    XpCost: 30
-    UnlockedByDefault: 0
+    XpCost: 0
+    UnlockedByDefault: 1
     MaterialCosts: []
     EssenceCost: 0
     RequiredNodes: []
-    Position: {x: -110, y: -150}
+    Position: {x: -60, y: 100}
     Gains:
       Values: []
     ResistType: 0
@@ -592,7 +592,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - rogue-trunk-1
+    - rogue-sig
   - Key: rogue-sig-keen
     Kind: 12
     XpCost: 20

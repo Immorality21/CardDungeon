@@ -111,12 +111,12 @@ MonoBehaviour:
     - ranger-start
   - Key: ranger-trunk-slot
     Kind: 2
-    XpCost: 65
+    XpCost: 20
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
     RequiredNodes: []
-    Position: {x: 60, y: -375}
+    Position: {x: 60, y: 100}
     Gains:
       Values: []
     ResistType: 0
@@ -130,7 +130,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - ranger-trunk-2
+    - ranger-sig
   - Key: ranger-a-1
     Kind: 0
     XpCost: 65
@@ -544,7 +544,7 @@ MonoBehaviour:
     Neighbors:
     - ranger-b-3
   - Key: ranger-b-3
-    Kind: 3
+    Kind: 12
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
@@ -558,7 +558,7 @@ MonoBehaviour:
     GrantedMagicKey: Snare
     GrantedCharges: 2
     AwakenedMagicKey: 
-    UpgradeType: 0
+    UpgradeType: 2
     UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
@@ -1310,3 +1310,25 @@ MonoBehaviour:
     SummonAmount: 1
     Neighbors:
     - ranger-b-6
+  - Key: ranger-snare-basic
+    Kind: 3
+    XpCost: 0
+    UnlockedByDefault: 1
+    MaterialCosts: []
+    EssenceCost: 0
+    RequiredNodes: []
+    Position: {x: -60, y: 100}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: Snare
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - ranger-sig

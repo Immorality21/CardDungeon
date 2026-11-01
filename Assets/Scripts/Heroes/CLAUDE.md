@@ -30,6 +30,15 @@
   the start; and a `MagicKnown` default has to be marked discovered somewhere other than the buy
   path — `HeroRoster.MarkDefaultUnlocksDiscovered`, called on hub load, or the Forge will refuse to
   upgrade the one spell every hero owns. Arming the other five heroes is one checkbox each.
+- **Every hero starts with two abilities; the Mage starts with three** *(owner, 2026-11-01)*. The second
+  is a free `MagicKnown` leaf beside the root (`<hero>-*-basic`, the Rogue's `rogue-steal`). The node
+  it left on its branch keeps its key and is now an **upgrade of that ability** at the same price
+  (`warrior-b-3`, `paladin-c-3`, `cleric-c-3`, `ranger-b-3`, `tinkerer-a-3`, `warlock-b-3`,
+  `cultist-b-3`). **The third slot is `<hero>-trunk-slot`, a leaf beside the root**: 20 XP on the depth
+  curve, free and default for the Mage. It does nothing until a third ability is learned, 160 XP away.
+  Fourth and higher slots are the branches' `MagicSlot` nodes. `tinkerer-trunk-3` and `warlock-trunk-3`
+  are stat nodes that took the slot's old place, since the Tinkerer's branches and the Demon Army hung
+  off it. `HeroPassKitTests` pins all of this.
 - **A node's frontier grows only out of what the hero holds.** Until 2026-09-05 adjacency to the
   *start node* granted reachability whether or not the start had been bought — so a new hero's
   **second** node was purchasable while the first still read as unbought, and the entry node could be
@@ -98,7 +107,7 @@ are new heroes rather than the Acolyte and Scout renamed. Nothing is seeder-gene
 | Warlock | Intelligence | BloodPact→LifeTap (awakens to **Dark Pact** → **Dark Pact II**) → **BloodShower** (awakens to **Crimson Rain**) · DrainLife→SiphonSoul (awakens to **Soul Feast**) → **LeechingCurse** · a **+1 charge** ▲ spur off every one of his seven abilities (2026-10-11) · demons — three, re-authored 2026-10-04, workbook pass 2026-10-11. **One summon, the Demon Army, on the trunk; every branch improves it** (C: more troops, Succubi). **Demon Form** (Ultra) on the trunk behind 3 Void Shards |
 | Mage | Intelligence | LightningBolt (root), **IceShard and Fireball known from the start** (`mage-ice-basic`, `mage-fire-basic`; all three one target, damage only, owner 2026-10-31; enemies keep `EnemyFireball` and `EnemyLightningBolt`, the old versions) + **MultiCast** Ultra on the trunk (`mage-multicast`) · StormCloak→ChainLightning (awakens to **Tempest**) → **Qyraxis** · IceShard→WaterSplash (awakens to **Deluge**)→FrostCloak → **Glacius** · FireCloak→Fireball (awakens to **Inferno**) → **Ifrit** — built to his vision 2026-10-10. Signature: **Focus** (`HeroSO.Focus`, Combat guide). Summon art: PixelLab, 2026-10-11 (64x64, PPU 38, 5-frame idle; Ifrit has hit frames) |
 | Tinkerer | Intelligence | **Disassemble** (root) + Patch Kit · RivetGun (awakens to **Rivet Storm**)→SteamBurst (+ **Auto Turret** summon spur, + its Blind upgrade) → **Warrior Mech** · OilFlask→GearJam → **Oil Spewing Mech** · FlareCannon→IncendiaryBomb (single target; awakens to **Cluster Bomb**, all enemies) → **Flamethrower Mech** — rebuilt 2026-10-07, workbook pass 2026-10-11 (`Sandbox/TinkererKit.asset`); the mechs are Mount Ultras (Magic guide). Her old elemental grid is now the stub `MageGrid` (the Mage is off the roster) |
-| Rogue | Agility | PoisonDart→AimedShot · SmokeBomb→Hush |
+| Rogue | Agility | **Steal** free beside the root · PoisonDart→AimedShot · SmokeBomb→Hush |
 | Cultist | Intelligence | **Writhing Spawn→The Watcher** (horrors beside the party) + Sacrifice · WhisperOfMadness→Dread (+MindRot) → **Abyssal Nightmare** · BloodRite→RiteOfWarding (+DarkCommunion) → **Blood Idol** — added 2026-10-05, rescued in The Hollow Vault |
 
 **Put a spell on a grid only if the hero's stats scale it.** This is the mistake the old roster made

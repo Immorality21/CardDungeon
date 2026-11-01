@@ -111,12 +111,12 @@ MonoBehaviour:
     - cultist-start
   - Key: cultist-trunk-slot
     Kind: 2
-    XpCost: 65
+    XpCost: 20
     UnlockedByDefault: 0
     MaterialCosts: []
     EssenceCost: 0
     RequiredNodes: []
-    Position: {x: 60, y: -375}
+    Position: {x: 60, y: 100}
     Gains:
       Values: []
     ResistType: 0
@@ -130,7 +130,7 @@ MonoBehaviour:
     GrantedUltraKey: 
     SummonAmount: 1
     Neighbors:
-    - cultist-trunk-2
+    - cultist-sig
   - Key: cultist-a-1
     Kind: 0
     XpCost: 65
@@ -415,7 +415,7 @@ MonoBehaviour:
     - cultist-b-3
     - cultist-b-5
   - Key: cultist-b-3
-    Kind: 3
+    Kind: 12
     XpCost: 65
     UnlockedByDefault: 0
     MaterialCosts: []
@@ -429,7 +429,7 @@ MonoBehaviour:
     GrantedMagicKey: WhisperOfMadness
     GrantedCharges: 2
     AwakenedMagicKey: 
-    UpgradeType: 0
+    UpgradeType: 2
     UpgradeAmount: 1
     GrantedSummonKey: 
     GrantedUltraKey: 
@@ -1009,3 +1009,25 @@ MonoBehaviour:
     SummonAmount: 1
     Neighbors:
     - cultist-c-2
+  - Key: cultist-whisper-basic
+    Kind: 3
+    XpCost: 0
+    UnlockedByDefault: 1
+    MaterialCosts: []
+    EssenceCost: 0
+    RequiredNodes: []
+    Position: {x: -60, y: 100}
+    Gains:
+      Values: []
+    ResistType: 1
+    ResistPercent: 10
+    GrantedMagicKey: WhisperOfMadness
+    GrantedCharges: 2
+    AwakenedMagicKey: 
+    UpgradeType: 0
+    UpgradeAmount: 1
+    GrantedSummonKey: 
+    GrantedUltraKey: 
+    SummonAmount: 1
+    Neighbors:
+    - cultist-sig
