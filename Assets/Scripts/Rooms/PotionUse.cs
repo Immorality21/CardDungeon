@@ -12,6 +12,22 @@ namespace Assets.Scripts.Rooms
     /// </summary>
     public static class PotionUse
     {
+        /// <summary>The careful drinker's line: a hero this low may drink from the reserve.</summary>
+        public const float EmergencyHealth = 0.2f;
+
+        /// <summary>A careful drinker's rule, shared by the balance model and the bot: a floor's share is
+        /// what is left of the belt over the floors still ahead, so it lasts to the finale. The rest is
+        /// the reserve, which <see cref="MayDrink"/> opens only to save a hero.</summary>
+        public static int ReserveFor(int potionsLeft, int floorsAhead)
+        {
+            return potionsLeft - Mathf.CeilToInt((float)potionsLeft / Mathf.Max(1, floorsAhead));
+        }
+
+        public static bool MayDrink(int potionsLeft, int reserve, float healthShare)
+        {
+            return potionsLeft > reserve || (potionsLeft > 0 && healthShare <= EmergencyHealth);
+        }
+
         /// <summary>A cure has nothing to do outside a fight: every status it clears ends with the fight.</summary>
         public static bool WorksOutsideCombat(ItemSO item)
         {

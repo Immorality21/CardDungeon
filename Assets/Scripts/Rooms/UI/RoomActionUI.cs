@@ -4220,6 +4220,15 @@ namespace Assets.Scripts.Rooms
             OnFight();
         }
 
+        /// <summary>A drink from the potion window, without the window.</summary>
+        public void DrinkPotion(ItemSO item, Heroes.Hero hero)
+        {
+            if (UI.PotionWindow.DrinkNow(item, hero))
+            {
+                OnPotionDrunk();
+            }
+        }
+
         public void PressVictoryContinue()
         {
             OnVictoryContinue();

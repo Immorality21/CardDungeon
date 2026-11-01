@@ -61,6 +61,24 @@ namespace Tests.EditMode
         }
 
         [Test]
+        public void ReserveFor_KeepsAShareForEachFloorAhead()
+        {
+            Assert.AreEqual(4, PotionUse.ReserveFor(5, 5), "One of five potions for this floor.");
+            Assert.AreEqual(2, PotionUse.ReserveFor(5, 2), "Rounds in favour of the floor being played.");
+            Assert.AreEqual(0, PotionUse.ReserveFor(5, 1), "Nothing to save on the last floor.");
+            Assert.AreEqual(0, PotionUse.ReserveFor(0, 3));
+        }
+
+        [Test]
+        public void MayDrink_TheReserveOpensOnlyToSaveAHero()
+        {
+            Assert.IsTrue(PotionUse.MayDrink(5, 4, 0.4f), "The floor's share is free.");
+            Assert.IsFalse(PotionUse.MayDrink(4, 4, 0.4f), "The reserve is not.");
+            Assert.IsTrue(PotionUse.MayDrink(4, 4, PotionUse.EmergencyHealth), "Unless a hero is about to fall.");
+            Assert.IsFalse(PotionUse.MayDrink(0, 0, 0.1f), "An empty belt saves nobody.");
+        }
+
+        [Test]
         public void Helps_AnElixir_EitherHalfIsEnough()
         {
             _item.ConsumableEffect = ConsumableEffectType.HealAndCharge;

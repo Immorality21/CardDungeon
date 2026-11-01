@@ -46,11 +46,8 @@ namespace Assets.Scripts.Balance
         /// <summary>Fraction of max HP below which the Adaptive policy reaches for a heal.</summary>
         public float HealThreshold = 0.45f;
 
-        /// <summary>Potions kept for the floors ahead. Drunk only to save a hero at or under
-        /// <see cref="EmergencyHealth"/>, as a careful player breaks into a reserve.</summary>
+        /// <summary>Potions kept for the floors ahead (<c>PotionUse.MayDrink</c>).</summary>
         public int PotionReserve;
-
-        public float EmergencyHealth = 0.2f;
 
         /// <summary>
         /// Whether heroes may summon (section 4b). On a floor the charge is held for the hardest
@@ -985,7 +982,6 @@ namespace Assets.Scripts.Balance
                     Combos = settings.Combos,
                     HealThreshold = settings.HealThreshold,
                     PotionReserve = settings.PotionReserve,
-                    EmergencyHealth = settings.EmergencyHealth,
                     RestRooms = settings.RestRooms,
                     RestHealFraction = settings.RestHealFraction,
                     StartsWithFullCharges = settings.StartsWithFullCharges,
@@ -1169,8 +1165,7 @@ namespace Assets.Scripts.Balance
         private static bool MayDrink(SimSettings settings, int potionsLeft, SimUnit wounded)
         {
             return settings.PotionHealAmount > 0
-                && (potionsLeft > settings.PotionReserve
-                    || (potionsLeft > 0 && HealthFraction(wounded) <= settings.EmergencyHealth));
+                && PotionUse.MayDrink(potionsLeft, settings.PotionReserve, HealthFraction(wounded));
         }
 
         /// <summary>Between rooms a potion costs no turn, so the wounded drink there before the next

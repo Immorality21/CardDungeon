@@ -43,6 +43,7 @@ namespace Assets.Scripts.Sandbox.Bot
         public int RoomsSeen;
         public int RoomsTotal;
         public float HealthAtEnd;
+        public int PotionsBetweenRooms;
         public List<BotFight> Fights = new List<BotFight>();
         public List<BotEvent> Events = new List<BotEvent>();
     }

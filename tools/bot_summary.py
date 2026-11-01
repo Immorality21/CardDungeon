@@ -57,6 +57,9 @@ for level, fights in bosses.items():
           f"{mean([f['HeroesDown'] for f in fights]):>6.1f}{mean([f['HeroTurns'] for f in fights]):>7.1f}"
           f"{mean([f['PotionsUsed'] for f in fights]):>8.1f}")
 
+drunk = sum(floor.get("PotionsBetweenRooms", 0) for game in report["Games"] for run in game["Runs"] for floor in run["Floors"])
+print(f"\npotions drunk between rooms: {drunk}")
+
 print(f"\n{'event habit: taken / seen':34}{'taken':>7}{'declined':>9}{'avg odds taken':>16}")
 events = defaultdict(list)
 for game in report["Games"]:

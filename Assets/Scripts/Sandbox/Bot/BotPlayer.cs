@@ -6,6 +6,7 @@ using Assets.Scripts.Combat;
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.Heroes;
 using Assets.Scripts.Hub;
+using Assets.Scripts.Items;
 using Assets.Scripts.Rooms;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -34,6 +35,7 @@ namespace Assets.Scripts.Sandbox.Bot
         private BotGame _game;
         private BotRun _run;
         private BotFloor _floor;
+        private int _potionReserve = -1;
         private BotFight _fight;
         private float _gameStart;
 
@@ -277,6 +279,7 @@ namespace Assets.Scripts.Sandbox.Bot
             {
                 var entry = DungeonManager.ActiveRun?.Levels[DungeonManager.RunLevelIndex];
                 _floor = new BotFloor { Level = entry?.LevelName ?? "?" };
+                _potionReserve = -1;
                 _run.Floors.Add(_floor);
                 _eventsDone.Clear();
                 _sideRoomsDone.Clear();
@@ -333,6 +336,10 @@ namespace Assets.Scripts.Sandbox.Bot
             {
                 return;
             }
+            if (TryDrink())
+            {
+                return;
+            }
 
             if (room.HasPendingEvent && room.EventMarker != null && !_eventsDone.Contains(room)
                 && TryUse(room, room.EventMarker.transform.position))
@@ -383,6 +390,37 @@ namespace Assets.Scripts.Sandbox.Bot
             {
                 TryUse(room, room.ExitMarker.position);
             }
+        }
+
+        /// <summary>The floor's reserve, worked out once the belt is stocked: the model's rule.</summary>
+        private int PotionReserve()
+        {
+            if (_potionReserve < 0)
+            {
+                var potion = BotCombat.FindPotion();
+                int left = potion != null ? InventoryManager.Instance.GetConsumableQuantity(potion.Key) : 0;
+                int floors = DungeonManager.ActiveRun != null ? DungeonManager.ActiveRun.Levels.Count : 1;
+                _potionReserve = PotionUse.ReserveFor(left, floors - DungeonManager.RunLevelIndex);
+            }
+            return _potionReserve;
+        }
+
+        /// <summary>One potion for the most wounded, while it costs no turn: the model's rule between rooms.</summary>
+        private bool TryDrink()
+        {
+            var wounded = Party().Heroes.Where(h => h != null && h.IsAlive)
+                .OrderBy(BotCombat.HealthShare).FirstOrDefault();
+            var potion = BotCombat.FindPotion();
+            if (wounded == null || potion == null || BotCombat.HealthShare(wounded) > BotCombat.HealThreshold
+                || !PotionUse.MayDrink(InventoryManager.Instance.GetConsumableQuantity(potion.Key),
+                    PotionReserve(), BotCombat.HealthShare(wounded)))
+            {
+                return false;
+            }
+            _ui.DrinkPotion(potion, wounded);
+            _floor.PotionsBetweenRooms++;
+            Touch();
+            return true;
         }
 
         /// <summary>The nearest room not yet entered; the exit last, when the route clears the floor.</summary>
@@ -492,7 +530,7 @@ namespace Assets.Scripts.Sandbox.Bot
             var unit = _pendingTurn;
             _pendingTurn = null;
             _ui.HideCommands();
-            BotCombat.Act(unit, Party(), _fight ?? (_fight = NewFight()));
+            BotCombat.Act(unit, Party(), _fight ?? (_fight = NewFight()), PotionReserve());
         }
 
         private BotFight NewFight()

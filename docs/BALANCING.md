@@ -3514,8 +3514,8 @@ predate this pass.
 between fights. The model does the same at the Adaptive policy's 45% (`DrinkBetweenRooms`), and rations the belt: a
 floor's share is what is left divided by the floors still ahead, and the rest is a reserve drunk only to save a hero at
 20% or under (`PotionReserveFor`, `SimSettings.EmergencyHealth`). A hard ration with no emergency use took the March to
-7% clears with potions unspent in dead parties' belts, which measures nothing a player would do. The bot does not
-drink between rooms yet.
+7% clears with potions unspent in dead parties' belts, which measures nothing a player would do. The bot drinks by
+the same rules (`PotionUse`).
 
 Wipes with both in: March 0 6 2 14 44 (45% clear), Ashen Deep 0 2 52 (47%), Blood Stair 0 9 32 0 4 (59%), Catacombs 0 2 8
 (90%), Warrens 0 37 (63%). The March still empties its belt by floor 3, through the emergency rule.

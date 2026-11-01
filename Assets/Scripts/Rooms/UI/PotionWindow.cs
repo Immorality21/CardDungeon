@@ -154,9 +154,27 @@ namespace Assets.Scripts.Rooms.UI
 
         private void Drink(ItemSO item, Hero hero)
         {
-            if (!InventoryManager.Instance.TryConsume(item.Key))
+            if (!DrinkNow(item, hero))
             {
                 return;
+            }
+            Drank?.Invoke();
+
+            if (InventoryManager.Instance.GetConsumableQuantity(item.Key) > 0)
+            {
+                ShowHeroes(item);
+                return;
+            }
+            _potion = null;
+            ShowPotions();
+        }
+
+        /// <summary>The drink itself: spends the potion and applies it. False when none is left.</summary>
+        public static bool DrinkNow(ItemSO item, Hero hero)
+        {
+            if (!InventoryManager.Instance.TryConsume(item.Key))
+            {
+                return false;
             }
 
             CombatAudio.Play(CombatSound.ItemUse);
@@ -170,15 +188,7 @@ namespace Assets.Scripts.Rooms.UI
                 new EquippedChargeBank(DungeonManager.Instance.MagicState)
                     .Restore(hero, SpellcastAction.AnyChargeSlot, PotionUse.ChargesOf(item), -1);
             }
-            Drank?.Invoke();
-
-            if (InventoryManager.Instance.GetConsumableQuantity(item.Key) > 0)
-            {
-                ShowHeroes(item);
-                return;
-            }
-            _potion = null;
-            ShowPotions();
+            return true;
         }
     }
 }

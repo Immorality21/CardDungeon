@@ -3553,13 +3553,9 @@ namespace Assets.Scripts.Balance
             return Mathf.Max(0, belt - Mathf.RoundToInt(entry.PotionsDrunk));
         }
 
-        /// <summary>A careful player's ration (owner, 2026-11-01): a floor's share is what is left of the
-        /// belt over the floors still ahead, so it lasts to the finale. The rest is the reserve.</summary>
         private static int PotionReserveFor(int belt, RunEntry entry, RunCurve run, LevelCurve level)
         {
-            int left = PotionsLeft(belt, entry);
-            int floorsAhead = Mathf.Max(1, run.Levels.Count - level.Index);
-            return left - Mathf.CeilToInt((float)left / floorsAhead);
+            return PotionUse.ReserveFor(PotionsLeft(belt, entry), run.Levels.Count - level.Index);
         }
 
         /// <summary>

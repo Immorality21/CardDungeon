@@ -55,6 +55,8 @@ buildings. The odds used are the true chance, which can be better than the playe
 - **Fights** (`BotCombat`) in the order of the balance model's Adaptive policy, so a gap between the
   bot and the model is the model's and not a different way of playing: heal whoever is at 45% or
   under, Ultra when ready, damaging abilities while charges last, attack the weakest.
+- **Potions** by the model's rules: at 45% or under, between rooms as well as in fights, keeping a reserve for
+  the floors ahead that it opens only for a hero at 20% or under (`PotionUse`, `BotPlayer.TryDrink`).
 - **Town** (`BotHub`): places what it can pay for, fields everyone the party cap allows, buys and
   wears gear, spends XP with `SphereGridOps.GreedySpend`, starts the next open run on the list.
 - **It retries** a run it wiped on, like a player, up to `MaxAttemptsPerRun`.

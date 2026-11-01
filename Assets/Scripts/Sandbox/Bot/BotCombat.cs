@@ -20,9 +20,10 @@ namespace Assets.Scripts.Sandbox.Bot
     public static class BotCombat
     {
         /// <summary>The model's <c>HealThreshold</c>.</summary>
-        private const float HealThreshold = 0.45f;
+        public const float HealThreshold = 0.45f;
 
-        public static void Act(ICombatUnit unit, Party party, BotFight fight)
+        /// <param name="potionReserve">Potions kept for the floors ahead, as the model keeps them.</param>
+        public static void Act(ICombatUnit unit, Party party, BotFight fight, int potionReserve)
         {
             var combat = CombatManager.Instance;
             var enemies = combat.GetAliveEnemies();
@@ -42,7 +43,8 @@ namespace Assets.Scripts.Sandbox.Bot
             if (wounded != null && HealthShare(wounded) <= HealThreshold)
             {
                 var potion = FindPotion();
-                if (potion != null)
+                if (potion != null && PotionUse.MayDrink(
+                    InventoryManager.Instance.GetConsumableQuantity(potion.Key), potionReserve, HealthShare(wounded)))
                 {
                     fight.PotionsUsed++;
                     combat.SubmitUseItemAction(potion, wounded);
@@ -115,7 +117,7 @@ namespace Assets.Scripts.Sandbox.Bot
             }
         }
 
-        private static ItemSO FindPotion()
+        public static ItemSO FindPotion()
         {
             var inventory = InventoryManager.Instance;
             foreach (var entry in inventory.GetConsumables())
