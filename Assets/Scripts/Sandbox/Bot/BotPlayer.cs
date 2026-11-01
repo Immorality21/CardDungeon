@@ -110,6 +110,7 @@ namespace Assets.Scripts.Sandbox.Bot
             _gameOver = false;
             _run = null;
             _attempts.Clear();
+            _passedOver.Clear();
 
             // Every manager lives in a scene: leave them all behind before the save goes.
             SceneManager.LoadScene("MenuScene");

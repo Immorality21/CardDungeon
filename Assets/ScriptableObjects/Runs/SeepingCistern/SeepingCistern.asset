@@ -29,7 +29,7 @@ MonoBehaviour:
       StatScales:
       - Stat: 3
         Multiplier: 3
-      XpMultiplier: 3
+      XpMultiplier: 2.1
       GoldMultiplier: 1
       Overrides: []
     RescueHero: {fileID: 11400000, guid: 09b6a3424e4546719cda1391729e96cc, type: 2}
@@ -47,7 +47,7 @@ MonoBehaviour:
       StatScales:
       - Stat: 3
         Multiplier: 3
-      XpMultiplier: 3
+      XpMultiplier: 2.1
       GoldMultiplier: 1
       Overrides:
       - Enemy: {fileID: 11400000, guid: 193d822f3b9fcf740a2bb06c71007dda, type: 2}

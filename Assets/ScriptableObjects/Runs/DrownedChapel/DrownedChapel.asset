@@ -25,13 +25,20 @@ MonoBehaviour:
     BossEnemy: {fileID: 0}
     BossAdds: []
     EnemyTuning:
-      Difficulty: 5
+      Difficulty: 8.75
       StatScales:
       - Stat: 3
         Multiplier: 3
-      XpMultiplier: 2.5
+      XpMultiplier: 1.75
       GoldMultiplier: 1
-      Overrides: []
+      Overrides:
+      - Enemy: {fileID: 11400000, guid: d43f3a83da179484091d957b352a4b13, type: 2}
+        Stats:
+          Values:
+          - Type: 1
+            Amount: 45
+        XpReward: 0
+        GoldReward: 0
     RescueHero: {fileID: 11400000, guid: 417d412fa1fe407cb763056439898d1d, type: 2}
     AllowRoomEvents: 1
     IntendedHard: 1
@@ -43,11 +50,11 @@ MonoBehaviour:
     - Enemy: {fileID: 11400000, guid: 96912e3cdfce0d24792157ecadc855fd, type: 2}
       Count: 2
     EnemyTuning:
-      Difficulty: 5
+      Difficulty: 8.75
       StatScales:
       - Stat: 3
         Multiplier: 3
-      XpMultiplier: 2.5
+      XpMultiplier: 1.75
       GoldMultiplier: 1
       Overrides:
       - Enemy: {fileID: 11400000, guid: 770983482ac1400fa05bc9d41b51f956, type: 2}
@@ -59,6 +66,13 @@ MonoBehaviour:
             Amount: 22
           - Type: 3
             Amount: 17
+        XpReward: 0
+        GoldReward: 0
+      - Enemy: {fileID: 11400000, guid: d43f3a83da179484091d957b352a4b13, type: 2}
+        Stats:
+          Values:
+          - Type: 1
+            Amount: 45
         XpReward: 0
         GoldReward: 0
     RescueHero: {fileID: 0}

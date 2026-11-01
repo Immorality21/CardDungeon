@@ -3341,7 +3341,8 @@ namespace Assets.Scripts.Balance
         /// floor. <paramref name="carryHealth"/> false starts every floor whole, which is the game as it
         /// was until 2026-11-01 and the before-and-after a tuning pass wants.
         /// </summary>
-        public static List<FloorSimReport> SimulateRun(BalanceInput input, RunDefinitionSO run, bool carryHealth = true)
+        public static List<FloorSimReport> SimulateRun(BalanceInput input, RunDefinitionSO run, bool carryHealth = true,
+            bool ultras = true, bool summons = true)
         {
             using var memo = GridSpendMemo.Scope();
             var floors = new List<FloorSimReport>();
@@ -3362,7 +3363,7 @@ namespace Assets.Scripts.Balance
             var entry = RunEntry.Start;
             foreach (var level in curve.Levels)
             {
-                var floor = SimulateLevel(input, rules, report, curve, level, entry);
+                var floor = SimulateLevel(input, rules, report, curve, level, entry, false, ultras, summons);
                 if (floor != null)
                 {
                     floors.Add(floor);
@@ -3497,7 +3498,8 @@ namespace Assets.Scripts.Balance
         }
 
         private static FloorSimReport SimulateLevel(BalanceInput input, BalanceRulesSO rules, BalanceReport report,
-            RunCurve run, LevelCurve level, RunEntry entry, bool adaptiveOnly = false)
+            RunCurve run, LevelCurve level, RunEntry entry, bool adaptiveOnly = false, bool ultras = true,
+            bool summons = true)
         {
             var rooms = BuildFloorRooms(level);
             if (rooms.Count == 0)
@@ -3521,7 +3523,9 @@ namespace Assets.Scripts.Balance
                 // full charges is exactly the optimism the per-room simulation carries.
                 StartsWithFullCharges = level.Index == 0,
                 StartHealthFraction = entry.HealthShare,
-                RollRooms = () => RollFloorRooms(level)
+                RollRooms = () => RollFloorRooms(level),
+                UseUltras = ultras,
+                UseSummons = summons
             };
 
             // Same loadout rules as the per-room sims, so the two are comparable.

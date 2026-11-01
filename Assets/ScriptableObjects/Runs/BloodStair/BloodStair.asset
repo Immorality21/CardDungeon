@@ -29,7 +29,7 @@ MonoBehaviour:
       StatScales:
       - Stat: 3
         Multiplier: 3
-      XpMultiplier: 3
+      XpMultiplier: 2.1
       GoldMultiplier: 1.5
       Overrides: []
     RescueHero: {fileID: 0}
@@ -41,11 +41,11 @@ MonoBehaviour:
     BossEnemy: {fileID: 0}
     BossAdds: []
     EnemyTuning:
-      Difficulty: 8.5
+      Difficulty: 9.5
       StatScales:
       - Stat: 3
         Multiplier: 3
-      XpMultiplier: 3.5
+      XpMultiplier: 2.45
       GoldMultiplier: 1.5
       Overrides: []
     RescueHero: {fileID: 0}
@@ -57,16 +57,16 @@ MonoBehaviour:
     BossEnemy: {fileID: 0}
     BossAdds: []
     EnemyTuning:
-      Difficulty: 7.1
+      Difficulty: 8.9
       StatScales:
       - Stat: 3
         Multiplier: 3
-      XpMultiplier: 4
+      XpMultiplier: 2.8
       GoldMultiplier: 1.5
       Overrides: []
     RescueHero: {fileID: 0}
     AllowRoomEvents: 1
-    IntendedHard: 0
+    IntendedHard: 1
   - LevelTemplate: {fileID: 11400000, guid: 60caa03b7f18bfc4eacb115544597fd6, type: 2}
     LevelNameKey: run.blood-stair.level-4.name
     ManualLayout: {fileID: 11400000, guid: 2ef590897fff7af4b8651ce4b30fe706, type: 2}
@@ -75,11 +75,11 @@ MonoBehaviour:
     - Enemy: {fileID: 11400000, guid: d43f3a83da179484091d957b352a4b13, type: 2}
       Count: 2
     EnemyTuning:
-      Difficulty: 3.2
+      Difficulty: 4
       StatScales:
       - Stat: 3
         Multiplier: 2.5
-      XpMultiplier: 4
+      XpMultiplier: 2.8
       GoldMultiplier: 1.5
       Overrides:
       - Enemy: {fileID: 11400000, guid: 770983482ac1400fa05bc9d41b51f956, type: 2}
@@ -104,11 +104,11 @@ MonoBehaviour:
     - Enemy: {fileID: 11400000, guid: ce571ba2b36e6c14bb37279e004b146c, type: 2}
       Count: 2
     EnemyTuning:
-      Difficulty: 5
+      Difficulty: 6.25
       StatScales:
       - Stat: 3
         Multiplier: 2.5
-      XpMultiplier: 4.5
+      XpMultiplier: 3.15
       GoldMultiplier: 2
       Overrides:
       - Enemy: {fileID: 11400000, guid: a3ec74314eaaa1546a44c86e575112d8, type: 2}

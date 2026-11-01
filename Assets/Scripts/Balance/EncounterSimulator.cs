@@ -49,6 +49,9 @@ namespace Assets.Scripts.Balance
         /// <summary>Potions kept for the floors ahead (<c>PotionUse.MayDrink</c>).</summary>
         public int PotionReserve;
 
+        /// <summary>Off to measure what Ultras are worth to a floor.</summary>
+        public bool UseUltras = true;
+
         /// <summary>
         /// Whether heroes may summon (section 4b). On a floor the charge is held for the hardest
         /// room; in a single encounter it may be spent at once. Off gives the "without summons" reading.
@@ -986,6 +989,7 @@ namespace Assets.Scripts.Balance
                     Combos = settings.Combos,
                     HealThreshold = settings.HealThreshold,
                     PotionReserve = settings.PotionReserve,
+                    UseUltras = settings.UseUltras,
                     RestRooms = settings.RestRooms,
                     RestHealFraction = settings.RestHealFraction,
                     StartsWithFullCharges = settings.StartsWithFullCharges,
@@ -1385,7 +1389,7 @@ namespace Assets.Scripts.Balance
             // nothing because the gauge starts every fight empty. Then, while a form lasts, its
             // ability is free and is the turn. Both are commands, not casts, so Silence leaves the
             // Ultra open; the form's ability is a cast and Silence closes it.
-            if (settings.Policy != SimPolicy.AttackOnly && ultras != null)
+            if (settings.Policy != SimPolicy.AttackOnly && ultras != null && settings.UseUltras)
             {
                 var ready = ultras.Ready(hero, heroes, allies, resolver.FallenAllies);
                 if (ready != null)

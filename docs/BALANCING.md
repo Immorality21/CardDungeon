@@ -3586,3 +3586,41 @@ either, as for a gated finale. They are not exempt from being looked at.
 
 **Still too kind where the bot said so:** the Blood Stair and the Seeping Cistern read 100% against 0 of 5 and 1 of 5 played, with
 a weaker party. Not re-measured with the bot since this change.
+
+## §5ax — The late-game drop: XP and enemies both (2026-11-01)
+
+Owner, after the second full-campaign bot game: every run from the Ashen Deep on fell first try with health to spare. **The cause is
+the power curve, not any one boss.** `XpMultiplier` climbed from 2 on the March to 3-4.5 late, and one retry of the March bought 17
+nodes. Three guesses were measured and two were wrong:
+
+- **Not Ultras and summons.** With both off (`SimulateRun(..., ultras: false, summons: false)`) a 1,400 XP party still wipes 10% on Emberfall.
+- **Not boss stats alone.** A Cinder Tyrant at 4x his stats (600 health, 84 Strength) wiped a one-replay party 0% of the time: four
+  heroes deal his 150 health in about a round and he gets too few turns. Only 10x reached 75%.
+- **It is compounding.** With health carried, a small edge means arriving at a finale on 68% instead of 41%, with potions left.
+
+Enemies alone stopped at 12% wipes after one replay, so both moved (owner):
+
+| | XP | Difficulty |
+|---|---|---|
+| Drowned March | x0.7 | unchanged |
+| Ashen Deep | x0.7 | 5.6 / 6.8 / 3.15 -> 7.5 / 9 / 5; Tyrant 150/21 -> 300/27 |
+| Drowned Chapel | x0.7 | 5 -> 8.75 |
+| Hollow Vault | x0.7 | 3.8 -> 4.25 |
+| Blood Stair | x0.7 | 9 / 8.5 / 7.1 / 3.2 / 5 -> 9 / 9.5 / 8.9 / 4 / 6.25 |
+| Seeping Cistern | x0.7 | unchanged |
+
+Straight-line party, clear rate: Chapel 55%, Hollow Vault 67%, Blood Stair 76%, Ashen Deep 0%. Finale wipes after 0 / 1 / 2 replays:
+Ashen Deep 100 / 45 / 0, the March 100 / 100 / 0, Catacombs 70 / 2 / 0. Read 22 before the Strength caps below, so that one replay number is noisy.
+
+- **The Slag Halls and The Ossuary Gate are `IntendedHard`.**
+- **The Tyrant's 300 health is the boss ratio's ceiling**: 450 read 7.8x the floor's trash, and 6x is the band.
+- **Strength capped at 45** on four placements that two-shot the Warrior (Hex Weaver on The Slag Halls and both Chapel floors, Steam
+  Automaton on The Slag Halls), rather than easing the floors.
+- **The Catacombs and Emberfall are still steep** after one replay, and the Cistern still reads 99% against a bot that loses there.
+**Bot, seed 3000, Everything/ClearEverything (full-campaign-3):** every run cleared except the Ashen Deep, which wiped 4 of 4, three on
+Emberfall arriving at 7-30% health and one on The Slag Halls. The March took 2 tries and the Blood Stair 2. The Chapel and the Cistern
+still fell first try, finishing on 100% and 95%, so **the drop is fixed at the Ashen Deep and the Blood Stair, not yet at the Chapel or
+the Cistern.** The bot does not replay earlier runs, so its Ashen wall is the wall the model predicts for an unreplayed party.
+
+The other five profiles in that report are not a clean read: `_passedOver` carried between games, so each skipped runs an earlier game
+had given up on, and they went in with less XP. Fixed in `BotPlayer`, not re-run.
