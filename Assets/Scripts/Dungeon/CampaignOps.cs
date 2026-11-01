@@ -667,6 +667,25 @@ namespace Assets.Scripts.Dungeon
         }
 
         /// <summary>
+        /// The whole campaign start to end, by run asset name: play order, secret runs included, with the
+        /// challenge runs last, where they are meant to be played rather than where they open.
+        /// </summary>
+        public static List<string> GetRunsStartToEnd(CampaignSO campaign)
+        {
+            var ordinary = new List<string>();
+            var challenge = new List<string>();
+            foreach (var node in GetNodesInPlayOrder(campaign))
+            {
+                if (node != null && node.Run != null)
+                {
+                    (node.Run.Challenge ? challenge : ordinary).Add(node.Run.name);
+                }
+            }
+            ordinary.AddRange(challenge);
+            return ordinary;
+        }
+
+        /// <summary>
         /// The campaign's nodes shallowest-first, so a consumer can process a run only after
         /// everything that unlocks it. Within a tier the raw graph depth decides (a chapter's parts in
         /// order), then authored order.

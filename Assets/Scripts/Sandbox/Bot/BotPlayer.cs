@@ -36,6 +36,7 @@ namespace Assets.Scripts.Sandbox.Bot
         private BotRun _run;
         private BotFloor _floor;
         private int _potionReserve = -1;
+        private readonly List<string> _passedOver = new List<string>();
         private BotFight _fight;
         private float _gameStart;
 
@@ -166,19 +167,12 @@ namespace Assets.Scripts.Sandbox.Bot
             _run = null;
             _report.Write(_settings.ReportName);
 
-            var next = BotHub.NextRun(_settings, manager.Roster);
+            var next = NextRun(manager.Roster);
             if (next == null)
             {
-                _game.Finished = "every listed run done";
-                _gameOver = true;
-                _inHub = false;
-                yield break;
-            }
-
-            _attempts.TryGetValue(next.name, out int tried);
-            if (tried >= _settings.MaxAttemptsPerRun)
-            {
-                _game.Finished = "gave up on " + next.name;
+                _game.Finished = _passedOver.Count > 0
+                    ? "gave up on " + string.Join(", ", _passedOver)
+                    : "every listed run done";
                 _gameOver = true;
                 _inHub = false;
                 yield break;
@@ -189,6 +183,26 @@ namespace Assets.Scripts.Sandbox.Bot
             _lastActivity = Time.realtimeSinceStartup;
             _inHub = false;
             yield return null;
+        }
+
+        /// <summary>The next run with tries left. A run without any ends the playthrough, or with
+        /// <see cref="BotSettings.PassOverWalls"/> is left behind; both are named when it finishes.</summary>
+        private RunDefinitionSO NextRun(PartyRosterSO roster)
+        {
+            while (true)
+            {
+                var next = BotHub.NextRun(_settings, roster, _passedOver);
+                _attempts.TryGetValue(next != null ? next.name : string.Empty, out int tried);
+                if (next == null || tried < _settings.MaxAttemptsPerRun)
+                {
+                    return next;
+                }
+                _passedOver.Add(next.name);
+                if (!_settings.PassOverWalls)
+                {
+                    return null;
+                }
+            }
         }
 
         // ------------------------------------------------------------------

@@ -20,6 +20,25 @@ namespace Tests.EditMode
         }
 
         [Test]
+        public void RunsStartToEnd_ListEveryRun_ChallengeRunsLast()
+        {
+            var campaign = UnityEngine.Resources.Load<CampaignSO>(CampaignSO.ResourcePath);
+            var runs = CampaignOps.GetRunsStartToEnd(campaign);
+
+            bool challengeSeen = false;
+            foreach (var node in CampaignOps.GetNodesInPlayOrder(campaign))
+            {
+                CollectionAssert.Contains(runs, node.Run.name);
+            }
+            foreach (var name in runs)
+            {
+                bool challenge = campaign.Nodes.Find(n => n.Run != null && n.Run.name == name).Run.Challenge;
+                Assert.IsTrue(challenge || !challengeSeen, name + " comes after a challenge run.");
+                challengeSeen |= challenge;
+            }
+        }
+
+        [Test]
         public void Campaign_ExistsInResources()
         {
             Assert.IsNotNull(LoadCampaign(),

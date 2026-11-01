@@ -23,6 +23,13 @@ Assets.Scripts.Sandbox.Editor.BotLauncher.Launch(new BotSettings
 });
 ```
 
+**Two sizes** (owner, 2026-11-01). Most retests want the first few runs: `BotLauncher.EarlySettings(name)`, or
+`Tools ▸ Bot ▸ Early Runs`, or `Runs` set by hand with a run or two added. A start-to-end check is
+`BotLauncher.FullCampaignSettings(name)` or `Tools ▸ Bot ▸ Full Campaign`: every run in play order, challenge runs
+last, and `PassOverWalls` on, so a run it cannot beat in `MaxAttemptsPerRun` tries is left behind and named in
+`Finished` rather than ending the game. Set `Games` and `Profiles` on the result to change the size. The bot never
+revisits a run, so the late floors meet a party with less XP than a player who replays would have.
+
 Play stops by itself when the batch ends. The report is rewritten after every attempt at
 `persistentDataPath/bot_reports/<ReportName>.json`, so a batch that dies keeps what it had:
 

@@ -49,7 +49,7 @@ namespace Assets.Scripts.Sandbox.Bot
         }
 
         /// <summary>The first listed run that is open and not yet cleared; null when there is none.</summary>
-        public static RunDefinitionSO NextRun(BotSettings settings, PartyRosterSO roster)
+        public static RunDefinitionSO NextRun(BotSettings settings, PartyRosterSO roster, ICollection<string> passedOver)
         {
             var campaign = UnityEngine.Resources.Load<CampaignSO>(CampaignSO.ResourcePath);
             var completed = MetaProgressManager.Instance.GetCompletedRunKeys();
@@ -57,7 +57,7 @@ namespace Assets.Scripts.Sandbox.Bot
             foreach (var name in settings.Runs)
             {
                 var node = campaign.Nodes.FirstOrDefault(n => n != null && n.Run != null && n.Run.name == name);
-                if (node == null)
+                if (node == null || passedOver.Contains(name))
                 {
                     continue;
                 }

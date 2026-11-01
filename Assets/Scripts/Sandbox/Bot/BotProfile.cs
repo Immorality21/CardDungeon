@@ -62,6 +62,10 @@ namespace Assets.Scripts.Sandbox.Bot
         /// <summary>Tries at one run before the playthrough is given up as stuck on it.</summary>
         public int MaxAttemptsPerRun = 4;
 
+        /// <summary>A run out of tries is passed over rather than ending the playthrough, so a wall in
+        /// the middle of the list does not hide everything behind it.</summary>
+        public bool PassOverWalls;
+
         /// <summary>Real seconds with nothing happening before a game is reported as stuck.</summary>
         public float StuckSeconds = 30f;
 

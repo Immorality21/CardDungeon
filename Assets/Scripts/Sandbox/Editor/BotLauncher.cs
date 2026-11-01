@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Assets.Scripts.Dungeon;
 using Assets.Scripts.Sandbox.Bot;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -19,6 +20,43 @@ namespace Assets.Scripts.Sandbox.Editor
         {
             "ThresholdEntrance", "ThresholdHalls", "TutorialRun", "SealedArchive", "TheWarrens", "Catacombs",
         };
+
+        /// <summary>Every run from start to end (<see cref="CampaignOps.GetRunsStartToEnd"/>).</summary>
+        public static List<string> FullCampaign()
+        {
+            return CampaignOps.GetRunsStartToEnd(UnityEngine.Resources.Load<CampaignSO>(CampaignSO.ResourcePath));
+        }
+
+        /// <summary>The usual retest: the early runs, one game per profile.</summary>
+        public static BotSettings EarlySettings(string reportName, int firstSeed = 3000)
+        {
+            return new BotSettings
+            {
+                Profiles = AllProfiles(), FirstSeed = firstSeed, ReportName = reportName, Runs = EarlyRuns,
+            };
+        }
+
+        /// <summary>Start to end: a wall is passed over, so one run cannot hide the rest of the campaign.</summary>
+        public static BotSettings FullCampaignSettings(string reportName, int firstSeed = 3000)
+        {
+            return new BotSettings
+            {
+                Profiles = AllProfiles(), FirstSeed = firstSeed, ReportName = reportName, Runs = FullCampaign(),
+                PassOverWalls = true,
+            };
+        }
+
+        [MenuItem("Tools/Bot/Early Runs (one game per profile)", false, 40)]
+        private static void LaunchEarly()
+        {
+            Launch(EarlySettings("early-runs"));
+        }
+
+        [MenuItem("Tools/Bot/Full Campaign (one game per profile)", false, 41)]
+        private static void LaunchFullCampaign()
+        {
+            Launch(FullCampaignSettings("full-campaign"));
+        }
 
         /// <summary>Every event habit on both routes.</summary>
         public static List<BotProfile> AllProfiles()
