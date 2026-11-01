@@ -145,9 +145,9 @@ namespace Tests.EditMode
         [Test]
         public void RestHealAmount_IsAShareOfTheBar_RoundedDown()
         {
-            // 35% of 13 is 4.55.
-            Assert.AreEqual(4, RoomKindRewards.RestHealAmount(13));
-            Assert.AreEqual(35, RoomKindRewards.RestHealAmount(100));
+            // 50% of 13 is 6.5.
+            Assert.AreEqual(6, RoomKindRewards.RestHealAmount(13));
+            Assert.AreEqual(50, RoomKindRewards.RestHealAmount(100));
         }
 
         [Test]
@@ -214,8 +214,8 @@ namespace Tests.EditMode
             // The model's sustain credit and the game's heal have to be the same number, or the curve
             // measures a level nobody plays.
             int partyPool = 60;
-            Assert.AreEqual(21, RoomKindRewards.ExpectedRestHealing(1, partyPool));
-            Assert.AreEqual(42, RoomKindRewards.ExpectedRestHealing(2, partyPool));
+            Assert.AreEqual(30, RoomKindRewards.ExpectedRestHealing(1, partyPool));
+            Assert.AreEqual(60, RoomKindRewards.ExpectedRestHealing(2, partyPool));
             Assert.AreEqual(0, RoomKindRewards.ExpectedRestHealing(0, partyPool));
         }
 

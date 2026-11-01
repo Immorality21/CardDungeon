@@ -107,8 +107,8 @@ namespace Assets.Scripts.Dungeon
                 data.Afflictions = DungeonManager.Instance.Afflictions.GetSaveData();
             }
 
-            // Health is level-scoped (HealAll only fires on a fresh dungeon), so it belongs in the
-            // dungeon save alongside the afflictions. Every caller of Save() is a point where it
+            // Mid-floor health lives in the dungeon save alongside the afflictions; the run save
+            // takes over at the stairs (HealthCarry). Every caller of Save() is a point where it
             // just changed: entering a room, finishing a fight, resolving a room event.
             if (DungeonManager.HasInstance && DungeonManager.Instance.Party != null)
             {

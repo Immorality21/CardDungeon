@@ -250,10 +250,13 @@ mirrors `DungeonManager.PlaceRoomEvents` exactly: connectors and the start room 
 room is taken out of the budget, and a room's candidates roll in authored order with the first to pass
 taking it. Covered by `RoomEventModelTests`.
 
-**Attrition load** = a level's expected HP cost ÷ the party's HP + potion pool. This is the metric
-that ends runs, because `Party.HealAll()` only fires when a fresh dungeon is entered — within a level
-health is a consumable resource. At or above 1.00 the level cannot be cleared, whatever the per-room
-numbers look like. The run curve is drawn from this.
+**Attrition load** = a level's expected HP cost ÷ what the party has left for it: the share of the bar
+the level before left it (`LevelCurve.EntryHealthFraction`), plus potions and refuges. This is the metric
+that ends runs, because `Party.HealAll()` only fires on a run's first floor — across a run health is a
+consumable resource (owner, 2026-11-01). At or above 1.00 the level cannot be cleared, whatever the
+per-room numbers look like. The run curve is drawn from this. **`FreshAttritionLoad` is the same sum on a
+full bar**: what the level itself asks, and what the difficulty-jump check reads, or a run of identical
+floors would read as escalating.
 
 **An enemy's whole repertoire is one expectation.** `EnemyBehaviorModel.Profile` prices an
 `EnemyBehaviorSO`'s authored actions — swings, telegraphed heavies, party-wide signatures, heals,
@@ -376,7 +379,8 @@ the combat loop calls, and `ResolveCast` goes through the real `EffectResolver` 
 `CombatManager.ExecuteEnemyCast` uses. Only the turn loop and the player's choices are simulated.
 
 Deliberate simplifications: **a hero's slots are whatever they start the fight with** — exact now that
-nothing acquires magic mid-fight, but note the per-room sim does not model the refuge charge refill;
+nothing acquires magic mid-fight, but note the per-room sim does not model the refuge charge refill
+(the floor sim does, since 2026-11-01);
 the loadout comes from `BalanceAnalyzer.AssignMagicLoadout`, which reads the heroes' **grids** rather
 than the encounter (it read the enemies until Draw was removed); and fleeing is never attempted.
 
@@ -392,7 +396,13 @@ that kills parties is not one room.
 pool of health, potions and charges, with refuges spread through the order. Three things only it can
 see — attrition compounding room to room, the fact that **nothing revives** mid-floor (so a hero lost
 early compounds for every room after), and a potion belt that is spent rather than refilled per fight.
-`StartsWithFullCharges` is true only for floor 0, matching charges being a run resource.
+`StartsWithFullCharges` is true only for floor 0, matching charges being a run resource. A later floor
+drains every charge rather than carrying what is left, which errs hard, and a refuge refills them.
+**Health and the belt are chained too** (2026-11-01): `RunFloorSimulations` enters each floor on the last
+one's average ending health (`FloorSimSettings.StartHealthFraction`) and what is left of the belt
+(`BalanceAnalyzer.RunEntry`), so a floor's wipe rate reads *given the party got here*. One party-wide
+number, so it loses the spread and a dead hero reads as everyone hurt, both of which err easy. A frontier
+sweep enters a finale in the straight-line party's state whatever it invests.
 
 So: **`Run` judges an asset, `RunFloor` judges a floor.** `BalanceAnalyzer.RunFloorSimulations` fills
 `BalanceReport.Floors`, and `EvaluateFloorSimulations` reads it against `MaxFloorWipeRate` and **the
@@ -400,7 +410,8 @@ difficulty curve, `TierFloorBands`** (per campaign tier: ordinary floors' ending
 rate; owner, 2026-10-17). A finale the tier budget marks as a gate and that wipes past the curve is an
 Info, not a failure. `MinFinalFloorWipeRate` / `TrivialFloorEndHealth` only apply to a run with no
 campaign tier. **To tune one floor, call `BalanceAnalyzer.SimulateFloor(input, run, levelIndex)`** -
-seconds, the same numbers as the full analysis. **The closed form flags, the simulator decides**
+seconds, the same numbers as the full analysis. **`SimulateRun(input, run, carryHealth)`** does a whole run
+in order; `carryHealth: false` is the before-and-after. **The closed form flags, the simulator decides**
 (2026-10-17): a floor the closed form reads as "unclearable on one health bar" is simulated on the spot
 (`ConfirmByFloorSimulation`) and reported as an Info when the party clears it, because attrition composes
 per enemy and overstates dense rooms of fast enemies. A floor marked **`RunLevelEntry.IntendedHard`**
@@ -463,7 +474,8 @@ being a threat.
   is *conditional*: a Fire ward is a purchase on Emberfall and a waste on the Mire. Pass no mix and
   resistance prices at nothing, which is the honest answer when the opponent is unknown.
 - **`BalanceAnalyzer.MeasureFrontiers(input)`** is the public entry point for a tuning pass — curves
-  closed-form, finales simulated, no findings. ~16s for the whole campaign.
+  closed-form, finales simulated, no findings. **~630s** for the whole campaign (2026-11-01, 12 finales, with
+  the summon sweeps), so run it on its own, never in one command with the test suite.
 
 `EvaluateFrontiers` turns the result into findings against `TierInvestmentBudgets` (indexed by
 `CampaignOps.ComputeTiers` depth), `HeroXpEquivalent`, `InvestmentBudgetTolerance` and
@@ -486,17 +498,23 @@ Nothing is ever auto-applied. Findings carry a `Suggestion` string; acting on it
 
 ### What a re-analysis costs, and who is allowed to start one
 
-Measured on this project (2026-09-01), one `Collect` + `Analyze`:
+Measured on this project (2026-11-01), one `Collect` + `Analyze`:
 
 | Scope | Cost |
 |---|---|
-| Closed-form only (`Simulate` off) | **~130 ms** |
-| \+ encounter and floor simulations | ~5.8 s |
-| \+ investment frontier sweeps | **~18.9 s** |
+| Closed-form only (`Simulate` off) | **~3.7 s** (it confirms flagged floors in the simulator) |
+| \+ encounter and floor simulations | ~44 s |
+| \+ investment frontier sweeps | **about 11 minutes** |
 
 The frontier sweep dominates because it is a grid: `FrontierPartyWidths` × `FrontierXpSteps` ×
 `FrontierGoldSteps` (4 × 10 × 4 = **160 mixes**) × `FrontierTrials` floor simulations, per run finale.
 That is the price of the question it answers, not a defect — see §"The frontier".
+
+**Floors are simulated once per report** (`BalanceReport.FloorChain`, `BalanceAnalyzer.ChainedFloor`), or a
+run's chain costs floors squared. A sweep's gear (`GearSpends`) and floor results (`Outcomes`, by party) are
+shared across its summon sweeps, and `GridSpendMemo` keeps grid spends for one analysis. Still open if it needs
+to be faster: a binary search of the XP ladder and fewer trials on the non-Adaptive policies, which can both
+nudge numbers.
 
 So the window enforces one rule: **only an explicit action may start the simulated phases.** Explicit
 means pressing Re-analyze, or flipping `Simulate` on. Everything else — gaining focus, an inline edit,

@@ -26,8 +26,8 @@ namespace Assets.Scripts.Dungeon
         public bool IsRevisit;
         public List<RunModifierSelection> Modifiers = new List<RunModifierSelection>();
 
-        // Heroes who fell and stay down on the run's next floor; emptied by a visit to town (DownedCarry).
-        public List<string> DownedHeroKeys = new List<string>();
+        // Each hero's health as the last floor left it: a new floor heals nobody (HealthCarry).
+        public List<HeroHealthSaveData> HeroHealth = new List<HeroHealthSaveData>();
 
         // Room event losses that last the run; a floor's own afflictions live in the dungeon save.
         public List<Rooms.Events.LevelAffliction> RunAfflictions = new List<Rooms.Events.LevelAffliction>();

@@ -2379,9 +2379,7 @@ namespace Assets.Scripts.Rooms
         /// worth to whoever drinks it; ItemSO owns the arithmetic so the balance model agrees.</summary>
         private int DrinkHeal(ICombatUnit user, ItemSO item, ICombatUnit target)
         {
-            int max = target.GetEffectiveStat(StatType.MaxHealth);
-            int amount = item.HealAmountFor(max, PotionBeltState.HealBonusFor(item));
-            int healed = HealthOps.Heal(target, RunFear.Current.ScaleHealing(target, amount),
+            int healed = HealthOps.Heal(target, PotionUse.HealAmount(item, target),
                 new HealthSource(user, HealthCause.Item), Events).Healed;
             CombatAudio.Play(CombatSound.ItemUse);
             CombatAudio.Play(CombatSound.Heal);
@@ -2395,7 +2393,7 @@ namespace Assets.Scripts.Rooms
         /// </summary>
         private string DrinkCharges(ItemSO item, ICombatUnit target)
         {
-            int charges = Mathf.Max(1, item.ConsumableCharges + PotionBeltState.ChargeBonusFor(item));
+            int charges = PotionUse.ChargesOf(item);
             var bank = _calculator != null ? _calculator.Charges : null;
             if (bank == null || !bank.Carries(target))
             {

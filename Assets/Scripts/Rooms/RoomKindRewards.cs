@@ -16,7 +16,7 @@ namespace Assets.Scripts.Rooms
         /// it keeps its meaning as bars grow - the flat-heal mistake the analyzer already caught once
         /// with potions.
         /// </summary>
-        public const float RestHealFraction = 0.35f;
+        public const float RestHealFraction = 0.5f;
 
         /// <summary>Gold in a cache at depth 1, before the per-depth step.</summary>
         public const int TreasureGoldBase = 15;

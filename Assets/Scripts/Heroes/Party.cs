@@ -481,7 +481,7 @@ namespace Assets.Scripts.Heroes
         /// <summary>
         /// Refills every hero to the top of the bar they actually fight with - <b>effective</b> max
         /// health, gear included. Filling <c>Stats.MaxHealth</c> instead left a geared hero short by
-        /// exactly their +MaxHealth bonus at the start of every level, which is most of the reason
+        /// exactly their +MaxHealth bonus at the start of every run, which is most of the reason
         /// that bonus did nothing.
         /// </summary>
         public void HealAll()

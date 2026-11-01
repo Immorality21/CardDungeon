@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.Events;
+using Assets.Scripts.Hub;
 using Assets.Scripts.Items;
 using Assets.Scripts.Progression;
 
@@ -26,12 +28,82 @@ namespace Assets.Scripts.Tutorial
                 return;
             }
             var tutorial = UnityEngine.Resources.Load<TutorialSO>(TutorialSO.ResourcePath);
-            if (tutorial == null || tutorial.GearReward == null || tutorial.GearRunOrFirst != run
-                || tutorial.GearLevelIndex != levelIndex)
+            if (tutorial == null)
             {
                 return;
             }
-            InventoryManager.Instance.AddItem(tutorial.GearReward, 1, EconomySource.LevelClear);
+            if (tutorial.GearReward != null && tutorial.GearRunOrFirst == run && tutorial.GearLevelIndex == levelIndex)
+            {
+                InventoryManager.Instance.AddItem(tutorial.GearReward, 1, EconomySource.LevelClear);
+            }
+            if (tutorial.BeltRun == run && levelIndex == run.Levels.Count - 1)
+            {
+                PayForTheBelt(tutorial);
+            }
+        }
+
+        /// <summary>
+        /// The belt step's promise: whatever is still missing for the Merchant and the first healing
+        /// capacity step, so the player can pay and nothing they saved is wasted, and the recipe of
+        /// <see cref="TutorialSO.BeltPotionKey"/>. A belt recipe is not an item (the Merchant sells it),
+        /// so it is learned outright. The clear's own gold counts towards the price.
+        /// </summary>
+        private static void PayForTheBelt(TutorialSO tutorial)
+        {
+            var belt = PotionBeltSO.Load();
+            if (belt == null)
+            {
+                return;
+            }
+
+            var bill = new Dictionary<ItemSO, int>();
+            var merchant = HubState.Town()?.Find(tutorial.BeltBuildingKey);
+            if (merchant != null && !BuildingOps.IsBuilt(merchant, HubState.Progress()))
+            {
+                AddToBill(bill, merchant.PlacementCost);
+            }
+
+            var healing = belt.Find(PotionBeltState.HealingKey);
+            var step = PotionBeltOps.NextCapacity(healing, PotionBeltState.Capacity(healing));
+            if (step != null)
+            {
+                AddToBill(bill, step.Materials);
+            }
+
+            var inventory = InventoryManager.Instance;
+            foreach (var line in bill)
+            {
+                int missing = TutorialOps.Shortfall(line.Value, inventory.GetMaterialQuantity(line.Key.Key));
+                if (missing > 0)
+                {
+                    inventory.AddItem(line.Key, missing, EconomySource.LevelClear);
+                }
+            }
+
+            var meta = MetaProgressManager.Instance;
+            int gold = TutorialOps.Shortfall(step != null ? step.Gold : 0, meta.Gold + meta.PendingRunGold);
+            if (gold > 0)
+            {
+                meta.AddGold(gold, EconomySource.LevelClear);
+            }
+
+            var potion = belt.Find(tutorial.BeltPotionKey);
+            if (potion != null)
+            {
+                PotionBeltState.Unlock(potion);
+            }
+        }
+
+        private static void AddToBill(Dictionary<ItemSO, int> bill, IEnumerable<MaterialCost> costs)
+        {
+            foreach (var cost in costs)
+            {
+                if (cost != null && cost.Material != null)
+                {
+                    bill.TryGetValue(cost.Material, out int amount);
+                    bill[cost.Material] = amount + cost.Amount;
+                }
+            }
         }
     }
 }

@@ -3255,6 +3255,10 @@ Four things this pass learned:
 
 ## §5am — The potion belt refills per run; the model still refills per floor (2026-10-28, playtest 3 finding 5)
 
+> **Superseded 2026-11-01 (owner): the model spends the belt per run too.** Once health carried between
+> floors the free refill decided results (Emberfall 3% wipes against 69%). Potency and capacity below still
+> stand; "still refills every floor" does not. See §5au.
+
 The real game now tops the healing-potion belt up on a run's **first floor only**, and the Merchant
 sells potency steps (+10/20/30/40% of max HP on top of the potion's own 30%). **The model was
 deliberately left alone** (owner): `PartyBaseline.SustainPool` and the floor simulator still give
@@ -3470,3 +3474,48 @@ Owner: Attack is sometimes stronger than Slash or Ice Shard; Flurry's four hits 
 
 Suite green. Bot: one finished game, not a measurement. Everything/ClearEverything, seed 3000: every run cleared first try,
 against 2 wipes on the same seed before. Heroes hit harder here, so this pass makes the game easier, not harder.
+
+## §5au — Health carries between floors, refuges pay for it (2026-11-01)
+
+Owner: stop healing when the party arrives on the next floor; that is what refuges are for, and the difficulty
+rise is fine. **Health is now a run resource** (`HealthCarry`, `RunSaveData.HeroHealth`). Refuges heal **50%**, up
+from 35%. **The model now spends the belt per run** too (owner, reversing §5am's per-floor refill): with health
+carried it decided results, Emberfall 3% wipes against 69%. The floor sim also refills ability charges at a refuge
+now, as the game does; it never had.
+
+Wipe % per floor (simulator, straight-line party). The old column refilled the belt every floor, as the model did; the other two spend it across the run:
+
+| run | old rules | carried, 35%, refuges as they were | shipped |
+|---|---|---|---|
+| Drowned March | 0 0 0 1 12 | 0 6 76 98 100 | 0 4 2 10 46 |
+| Ashen Deep | 0 0 1 | 0 1 69 | 0 2 67 |
+| Blood Stair | 0 0 1 0 0 | 0 2 56 1 22 | 0 1 32 0 5 |
+| Catacombs | 0 0 0 | 0 2 24 | 0 1 9 |
+
+- **The March needed three refuges** (The Reedcage, Rotwater Deep, The Mire Throne): it had none and is five
+  floors long. Two left the finale at 95-100% wipes. **Which floor matters as much as how many.** [0,0,1,1,0] and
+  [0,1,0,1,0] both wipe 100% on the Throne.
+- **A refuge is worth far more than its heal:** it adds half the bar, refills every charge and removes a fight.
+  A refuge on every later floor at 35% took the Ashen Deep from 31% clears to 98%, which is why the owner chose
+  fewer and stronger.
+- **The Ossuary Gate, Difficulty 7.9 -> 7.1.** The March's refuges remove fights, so the March pays less XP, so
+  the party the Blood Stair is measured against got weaker: 42% wipes became 56%. Now 32%.
+- **The model is a party-wide average per floor**, so a dead hero reads as everyone hurt. Errs easy.
+
+Bot, 6 games, one per profile, seed 3000, early runs plus the March and the Ashen Deep. Five games finished every
+run, one gave up on the March after 4 tries, 26 wipes in 72 attempts, none stuck. On the early runs 15 wipes against
+9 before this change. **The Mire Throne is where the March ends: 6 wipes in 11 plays, but only 1 of 6 boss fights
+lost**, so the floor kills, not the boss. **The bot cleared Emberfall 5 of 5 on the first try against the
+simulator's 67% wipes**, with a base belt: its party is stronger than the straight-line one after that many retries.
+Six games: a direction only. The tier bands were not revisited: most of the report's "easier than its tier" lines
+predate this pass.
+
+**Same day (owner): potions work while walking, and the model drinks carefully.** `PotionWindow` drinks for free
+between fights. The model does the same at the Adaptive policy's 45% (`DrinkBetweenRooms`), and rations the belt: a
+floor's share is what is left divided by the floors still ahead, and the rest is a reserve drunk only to save a hero at
+20% or under (`PotionReserveFor`, `SimSettings.EmergencyHealth`). A hard ration with no emergency use took the March to
+7% clears with potions unspent in dead parties' belts, which measures nothing a player would do. The bot does not
+drink between rooms yet.
+
+Wipes with both in: March 0 6 2 14 44 (45% clear), Ashen Deep 0 2 52 (47%), Blood Stair 0 9 32 0 4 (59%), Catacombs 0 2 8
+(90%), Warrens 0 37 (63%). The March still empties its belt by floor 3, through the emergency rule.

@@ -978,13 +978,17 @@ namespace Assets.Scripts.Heroes
         /// <see cref="SphereGridSO.Nodes"/>.</summary>
         public static List<SphereGridNode> Frontier(SphereGridSO grid, ICollection<string> activated)
         {
-            var result = new List<SphereGridNode>();
-            if (grid == null || grid.Nodes == null)
-            {
-                return result;
-            }
+            return grid == null || grid.Nodes == null
+                ? new List<SphereGridNode>()
+                : Frontier(grid, BuildAdjacency(grid), activated);
+        }
 
-            var adjacency = BuildAdjacency(grid);
+        /// <summary><see cref="Frontier(SphereGridSO, ICollection{string})"/> for a caller walking the
+        /// grid repeatedly, who holds on to the adjacency.</summary>
+        private static List<SphereGridNode> Frontier(SphereGridSO grid,
+            Dictionary<string, List<string>> adjacency, ICollection<string> activated)
+        {
+            var result = new List<SphereGridNode>();
             var active = ActiveNodes(grid, activated);
             var seen = new List<string>();
             foreach (var node in grid.Nodes)
@@ -1064,10 +1068,10 @@ namespace Assets.Scripts.Heroes
                 return activated;
             }
 
-            var adjacency = baseSlots >= 0 ? BuildAdjacency(grid) : null;
+            var adjacency = BuildAdjacency(grid);
             while (true)
             {
-                var frontier = Frontier(grid, activated);
+                var frontier = Frontier(grid, adjacency, activated);
                 SphereGridNode pick = null;
                 int pickCost = int.MaxValue;
                 SphereGridNode fallback = null;

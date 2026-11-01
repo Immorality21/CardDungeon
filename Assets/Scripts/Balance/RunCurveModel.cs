@@ -12,9 +12,9 @@ namespace Assets.Scripts.Balance
 {
     /// <summary>
     /// One level of a run, modelled end to end. The important property of this game's structure is
-    /// that <c>Party.HealAll()</c> only fires when a fresh dungeon is entered, so within a level HP is
-    /// a consumable resource: the meaningful question is not "can the party beat one room" but "does
-    /// the party survive every room in the level on one health bar plus its potion belt".
+    /// that <c>Party.HealAll()</c> only fires on a run's first floor, so across a run HP is a
+    /// consumable resource: the meaningful question is not "can the party beat one room" but "does
+    /// the party survive every room of the run on one health bar plus its potions and refuges".
     /// </summary>
     public class LevelCurve
     {
@@ -129,6 +129,9 @@ namespace Assets.Scripts.Balance
         /// <summary>Heroes in the party entering this level. Roster growth makes this vary per level.</summary>
         public int PartySize;
 
+        /// <summary>Share of the party's bar this level is entered on: what the level before it left.</summary>
+        public float EntryHealthFraction = 1f;
+
         /// <summary>HP + healing the party brings into this level, plus what its refuges give back — the denominator of AttritionLoad.</summary>
         public int SustainPool;
 
@@ -155,7 +158,13 @@ namespace Assets.Scripts.Balance
         /// The single number the run curve is drawn from. Attrition load is the right choice because
         /// it is the metric that actually ends runs, and it composes across rooms.
         /// </summary>
-        public float DifficultyScore => AttritionLoad;
+        public float DifficultyScore => FreshAttritionLoad;
+
+        /// <summary>Attrition on a full bar: what this level itself asks, without what the levels
+        /// before it already took. <see cref="AttritionLoad"/> is what it asks of the party that gets
+        /// there. The step between two levels reads this one, or a run of identical floors would read
+        /// as escalating.</summary>
+        public float FreshAttritionLoad;
 
         public string LayoutKind => Layout != null ? "Manual" : "Generated";
 
@@ -339,6 +348,8 @@ namespace Assets.Scripts.Balance
                 AddRecruit(roster, lifetime, entry.RescueHero);
             }
 
+            CarryHealth(curve);
+
             // A hero who joins on the clear fights none of this run, only the ones it opens - so
             // they reach EndRoster, which is what a downstream run inherits.
             AddRecruit(roster, lifetime, run.JoinsOnClear);
@@ -466,6 +477,37 @@ namespace Assets.Scripts.Balance
         /// its layout's authored count when that is higher (authored kinds are spent from the quota
         /// first, so the two never add up - see <c>DungeonManager.PlaceRoomKinds</c>).
         /// </summary>
+        /// <summary>
+        /// Health and the potion belt are run resources (owner, 2026-11-01), so a level's sustain holds
+        /// only what the level before it left, not a full bar and a full belt. Each level is aggregated
+        /// on its own first; this walks the run and takes the rest back out of the denominator. What
+        /// is left of a level's sustain refills the bar first and stays in the belt after that, which
+        /// spends potions only when the bar runs out.
+        /// </summary>
+        private static void CarryHealth(RunCurve curve)
+        {
+            float carried = 1f;
+            float beltLeft = 1f;
+            foreach (var level in curve.Levels)
+            {
+                int bar = level.Party != null ? level.Party.HealthPool : 0;
+                if (bar <= 0)
+                {
+                    continue;
+                }
+
+                float belt = level.SustainPool - bar - level.RestHealing;
+                float sustain = bar * carried + belt * beltLeft + level.RestHealing;
+                level.EntryHealthFraction = carried;
+                level.SustainPool = Mathf.RoundToInt(sustain);
+                level.AttritionLoad = sustain > 0f ? level.ExpectedHealthCost / sustain : level.ExpectedHealthCost > 0f ? 2f : 0f;
+
+                float left = Mathf.Max(0f, sustain - level.ExpectedHealthCost);
+                carried = Mathf.Min(1f, left / bar);
+                beltLeft = belt > 0f ? Mathf.Clamp(left - bar, 0f, belt * beltLeft) / belt : 0f;
+            }
+        }
+
         private static int KindCount(RunLevelEntry entry, RoomKind kind)
         {
             int quota = 0;
@@ -788,6 +830,7 @@ namespace Assets.Scripts.Balance
             level.SustainPool = sustain;
             level.Party = party;
             level.AttritionLoad = sustain > 0 ? level.ExpectedHealthCost / sustain : 0f;
+            level.FreshAttritionLoad = level.AttritionLoad;
         }
     }
 }

@@ -6,8 +6,8 @@ namespace Assets.Scripts.Dungeon
     /// <summary>
     /// The rules for carrying hero health across a mid-level quit and resume.
     ///
-    /// <para>Health is the level's scarce resource - it refills only on entering a fresh dungeon, so
-    /// every fight and every room event inside a level spends from one bar. Without this the bar was
+    /// <para>Health is the run's scarce resource - it refills only on a run's first floor, so every
+    /// fight and every room event of a run spends from one bar. Without this the bar was
     /// rebuilt full on resume (<c>Party.Initialize</c> derives a hero at full health), which made
     /// quitting to the menu and resuming a free heal, and quietly undid every event's damage as
     /// well.</para>
@@ -32,7 +32,7 @@ namespace Assets.Scripts.Dungeon
         /// <i>effective</i> maximum, so re-deriving a hero whose bar grew (gear, a node bought at
         /// the hub between sessions) restores the saved value rather than the new ceiling, and one
         /// whose bar shrank cannot resume above it. Zero is preserved: a hero downed in an earlier
-        /// room stays down until the next level, exactly as they do without a quit.</para>
+        /// room stays down for the rest of the run, exactly as they do without a quit.</para>
         /// </summary>
         public static int HealthFor(IReadOnlyList<HeroHealthSaveData> saved, string heroKey, int maxHealth)
         {

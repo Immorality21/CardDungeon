@@ -153,6 +153,9 @@ namespace Assets.Scripts.Balance
         /// <summary>True for a run's first floor, the only one that starts on full charges.</summary>
         public bool StartsWithFullCharges;
 
+        /// <summary>Share of the party's bar this floor was entered on: what the floor before it left.</summary>
+        public float StartHealthFraction = 1f;
+
         public Dictionary<SimPolicy, EncounterSimulator.FloorOutcome> Outcomes =
             new Dictionary<SimPolicy, EncounterSimulator.FloorOutcome>();
 
@@ -213,6 +216,10 @@ namespace Assets.Scripts.Balance
 
         /// <summary>Per-floor simulations - the read on whether a run can actually be lost.</summary>
         public List<FloorSimReport> Floors = new List<FloorSimReport>();
+
+        /// <summary>Every floor simulated so far, by the curve's own level: a revisit-funded curve of a
+        /// run is a different party on the same floors, so the run alone is not a key.</summary>
+        public Dictionary<LevelCurve, FloorSimReport> FloorChain = new Dictionary<LevelCurve, FloorSimReport>();
 
         /// <summary>
         /// Per-floor investment frontiers - the read on whether a run can be lost *by whom*, and the

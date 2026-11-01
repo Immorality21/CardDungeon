@@ -42,6 +42,27 @@ namespace Assets.Scripts.Tutorial
 
         /// <summary>The grid was opened and left again after the gear step (<see cref="TutorialStep.RevisitHall"/>).</summary>
         public bool HallRevisited;
+
+        /// <summary>The Threshold is cleared, which paid for the belt's first step. True with no such run set.</summary>
+        public bool BeltRunCleared;
+
+        /// <summary>The belt's building stands. A missing lot reads as built, so its step is skipped.</summary>
+        public bool BeltBuildingBuilt;
+
+        /// <summary>It is on offer and the inventory holds its price right now.</summary>
+        public bool CanAffordBeltBuilding;
+
+        /// <summary>The healing potion's capacity has had a step bought.</summary>
+        public bool BeltUpgraded;
+
+        /// <summary>The next healing capacity step exists and can be paid right now.</summary>
+        public bool CanAffordBeltUpgrade;
+
+        /// <summary>The potion the Threshold's clear taught is known.</summary>
+        public bool BeltPotionKnown;
+
+        /// <summary>That potion is in a belt slot.</summary>
+        public bool BeltPotionPacked;
     }
 
     /// <summary>
@@ -91,13 +112,35 @@ namespace Assets.Scripts.Tutorial
             {
                 return TutorialStep.RevisitHall;
             }
-            return TutorialStep.GoOn;
+            if (!p.BeltRunCleared)
+            {
+                return TutorialStep.GoOn;
+            }
+            if (!p.BeltBuildingBuilt && p.CanAffordBeltBuilding)
+            {
+                return TutorialStep.BuildMerchant;
+            }
+            if (p.BeltBuildingBuilt && !p.BeltUpgraded && p.CanAffordBeltUpgrade)
+            {
+                return TutorialStep.UpgradeBelt;
+            }
+            if (p.BeltPotionKnown && !p.BeltPotionPacked)
+            {
+                return TutorialStep.EquipPotion;
+            }
+            return TutorialStep.BeltReady;
         }
 
         /// <summary>Whether entering the dungeon at <paramref name="step"/> finishes the tutorial.</summary>
         public static bool FinishesOnDescent(TutorialStep step)
         {
-            return step == TutorialStep.GoOn;
+            return step == TutorialStep.BeltReady;
+        }
+
+        /// <summary>What <paramref name="needed"/> asks for beyond the <paramref name="owned"/> already held.</summary>
+        public static int Shortfall(int needed, int owned)
+        {
+            return System.Math.Max(0, needed - owned);
         }
 
         /// <summary>
@@ -145,18 +188,31 @@ namespace Assets.Scripts.Tutorial
 
         /// <summary>
         /// Whether a step locks the town to one building (<see cref="GuidedLotKey"/>): the hall's two
-        /// steps and the Storehouse's.
+        /// steps, the Storehouse's, and the belt's.
         /// </summary>
         private static bool GuidesBuilding(TutorialStep step)
         {
             return step == TutorialStep.BuildHall || step == TutorialStep.SpendXp || step == TutorialStep.EquipGear
-                || step == TutorialStep.RevisitHall;
+                || step == TutorialStep.RevisitHall || step == TutorialStep.BuildMerchant
+                || step == TutorialStep.UpgradeBelt || step == TutorialStep.EquipPotion;
         }
 
-        /// <summary>The lot the step walks the player to: the Storehouse for the gear step, else the hall.</summary>
-        public static string GuidedLotKey(TutorialStep step, string hallKey, string gearKey)
+        /// <summary>The lot the step walks the player to.</summary>
+        public static string GuidedLotKey(TutorialStep step, string hallKey, string gearKey,
+            string beltKey = null, string campKey = null)
         {
-            return step == TutorialStep.EquipGear ? gearKey : hallKey;
+            switch (step)
+            {
+                case TutorialStep.EquipGear:
+                    return gearKey;
+                case TutorialStep.BuildMerchant:
+                case TutorialStep.UpgradeBelt:
+                    return beltKey;
+                case TutorialStep.EquipPotion:
+                    return campKey;
+                default:
+                    return hallKey;
+            }
         }
 
         /// <summary>
@@ -199,7 +255,7 @@ namespace Assets.Scripts.Tutorial
         public static bool GuidesRoad(TutorialStep step)
         {
             return step == TutorialStep.ClearFirstFloor || step == TutorialStep.TakeTheRoad
-                || step == TutorialStep.GoOn;
+                || step == TutorialStep.GoOn || step == TutorialStep.BeltReady;
         }
 
         /// <summary>
@@ -285,6 +341,49 @@ namespace Assets.Scripts.Tutorial
                         return TutorialCue.GoOn;
                     }
                     return screen == TutorialScreen.Inventory ? TutorialCue.GearEquipped : TutorialCue.None;
+
+                case TutorialStep.BuildMerchant:
+                    if (screen == TutorialScreen.Town)
+                    {
+                        return TutorialCue.BuildMerchantInTown;
+                    }
+                    return screen == TutorialScreen.GuideLot ? TutorialCue.BuildMerchantOnPanel : TutorialCue.None;
+
+                case TutorialStep.UpgradeBelt:
+                    switch (screen)
+                    {
+                        case TutorialScreen.Town:
+                            return TutorialCue.OpenMerchantInTown;
+                        case TutorialScreen.GuideLot:
+                            return TutorialCue.EnterMerchantOnPanel;
+                        case TutorialScreen.Merchant:
+                            return TutorialCue.UpgradeBelt;
+                        default:
+                            return TutorialCue.None;
+                    }
+
+                case TutorialStep.EquipPotion:
+                    switch (screen)
+                    {
+                        case TutorialScreen.Town:
+                            return TutorialCue.OpenCampfireInTown;
+                        case TutorialScreen.GuideLot:
+                            return TutorialCue.EnterCampfireOnPanel;
+                        case TutorialScreen.Merchant:
+                            // The step starts the moment the upgrade is bought, with the Merchant still up.
+                            return TutorialCue.BeltUpgraded;
+                        case TutorialScreen.Campfire:
+                            return TutorialCue.EquipPotion;
+                        default:
+                            return TutorialCue.None;
+                    }
+
+                case TutorialStep.BeltReady:
+                    if (screen == TutorialScreen.Town)
+                    {
+                        return TutorialCue.BeltReady;
+                    }
+                    return screen == TutorialScreen.Campfire ? TutorialCue.BeltPacked : TutorialCue.None;
 
                 default:
                     return TutorialCue.None;

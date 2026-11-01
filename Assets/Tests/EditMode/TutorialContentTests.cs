@@ -187,6 +187,23 @@ namespace Tests.EditMode
                 "The gear reward is not in the ItemCatalog, so the hub cannot resolve it.");
         }
 
+        /// <summary>The belt step pays for itself, so it needs a real step to buy and a real potion to pack.</summary>
+        [Test]
+        public void TheBeltStep_HasARunAStepAndAPotion()
+        {
+            var tutorial = Tutorial();
+            var belt = PotionBeltSO.Load();
+
+            Assert.IsNotNull(tutorial.BeltRun, "The tutorial names no run to pay for the belt.");
+            Assert.IsNotNull(belt, "No potion belt asset.");
+            var healing = belt.Find(PotionBeltState.HealingKey);
+            Assert.IsNotNull(PotionBeltOps.NextCapacity(healing, healing.BaseCapacity), "Healing has no capacity step to buy.");
+            var potion = belt.Find(tutorial.BeltPotionKey);
+            Assert.IsNotNull(potion, "The belt has no type called " + tutorial.BeltPotionKey + ".");
+            Assert.IsFalse(potion.StartsUnlocked, "A potion known from the start teaches nothing.");
+            Assert.GreaterOrEqual(belt.StartingSlots, 2, "The potion needs a second slot to go in.");
+        }
+
         [Test]
         public void EveryCue_HasAuthoredWords()
         {

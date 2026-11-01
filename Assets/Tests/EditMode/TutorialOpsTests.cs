@@ -21,6 +21,93 @@ namespace Tests.EditMode
             return new TutorialProgress { Started = true };
         }
 
+        // --- the belt step ------------------------------------------------------
+
+        /// <summary>A save past the gear step and home from the Threshold, nothing about the belt done.</summary>
+        private static TutorialProgress HomeFromTheThreshold()
+        {
+            return new TutorialProgress
+            {
+                Started = true,
+                FirstFloorCleared = true,
+                GuideBuilt = true,
+                HeroHasSpent = true,
+                GearFloorCleared = true,
+                AnyGearEquipped = true,
+                HallRevisited = true,
+                BeltRunCleared = true,
+                CanAffordBeltBuilding = true,
+                CanAffordBeltUpgrade = true,
+                BeltPotionKnown = true
+            };
+        }
+
+        [Test]
+        public void CurrentStep_BeforeTheThreshold_GoesOn_AndNothingFinishes()
+        {
+            var p = HomeFromTheThreshold();
+            p.BeltRunCleared = false;
+
+            Assert.AreEqual(TutorialStep.GoOn, TutorialOps.CurrentStep(p));
+        }
+
+        [Test]
+        public void CurrentStep_WalksTheBeltStep_InOrder()
+        {
+            var p = HomeFromTheThreshold();
+            Assert.AreEqual(TutorialStep.BuildMerchant, TutorialOps.CurrentStep(p));
+
+            p.BeltBuildingBuilt = true;
+            Assert.AreEqual(TutorialStep.UpgradeBelt, TutorialOps.CurrentStep(p));
+
+            p.BeltUpgraded = true;
+            Assert.AreEqual(TutorialStep.EquipPotion, TutorialOps.CurrentStep(p));
+
+            p.BeltPotionPacked = true;
+            Assert.AreEqual(TutorialStep.BeltReady, TutorialOps.CurrentStep(p));
+        }
+
+        [Test]
+        public void CurrentStep_ABeltStepThatCannotBePaid_IsSkippedNeverWaitedOn()
+        {
+            var p = HomeFromTheThreshold();
+            p.CanAffordBeltBuilding = false;
+            p.CanAffordBeltUpgrade = false;
+            p.BeltPotionKnown = false;
+
+            Assert.AreEqual(TutorialStep.BeltReady, TutorialOps.CurrentStep(p));
+        }
+
+        [TestCase(TutorialStep.BuildMerchant, "merchant")]
+        [TestCase(TutorialStep.UpgradeBelt, "merchant")]
+        [TestCase(TutorialStep.EquipPotion, "campfire")]
+        public void TheBeltSteps_LockTheTownToTheirLot(TutorialStep step, string lot)
+        {
+            Assert.AreEqual(lot, TutorialOps.GuidedLotKey(step, Hall, "storehouse", "merchant", "campfire"));
+            Assert.IsTrue(TutorialOps.LocksTown(step));
+            Assert.IsFalse(TutorialOps.AllowsRoad(step));
+        }
+
+        [Test]
+        public void TheBeltStep_SaysSomethingOnEveryScreenItUses()
+        {
+            Assert.AreEqual(TutorialCue.UpgradeBelt,
+                TutorialOps.CueFor(TutorialStep.UpgradeBelt, TutorialScreen.Merchant, false));
+            Assert.AreEqual(TutorialCue.BeltUpgraded,
+                TutorialOps.CueFor(TutorialStep.EquipPotion, TutorialScreen.Merchant, false));
+            Assert.AreEqual(TutorialCue.EquipPotion,
+                TutorialOps.CueFor(TutorialStep.EquipPotion, TutorialScreen.Campfire, false));
+            Assert.AreEqual(TutorialCue.BeltPacked,
+                TutorialOps.CueFor(TutorialStep.BeltReady, TutorialScreen.Campfire, false));
+        }
+
+        [Test]
+        public void Shortfall_PaysOnlyWhatIsMissing()
+        {
+            Assert.AreEqual(7, TutorialOps.Shortfall(10, 3));
+            Assert.AreEqual(0, TutorialOps.Shortfall(10, 12));
+        }
+
         // --- the step -----------------------------------------------------------
 
         [Test]
@@ -106,7 +193,8 @@ namespace Tests.EditMode
         {
             Assert.IsFalse(TutorialOps.FinishesOnDescent(TutorialStep.TakeTheRoad));
             Assert.IsFalse(TutorialOps.FinishesOnDescent(TutorialStep.EquipGear));
-            Assert.IsTrue(TutorialOps.FinishesOnDescent(TutorialStep.GoOn));
+            Assert.IsFalse(TutorialOps.FinishesOnDescent(TutorialStep.GoOn));
+            Assert.IsTrue(TutorialOps.FinishesOnDescent(TutorialStep.BeltReady));
         }
 
         [Test]

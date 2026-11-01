@@ -421,10 +421,10 @@ namespace Assets.Scripts.Dungeon
             Party.HealAll();
             if (ActiveRun != null)
             {
-                DownedCarry.KeepDown(Party, _fileHandler.Load<RunSaveData>(), CurrentRunKey, RunLevelIndex);
+                HealthCarry.Restore(Party, _fileHandler.Load<RunSaveData>(), CurrentRunKey, RunLevelIndex);
             }
-            // Afflictions and the consumption ledger are level-scoped like health, so a fresh level
-            // starts clean on all three.
+            // Afflictions and the consumption ledger are level-scoped, so a fresh level starts clean
+            // on both.
             Afflictions.Clear();
             if (ActiveRun != null)
             {
@@ -514,8 +514,8 @@ namespace Assets.Scripts.Dungeon
             // Stock the potion belt - on a run's FIRST floor only (owner, playtest 3 finding 5): potions
             // drunk on floor 1 stay gone for floor 2. Each slotted type is filled to its capacity and an
             // unslotted type emptied: the belt is what the party carries, and potions are found nowhere
-            // else. The balance model still assumes a full healing belt every floor, on purpose - see
-            // docs/BALANCING.md §5am.
+            // else. The balance model spends it the same way since 2026-11-01 - see docs/BALANCING.md
+            // §5am.
             var belt = PotionBeltSO.Load();
             if (belt != null && InventoryManager.HasInstance && MetaProgressManager.HasInstance
                 && EquippedMagicState.RefillsOnLevelStart(RunLevelIndex))
@@ -1677,9 +1677,9 @@ namespace Assets.Scripts.Dungeon
                 runSave.CurrentLevelIndex = RunLevelIndex + 1;
                 runSave.ActiveDungeonSeed = 0;
 
-                // Whoever fell on this floor is still down on the next one, unless the party goes back
-                // to town first. A revive could only reach them in the fight they fell in.
-                DownedCarry.Record(runSave, Party);
+                // Health is a run resource: the next floor starts where this one ended, the fallen
+                // included. A revive could only reach them in the fight they fell in.
+                HealthCarry.Record(runSave, Party);
 
                 // Carry equipped magic to the next level of the run - merged, like summons, so a
                 // hero benched for this floor keeps their slots. The opening floor replaces.

@@ -92,6 +92,22 @@ leaving the grid is the step (`MetaProgressSaveData.TutorialHallRevisited`, writ
 inventory keeps saying `GearEquipped` and pointing at its Back during the step. Walked in play 2026-10-27
 through `Tools ▸ Tutorial` (town locked to the hall, grid on the Paladin with 40 XP, Back -> road opens).
 
+### The belt step (2026-11-01, owner)
+
+Going down after the gear step **no longer finishes the tutorial**: `GoOn` leaves the road pointed at the
+rest of the Threshold, and the last floor's clear pays for the belt (`TutorialSO.BeltRun`, in
+`TutorialRewards.PayForTheBelt`). It pays the **shortfall**: what is still missing for the Merchant
+(`BeltBuildingKey`, 10 Scrap Iron + 1 Rotted Timber if unbuilt) and the first healing capacity step
+(3 Scrap Iron + 2 Rotted Timber + 60 gold), counting what the player holds, so a saved pile is not doubled.
+A belt recipe is not an item, so the Energy recipe (`BeltPotionKey`) is learned outright, ahead of its
+usual sale after The Catacombs. Home: `BuildMerchant` (skipped when it stands), `UpgradeBelt` (the Merchant
+opens on its Potion Belt tab, locked to the Healing capacity row, `MerchantUI.GuideBelt`, Back shut until
+bought), `EquipPotion` (town locked to the campfire, its second belt slot pointed at, Back shut until the
+potion is packed), `BeltReady` (town open; going down finishes the tutorial). Any step the save cannot pay
+for is skipped. The materials show on the level-clear window; the recipe has no line there, only the
+banner says it (`BeltUpgraded`). The bot finishes the tutorial on its first town visit, so it gets none of
+this.
+
 ## How it works — the rules worth knowing before changing it
 
 - **Only the two ends are stored** (`MetaProgressSaveData.TutorialStarted` / `TutorialFinished`).

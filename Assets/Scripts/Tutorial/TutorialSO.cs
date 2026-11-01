@@ -60,6 +60,20 @@ namespace Assets.Scripts.Tutorial
         [Tooltip("BuildingSO.Key of the lot the gear step walks the player to: the inventory's building.")]
         public string GearBuildingKey = "storehouse";
 
+        [Tooltip("The run whose last floor pays for the belt step: on its clear, whatever is still " +
+                 "missing for the belt's building and its first healing capacity step, plus the recipe " +
+                 "of BeltPotionKey. Empty skips the belt step.")]
+        public RunDefinitionSO BeltRun;
+
+        [Tooltip("BuildingSO.Key of the lot that sells belt steps.")]
+        public string BeltBuildingKey = "merchant";
+
+        [Tooltip("BuildingSO.Key of the lot where the belt is packed.")]
+        public string CampBuildingKey = "campfire";
+
+        [Tooltip("BeltPotionType.Key of the potion the belt step teaches and packs.")]
+        public string BeltPotionKey = "Energy";
+
         public List<TutorialLine> Lines = new List<TutorialLine>();
 
         /// <summary>The authored words for <paramref name="cue"/>, or empty when there are none.</summary>

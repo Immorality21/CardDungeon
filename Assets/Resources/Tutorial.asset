@@ -18,6 +18,10 @@ MonoBehaviour:
   GearReward: {fileID: 11400000, guid: a980d0c632d67214090fec83f40050c4, type: 2}
   GearLevelIndex: 0
   GearBuildingKey: storehouse
+  BeltRun: {fileID: 11400000, guid: 02238c2f5e7bf674cb347b495fc6ac00, type: 2}
+  BeltBuildingKey: merchant
+  CampBuildingKey: campfire
+  BeltPotionKey: Energy
   Lines:
   - Cue: 1
   - Cue: 2
@@ -38,3 +42,14 @@ MonoBehaviour:
   - Cue: 17
   - Cue: 18
   - Cue: 19
+  - Cue: 20
+  - Cue: 21
+  - Cue: 22
+  - Cue: 23
+  - Cue: 24
+  - Cue: 25
+  - Cue: 26
+  - Cue: 27
+  - Cue: 28
+  - Cue: 29
+  - Cue: 30

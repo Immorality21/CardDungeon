@@ -90,7 +90,7 @@ namespace Assets.Scripts.Balance
                  "enemy that casts starts to read the same way.")]
         [Range(0f, 1f)] public float MaxEnemyCastChance = 0.5f;
 
-        [Header("Level attrition — HP is a level-scoped resource (HealAll only fires at level start)")]
+        [Header("Level attrition — HP is a run-scoped resource (HealAll only fires on a run's first floor)")]
         [Tooltip("Fraction of the party's HP + healing pool that should still be left after " +
                  "clearing every combat room in a level.")]
         [Range(-1f, 1f)] public float MinAttritionMargin = 0.20f;

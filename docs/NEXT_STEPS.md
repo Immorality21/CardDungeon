@@ -455,6 +455,11 @@ backlog.**
 
 ## Shipped ledger
 
+- **Health carries between floors** (2026-11-01, owner) — `BALANCING.md` §5au. Nothing heals on arrival at a
+  floor; refuges heal 50% and the March has three. The balance model carries health and spends the belt per run.
+- **The belt step of the tutorial** (2026-11-01, owner) — `TUTORIAL.md`. The Threshold's clear pays for the
+  Merchant and a healing capacity step and teaches the Energy recipe; the tutorial ends after packing it.
+
 One line each. Reasoning lives in `docs/BALANCING.md`, `docs/ELEMENTAL_PLAN.md` and the
 per-subsystem `CLAUDE.md` files — not here.
 

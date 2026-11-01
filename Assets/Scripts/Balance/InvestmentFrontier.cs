@@ -257,6 +257,19 @@ namespace Assets.Scripts.Balance
         public ItemSO PotionItem;
         public int PotionCount = -1;
 
+        /// <summary>Potions the floors before this one already drank: the belt is stocked once a run.</summary>
+        public int PotionsDrunk;
+
+        /// <summary>Gear bought per width/xp/gold, kept across the sweeps of one floor: a summon sweep
+        /// spends the same gold on the same heroes as the plain one.</summary>
+        public readonly Dictionary<string, GearSpend> GearSpends = new Dictionary<string, GearSpend>();
+
+        /// <summary>This floor's result per party, kept across its sweeps. A summon sweep's party is
+        /// often the plain one: a width without the learner, or too little XP to reach the summon.
+        /// One floor only: a settings object must not be reused for other rooms.</summary>
+        public readonly Dictionary<string, EncounterSimulator.FloorOutcome> Outcomes =
+            new Dictionary<string, EncounterSimulator.FloorOutcome>();
+
         /// <summary>The floor sim template — trials, seed, refuges, charges. Policy is forced to Adaptive.</summary>
         public EncounterSimulator.FloorSimSettings Sim;
 
@@ -511,8 +524,12 @@ namespace Assets.Scripts.Balance
                 System.Func<HeroSO, List<ItemSO>> gearLookup = null;
                 if (gold > 0 && settings.Catalog != null && settings.StatWeightFor != null)
                 {
-                    var spend = GearLoadout.Spend(
-                        roster, xp, settings.Catalog, gold, settings.StatWeightFor, incoming);
+                    string spendKey = width + "/" + xp + "/" + gold;
+                    if (!settings.GearSpends.TryGetValue(spendKey, out var spend))
+                    {
+                        spend = GearLoadout.Spend(roster, xp, settings.Catalog, gold, settings.StatWeightFor, incoming);
+                        settings.GearSpends[spendKey] = spend;
+                    }
                     // Charge what was actually bought, not what was offered: an axis step past the
                     // point the catalog runs dry would otherwise read as a dearer mix for nothing.
                     point.GoldOnGear = spend.GoldSpent;
@@ -525,17 +542,22 @@ namespace Assets.Scripts.Balance
                     ? PartyBaseline.Build(roster, _ => xp, gearLookup, settings.PotionItem, settings.PotionCount,
                         hero => SummonBuildNodes(hero, xp, settings.SummonKey))
                     : PartyBaseline.Build(roster, xp, gearLookup, settings.PotionItem, settings.PotionCount);
-                if (settings.PrepareParty != null)
+                string partyKey = PartyKey(party);
+                if (!settings.Outcomes.TryGetValue(partyKey, out var outcome))
                 {
-                    settings.PrepareParty(party);
+                    if (settings.PrepareParty != null)
+                    {
+                        settings.PrepareParty(party);
+                    }
+
+                    var sim = CloneSettings(settings.Sim);
+                    sim.Policy = SimPolicy.Adaptive;
+                    sim.PotionCount = Mathf.Max(0, party.PotionCount - settings.PotionsDrunk);
+                    sim.PotionHealAmount = party.PotionHealAmount;
+
+                    outcome = EncounterSimulator.RunFloor(party, settings.Rooms, sim);
+                    settings.Outcomes[partyKey] = outcome;
                 }
-
-                var sim = CloneSettings(settings.Sim);
-                sim.Policy = SimPolicy.Adaptive;
-                sim.PotionCount = party.PotionCount;
-                sim.PotionHealAmount = party.PotionHealAmount;
-
-                var outcome = EncounterSimulator.RunFloor(party, settings.Rooms, sim);
                 point.WipeRate = outcome.WipeRate;
                 point.EndHealthFraction = outcome.AverageEndHealthFraction;
                 point.HeroDeaths = outcome.AverageHeroDeaths;
@@ -543,6 +565,27 @@ namespace Assets.Scripts.Balance
 
             cache[key] = point;
             return point;
+        }
+
+        /// <summary>Who is fielded, what each bought and what each wears: all a floor's result depends on.
+        /// Nodes stay in buying order, so two parties that differ only in that order are simulated twice.</summary>
+        private static string PartyKey(PartyBaseline party)
+        {
+            var key = new System.Text.StringBuilder();
+            foreach (var hero in party.Heroes)
+            {
+                key.Append(hero.Definition != null ? hero.Definition.SaveKey : hero.Name).Append(':');
+                key.Append(string.Join(",", hero.ActivatedNodes)).Append(':');
+                if (hero.Gear != null)
+                {
+                    foreach (var item in hero.Gear)
+                    {
+                        key.Append(item != null ? item.Key : string.Empty).Append(',');
+                    }
+                }
+                key.Append(';');
+            }
+            return key.ToString();
         }
 
         /// <summary>
@@ -559,7 +602,7 @@ namespace Assets.Scripts.Balance
                 : null;
             return summonNode != null
                 ? Heroes.SphereGridOps.BeelineThenGreedy(grid, summonNode.Key, xp, Cards.EquippedMagicState.DefaultSlotCount)
-                : Heroes.SphereGridOps.GreedySpend(grid, null, xp, out _, Cards.EquippedMagicState.DefaultSlotCount);
+                : GridSpendMemo.Spend(grid, xp);
         }
 
         /// <summary>Every summon some hero on the roster can learn, in grid order, each once.</summary>
@@ -624,6 +667,7 @@ namespace Assets.Scripts.Balance
                 RestRooms = source.RestRooms,
                 RestHealFraction = source.RestHealFraction,
                 StartsWithFullCharges = source.StartsWithFullCharges,
+                StartHealthFraction = source.StartHealthFraction,
                 UseSummons = source.UseSummons
             };
         }

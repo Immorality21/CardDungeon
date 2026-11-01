@@ -205,11 +205,11 @@ namespace Assets.Scripts.Hub
                 return;
             }
 
-            // Back in town every hero is whole again: a hero who fell stays down only for the floors
-            // walked straight through (playtest 3 finding 9, DownedCarry).
-            if (_runSaveData != null && _runSaveData.DownedHeroKeys != null && _runSaveData.DownedHeroKeys.Count > 0)
+            // Back in town every hero is whole again: wounds and the fallen last only for the floors
+            // of a run (HealthCarry).
+            if (_runSaveData != null && _runSaveData.HeroHealth != null && _runSaveData.HeroHealth.Count > 0)
             {
-                _runSaveData.DownedHeroKeys.Clear();
+                _runSaveData.HeroHealth.Clear();
                 _fileHandler.Save(_runSaveData);
             }
 
@@ -302,7 +302,11 @@ namespace Assets.Scripts.Hub
                 _campaignMap.OnRunChosen += OnRunChosen;
             }
             _merchant.OnClosed += ShowTown;
+            _merchant.CanClose = () => _tutorialStep != TutorialStep.UpgradeBelt;
+            _merchant.BeltBought += OnBeltBought;
             _partySelect.OnClosed += OnPartyClosed;
+            _partySelect.CanClose = () => _tutorialStep != TutorialStep.EquipPotion;
+            _partySelect.BeltChanged += RefreshTutorial;
             _sphereGrid.OnClosed += OnGridClosed;
             _sphereGrid.NodeActivated += OnGridNodeActivated;
             _sphereGrid.SelectionChanged += RefreshTutorial;
@@ -1533,7 +1537,7 @@ namespace Assets.Scripts.Hub
                 ? _runSaveData.ActiveDungeonSeed
                 : (int?)null;
 
-            // The tutorial's last step is "go on" (after the gear step); going down is how it is finished.
+            // The tutorial's last step is "go on" (after the belt step); going down is how it is finished.
             if (TutorialOps.FinishesOnDescent(_tutorialStep) && MetaProgressManager.HasInstance)
             {
                 MetaProgressManager.Instance.FinishTutorial();
@@ -1563,7 +1567,9 @@ namespace Assets.Scripts.Hub
         private string GuidedLot()
         {
             return TutorialOps.GuidedLotKey(_tutorialStep, GuideKey(),
-                _tutorial != null ? _tutorial.GearBuildingKey : null);
+                _tutorial != null ? _tutorial.GearBuildingKey : null,
+                _tutorial != null ? _tutorial.BeltBuildingKey : null,
+                _tutorial != null ? _tutorial.CampBuildingKey : null);
         }
 
         /// <summary>The hero the tutorial walks through the grid: the first starting hero the save owns.</summary>
@@ -1631,7 +1637,32 @@ namespace Assets.Scripts.Hub
             progress.HasGearToEquip = bagGear > 0;
             progress.AnyGearEquipped = inventory.GetAllEquipment().Count > bagGear;
             progress.HallRevisited = meta.TutorialHallRevisited;
+            ReadBeltProgress(ref progress, hub);
             return progress;
+        }
+
+        /// <summary>The belt step's half of <see cref="ReadTutorialProgress"/>.</summary>
+        private void ReadBeltProgress(ref TutorialProgress progress, HubProgress hub)
+        {
+            progress.BeltRunCleared = _tutorial.BeltRun == null || hub.HasCleared(RunKeyOf(_tutorial.BeltRun));
+
+            var merchant = _hub != null ? _hub.Find(_tutorial.BeltBuildingKey) : null;
+            progress.BeltBuildingBuilt = merchant == null || BuildingOps.IsBuilt(merchant, hub);
+            progress.CanAffordBeltBuilding = merchant != null && BuildingOps.CanPlace(merchant, hub) && CanPayFor(merchant, hub);
+
+            var belt = PotionBeltSO.Load();
+            var healing = belt != null ? belt.Find(PotionBeltState.HealingKey) : null;
+            if (healing != null)
+            {
+                int capacity = PotionBeltState.Capacity(healing);
+                var step = PotionBeltOps.NextCapacity(healing, capacity);
+                progress.BeltUpgraded = capacity > healing.BaseCapacity;
+                progress.CanAffordBeltUpgrade = step != null && MerchantUI.CanPay(step);
+            }
+
+            var potion = belt != null ? belt.Find(_tutorial.BeltPotionKey) : null;
+            progress.BeltPotionKnown = potion != null && PotionBeltState.Unlocked(potion);
+            progress.BeltPotionPacked = potion != null && PotionBeltState.Loadout(belt).Contains(potion.Key);
         }
 
         /// <summary>
@@ -1703,10 +1734,12 @@ namespace Assets.Scripts.Hub
 
             bool onGuideLot = _selectedLot != null && _selectedLot.SaveKey == guideKey;
             SetEnabled(_lotCloseButton, !onGuideLot || TutorialOps.AllowsLeaving(step));
-            SetClass(_lotActionButton, HubView.TutorialTargetClass, onGuideLot && step == TutorialStep.BuildHall);
+            SetClass(_lotActionButton, HubView.TutorialTargetClass,
+                onGuideLot && (step == TutorialStep.BuildHall || step == TutorialStep.BuildMerchant));
             SetClass(_lotEnterButton, HubView.TutorialTargetClass,
                 onGuideLot && (step == TutorialStep.SpendXp || step == TutorialStep.EquipGear
-                               || step == TutorialStep.RevisitHall));
+                               || step == TutorialStep.RevisitHall || step == TutorialStep.UpgradeBelt
+                               || step == TutorialStep.EquipPotion));
 
             // Once the node is bought the only way on is back to town, so the grid's Back is what gets
             // pointed at. Keyed on the step alone: the class only shows while the grid does.
@@ -1716,6 +1749,16 @@ namespace Assets.Scripts.Hub
             SetEnabled(inventoryClose, step != TutorialStep.EquipGear);
             SetClass(inventoryClose, HubView.TutorialTargetClass,
                 step == TutorialStep.GoOn || step == TutorialStep.RevisitHall);
+
+            // The belt step's screens work the same way: shut until the thing is done, then Back.
+            SetClass(_root.Q<Button>("merchant-action"), HubView.TutorialTargetClass, step == TutorialStep.UpgradeBelt);
+            var merchantClose = _root.Q<Button>("merchant-close");
+            SetEnabled(merchantClose, step != TutorialStep.UpgradeBelt);
+            SetClass(merchantClose, HubView.TutorialTargetClass, step == TutorialStep.EquipPotion);
+            SetClass(_root.Q<Button>("party-belt-1"), HubView.TutorialTargetClass, step == TutorialStep.EquipPotion);
+            var partyClose = _root.Q<Button>("party-close");
+            SetEnabled(partyClose, step != TutorialStep.EquipPotion);
+            SetClass(partyClose, HubView.TutorialTargetClass, step == TutorialStep.BeltReady);
 
             RefreshTutorialBanner();
         }
@@ -1734,7 +1777,8 @@ namespace Assets.Scripts.Hub
             // The grid window leaves only ~90px above it, and the full-size banner ran over its top
             // edge (playtest 2 finding 7): over the grid the banner is set smaller and tighter.
             bool compact = screen == TutorialScreen.Grid || screen == TutorialScreen.Inventory
-                || screen == TutorialScreen.CampaignMap;
+                || screen == TutorialScreen.CampaignMap || screen == TutorialScreen.Merchant
+                || screen == TutorialScreen.Campfire;
             if (_tutorialBanner.ClassListContains(TutorialCompactClass) != compact)
             {
                 SetClass(_tutorialBanner, TutorialCompactClass, compact);
@@ -1768,6 +1812,14 @@ namespace Assets.Scripts.Hub
             if (IsShown(_campaignView))
             {
                 return TutorialScreen.CampaignMap;
+            }
+            if (IsShown(_merchantView))
+            {
+                return TutorialScreen.Merchant;
+            }
+            if (IsShown(_partyView))
+            {
+                return TutorialScreen.Campfire;
             }
             if (IsShown(_lotView))
             {
@@ -1831,6 +1883,16 @@ namespace Assets.Scripts.Hub
             return null;
         }
 
+        /// <summary>A belt step was bought at the Merchant. If that closed the guided step, the screen is handed back.</summary>
+        private void OnBeltBought()
+        {
+            RefreshTutorial();
+            if (_tutorialStep != TutorialStep.UpgradeBelt)
+            {
+                _merchant.ClearGuide();
+            }
+        }
+
         /// <summary>A node was bought on the grid. If that closed the guided step, the screen is handed back.</summary>
         private void OnGridNodeActivated(string nodeKey)
         {
@@ -1859,6 +1921,11 @@ namespace Assets.Scripts.Hub
             CoverTown();
             SetShown(_lotView, false);
             _merchant.Show();
+            if (_tutorialStep == TutorialStep.UpgradeBelt)
+            {
+                _merchant.GuideBelt(PotionBeltState.HealingKey);
+            }
+            RefreshTutorial();
             ResetKeyboardNavigation();
         }
 

@@ -32,7 +32,7 @@ namespace Assets.Scripts.Tutorial
         /// </summary>
         EquipGear = 5,
 
-        /// <summary>Something is equipped. The town is open; going down finishes the tutorial.</summary>
+        /// <summary>Something is equipped. The town is open and the road points at the rest of the Threshold.</summary>
         GoOn = 6,
 
         /// <summary>
@@ -42,6 +42,21 @@ namespace Assets.Scripts.Tutorial
         /// ends the step (<c>MetaProgressSaveData.TutorialHallRevisited</c>). Comes before <see cref="GoOn"/>.
         /// </summary>
         RevisitHall = 7,
+
+        /// <summary>
+        /// Home from the Threshold, whose clear paid for the belt (<c>TutorialRewards</c>), with no
+        /// Merchant standing: the town is locked to its lot, the panel to Build.
+        /// </summary>
+        BuildMerchant = 8,
+
+        /// <summary>The Merchant stands: its Potion Belt tab, locked to the Healing capacity step.</summary>
+        UpgradeBelt = 9,
+
+        /// <summary>The town is locked to the campfire, and its Back to packing the recipe the clear gave.</summary>
+        EquipPotion = 10,
+
+        /// <summary>The belt is packed. The town is open; going down finishes the tutorial.</summary>
+        BeltReady = 11,
     }
 
     /// <summary>Which screen the tutorial is being asked about — the same step says different things on each.</summary>
@@ -60,6 +75,11 @@ namespace Assets.Scripts.Tutorial
 
         /// <summary>The story map (run selection).</summary>
         CampaignMap = 5,
+
+        Merchant = 6,
+
+        /// <summary>The campfire's screen, where the belt is packed.</summary>
+        Campfire = 7,
     }
 
     /// <summary>
@@ -88,5 +108,16 @@ namespace Assets.Scripts.Tutorial
         RevisitHallInTown = 17,
         RevisitHallOnGrid = 18,
         ReplayToGetStronger = 19, // the death screen, the first wipe in a run flagged ReplayHintOnWipe (not a step: any save sees it)
+        BuildMerchantInTown = 20,
+        BuildMerchantOnPanel = 21,
+        OpenMerchantInTown = 22,
+        EnterMerchantOnPanel = 23,
+        UpgradeBelt = 24,
+        BeltUpgraded = 25,
+        OpenCampfireInTown = 26,
+        EnterCampfireOnPanel = 27,
+        EquipPotion = 28,
+        BeltPacked = 29,
+        BeltReady = 30,
     }
 }

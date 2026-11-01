@@ -94,6 +94,7 @@ namespace Assets.Scripts.Balance
     {
         public static BalanceReport Analyze(BalanceInput input)
         {
+            using var memo = GridSpendMemo.Scope();
             var report = new BalanceReport();
             if (input == null)
             {
@@ -315,8 +316,7 @@ namespace Assets.Scripts.Balance
         /// and potency step whose materials drop somewhere in <paramref name="cleared"/> is bought,
         /// revisit-only drops included (a cleared run can be revisited), gold ignored. Deliberately
         /// generous - it makes the model read the game as easier, so tuning errs hard. Only Healing:
-        /// the other potion types stay unpriced. The real game refills per run; this still refills
-        /// every floor (docs/BALANCING.md §5am).
+        /// the other potion types stay unpriced. Stocked once a run, like the game (docs/BALANCING.md §5am).
         /// </summary>
         private static PartyBaseline AssumedBelt(PartyBaseline party, IEnumerable<RunCurve> cleared)
         {
@@ -1026,10 +1026,11 @@ namespace Assets.Scripts.Balance
         private static void AssignMagicLoadout(
             PartyBaseline party, SaveAudit save, IList<MagicSO> allMagic)
         {
-            if (party == null)
+            if (party == null || party.LoadoutAssigned)
             {
                 return;
             }
+            party.LoadoutAssigned = true;
 
             foreach (var hero in party.Heroes)
             {
@@ -2086,7 +2087,7 @@ namespace Assets.Scripts.Balance
             {
                 return existing;
             }
-            return input != null ? SimulateLevel(input, rules, report, run, level) : null;
+            return input != null ? ChainedFloor(input, rules, report, run, level, EntryTo(input, rules, report, run, level)) : null;
         }
 
         private static void EvaluateLevel(RunCurve run, LevelCurve level, BalanceReport report,
@@ -3208,15 +3209,82 @@ namespace Assets.Scripts.Balance
         {
             foreach (var run in report.Runs)
             {
+                // Health and the belt are run resources: each floor is entered on what the one
+                // before it left.
+                var entry = RunEntry.Start;
                 foreach (var level in run.Levels)
                 {
-                    var floorReport = SimulateLevel(input, rules, report, run, level);
+                    var floorReport = SimulateLevel(input, rules, report, run, level, entry);
                     if (floorReport != null)
                     {
                         report.Floors.Add(floorReport);
+                        report.FloorChain[level] = floorReport;
+                        entry = entry.After(floorReport);
                     }
                 }
             }
+        }
+
+        /// <summary>What a run has left on arriving at a floor. Averages, like the floor simulation
+        /// that produced them.</summary>
+        private struct RunEntry
+        {
+            public float HealthShare;
+            public float PotionsDrunk;
+
+            public static RunEntry Start => new RunEntry { HealthShare = 1f };
+
+            /// <summary>A floor nobody survives has no ending health to average, and the run is
+            /// stopped there anyway, so the next floor is read as a party on its last legs rather than
+            /// as a party of corpses.</summary>
+            public RunEntry After(FloorSimReport floor)
+            {
+                var outcome = floor.Adaptive;
+                return outcome == null
+                    ? this
+                    : new RunEntry
+                    {
+                        HealthShare = Mathf.Max(0.1f, outcome.AverageEndHealthFraction),
+                        PotionsDrunk = PotionsDrunk + outcome.AveragePotionsUsed
+                    };
+            }
+        }
+
+        /// <summary>What <paramref name="target"/> is entered on: every floor of the run before it,
+        /// simulated in order.</summary>
+        private static RunEntry EntryTo(BalanceInput input, BalanceRulesSO rules, BalanceReport report,
+            RunCurve run, LevelCurve target)
+        {
+            var entry = RunEntry.Start;
+            foreach (var level in run.Levels)
+            {
+                if (level.Index >= target.Index)
+                {
+                    break;
+                }
+                var floor = ChainedFloor(input, rules, report, run, level, entry);
+                if (floor != null)
+                {
+                    entry = entry.After(floor);
+                }
+            }
+            return entry;
+        }
+
+        /// <summary>
+        /// <paramref name="level"/> simulated once per report, Adaptive only: the chain and the checks
+        /// that read it want nothing else. Every level asks for the floors before it, so without this a
+        /// run costs a number of floor simulations quadratic in its length.
+        /// </summary>
+        private static FloorSimReport ChainedFloor(BalanceInput input, BalanceRulesSO rules, BalanceReport report,
+            RunCurve run, LevelCurve level, RunEntry entry)
+        {
+            if (!report.FloorChain.TryGetValue(level, out var floor))
+            {
+                floor = SimulateLevel(input, rules, report, run, level, entry, adaptiveOnly: true);
+                report.FloorChain[level] = floor;
+            }
+            return floor;
         }
 
         /// <summary>
@@ -3233,6 +3301,7 @@ namespace Assets.Scripts.Balance
         public static FloorSimReport SimulateFloor(BalanceInput input, RunDefinitionSO run, int levelIndex,
             int feederRevisits = 0)
         {
+            using var memo = GridSpendMemo.Scope();
             if (input == null || run == null)
             {
                 return null;
@@ -3257,10 +3326,52 @@ namespace Assets.Scripts.Balance
             {
                 if (level.Index == levelIndex)
                 {
-                    return SimulateLevel(input, rules, report, target, level);
+                    return SimulateLevel(input, rules, report, target, level,
+                        EntryTo(input, rules, report, target, level));
                 }
             }
             return null;
+        }
+
+        /// <summary>
+        /// Every floor of <paramref name="run"/>, simulated in order with health carried from each to
+        /// the next: <see cref="SimulateFloor"/> for a whole run, without paying for the chain once per
+        /// floor. <paramref name="carryHealth"/> false starts every floor whole, which is the game as it
+        /// was until 2026-11-01 and the before-and-after a tuning pass wants.
+        /// </summary>
+        public static List<FloorSimReport> SimulateRun(BalanceInput input, RunDefinitionSO run, bool carryHealth = true)
+        {
+            using var memo = GridSpendMemo.Scope();
+            var floors = new List<FloorSimReport>();
+            if (input == null || run == null)
+            {
+                return floors;
+            }
+            var rules = input.Rules ?? BalanceRulesSO.CreateDefault();
+            var report = new BalanceReport();
+            report.Party = BuildReferenceParty(input, rules, null);
+            BuildRunCurves(input, rules, report);
+
+            var curve = report.Runs.Find(c => c.Run == run);
+            if (curve == null)
+            {
+                return floors;
+            }
+            var entry = RunEntry.Start;
+            foreach (var level in curve.Levels)
+            {
+                var floor = SimulateLevel(input, rules, report, curve, level, entry);
+                if (floor != null)
+                {
+                    floors.Add(floor);
+                    entry = entry.After(floor);
+                    if (!carryHealth)
+                    {
+                        entry.HealthShare = 1f;
+                    }
+                }
+            }
+            return floors;
         }
 
         /// <summary>
@@ -3341,7 +3452,9 @@ namespace Assets.Scripts.Balance
                 {
                     var curve = RevisitFundedCurve(report, rules, nudge, k, input);
                     var level = curve?.Levels.Find(l => l.Index == finale);
-                    var floor = level != null ? SimulateLevel(input, rules, report, curve, level) : null;
+                    var floor = level != null
+                        ? ChainedFloor(input, rules, report, curve, level, EntryTo(input, rules, report, curve, level))
+                        : null;
                     if (floor?.Adaptive == null)
                     {
                         break;
@@ -3382,7 +3495,7 @@ namespace Assets.Scripts.Balance
         }
 
         private static FloorSimReport SimulateLevel(BalanceInput input, BalanceRulesSO rules, BalanceReport report,
-            RunCurve run, LevelCurve level)
+            RunCurve run, LevelCurve level, RunEntry entry, bool adaptiveOnly = false)
         {
             var rooms = BuildFloorRooms(level);
             if (rooms.Count == 0)
@@ -3396,14 +3509,16 @@ namespace Assets.Scripts.Balance
                 Seed = rules.SimulationSeed,
                 MaxTurns = rules.MaxSimTurns,
                 Combos = input.Combos,
-                PotionCount = level.Party.PotionCount,
+                PotionCount = PotionsLeft(level.Party.PotionCount, entry),
+                PotionReserve = PotionReserveFor(level.Party.PotionCount, entry, run, level),
                 PotionHealAmount = level.Party.PotionHealAmount,
                 RestRooms = level.RestRooms,
                 RestHealFraction = RoomKindRewards.RestHealFraction,
 
                 // Charges are a run resource: only floor 0 starts full. Granting every floor
                 // full charges is exactly the optimism the per-room simulation carries.
-                StartsWithFullCharges = level.Index == 0
+                StartsWithFullCharges = level.Index == 0,
+                StartHealthFraction = entry.HealthShare
             };
 
             // Same loadout rules as the per-room sims, so the two are comparable.
@@ -3417,10 +3532,34 @@ namespace Assets.Scripts.Balance
                 LevelIndex = level.Index,
                 Rooms = rooms.Count,
                 PredictedAttrition = level.AttritionLoad,
-                StartsWithFullCharges = settings.StartsWithFullCharges
+                StartsWithFullCharges = settings.StartsWithFullCharges,
+                StartHealthFraction = entry.HealthShare
             };
-            floorReport.Outcomes = EncounterSimulator.RunAllPoliciesOnFloor(level.Party, rooms, settings);
+            if (adaptiveOnly)
+            {
+                settings.Policy = SimPolicy.Adaptive;
+                floorReport.Outcomes[SimPolicy.Adaptive] = EncounterSimulator.RunFloor(level.Party, rooms, settings);
+            }
+            else
+            {
+                floorReport.Outcomes = EncounterSimulator.RunAllPoliciesOnFloor(level.Party, rooms, settings);
+            }
             return floorReport;
+        }
+
+        /// <summary>The belt is stocked once, on a run's first floor (owner, 2026-11-01, BALANCING.md 5am).</summary>
+        private static int PotionsLeft(int belt, RunEntry entry)
+        {
+            return Mathf.Max(0, belt - Mathf.RoundToInt(entry.PotionsDrunk));
+        }
+
+        /// <summary>A careful player's ration (owner, 2026-11-01): a floor's share is what is left of the
+        /// belt over the floors still ahead, so it lasts to the finale. The rest is the reserve.</summary>
+        private static int PotionReserveFor(int belt, RunEntry entry, RunCurve run, LevelCurve level)
+        {
+            int left = PotionsLeft(belt, entry);
+            int floorsAhead = Mathf.Max(1, run.Levels.Count - level.Index);
+            return left - Mathf.CeilToInt((float)left / floorsAhead);
         }
 
         /// <summary>
@@ -3757,6 +3896,7 @@ namespace Assets.Scripts.Balance
         /// </summary>
         public static List<FloorFrontier> MeasureFrontiers(BalanceInput input)
         {
+            using var memo = GridSpendMemo.Scope();
             var frontiers = new List<FloorFrontier>();
             if (input == null)
             {
@@ -3852,6 +3992,7 @@ namespace Assets.Scripts.Balance
                     tier = depth;
                 }
 
+                var entry = EntryTo(input, rules, report, run, level);
                 var settings = new FrontierSweepSettings
                 {
                     Roster = roster,
@@ -3869,6 +4010,7 @@ namespace Assets.Scripts.Balance
                     EquivalentInvestmentTolerance = rules.EquivalentInvestmentTolerance,
                     PotionItem = level.Party.PotionItem,
                     PotionCount = level.Party.PotionCount,
+                    PotionsDrunk = level.Party.PotionCount - PotionsLeft(level.Party.PotionCount, entry),
                     PrepareParty = party => AssignMagicLoadout(party, report.Save, input.Magic),
                     Sim = new EncounterSimulator.FloorSimSettings
                     {
@@ -3882,7 +4024,11 @@ namespace Assets.Scripts.Balance
 
                         // Same rule as the floor sims: charges are a run resource, so only a run's
                         // first floor starts full. A finale almost never is one.
-                        StartsWithFullCharges = level.Index == 0
+                        StartsWithFullCharges = level.Index == 0,
+
+                        // The straight-line party's health on arrival, whatever the sweep invests:
+                        // simulating the run again per investment would multiply the sweep's cost.
+                        StartHealthFraction = entry.HealthShare
                     }
                 };
 

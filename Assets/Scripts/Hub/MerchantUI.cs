@@ -90,6 +90,15 @@ namespace Assets.Scripts.Hub
 
         public event Action OnClosed;
 
+        /// <summary>A belt step was bought.</summary>
+        public event Action BeltBought;
+
+        /// <summary>Asked before closing; false keeps the screen up (the tutorial's belt step).</summary>
+        public Func<bool> CanClose { get; set; }
+
+        // The tutorial's belt step: this type's capacity step is the only row that can be used.
+        private string _guidedTypeKey;
+
         public MerchantUI(VisualElement root, PartyRosterSO roster)
         {
             _root = root;
@@ -144,8 +153,43 @@ namespace Assets.Scripts.Hub
 
         public void Hide()
         {
+            if (CanClose != null && !CanClose())
+            {
+                return;
+            }
             _root.style.display = DisplayStyle.None;
             OnClosed?.Invoke();
+        }
+
+        /// <summary>Opens the belt tab on <paramref name="typeKey"/>'s capacity step, and locks the
+        /// screen to it until <see cref="ClearGuide"/>.</summary>
+        public void GuideBelt(string typeKey)
+        {
+            _guidedTypeKey = typeKey;
+            _tab = Tab.Belt;
+            BuildList();
+            _index = Mathf.Max(0, _entries.FindIndex(IsGuided));
+            SetTabsEnabled(false);
+            Refresh();
+        }
+
+        public void ClearGuide()
+        {
+            _guidedTypeKey = null;
+            SetTabsEnabled(true);
+            Refresh();
+        }
+
+        private bool IsGuided(Entry entry)
+        {
+            return entry.Offer == BeltOffer.Capacity && entry.Type != null && entry.Type.Key == _guidedTypeKey;
+        }
+
+        private void SetTabsEnabled(bool enabled)
+        {
+            _tabBuy?.SetEnabled(enabled);
+            _tabSell?.SetEnabled(enabled);
+            _tabBelt?.SetEnabled(enabled);
         }
 
         private void WireTab(Button tab, Tab which)
@@ -164,7 +208,7 @@ namespace Assets.Scripts.Hub
         }
 
         /// <summary>Whether the bags and the purse both cover <paramref name="price"/>.</summary>
-        private static bool CanPay(BeltPrice price)
+        public static bool CanPay(BeltPrice price)
         {
             return price != null && Gold >= price.Gold && InventoryManager.Instance.CanAfford(price.Materials);
         }
@@ -344,6 +388,7 @@ namespace Assets.Scripts.Hub
             price.EnableInClassList("cd-shop-price--short", short_);
             row.Add(price);
 
+            row.SetEnabled(_guidedTypeKey == null || IsGuided(entry));
             entry.Row = row;
             _entries.Add(entry);
             _list?.Add(row);
@@ -751,6 +796,7 @@ namespace Assets.Scripts.Hub
                     break;
             }
             Refresh();
+            BeltBought?.Invoke();
         }
 
         // --- Stock generation --------------------------------------------------

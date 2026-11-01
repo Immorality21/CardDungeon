@@ -273,6 +273,9 @@ namespace Tests.EditMode
 
             Assert.AreEqual(0f, curve.DifficultyJumps[0], 0.0001f,
                 "Two identical levels must read as a flat curve, not as escalation.");
+            Assert.Less(curve.Levels[1].EntryHealthFraction, 1f, "The second level is entered on what the first left.");
+            Assert.Greater(curve.Levels[1].AttritionLoad, curve.Levels[0].AttritionLoad,
+                "Health is a run resource, so the same floor costs a hurt party more of what it has left.");
         }
 
         [Test]

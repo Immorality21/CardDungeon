@@ -197,6 +197,40 @@ namespace Tests.EditMode
                 "Two refuges on a lethal floor must reduce the wipe rate.");
         }
 
+        /// <summary>Health is a run resource: a floor entered hurt is harder than the same floor entered whole.</summary>
+        [Test]
+        public void RunFloor_StartingHurt_WipesMore()
+        {
+            var rooms = Rooms(new[] { Enemy("biter", 8, 0, 10) },
+                              new[] { Enemy("biter", 8, 0, 10) },
+                              new[] { Enemy("biter", 8, 0, 10) },
+                              new[] { Enemy("biter", 8, 0, 10) });
+
+            var whole = EncounterSimulator.RunFloor(
+                Party(Hero("solo", 6, 0, 30)), rooms, Settings(restRooms: 2));
+            var hurtSettings = Settings(restRooms: 2);
+            hurtSettings.StartHealthFraction = 0.3f;
+            var hurt = EncounterSimulator.RunFloor(Party(Hero("solo", 6, 0, 30)), rooms, hurtSettings);
+
+            Assert.Greater(hurt.WipeRate, whole.WipeRate,
+                "A party that walks in at 30% of its bar must wipe more often than one walking in whole.");
+        }
+
+        /// <summary>Between rooms a potion costs no turn, so the wounded drink before the next fight.</summary>
+        [Test]
+        public void RunFloor_TheWoundedDrinkBetweenRooms()
+        {
+            var rooms = Rooms(new[] { Enemy("biter", 8, 0, 10) },
+                              new[] { Enemy("biter", 1, 0, 1) });
+
+            var dry = EncounterSimulator.RunFloor(
+                Party(Hero("solo", 6, 0, 16)), rooms, Settings(policy: SimPolicy.Adaptive));
+            var belted = EncounterSimulator.RunFloor(
+                Party(Hero("solo", 6, 0, 16)), rooms, Settings(policy: SimPolicy.Adaptive, potions: 1));
+
+            Assert.Greater(belted.AverageEndHealthFraction, dry.AverageEndHealthFraction);
+        }
+
         /// <summary>A refuge is not a revive: the dead do not come back from resting.</summary>
         [Test]
         public void RunFloor_RefugeDoesNotReviveTheDead()

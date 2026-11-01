@@ -177,6 +177,15 @@
             <ui:Button name="map-back" text="#ui.common.back" class="cd-button cd-button--wide" />
         </ui:VisualElement>
 
+        <!-- Drinking while the party walks: pick a potion, then who drinks it (PotionWindow). -->
+        <ui:VisualElement name="potion-window" class="cd-window cd-dock-center cd-hidden">
+            <ui:Label text="#ui.room.potion-title" class="cd-title" />
+            <ui:Label name="potion-prompt" text="" class="cd-message" />
+            <ui:ScrollView name="potion-list" class="cd-list cd-list--fit" mode="Vertical" />
+            <ui:Label text="#ui.room.potion-hint" class="cd-info-label cd-hint" />
+            <ui:Button name="potion-back" text="#ui.common.back" class="cd-button cd-button--narrow" />
+        </ui:VisualElement>
+
         <!-- Pause overlay. Last in the document so it paints over everything else, and the only
              window that can come up on top of a fight. Holds what the hub owns between runs but
              the dungeon had no way to reach: the audio dials, and the way out.
@@ -191,6 +200,7 @@
                  under their own heading, and Leave last (it is already two-press). 2026-09-30. -->
             <ui:Button name="pause-resume" text="#ui.room.pause-resume" class="cd-button cd-button--wide" />
             <ui:Button name="pause-map" text="#ui.room.pause-map" class="cd-button cd-button--wide" />
+            <ui:Button name="pause-potions" text="#ui.room.pause-potions" class="cd-button cd-button--wide" />
             <ui:Label text="#ui.room.audio" class="cd-section-head" />
             <!-- Each dial: a fixed label column, the nudge buttons either side of a 10-segment bar (one
                  segment per AudioOptions.Step, lit by AudioOptionsUI), the percentage after. Mute is a

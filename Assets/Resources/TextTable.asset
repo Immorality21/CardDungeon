@@ -3512,6 +3512,61 @@ MonoBehaviour:
       to town when you are ready.'
     Reviewed: 0
     Note: 
+  - Key: tutorial.build-merchant-in-town.text
+    Values:
+    - 'The Threshold''s spoils are enough for the Merchant. Build it: your potion belt can do more.'
+    Reviewed: 0
+    Note: 
+  - Key: tutorial.build-merchant-on-panel.text
+    Values:
+    - 'Build the Merchant.'
+    Reviewed: 0
+    Note: 
+  - Key: tutorial.open-merchant-in-town.text
+    Values:
+    - 'Visit the Merchant: your potion belt can carry more.'
+    Reviewed: 0
+    Note: 
+  - Key: tutorial.enter-merchant-on-panel.text
+    Values:
+    - 'Enter the Merchant.'
+    Reviewed: 0
+    Note: 
+  - Key: tutorial.upgrade-belt.text
+    Values:
+    - 'Buy this step to carry one more Healing potion on every run.'
+    Reviewed: 0
+    Note: 
+  - Key: tutorial.belt-upgraded.text
+    Values:
+    - 'You also found the Energy potion recipe. Go back, then pack it at the campfire.'
+    Reviewed: 0
+    Note: 
+  - Key: tutorial.open-campfire-in-town.text
+    Values:
+    - 'Visit the campfire to pack your new potion.'
+    Reviewed: 0
+    Note: 
+  - Key: tutorial.enter-campfire-on-panel.text
+    Values:
+    - 'Enter the campfire.'
+    Reviewed: 0
+    Note: 
+  - Key: tutorial.equip-potion.text
+    Values:
+    - 'Click the empty belt slot to pack Energy. It restores an ability charge in a fight.'
+    Reviewed: 0
+    Note: 
+  - Key: tutorial.belt-packed.text
+    Values:
+    - 'Packed. The belt refills at the start of each run. Go back when you are ready.'
+    Reviewed: 0
+    Note: 
+  - Key: tutorial.belt-ready.text
+    Values:
+    - 'Your belt is ready. Choose The Story to carry on.'
+    Reviewed: 0
+    Note: 
   - Key: tutorial.go-on.text
     Values:
     - Your party is equipped. When you are ready, choose The Story to continue The
@@ -4341,6 +4396,46 @@ MonoBehaviour:
   - Key: ui.room.party-status-title
     Values:
     - Party
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.potion-title
+    Values:
+    - 'Potions'
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.potion-hint
+    Values:
+    - 'Arrows choose · Enter drink · Esc back'
+    Reviewed: 0
+    Note: 
+  - Key: ui.room.pause-potions
+    Values:
+    - 'Potions (P)'
+    Reviewed: 0
+    Note: 
+  - Key: room.potions.pick-potion
+    Values:
+    - 'Drink which potion?'
+    Reviewed: 0
+    Note: 
+  - Key: room.potions.pick-hero
+    Values:
+    - 'Who drinks {potion}?'
+    Reviewed: 0
+    Note: 
+  - Key: room.potions.none
+    Values:
+    - 'No potions to drink here.'
+    Reviewed: 0
+    Note: 
+  - Key: room.potions.potion-row
+    Values:
+    - '{potion} ×{count}'
+    Reviewed: 0
+    Note: 
+  - Key: room.potions.hero-row
+    Values:
+    - '{hero}  {health}/{max}'
     Reviewed: 0
     Note: 
   - Key: ui.room.pause-map
@@ -6076,7 +6171,7 @@ MonoBehaviour:
     Note: Keyboard hint while the combat command window is up
   - Key: room.keys.doors
     Values:
-    - "Arrows / WASD walk \xB7 Enter use"
+    - "Arrows / WASD walk \xB7 Enter use \xB7 P potions"
     Reviewed: 0
     Note: Keyboard hint while walking the floor
   - Key: room.party.hp

@@ -81,6 +81,12 @@ namespace Assets.Scripts.Hub
 
         public event Action OnClosed;
 
+        /// <summary>A belt slot changed.</summary>
+        public event Action BeltChanged;
+
+        /// <summary>Asked before closing; false keeps the screen up (the tutorial's belt step).</summary>
+        public Func<bool> CanClose { get; set; }
+
         public PartySelectUI(VisualElement root, PartyRosterSO catalog)
         {
             _root = root;
@@ -173,6 +179,10 @@ namespace Assets.Scripts.Hub
 
         public void Hide()
         {
+            if (CanClose != null && !CanClose())
+            {
+                return;
+            }
             _root.style.display = DisplayStyle.None;
             OnClosed?.Invoke();
         }
@@ -603,6 +613,7 @@ namespace Assets.Scripts.Hub
             PotionBeltState.SetLoadout(loadout);
             SetFeedback(string.Empty);
             RefreshBelt();
+            BeltChanged?.Invoke();
         }
 
         private void RefreshSplitControls(List<string> fieldedKeys)

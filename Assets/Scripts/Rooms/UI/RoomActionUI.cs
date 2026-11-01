@@ -40,6 +40,9 @@ namespace Assets.Scripts.Rooms
         private Button _pauseQuit;
         private Label _pauseNote;
         private Button _pauseMap;
+        private Button _pausePotions;
+        private UI.PotionWindow _potions;
+        private bool _potionsFromPause;
         private MainMenu.AudioOptionsUI _pauseAudio;
         private KeyboardNavigator _pauseNav;
         private bool _quitArmed;
@@ -227,6 +230,7 @@ namespace Assets.Scripts.Rooms
             _pauseQuit = root.Q<Button>("pause-quit");
             _pauseNote = root.Q<Label>("pause-note");
             _pauseMap = root.Q<Button>("pause-map");
+            _pausePotions = root.Q<Button>("pause-potions");
             _mapWindow = root.Q<VisualElement>("map-window");
             _mapTitle = root.Q<Label>("map-title");
             _mapStatus = root.Q<Label>("map-status");
@@ -346,6 +350,17 @@ namespace Assets.Scripts.Rooms
             if (_pauseMap != null)
             {
                 _pauseMap.clicked += () => OpenMap(fromPause: true);
+            }
+            if (_pausePotions != null)
+            {
+                _pausePotions.clicked += () => OpenPotions(fromPause: true);
+            }
+            var potionRoot = root.Q<VisualElement>("potion-window");
+            if (potionRoot != null)
+            {
+                _potions = new UI.PotionWindow(potionRoot);
+                _potions.Closed += OnPotionsClosed;
+                _potions.Drank += OnPotionDrunk;
             }
 
             // The map canvas is authored in the UXML; the painter is added into it the same way the
@@ -497,6 +512,7 @@ namespace Assets.Scripts.Rooms
             // Cleared first: CloseMap would otherwise put the pause overlay back up on its way out.
             _mapFromPause = false;
             CloseMap();
+            _potions?.Close();
             ClosePause();
         }
 
@@ -2009,6 +2025,13 @@ namespace Assets.Scripts.Rooms
                 return;
             }
 
+            if (PotionsOpen)
+            {
+                _potions.HandleKey(evt);
+                evt.StopPropagation();
+                return;
+            }
+
             // Pause is above everything else, including a dialog it can never be opened over: while
             // it is up it is the only thing the keyboard reaches.
             if (IsShown(_pauseWindow))
@@ -2028,6 +2051,13 @@ namespace Assets.Scripts.Rooms
             if (evt.keyCode == KeyCode.M && CanOpenMap())
             {
                 OpenMap(fromPause: false);
+                evt.StopPropagation();
+                return;
+            }
+
+            if (evt.keyCode == KeyCode.P && CanOpenPotions())
+            {
+                OpenPotions(fromPause: false);
                 evt.StopPropagation();
                 return;
             }
@@ -2120,11 +2150,53 @@ namespace Assets.Scripts.Rooms
         /// </summary>
         private bool CanOpenPause()
         {
-            if (_pauseWindow == null || IsShown(_pauseWindow) || IsShown(_mapWindow) || IsDialogUp())
+            if (_pauseWindow == null || IsShown(_pauseWindow) || IsShown(_mapWindow) || PotionsOpen || IsDialogUp())
             {
                 return false;
             }
             return DoorNavActive() || IsShown(_combatBar) || IsShown(_heroBar);
+        }
+
+        private bool PotionsOpen => _potions != null && _potions.IsOpen;
+
+        /// <summary>Only while the party walks: in a fight a potion costs a turn, which is the Item command.</summary>
+        private bool CanOpenPotions()
+        {
+            return _potions != null && DoorNavActive() && UI.PotionWindow.AnyPotion();
+        }
+
+        private void OpenPotions(bool fromPause)
+        {
+            _potionsFromPause = fromPause;
+            if (fromPause)
+            {
+                ClosePause();
+            }
+            _potions.Open(GameManager.Instance.Party);
+            FocusRoot();
+        }
+
+        private void OnPotionsClosed()
+        {
+            bool backToPause = _potionsFromPause;
+            _potionsFromPause = false;
+            if (backToPause)
+            {
+                OpenPause();
+                return;
+            }
+            FocusRoot();
+        }
+
+        /// <summary>Saved at once, like a room event: otherwise quitting would give the potion back
+        /// and take the health away, or the other way round.</summary>
+        private void OnPotionDrunk()
+        {
+            ShowPartyStatusOutOfCombat();
+            if (DungeonSaveManager.HasInstance && _currentRoom != null)
+            {
+                DungeonSaveManager.Instance.Save(_currentRoom);
+            }
         }
 
         private void OpenPause()
@@ -2133,6 +2205,7 @@ namespace Assets.Scripts.Rooms
             {
                 return;
             }
+            _pausePotions?.SetEnabled(CanOpenPotions());
 
             // Arming is per-visit: a player who opened the menu, thought better of quitting and
             // resumed must not find the button still primed the next time they pause.
@@ -2172,7 +2245,7 @@ namespace Assets.Scripts.Rooms
         private bool CanOpenMap()
         {
             // A side room is not on the floor's map.
-            if (_mapWindow == null || IsShown(_mapWindow) || IsDialogUp() || (_currentRoom != null && _currentRoom.IsSideRoom))
+            if (_mapWindow == null || IsShown(_mapWindow) || PotionsOpen || IsDialogUp() || (_currentRoom != null && _currentRoom.IsSideRoom))
             {
                 return false;
             }
@@ -2938,7 +3011,8 @@ namespace Assets.Scripts.Rooms
 
             // The scrim follows the dialogs rather than being set at each of the many places one
             // opens, so no path can leave the room dimmed or a dialog undimmed.
-            bool dialogUp = IsShown(_eventWindow) || IsShown(_detailWindow) || IsShown(_mapWindow) || IsShown(_pauseWindow);
+            bool dialogUp = IsShown(_eventWindow) || IsShown(_detailWindow) || IsShown(_mapWindow) || IsShown(_pauseWindow)
+                || PotionsOpen;
             if (IsShown(_dialogScrim) != dialogUp)
             {
                 SetShown(_dialogScrim, dialogUp);
@@ -3012,7 +3086,7 @@ namespace Assets.Scripts.Rooms
         /// </summary>
         private bool OwnsNavigationKeys()
         {
-            return IsShown(_pauseWindow) || IsShown(_mapWindow) || IsShown(_heroBar)
+            return IsShown(_pauseWindow) || IsShown(_mapWindow) || PotionsOpen || IsShown(_heroBar)
                 || IsShown(_combatBar) || IsDialogUp() || DoorNavActive();
         }
 
@@ -3026,7 +3100,7 @@ namespace Assets.Scripts.Rooms
         {
             return _doorsLive
                 && !IsShown(_combatBar) && !IsShown(_heroBar) && !IsShown(_pauseWindow)
-                && !IsShown(_mapWindow) && !IsShown(_detailWindow) && !IsShown(_eventWindow)
+                && !IsShown(_mapWindow) && !PotionsOpen && !IsShown(_detailWindow) && !IsShown(_eventWindow)
                 && !IsShown(_victoryWindow) && !IsShown(_levelWindow);
         }
 

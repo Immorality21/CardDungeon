@@ -39,7 +39,7 @@ namespace Assets.Scripts.Combat
         /// <summary>Resting at a refuge, outside combat.</summary>
         Rest,
 
-        /// <summary>Bookkeeping, not an event in the game: a fresh floor's full heal, a hero joining at
+        /// <summary>Bookkeeping, not an event in the game: a run's opening full heal, a hero joining at
         /// full health, a saved bar restored, the balance model resetting a clone.</summary>
         Refill,
 

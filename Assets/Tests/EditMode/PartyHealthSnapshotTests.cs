@@ -50,7 +50,7 @@ namespace Tests.EditMode
         [Test]
         public void HealthFor_DownedHero_StaysDown()
         {
-            // Nothing revives a hero inside a level - HealAll only fires on a fresh dungeon - so
+            // Nothing revives a hero inside a run - HealAll only fires on its first floor - so
             // resuming a 0 as a 0 is what happens without the quit.
             var saved = Saved(("Warrior", 0));
 

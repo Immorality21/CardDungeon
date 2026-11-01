@@ -14,8 +14,8 @@ namespace Assets.Scripts.Items
     /// revisits (<see cref="ItemSO.RevisitFear"/>), so the belt grows with the campaign.
     ///
     /// <para>One asset, <c>Resources/PotionBelt.asset</c>, loaded like <c>Revisits.asset</c>. The
-    /// balance model ignores the belt on purpose (owner, 2026-10-27): it still gives every floor a full
-    /// healing belt at base potency (<c>docs/BALANCING.md</c> §5am).</para>
+    /// balance model reads only the Healing slot, and spends it across the run as the game does
+    /// (<c>docs/BALANCING.md</c> §5am).</para>
     /// </summary>
     [CreateAssetMenu(menuName = "SO/Potion Belt")]
     public class PotionBeltSO : ScriptableObject

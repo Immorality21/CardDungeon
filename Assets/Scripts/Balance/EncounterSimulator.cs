@@ -46,6 +46,12 @@ namespace Assets.Scripts.Balance
         /// <summary>Fraction of max HP below which the Adaptive policy reaches for a heal.</summary>
         public float HealThreshold = 0.45f;
 
+        /// <summary>Potions kept for the floors ahead. Drunk only to save a hero at or under
+        /// <see cref="EmergencyHealth"/>, as a careful player breaks into a reserve.</summary>
+        public int PotionReserve;
+
+        public float EmergencyHealth = 0.2f;
+
         /// <summary>
         /// Whether heroes may summon (section 4b). On a floor the charge is held for the hardest
         /// room; in a single encounter it may be spent at once. Off gives the "without summons" reading.
@@ -814,6 +820,14 @@ namespace Assets.Scripts.Balance
             /// party has already spent - the exact optimism the per-encounter simulation carries.
             /// </summary>
             public bool StartsWithFullCharges = true;
+
+            /// <summary>
+            /// Share of each hero's bar the party walks in with. Health is a run resource too (owner,
+            /// 2026-11-01): a run's first floor starts whole, a later one on what the floor before it
+            /// left (<c>BalanceAnalyzer</c> chains them). One number for the whole party on purpose: an
+            /// average, so a hero who fell reads as everyone hurt, which errs easy.
+            /// </summary>
+            public float StartHealthFraction = 1f;
         }
 
         /// <summary>Aggregated results over a batch of simulated floors.</summary>
@@ -860,7 +874,7 @@ namespace Assets.Scripts.Balance
         /// <list type="bullet">
         /// <item><b>Attrition compounds.</b> Room 3 is fought on what rooms 1 and 2 left.</item>
         /// <item><b>Nothing revives.</b> There is no revive item, spell or between-room recovery in the
-        /// game - <c>Party.HealAll</c> fires only on entering a fresh dungeon - so a hero downed in
+        /// game - <c>Party.HealAll</c> fires only on a run's first floor - so a hero downed in
         /// room 2 is gone for the rest of the floor, and the party gets weaker as the floor gets
         /// harder. That death spiral is the actual failure mode, and it is invisible per room.</item>
         /// <item><b>The potion belt is finite.</b> Per encounter it is effectively multiplied by the
@@ -970,9 +984,12 @@ namespace Assets.Scripts.Balance
                     PotionHealAmount = settings.PotionHealAmount,
                     Combos = settings.Combos,
                     HealThreshold = settings.HealThreshold,
+                    PotionReserve = settings.PotionReserve,
+                    EmergencyHealth = settings.EmergencyHealth,
                     RestRooms = settings.RestRooms,
                     RestHealFraction = settings.RestHealFraction,
                     StartsWithFullCharges = settings.StartsWithFullCharges,
+                    StartHealthFraction = settings.StartHealthFraction,
                     UseSummons = settings.UseSummons
                 };
                 results[policy] = RunFloor(party, rooms, perPolicy);
@@ -1008,6 +1025,7 @@ namespace Assets.Scripts.Balance
             {
                 DrainCharges(heroes);
             }
+            WoundTo(heroes, settings.StartHealthFraction);
 
             int potionsLeft = settings.PotionCount;
 
@@ -1055,10 +1073,13 @@ namespace Assets.Scripts.Balance
                 if (restAfter.Contains(i))
                 {
                     Rest(heroes, settings.RestHealFraction);
-                    // A refuge restores summon charges, as it does in the game (RoomActionUI.ApplyRest).
-                    // NOTE: ability charges are NOT refilled here, though the game refills them too -
-                    // a pre-existing gap, left as-is so this change does not move the ability numbers.
-                    RefillSummons(heroes);
+                    // A refuge restores every charge, as it does in the game (RoomActionUI.ApplyRest).
+                    RefillCharges(heroes);
+                }
+
+                if (settings.Policy == SimPolicy.Adaptive)
+                {
+                    DrinkBetweenRooms(heroes, settings, ref potionsLeft, trial);
                 }
             }
 
@@ -1114,21 +1135,80 @@ namespace Assets.Scripts.Balance
             }
         }
 
-        private static void RefillSummons(List<SimUnit> heroes)
+        private static void RefillCharges(List<SimUnit> heroes)
         {
             foreach (var hero in heroes)
             {
-                if (hero == null || hero.Summons == null)
+                if (hero == null)
                 {
                     continue;
                 }
-                foreach (var summon in hero.Summons)
+                if (hero.MagicSlots != null)
                 {
-                    if (summon != null)
+                    foreach (var slot in hero.MagicSlots)
                     {
-                        summon.Charges = summon.MaxCharges;
+                        if (slot != null)
+                        {
+                            slot.Charges = slot.MaxCharges;
+                        }
                     }
                 }
+                if (hero.Summons != null)
+                {
+                    foreach (var summon in hero.Summons)
+                    {
+                        if (summon != null)
+                        {
+                            summon.Charges = summon.MaxCharges;
+                        }
+                    }
+                }
+            }
+        }
+
+        private static bool MayDrink(SimSettings settings, int potionsLeft, SimUnit wounded)
+        {
+            return settings.PotionHealAmount > 0
+                && (potionsLeft > settings.PotionReserve
+                    || (potionsLeft > 0 && HealthFraction(wounded) <= settings.EmergencyHealth));
+        }
+
+        /// <summary>Between rooms a potion costs no turn, so the wounded drink there before the next
+        /// fight rather than in it (<c>PotionWindow</c>).</summary>
+        private static void DrinkBetweenRooms(List<SimUnit> heroes, FloorSimSettings settings, ref int potionsLeft,
+            FloorTrial trial)
+        {
+            while (true)
+            {
+                var wounded = MostWounded(heroes);
+                if (wounded == null || HealthFraction(wounded) > settings.HealThreshold
+                    || !MayDrink(settings, potionsLeft, wounded))
+                {
+                    return;
+                }
+                potionsLeft--;
+                trial.PotionsUsed++;
+                HealthOps.Heal(wounded, settings.PotionHealAmount, new HealthSource(wounded, HealthCause.Item), null);
+            }
+        }
+
+        /// <summary>Starts every hero at <paramref name="fraction"/> of their bar, for a floor that is
+        /// not the run's first. Never below 1: the average says hurt, not dead.</summary>
+        private static void WoundTo(List<SimUnit> heroes, float fraction)
+        {
+            if (fraction >= 1f)
+            {
+                return;
+            }
+
+            foreach (var hero in heroes)
+            {
+                if (hero == null || hero.Stats == null)
+                {
+                    continue;
+                }
+                int health = Mathf.Max(1, Mathf.RoundToInt(hero.Effective[StatType.MaxHealth] * fraction));
+                HealthOps.Set(hero, health, new HealthSource(null, HealthCause.Refill), null);
             }
         }
 
@@ -1282,7 +1362,7 @@ namespace Assets.Scripts.Balance
                 var wounded = MostWounded(heroes);
                 if (wounded != null && HealthFraction(wounded) <= settings.HealThreshold)
                 {
-                    if (potionsLeft > 0 && settings.PotionHealAmount > 0)
+                    if (MayDrink(settings, potionsLeft, wounded))
                     {
                         potionsLeft--;
                         result.PotionsUsed++;

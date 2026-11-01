@@ -45,6 +45,10 @@ namespace Assets.Scripts.Balance
         public List<HeroBaseline> Heroes = new List<HeroBaseline>();
         public string SourceLabel = "Designed baseline";
 
+        /// <summary>The kit is on every hero's unit (<c>BalanceAnalyzer.AssignMagicLoadout</c>). It reads
+        /// only the nodes, so a party needs it once however many fights it is sent to.</summary>
+        public bool LoadoutAssigned;
+
         /// <summary>
         /// The gear spend that produced this party's loadout, when it came from a designed gold
         /// budget rather than a save file. Null for a gearless or save-derived party. Held so the
@@ -269,8 +273,7 @@ namespace Assets.Scripts.Balance
                 else
                 {
                     budget = Mathf.Max(0, xpBudgetFor != null ? xpBudgetFor(definition) : 0);
-                    nodes = SphereGridOps.GreedySpend(definition.SphereGrid, null, budget, out _,
-                        Cards.EquippedMagicState.DefaultSlotCount);
+                    nodes = GridSpendMemo.Spend(definition.SphereGrid, budget);
                 }
 
                 var baseStats = HeroStatCalculator.BaseStatsForNodes(definition, nodes);
