@@ -93,7 +93,8 @@ namespace Tests.EditMode
             var slow = Unit("slow", 1, 0, 10, 5, true);
             var fast = Unit("fast", 1, 0, 10, 10, true);
 
-            Assert.AreEqual(2f, BalanceMath.TurnsPerTick(fast) / BalanceMath.TurnsPerTick(slow), 0.0001f);
+            Assert.AreEqual(TurnManager.SpeedFor(10) / TurnManager.SpeedFor(5),
+                BalanceMath.TurnsPerTick(fast) / BalanceMath.TurnsPerTick(slow), 0.0001f);
         }
 
         [Test]

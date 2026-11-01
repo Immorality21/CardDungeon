@@ -195,7 +195,7 @@ the resistance bonus already taught.
 |---|---|---|---|---|
 | `Burning` | Fire | applies | Ice | mirrors Frozen/Fire; resistances and absorption apply |
 | `Poisoned` | Normal | **bypassed** | — | the answer to a target the defense curve has made immune to flat damage |
-| `Bleeding` | Normal | applies | — | nothing in the project resists Normal, so today it is the plain one |
+| `Bleeding` | Normal | applies | — | nothing in the project resists Normal. Every hero bleed names the ability's damage stat as its `ScalingStat`, so it grows at the debuff rate (a quarter of the stat, 2026-11-01); poison and burn are still flat |
 | `Regenerating` | — | — | — | heals, clamped to effective max health |
 
 Five rules worth not re-deriving:

@@ -13,26 +13,20 @@ namespace Assets.Scripts.Combat
         // hardcoding a second copy of this constant.
         public const float BASE_TICKS = 100f;
 
-        /// <summary>Agility up to here counts in full toward turn speed (owner, 2026-10-17).</summary>
-        public const int SpeedKnee = 15;
-
-        /// <summary>What each point of Agility past <see cref="SpeedKnee"/> is worth toward turn speed.</summary>
-        public const float SpeedPastKnee = 0.5f;
+        /// <summary>The speed everyone has before Agility (owner, 2026-11-01).</summary>
+        public const float SpeedBase = 15f;
 
         /// <summary>
-        /// The Agility a unit's turns are paced by: full value up to <see cref="SpeedKnee"/>, half past
-        /// it. Without the bend a grown Rogue (Agility 30-46 against enemies' 2-8) took 6-10 turns per
-        /// enemy turn, so statuses that count down on the enemy's turn lasted almost forever and the
-        /// enemy side barely acted. Only turn order bends: dodge and anything that scales off Agility
-        /// read the stat itself. Shared by the live fight, the simulator and the closed form.
+        /// How fast a unit's turns come: <see cref="SpeedBase"/> plus its Agility. With speed equal to
+        /// Agility a point's worth depended on how little there was, so Agility 3 to 5 was 67% more
+        /// turns and two points could decide a boss (BALANCING.md, 5as); it also let a grown Rogue
+        /// (Agility 30-46 against enemies' 2-8) take 6-10 turns per enemy turn. Only turn order reads
+        /// this: anything else that scales off Agility reads the stat itself. Shared by the live fight,
+        /// the simulator and the closed form.
         /// </summary>
         public static float SpeedFor(int agility)
         {
-            if (agility <= SpeedKnee)
-            {
-                return agility;
-            }
-            return SpeedKnee + (agility - SpeedKnee) * SpeedPastKnee;
+            return SpeedBase + agility;
         }
 
         private Dictionary<ICombatUnit, float> _ticksUntilTurn = new Dictionary<ICombatUnit, float>();
@@ -356,7 +350,7 @@ namespace Assets.Scripts.Combat
         private float GetEffectiveSpeed(ICombatUnit unit)
         {
             // Item/level bonuses fold in via the unit's own effective stat; combat buffs/debuffs
-            // stack on top of that, and only then does the knee bend it (SpeedFor).
+            // stack on top of that, and only then does it become a speed (SpeedFor).
             int agility = unit.GetEffectiveStat(StatType.Agility);
             if (_buffTracker != null)
             {

@@ -20,7 +20,7 @@ MonoBehaviour:
   Rarity: 1
   Effects:
   - EffectType: 0
-    Power: 4
+    Power: 6
     PowerMode: 0
     ScalingStat: 1
     DamageType: 4

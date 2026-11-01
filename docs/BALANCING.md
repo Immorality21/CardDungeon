@@ -32,7 +32,7 @@ number was arrived at.
 | ⚠️ **The magic half of the model is about to be wrong** *(2026-09-04)* | `docs/plans/SPECIALIZATION.md` §9b **scraps Draw**. `ProgressionMap` — the unlock timeline, the availability matrix, every *unreachable magic* finding — is built entirely on Draw tables (enemy × level × run) and will be measuring a route that no longer exists. `BalanceRegressionTests` asserts the old model and **will go red**. Do not act on an Elements & Unlocks finding until that section lands. |
 | ⚠️ **Grids are about to get much bigger** *(2026-09-04)* | §4c re-authors all seven grids and grows them well past ~30 nodes. `MinGridShareForLastFloor` is a **share**, so it re-derives itself when the denominator moves; and §5s priced nodes *by depth*, so a bigger grid is not simply more nodes at the same cost. |
 | ⚠️ **Design first, dials second** *(owner, 2026-10-31)* | We are open to rethinking how levels are tuned. Before turning a dial, ask whether it is hiding a design gap, and whether a level could be easier to tune at all. |
-| ⚠️ **Agility is too strong** *(owner, 2026-10-31)* | A few points have a huge impact (§5aq). Its formula is first on the roadmap, so do not lean on it as a tuning lever until that is done. |
+| ⚠️ **Older Agility numbers are stale** *(2026-11-01)* | Speed is now 15 + Agility (§5as). Every Agility step and turn ratio written before that was measured on the old curve. |
 | ⚠️ **The simulator can read a boss easier than it plays** *(owner, 2026-10-31)* | From playtesting, some bosses were harder than the tool says. Which ones and why is not known yet; the owner will look later. §5aq's numbers come from this tool, so treat boss wipe rates and ending health as approximate. |
 | ⚠️ **§5i's headline is wrong** | "Party width gates, XP does not." **§5j corrects it** — both axes work and the right unit is a *frontier*. §5k is what shipped. |
 
@@ -2984,7 +2984,7 @@ four-hero floor: Rotwater Deep at Difficulty 4.9 still ended at 85% health, the 
 at 75%. Four fast heroes act so often that enemies barely get turns, so more enemy health and Strength
 only lengthen fights. **Enemy Agility is the lever** (`StatScales`, Agility, per floor): the Causeway at
 x3 went 93% -> 37%. Two changes shipped together (owner, 2026-10-17):
-- **Hero speed bends past Agility 15** (`TurnManager.SpeedFor`, half value above; Combat guide). It
+- **Hero speed bends past Agility 15** (later removed, §5as) (`TurnManager.SpeedFor`, half value above; Combat guide). It
   moved none of the tuned runs (the model's broad builds rarely pass 15 this early) - it is for invested
   Rogue/Ranger builds and later tiers.
 - **Enemy Agility per floor**, rising from the March:
@@ -3423,3 +3423,50 @@ watched, not acted on.
 **What still reads too easy, with a bot weaker than a player:** no wipes in 30 games and 79-83% ending health on
 Dungeon Entrance, Collapsed Caverns, The Ash Stacks and Warren Tunnels (`TierFloorBands` asks 50-75% on early floors).
 **The bot does no revisits**, so a replaying player sits above everything in this section.
+
+## §5as — Speed is 15 + Agility, and the knee is gone (2026-11-01)
+
+Owner: Agility is too strong. A unit acted every `100 / speed` ticks with speed equal to Agility, so a point's worth
+depended on how little there was: 3 to 5 was 67% more turns, 8 to 10 was 25%, and early units all sit at the low end.
+**`TurnManager.SpeedFor` is now `SpeedBase` (15) + Agility.** 3 to 5 is 11% more turns. The knee at 15 (half value
+above it) is removed: past a base of 10, taking it out changed almost nothing, and the base also answers what it was
+for (Agility 46 against 8 was 3.8 turns to 1, now 2.6). The knee was an agent's call, wrongly credited to the owner.
+
+| Lich's Sepulchre, simulator wipes | as tuned | Agility +2 | Agility +6 |
+|---|---|---|---|
+| speed = Agility, with the knee | 8% | 18% | 36% |
+| base 10 | 5% | 4% | 17% |
+| **base 15, no knee (shipped)** | 2% | 4% | 12% |
+| base 20, no knee | 3% | 3% | 9% |
+
+- **Ordinary floors barely moved in the simulator; boss floors did.** A flatter curve gives slow enemies relatively more
+  turns and fast ones fewer: the Counting Room went from 5% to 37% wipes on its own, Emberfall from 15% to 3%.
+- **Bosses retuned after it** (health/strength/agility): Lich 100/10/10, Mire Throne 225/23/11, Emberfall 150/21/15, Red
+  Cloister 320/32/24, and the Counting Room back to its original 70/10/3, since the formula made it harder by itself.
+- **Emberfall still reads easier than before** (3% wipes / 60% against 15% / 44%). Going further breaks the 6x ratio
+  ceiling, as on the Cloister and the Pool (§5aq).
+- **Agility is a usable lever now:** a step moves a floor a little, not a lot. Strength moves bosses more than it did.
+
+Bot, 6 games, one per profile, seed 3000, against the same seed before this change: 9 wipes and none given up against 10
+and one. The Counting Room read 4 of 10 against 2 of 8, Collapsed Caverns ended at 59% against 76% and The Ash Stacks
+at 58% against 80%, so two floors that read too easy in §5ar came down. Six games: a direction only.
+
+## §5at — Abilities beat a plain attack, Flurry has three hits, bleed scales (2026-11-01)
+
+Owner: Attack is sometimes stronger than Slash or Ice Shard; Flurry's four hits are too many; Slash's bleed only ticks 1.
+**The gauge stays** (owner: filling fast is fine).
+
+- **Why Attack could win:** on paper every ability already had base power on top of the same stat, but the margin was
+  small, an Attack can crit (12% at 1.6x) and most abilities cannot (`MagicSO.CanCrit`), and Ice Shard is typed: Floating
+  Eyes, the commonest early enemy, resist Ice 50%, where a plain attack is untyped. **Momentum is not the cause:**
+  abilities keep the stacks. Element resistance was left alone; it is the point of having elements.
+- **Hero abilities:** +2 base power on single-target damage, +1 on area and on Press the Attack's two hits. 47 assets.
+- **Enemies did not get stronger:** Slash, Ice Shard, Poison Dart and Water Splash were shared with enemies, and a shared
+  bump would have been multiplied by each floor's Difficulty. They now cast `EnemySlash` and the like (`EnemyOnly`), at the
+  old numbers, the `EnemyFireball` pattern.
+- **Flurry:** `Hits` 4 -> 3.
+- **Bleed:** all 8 name the ability's damage stat as `ScalingStat`, which adds a quarter of the stat, and Slash's base
+  went 1 -> 2. Poison and burn are still flat.
+
+Suite green. Bot: one finished game, not a measurement. Everything/ClearEverything, seed 3000: every run cleared first try,
+against 2 wipes on the same seed before. Heroes hit harder here, so this pass makes the game easier, not harder.

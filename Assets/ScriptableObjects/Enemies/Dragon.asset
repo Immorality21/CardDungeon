@@ -47,7 +47,7 @@ MonoBehaviour:
     CastWeight: 1
   - Magic: {fileID: 11400000, guid: 2eadbe7f36fe4473b34f4e2b11a452cd, type: 2}
     CastWeight: 1
-  - Magic: {fileID: 11400000, guid: 5a6c46af09324a6f933b7c6b755f387a, type: 2}
+  - Magic: {fileID: 11400000, guid: 41130f1c945040d895e5a8686527b246, type: 2}
     CastWeight: 1
   - Magic: {fileID: 11400000, guid: 2ca64f0892a84f2181d73f56d8fdf4ef, type: 2}
     CastWeight: 1

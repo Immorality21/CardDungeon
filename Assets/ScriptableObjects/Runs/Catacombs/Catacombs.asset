@@ -70,13 +70,13 @@ MonoBehaviour:
         Stats:
           Values:
           - Type: 7
-            Amount: 92
+            Amount: 100
           - Type: 1
-            Amount: 9
+            Amount: 10
           - Type: 4
             Amount: 14
           - Type: 3
-            Amount: 9
+            Amount: 10
         XpReward: 0
         GoldReward: 0
     RescueHero: {fileID: 0}

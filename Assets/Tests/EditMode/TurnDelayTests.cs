@@ -44,15 +44,15 @@ namespace Tests.EditMode
         {
             // A slow unit's turn is longer, so half of it is more ticks. The preview, which reads
             // the same counters, is where that shows.
-            // Both under TurnManager.SpeedKnee, so Agility is turn speed one for one.
-            var fast = new MockCombatUnit("Fast", strength: 1, endurance: 1, health: 10, agility: 12);
-            var slow = new MockCombatUnit("Slow", strength: 1, endurance: 1, health: 10, agility: 3);
+            // Speeds 60 and 15, so Fast takes four turns to Slow's one.
+            var fast = new MockCombatUnit("Fast", strength: 1, endurance: 1, health: 10, agility: 45);
+            var slow = new MockCombatUnit("Slow", strength: 1, endurance: 1, health: 10, agility: 0);
             var clock = new TurnManager();
             clock.Initialize(new List<ICombatUnit> { fast, slow });
 
             Assert.AreEqual(0.4f, clock.Delay(slow, 0.4f), Tolerance);
-            // Slow was at 33.3 ticks and is now at 46.7; Fast acts at 8.3, 16.7, 25, 33.3, 41.7 before it.
-            // Measured in Fast's turn instead, the delay would have been 3.3 ticks and Fast would have
+            // Slow was at 6.7 ticks and is now at 9.3; Fast acts at 1.7, 3.3, 5, 6.7, 8.3 before it.
+            // Measured in Fast's turn instead, the delay would have been 0.7 ticks and Fast would have
             // gone four times.
             var order = clock.GetTurnOrder(7);
             Assert.AreEqual(5, order.TakeWhile(u => ReferenceEquals(u, fast)).Count());

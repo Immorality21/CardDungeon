@@ -102,9 +102,9 @@ MonoBehaviour:
         Stats:
           Values:
           - Type: 7
-            Amount: 195
+            Amount: 225
           - Type: 1
-            Amount: 20
+            Amount: 23
           - Type: 3
             Amount: 11
         XpReward: 0

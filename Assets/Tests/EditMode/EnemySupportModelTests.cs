@@ -143,8 +143,8 @@ namespace Tests.EditMode
             float slowSustain = BalanceMath.SustainPerTick(SimUnit.FromEnemy(slow, null));
             float fastSustain = BalanceMath.SustainPerTick(SimUnit.FromEnemy(fast, null));
 
-            Assert.AreEqual(2f, fastSustain / slowSustain, 0.01f,
-                "Twice the Agility is twice the healing per tick, same as it is twice the damage.");
+            Assert.AreEqual(TurnManager.SpeedFor(10) / TurnManager.SpeedFor(5), fastSustain / slowSustain, 0.01f,
+                "Healing per tick follows turn speed, the same as damage does.");
         }
 
         // ------------------------------------------------------------------ debuffs on the party

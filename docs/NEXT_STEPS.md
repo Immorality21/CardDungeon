@@ -304,10 +304,6 @@ backlog.**
 
 ### Next up
 
-- **Agility is too strong: rethink the formula — first** (owner, 2026-10-31). A few points have a huge
-  impact. Measured in `BALANCING.md` §5aq: +2 on the Lich took a floor from 0% to 12% wipes and +6 to 43%,
-  far steeper than +50% health and strength. Look at the algorithm (how Agility turns into turns in
-  `TurnManager`), not at individual numbers. Re-measure the bosses afterwards: §5aq leaned on Agility.
 - **Rethink Ultras — first** (owner, 2026-10-30). The gauge should **keep its charge between fights**
   (today it empties at the end of each), and Ultras should be **unlocked from the start** instead of
   bought on the sphere grid. A broader rethink, not a tweak: `plans/COMBAT_DEPTH.md` §13. **Decided

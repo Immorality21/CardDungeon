@@ -30,7 +30,7 @@ MonoBehaviour:
     BonusVsStatus: 0
     BonusPerDebuff: 0
     DrainToParty: 0
-  Hits: 4
+  Hits: 3
   RandomTargets: 1
   Creature: {fileID: 0}
   StatAbilities: []

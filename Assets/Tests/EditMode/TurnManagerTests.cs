@@ -48,18 +48,26 @@ namespace Tests.EditMode
         }
 
         [Test]
-        public void SpeedFor_CountsAgilityInFullUpToTheKnee_AndHalfPastIt()
+        public void SpeedFor_IsTheBasePlusAgility()
         {
-            Assert.AreEqual(8f, TurnManager.SpeedFor(8));
-            Assert.AreEqual(15f, TurnManager.SpeedFor(TurnManager.SpeedKnee));
-            Assert.AreEqual(22.5f, TurnManager.SpeedFor(30));
-            Assert.AreEqual(30f, TurnManager.SpeedFor(45));
+            Assert.AreEqual(TurnManager.SpeedBase, TurnManager.SpeedFor(0));
+            Assert.AreEqual(TurnManager.SpeedBase + 8f, TurnManager.SpeedFor(8));
+            Assert.AreEqual(TurnManager.SpeedBase + 45f, TurnManager.SpeedFor(45));
         }
 
         [Test]
-        public void GetNextUnit_AgilityPastTheKnee_BuysHalfAsManyExtraTurns()
+        public void SpeedFor_TwoPointsAtLowAgility_AreAModestGain()
         {
-            // Agility 45 is speed 30 against 15's 15: two turns to one, not the three a straight line gave.
+            // The reason for the base: Agility 3 to 5 was 67% more turns when speed was Agility.
+            float gain = TurnManager.SpeedFor(5) / TurnManager.SpeedFor(3) - 1f;
+
+            Assert.Less(gain, 0.15f);
+        }
+
+        [Test]
+        public void GetNextUnit_FarMoreAgility_IsTwoTurnsToOne()
+        {
+            // Agility 45 is speed 60 against 15's 30: two turns to one, not the three speed alone gave.
             var fast = new MockCombatUnit("Fast", strength: 1, endurance: 1, health: 10, agility: 45);
             var slow = new MockCombatUnit("Slow", strength: 1, endurance: 1, health: 10, agility: 15);
             _turnManager.Initialize(new List<ICombatUnit> { fast, slow });

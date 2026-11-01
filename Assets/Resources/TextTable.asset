@@ -10644,6 +10644,46 @@ MonoBehaviour:
     - price
     Reviewed: 0
     Note: 
+  - Key: ability.enemy-slash.name
+    Values:
+    - Slash
+    Reviewed: 0
+    Note: 
+  - Key: ability.enemy-slash.description
+    Values:
+    - A swift blade strike against a single enemy.
+    Reviewed: 0
+    Note: 
+  - Key: ability.enemy-ice-shard.name
+    Values:
+    - Ice Shard
+    Reviewed: 0
+    Note: 
+  - Key: ability.enemy-ice-shard.description
+    Values:
+    - Launches a razor-sharp shard of ice at a single enemy.
+    Reviewed: 0
+    Note: 
+  - Key: ability.enemy-poison-dart.name
+    Values:
+    - Poison Dart
+    Reviewed: 0
+    Note: 
+  - Key: ability.enemy-poison-dart.description
+    Values:
+    - A toxic dart that damages and poisons an enemy.
+    Reviewed: 0
+    Note: 
+  - Key: ability.enemy-water-splash.name
+    Values:
+    - Water Splash
+    Reviewed: 0
+    Note: 
+  - Key: ability.enemy-water-splash.description
+    Values:
+    - A torrent of water crashes into all enemies.
+    Reviewed: 0
+    Note: 
   - Key: ability.enemy-fireball.name
     Values:
     - Fireball
