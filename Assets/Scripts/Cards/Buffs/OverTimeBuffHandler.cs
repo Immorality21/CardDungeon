@@ -86,11 +86,6 @@ namespace Assets.Scripts.Cards.Buffs
         /// </summary>
         public bool SkipsTurn => false;
 
-        public string GetSkipTurnMessage(ICombatUnit unit)
-        {
-            return null;
-        }
-
         /// <summary>
         /// Mirrors <see cref="FrozenBuffHandler"/>, which fire thaws: a burn is doused by Ice. Only
         /// Burning declares a remover — poison and bleeding are not elemental states, and a

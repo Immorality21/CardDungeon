@@ -139,7 +139,7 @@ namespace Assets.Scripts.Combat.Triggers
     }
 
     /// <summary>One trigger a unit carries, and what it came from (an item's or an enemy's name), for
-    /// the combat log.</summary>
+    /// the floating text.</summary>
     public struct CarriedTrigger
     {
         public TriggeredEffect Trigger;
@@ -162,7 +162,7 @@ namespace Assets.Scripts.Combat.Triggers
     }
 
     /// <summary>A trigger fired: raised on the fight's <see cref="CombatEvents"/> after its effects
-    /// resolved, for the combat log and the floating text.</summary>
+    /// resolved, for the floating text.</summary>
     public class ReactionResolved
     {
         public ICombatUnit Bearer;

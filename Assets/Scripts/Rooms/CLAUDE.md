@@ -2,13 +2,15 @@
 
 `RoomManager` (dungeon generation), `CombatManager` (combat flow/orchestration), and `GameManager` live here. Core combat *mechanics* (turn order, damage) are in `Assets/Scripts/Combat/CLAUDE.md`.
 
-> **Pending split - do it when you next refactor or add to these files** (owner, 2026-10-22).
-> `CombatManager.cs` (~3,600 lines) and `UI/RoomActionUI.cs` (~3,700 lines) each do several unrelated
-> jobs, which makes every change in them expensive to read around. Split along the seams they already
-> have: CombatManager into enemy-turn execution, hero commands and the fight's setup/teardown;
-> RoomActionUI into the command menu, the HUD and the level-clear screen. Move pure rules into
-> `*Ops`/planner classes (the `EnemyActionPlanner` pattern) and leave the MonoBehaviour as wiring.
-> Do it as its own change with a play test, not inside a feature, and remove this note when done.
+> **Both big classes are split into files by job** (2026-11-01, partial classes, so behaviour did not
+> move). Add to the file for the job, and keep a new file's job one sentence long.
+> `CombatManager.cs` holds the types, the fields and the API the UI calls; `.Fight` setup, the turn loop,
+> deaths, rewards; `.EnemyTurns`; `.HeroCommands` attack, cast, item, steal; `.Summons`; `.Ultras`;
+> `.Bestiary` what fighting teaches; `.Feedback` floating text.
+> `UI/RoomActionUI.cs` holds the fields and the wiring; `.Commands` the fight's bars, command menu, turn order
+> and hotkeys; `.RoomEvents`; `.Pause` pause, map, potions, dialogs; `.Walking`; `.PartyStatus`; `.Hud`;
+> `.LevelClear` victory and level clear; `.Bot`. A partial class shares its fields, so this splits the reading,
+> not the coupling: a pure rule still belongs in an `*Ops`/planner class (the `EnemyActionPlanner` pattern).
 
 ## Dungeon Generation Pipeline (RoomManager)
 

@@ -340,9 +340,6 @@ backlog.**
   the simulator says. The bot agrees on The Broken Orrery (0% against 27% wipes) and The Counting Room (18% against
   51%, mostly one five-body room, not the boss); Sunken Depths and the Lich match. To separate party from model, run the
   model's party through the bot. `BALANCING.md` §5ar, `docs/BOT.md`.
-- **Delete the dead combat log** (2026-10-30): no screen shows it, but `CombatManager` still builds it
-  (`_lastTurnLog`, `CombatResult.Log`, ~90 lines, the `combat.log.*` texts). Do it with the planned
-  `CombatManager` split (Rooms guide), not on its own.
 - **Localization follow-ups** (2026-10-30) — `plans/POLISH_CONTENT.md` §22: enum names still shown
   raw, English grammar in code, grid nodes showing raw ability keys.
 - **Own icons for Divine Protection and Smite** (2026-10-30): they borrow Sacred Shield's and Divine
@@ -454,6 +451,11 @@ backlog.**
 ---
 
 ## Shipped ledger
+
+- **`CombatManager` and `RoomActionUI` split by job** (2026-11-01) — partial classes, one file per job (Rooms guide).
+  The dead combat log went with it: `CombatResult.Log`, the `combat.log.*` texts, `GetSkipTurnMessage`.
+- **The belt is decided** (2026-11-01, owner): free, restocked when a run starts from town. We want players to use
+  potions and to buy potion upgrades. `plans/POLISH_CONTENT.md` §18c.
 
 - **Health carries between floors** (2026-11-01, owner) — `BALANCING.md` §5au. Nothing heals on arrival at a
   floor; refuges heal 50% and the March has three. The balance model carries health and spends the belt per run.

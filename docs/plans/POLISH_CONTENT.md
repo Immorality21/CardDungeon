@@ -506,6 +506,10 @@ Touch points: `Assets/Scripts/Items/ItemSO.cs` / `ItemBonus.cs` / `ConsumableEff
 `Assets/Scripts/Items/LootRoller.cs`, `Assets/Scripts/Balance/GearLoadout.cs`,
 `Assets/Scripts/Rooms/CombatManager.cs` (consumable use path).
 
+> **Decided 2026-11-01 (owner): the belt is free and restocks when a run starts from town.** The point is
+> that players use their potions and want more potion upgrades, so it never becomes a stock to buy. Drinkable
+> while walking too (`PotionWindow`). What follows is the question as it was opened.
+
 **18c. The potion belt — overhaul or re-evaluate** *(opened 2026-09-28, owner's call)*. The belt is
 a free top-up: `DungeonManager.SpawnFreshDungeon` calls `InventoryManager.TopUpConsumableToCap` to
 fill the basic potion to the cap `PartyResourceManager` holds (which the Merchant raises). It is

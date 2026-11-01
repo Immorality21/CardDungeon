@@ -39,11 +39,6 @@ namespace Assets.Scripts.Cards.Buffs
 
         public bool SkipsTurn => false;
 
-        public string GetSkipTurnMessage(ICombatUnit unit)
-        {
-            return null;
-        }
-
         public bool IsRemovedByDamageType(DamageType damageType)
         {
             return false;

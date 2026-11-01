@@ -44,15 +44,5 @@ namespace Assets.Scripts.Cards
         // Keys of every combo that triggered this cast — CombatManager records these as
         // discovered. Distinct from ComboName (display-only, last combo).
         public List<string> TriggeredComboKeys = new List<string>();
-
-        public string BuildLog(SpellcastAction action)
-        {
-            if (!string.IsNullOrEmpty(ComboName))
-            {
-                return Loc.Format("combat.log.cast-combo",
-                    ("caster", action.Caster.DisplayName), ("ability", action.Magic.DisplayName), ("combo", ComboName));
-            }
-            return Loc.Format("combat.log.cast", ("caster", action.Caster.DisplayName), ("ability", action.Magic.DisplayName));
-        }
     }
 }

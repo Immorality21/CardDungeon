@@ -539,35 +539,6 @@ namespace Tests.EditMode
             Assert.AreEqual(1, result.Entries.Count);
         }
 
-        // ---- Result / Log ----
-
-        [Test]
-        public void BuildLog_BasicFormat()
-        {
-            var card = CreateCard("Fireball", SpellEffectType.Damage, power: 5);
-            var action = MakeAction(card, _hero, _enemy);
-
-            var result = _calculator.Execute(action, _buffTracker);
-
-            Assert.AreEqual("Hero casts Fireball!", result.BuildLog(action));
-        }
-
-        [Test]
-        public void BuildLog_IncludesComboName()
-        {
-            var combo = CreateCombo("Ignite", new List<MagicTag> { MagicTag.Fire, MagicTag.Oil }, SpellEffectType.Damage, 10);
-            var detector = new ComboDetector(new List<MagicComboSO> { combo });
-
-            _tagTracker.ApplyTags(_enemy, new List<MagicTag> { MagicTag.Oil }, 3);
-
-            var card = CreateCard("Fireball", SpellEffectType.Damage, power: 5, tags: new List<MagicTag> { MagicTag.Fire });
-            var action = MakeAction(card, _hero, _enemy);
-
-            var result = _calculator.Execute(action, _buffTracker, _tagTracker, detector);
-
-            Assert.AreEqual("Hero casts Fireball! COMBO: Ignite!", result.BuildLog(action));
-        }
-
         [Test]
         public void Combo_BuffDefenseBonus_BuffsCaster()
         {

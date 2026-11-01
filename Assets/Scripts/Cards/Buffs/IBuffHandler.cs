@@ -9,7 +9,6 @@ namespace Assets.Scripts.Cards.Buffs
         void Apply(ICombatUnit target, int power, int duration, CombatBuffTracker buffTracker, ICombatUnit source = null);
         string GetDisplayText(int power);
         bool SkipsTurn { get; }
-        string GetSkipTurnMessage(ICombatUnit unit);
         bool IsRemovedByDamageType(DamageType damageType);
     }
 }
