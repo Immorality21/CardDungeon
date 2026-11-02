@@ -1562,6 +1562,16 @@
     justify-content: center;
 }
 
+.sg-learn__options {
+    flex-direction: column;
+    align-items: stretch;
+    margin-top: 8px;
+}
+
+.sg-learn__options > .cd-button {
+    margin-top: 4px;
+}
+
 .cd-inv-confirm__window {
     width: 520px;
     margin-bottom: 0;

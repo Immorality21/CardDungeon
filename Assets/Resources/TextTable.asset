@@ -3234,43 +3234,42 @@ MonoBehaviour:
   - Key: event.cutpurse.title
     Values:
     - A Cutpurse on the Rope
-    Reviewed: 0
+    Reviewed: 1
     Note: 
   - Key: event.cutpurse.prompt
     Values:
     - 'Every lock in these tunnels was picked before you reached it. Now you know
-      by whom: someone hangs from a frayed rope over the counting-pit, one hand on
-      the line and the other still holding a purse that is not theirs. ''Evening,''
-      they say. ''I don''t suppose you''d pull?'''
-    Reviewed: 0
+      by whom: a cutpurse who hangs from a rope over a pit, one hand on the line
+      and the other still holding a purse that is not theirs. ''Evening,'' he says.
+      ''Could you give me a hand?'''
+    Reviewed: 1
     Note: 
   - Key: event.cutpurse.option-1.label
     Values:
-    - Catch the rope
-    Reviewed: 0
+    - Try to grab the rope.
+    Reviewed: 1
     Note: 
   - Key: event.cutpurse.option-1.success-1.text
     Values:
-    - You get a hand on the line as it parts and haul them over the lip. They look
-      at you, then at the tunnel, then hand the purse back. 'Fine. You'll want someone
-      who can open things.'
-    Reviewed: 0
+    - 'You get a hand on the rope and pull it towards you. The man looks at you and
+      says: ''Thanks. You look like you could use someone with nible skills.'''
+    Reviewed: 1
     Note: 
   - Key: event.cutpurse.option-1.failure-1.text
     Values:
-    - The rope goes. So does the cutpurse - not down, but sideways into a crawlway
-      you never saw, and a little heavier than before.
-    Reviewed: 0
+    - The rope goes and so does the cutpurse.  He manages to jump sideways into a
+      narrow passage you never saw.
+    Reviewed: 1
     Note: 
   - Key: event.cutpurse.option-2.label
     Values:
     - Leave them hanging
-    Reviewed: 0
+    Reviewed: 1
     Note: 
   - Key: event.cutpurse.option-2.decline
     Values:
     - '''Suit yourselves,'' they call after you. ''I''ll be around.'''
-    Reviewed: 0
+    Reviewed: 1
     Note: 
   - Key: event.drowned-offering.title
     Values:
@@ -9750,22 +9749,51 @@ MonoBehaviour:
     - their next hit taken is negated
     Reviewed: 0
     Note: 'Status explanation in ability text: Divine Protection'
-  - Key: ui.hub.tab-all
-    Values:
-    - All
-    Reviewed: 0
-    Note: 'Storehouse tab: every piece of equipment, no slot filter'
   - Key: items.inv.title.all-equipment
     Values:
     - All equipment
     Reviewed: 0
     Note: inventory list title, All tab
-  - Key: items.inv.hint.all
+  - Key: items.inv.all.row-caption
     Values:
-    - "\u2191\u2193 item \xB7 Enter equip \xB7 Q/E hero \xB7 \u2190\u2192 tab \xB7
-      Esc back"
+    - Every slot
     Reviewed: 0
-    Note: inventory key hint, All tab
+    Note: caption under the All equipment row, first in the Storehouse slot column
+  - Key: items.inv.all.count-note
+    Values:
+    - '{count} pieces of gear in the party. Enter to browse them all.'
+    Reviewed: 0
+    Note: Storehouse detail note with the All equipment row under the cursor
+  - Key: grid.learn.title
+    Values:
+    - '{hero} learned {ability}'
+    Reviewed: 0
+    Note: sphere grid, dialog title after learning an ability
+  - Key: grid.learn.free
+    Values:
+    - Carry it into the next run?
+    Reviewed: 0
+    Note: sphere grid learn dialog, a slot is free
+  - Key: grid.learn.full
+    Values:
+    - 'All {slots} ability slots are full. Carry it in place of:'
+    Reviewed: 0
+    Note: sphere grid learn dialog, every slot full; buttons follow
+  - Key: grid.learn.carry
+    Values:
+    - Carry it
+    Reviewed: 0
+    Note: sphere grid learn dialog button
+  - Key: grid.learn.replace
+    Values:
+    - Replace {ability}
+    Reviewed: 0
+    Note: sphere grid learn dialog button; ability = one carried now
+  - Key: grid.learn.not-now
+    Values:
+    - Not now
+    Reviewed: 0
+    Note: sphere grid learn dialog button; the Storehouse changes it later
   - Key: items.inv.all.slot-caption
     Values:
     - "{slot} \xB7 {caption}"
@@ -10312,6 +10340,16 @@ MonoBehaviour:
   - Key: room.event.tag.price
     Values:
     - price
+    Reviewed: 0
+    Note: 
+  - Key: ability.enemy-slam.name
+    Values:
+    - Slam
+    Reviewed: 0
+    Note: The Stone Sentinel's crushing blow (it used to Slash).
+  - Key: ability.enemy-slam.description
+    Values:
+    - A stone fist brought down on one hero, denting their guard.
     Reviewed: 0
     Note: 
   - Key: ability.enemy-slash.name

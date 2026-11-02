@@ -6,6 +6,15 @@ it has been played; anything that turns out wrong becomes a backlog item in `NEX
 Most of it came out of playtest 3 (2026-10-26 to 2026-10-28); the first section is the outside
 playtest's fixes (2026-10-30).
 
+## Playtest notes, round of 2026-11-02 (built, not seen in play)
+
+- [ ] **Learning an ability asks** - buy Smite on the Paladin: a prompt names it and offers Carry it (a free slot) or Replace <ability> (all slots full), or Not now. His heal is never pushed out unasked. Keyboard: arrows + Enter, Esc = Not now. Not asked during the tutorial's guided node.
+- [ ] **Storehouse All equipment** - the cursor starts on it; see the Hub section.
+- [ ] **Floating Eye** - Eye Laser is a red beam straight to the hero, no bolt; Screech swells the eye and rings race out, then every hero is hit at the same moment.
+- [ ] **Stone Sentinel's Slam** - a fist icon instead of Slash; may lower Endurance 1 for 2 turns (60%) instead of a bleed.
+- [ ] **The Forge** - now 3 Cut Stone + 3 Scrap Iron, both found in the Threshold and the Archive (was Ember Iron + Slag Coal, which only the Ashen Deep has).
+- [ ] **The Cutpurse on the Rope** - new art: a hooded thief on a rope over a pit, holding a purse; the spent pit is empty.
+
 ## The test boss: the Barrow King (2026-11-02)
 
 - [ ] **The Barrow Throne** - optional, after the Catacombs. Does each phase read? The phase banners (The Crown Cracks, Last Rite), the named wind-ups (Grave Tide, Requiem) and the skeletons at 60%.
@@ -81,7 +90,7 @@ does (focus), so press them for real.
 - [ ] **Paladin** - Divine Protection cancels the next blow or ability hit on an ally ("Protected", gold
       shield icon); Aegis on the whole party; Smite hits harder on undead and demons.
 - [ ] **Empty loadout** - putting away a hero's last ability leaves them with none, in and after a run.
-- [ ] **Storehouse All tab** - with gear owned: every item listed, Enter equips / reassigns / takes off.
+- [ ] **Storehouse All equipment** - no longer a tab (owner, 2026-11-02): the first row of the Equipment tab's slot column, where the cursor starts. Every item listed, Enter equips / reassigns / takes off and the cursor stays in the list.
 - [ ] **Enemy counts** - a few tries of the same floor feel comparable.
 - [ ] **Catacombs** - the first wipe there (after the tutorial) adds the replay hint to the death screen.
 

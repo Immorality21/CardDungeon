@@ -90,6 +90,8 @@
 
   Three details that matter. The magic is named by **key, not reference**, because Heroes does not depend on Cards (the dependency runs the other way, and saves reference magic by key too) — resolution happens in `EquippedMagicState.SeedFromLoadout` where the catalog lives. `KnownMagicForNodes` walks the **grid**, not the save, so a hero's known list reads the same however they clicked, which is what makes the loadout auto-fill deterministic. And `GrantedCharges` is the real power dial, not `XpCost`: it is the whole run's allowance of that spell, restored only by resting in a refuge.
 
+  **Learning one asks where it goes** (owner, 2026-11-02): buying a `MagicKnown` node on the hub grid pins the kit the hero carried before as their chosen loadout, then `SphereGridUI.OfferToCarry` offers Carry it / Replace <ability> / Not now (`MagicLoadoutOps.CarryLearned`). Without the pin, a hero who never chose a kit auto-filled in grid order, and Smite silently pushed the Paladin's heal out. No prompt mid-run or on the tutorial's guided node (a free slot is filled there).
+
   Every hero's grid authors a cheap **signature** node near the start plus spells further out on each branch. All seven signatures are free and the grid's start node (see `UnlockedByDefault` above), so every hero arrives able to cast. `ElementalContentTests` fails if a grid has no `MagicKnown` node, if a node names a magic that does not exist, **or if any magic in the catalog is on no grid at all** — with no Draw there is no second route, so an unplaced spell is uncastable by anyone.
 
 ## The roster is eight, and every grid is authored

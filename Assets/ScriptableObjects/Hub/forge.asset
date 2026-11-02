@@ -57,10 +57,10 @@ MonoBehaviour:
   PlacedByDefault: 0
   MaxLevel: 3
   PlacementCost:
-  - Material: {fileID: 11400000, guid: c0de5211aa070000000000000000ab07, type: 2}
+  - Material: {fileID: 11400000, guid: c0de5211aa020000000000000000ab02, type: 2}
     Amount: 3
-  - Material: {fileID: 11400000, guid: c0de5211aa040000000000000000ab04, type: 2}
-    Amount: 2
+  - Material: {fileID: 11400000, guid: c0de5211aa060000000000000000ab06, type: 2}
+    Amount: 3
   GoldPerUpgrade: 250
   LevelGrantKeys:
   - building.forge.level-1.grant

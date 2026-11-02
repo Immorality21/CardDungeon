@@ -216,7 +216,7 @@ and the wrong one for a gate.
 | Hall of Progression (`sphere-hall`) | from the start | 1 Rotted Timber |
 | Hall of Knowledge (`bestiary`) | from the start | 4 Scrap Iron |
 | Merchant | from the start | 10 Scrap Iron · 1 Rotted Timber (was 8 + 2 until playtest 2 finding 14: timber only drops from caches) |
-| Forge | after `TutorialRun` | 3 Ember Iron · 2 Slag Coal |
+| Forge | after `TutorialRun` | 3 Cut Stone · 3 Scrap Iron (was 3 Ember Iron + 2 Slag Coal until 2026-11-02: neither drops before the Ashen Deep, so a recipe found in the Archive waited on a Forge nobody could build) |
 
 The Sphere Hall is deliberately the cheapest thing in town and is **not** gated on a run: the grid
 is where banked XP goes, and making a player finish a run before they can spend any of what they

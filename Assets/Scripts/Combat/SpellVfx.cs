@@ -32,6 +32,7 @@ namespace Assets.Scripts.Combat
         private static Sprite _glow;
         private static Sprite _ring;
         private static Sprite _spark;
+        private static Sprite _bar;
 
         /// <summary>
         /// Light gathers at the caster: a ring opens out on the ground under it, a glow swells behind
@@ -159,6 +160,141 @@ namespace Assets.Scripts.Combat
             }
         }
 
+        // A beam: how long it takes to open, how long it stays at full width, and how long it fades.
+        private const float BeamOpen = 0.06f;
+        private const float BeamHold = 0.16f;
+        private const float BeamFade = 0.14f;
+
+        /// <summary>How long after <see cref="Beam"/> starts it reaches the target - the caller waits
+        /// this long and lands the hit while the beam is still up.</summary>
+        public const float BeamLands = BeamOpen + 0.04f;
+
+        private const float BurstDuration = 0.45f;
+
+        /// <summary>
+        /// A beam (<c>MagicDelivery.Beam</c>, owner 2026-11-02: the Floating Eye's laser): a straight
+        /// line from the caster's body to the target's, opening at once, with a glow at each end.
+        /// Blocks only until it reaches the target (<see cref="BeamLands"/>); the fade plays on.
+        /// </summary>
+        public static IEnumerator Beam(ICombatUnit caster, ICombatUnit target, Color tint)
+        {
+            if (caster == null || caster.Transform == null || target == null || target.Transform == null)
+            {
+                yield break;
+            }
+            CoroutineHandler.Handle(BeamRoutine(BodyOf(caster).center, BodyOf(target).center, tint));
+            yield return new WaitForSeconds(BeamLands);
+        }
+
+        private static IEnumerator BeamRoutine(Vector3 from, Vector3 to, Color tint)
+        {
+            var root = new GameObject("BeamVfx").transform;
+            var outer = MakeRenderer(root, Bar, tint, OverUnitOrder);
+            var core = MakeRenderer(root, Bar, Color.white, OverUnitOrder + 1);
+            var source = MakeRenderer(root, Glow, tint, OverUnitOrder);
+            var hit = MakeRenderer(root, Glow, tint, OverUnitOrder);
+
+            Vector3 delta = to - from;
+            float length = delta.magnitude;
+            var rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(delta.y, delta.x) * Mathf.Rad2Deg);
+            Vector3 middle = (from + to) * 0.5f;
+            float total = BeamOpen + BeamHold + BeamFade;
+            float elapsed = 0f;
+            while (elapsed < total && root != null)
+            {
+                elapsed += Time.deltaTime;
+                float open = Mathf.Clamp01(elapsed / BeamOpen);
+                float fade = Mathf.Clamp01((elapsed - BeamOpen - BeamHold) / BeamFade);
+                // Thin at the edges of its life, full while it holds; it narrows as it fades.
+                float width = open * (1f - fade);
+                // A flicker so it reads as energy rather than a painted stripe.
+                float flicker = 0.85f + 0.15f * Mathf.Sin(elapsed * 70f);
+
+                foreach (var bar in new[] { outer, core })
+                {
+                    bar.transform.position = middle;
+                    bar.transform.rotation = rotation;
+                }
+                outer.transform.localScale = new Vector3(length, 0.26f * width * flicker, 1f);
+                core.transform.localScale = new Vector3(length, 0.09f * width, 1f);
+                outer.color = WithAlpha(tint, 0.85f * width);
+                core.color = WithAlpha(Color.white, width);
+
+                source.transform.position = from;
+                source.transform.localScale = Vector3.one * 0.5f * flicker;
+                source.color = WithAlpha(tint, 0.8f * width);
+                hit.transform.position = to;
+                hit.transform.localScale = Vector3.one * 0.7f * flicker;
+                hit.color = WithAlpha(tint, 0.8f * width);
+                yield return null;
+            }
+
+            if (root != null)
+            {
+                Object.Destroy(root.gameObject);
+            }
+        }
+
+        /// <summary>
+        /// The caster lets something out of itself (<c>MagicDelivery.Burst</c>, owner 2026-11-02: the
+        /// Floating Eye's Screech): it swells and shudders while rings of <paramref name="tint"/> race
+        /// out from it. Blocks for the whole effect; nothing crosses the stage, and the hits land after it.
+        /// </summary>
+        public static IEnumerator Burst(ICombatUnit caster, Color tint)
+        {
+            if (caster == null || caster.Transform == null)
+            {
+                yield break;
+            }
+
+            Bounds body = BodyOf(caster);
+            var unit = caster.Transform;
+            Vector3 scale = unit.localScale;
+            var root = new GameObject("BurstVfx").transform;
+            var glow = MakeRenderer(root, Glow, tint, BehindUnitOrder);
+            var rings = new SpriteRenderer[3];
+            for (int i = 0; i < rings.Length; i++)
+            {
+                rings[i] = MakeRenderer(root, Ring, tint, OverUnitOrder);
+            }
+
+            float size = Mathf.Max(0.6f, Mathf.Max(body.size.x, body.size.y));
+            float elapsed = 0f;
+            while (elapsed < BurstDuration && root != null && unit != null)
+            {
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / BurstDuration);
+
+                // Swells, shudders at its fullest, and settles.
+                float swell = Mathf.Sin(t * Mathf.PI);
+                float shudder = 1f + 0.03f * Mathf.Sin(elapsed * 90f) * swell;
+                unit.localScale = new Vector3(scale.x * (1f + 0.12f * swell) * shudder, scale.y * (1f + 0.12f * swell), scale.z);
+
+                glow.transform.position = body.center;
+                glow.transform.localScale = Vector3.one * size * Mathf.Lerp(1f, 1.6f, t);
+                glow.color = WithAlpha(tint, 0.5f * swell);
+
+                // Three rings, one after another, flying well past the caster.
+                for (int i = 0; i < rings.Length; i++)
+                {
+                    float r = Mathf.Clamp01((t - i * 0.18f) / 0.64f);
+                    rings[i].transform.position = body.center;
+                    rings[i].transform.localScale = Vector3.one * size * Mathf.Lerp(0.6f, 4f, r);
+                    rings[i].color = WithAlpha(tint, r <= 0f ? 0f : 0.9f * (1f - r));
+                }
+                yield return null;
+            }
+
+            if (unit != null)
+            {
+                unit.localScale = scale;
+            }
+            if (root != null)
+            {
+                Object.Destroy(root.gameObject);
+            }
+        }
+
         private static void RingAt(SpriteRenderer ring, Vector3 feet, float width, float t)
         {
             float size = width * Mathf.Lerp(0.4f, 1.6f, t);
@@ -231,6 +367,19 @@ namespace Assets.Scripts.Combat
                     });
                 }
                 return _ring;
+            }
+        }
+
+        // A solid square, one unit across, stretched into a beam.
+        private static Sprite Bar
+        {
+            get
+            {
+                if (_bar == null)
+                {
+                    _bar = MakeSprite(4, (dx, dy, r) => 1f);
+                }
+                return _bar;
             }
         }
 

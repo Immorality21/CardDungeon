@@ -17,8 +17,8 @@ using ImmoralityGaming.Localization;
 namespace Assets.Scripts.Items.UI
 {
     /// <summary>
-    /// Hub inventory (UI Toolkit view-controller). Five tabs - equipment (by slot, and all of it in
-    /// one list) and the ability loadout per hero, the carried consumables and the hauled materials
+    /// Hub inventory (UI Toolkit view-controller). Four tabs - equipment and the ability loadout per
+    /// hero, the carried consumables and the hauled materials
     /// party-wide - in one fixed frame:
     /// a header band with the tabs, a hero strip, three columns (what is worn or carried, the list to
     /// choose from, and a detail pane for whatever the cursor is on) and a hint line. The frame is
@@ -29,9 +29,11 @@ namespace Assets.Scripts.Items.UI
     /// Enter moves into that list, where every item shows its effect on the hero's stats before it
     /// is put on. Enter equips and returns to the slots; Esc backs out a layer at a time.</para>
     ///
-    /// <para><b>All</b> is the same gear without the slot filter: every piece the party owns, bag
-    /// and worn, in one list sorted by slot, so equipping does not mean cycling through every
-    /// slot. Enter puts the piece on the selected hero (or takes it off, if they wear it).</para>
+    /// <para><b>All equipment</b> is the first row of the slot column and where the cursor starts
+    /// (owner, 2026-11-02 - it was a tab of its own): the same gear without the slot filter, every
+    /// piece the party owns, bag and worn, in one list sorted by slot, so equipping does not mean
+    /// cycling through every slot. Enter puts the piece on the selected hero (or takes it off, if
+    /// they wear it).</para>
     ///
     /// <para>Stats here are the ones the hero fights with: base, plus the sphere-grid nodes they
     /// have bought, plus gear (<see cref="HeroStatCalculator"/>) - this screen used to leave the
@@ -43,7 +45,10 @@ namespace Assets.Scripts.Items.UI
     public class InventoryHubUI
     {
         // Declaration order is the tab row's order: Left/Right step through it.
-        private enum Tab { Equipment, All, Spells, Consumables, Materials }
+        private enum Tab { Equipment, Spells, Consumables, Materials }
+
+        // The slot column's first row lists every piece of gear; the slots follow it.
+        private const int AllEquipmentIndex = 0;
 
         private enum Focus { Slots, List }
 
@@ -65,7 +70,6 @@ namespace Assets.Scripts.Items.UI
 
         private readonly VisualElement _heroesRow;
         private readonly Button _tabEquipment;
-        private readonly Button _tabAll;
         private readonly Button _tabSpells;
         private readonly Button _tabConsumables;
         private readonly Button _tabMaterials;
@@ -115,7 +119,6 @@ namespace Assets.Scripts.Items.UI
 
             _heroesRow = root.Q<VisualElement>("inventory-heroes");
             _tabEquipment = root.Q<Button>("tab-equipment");
-            _tabAll = root.Q<Button>("tab-all");
             _tabSpells = root.Q<Button>("tab-spells");
             _tabConsumables = root.Q<Button>("tab-consumables");
             _tabMaterials = root.Q<Button>("tab-materials");
@@ -146,7 +149,6 @@ namespace Assets.Scripts.Items.UI
             }
 
             WireTab(_tabEquipment, Tab.Equipment);
-            WireTab(_tabAll, Tab.All);
             WireTab(_tabSpells, Tab.Spells);
             WireTab(_tabConsumables, Tab.Consumables);
             WireTab(_tabMaterials, Tab.Materials);
@@ -241,7 +243,9 @@ namespace Assets.Scripts.Items.UI
         //  TABS AND HEROES
         // ============================================================
 
-        private bool IsPerHeroTab => _tab == Tab.Equipment || _tab == Tab.All || _tab == Tab.Spells;
+        private bool IsPerHeroTab => _tab == Tab.Equipment || _tab == Tab.Spells;
+
+        private bool OnAllRow => _tab == Tab.Equipment && _slotIndex == AllEquipmentIndex;
 
         /// <summary>Left/Right step through the tabs, clamped so the ends of the row feel like ends.</summary>
         private void CycleTab(int delta)
@@ -270,7 +274,6 @@ namespace Assets.Scripts.Items.UI
         private void RefreshTabs()
         {
             _tabEquipment?.EnableInClassList("cd-inv-tab--active", _tab == Tab.Equipment);
-            _tabAll?.EnableInClassList("cd-inv-tab--active", _tab == Tab.All);
             _tabSpells?.EnableInClassList("cd-inv-tab--active", _tab == Tab.Spells);
             _tabConsumables?.EnableInClassList("cd-inv-tab--active", _tab == Tab.Consumables);
             _tabMaterials?.EnableInClassList("cd-inv-tab--active", _tab == Tab.Materials);
@@ -374,18 +377,21 @@ namespace Assets.Scripts.Items.UI
                 return;
             }
             _selectedHeroKey = heroKey;
+            // The All list does not depend on the hero, so the cursor stays on the same item and
+            // only its preview changes.
+            bool keepList = OnAllRow && _focus == Focus.List;
+            int keep = _listIndex;
             if (_tab == Tab.Equipment)
             {
                 _focus = Focus.Slots;
             }
-            // The All list does not depend on the hero, so the cursor stays on the same item and
-            // only its preview changes.
-            int keep = _listIndex;
             RefreshHeroes();
             RefreshBody();
-            if (_tab == Tab.All)
+            if (keepList)
             {
+                _focus = Focus.List;
                 SetListIndex(keep);
+                RefreshHint();
             }
         }
 
@@ -427,9 +433,6 @@ namespace Assets.Scripts.Items.UI
                 case Tab.Equipment:
                     BuildEquipment();
                     break;
-                case Tab.All:
-                    BuildAll();
-                    break;
                 case Tab.Spells:
                     BuildSpells();
                     break;
@@ -459,9 +462,6 @@ namespace Assets.Scripts.Items.UI
                         ? Loc.Get("items.inv.hint.slots")
                         : Loc.Get("items.inv.hint.items");
                     break;
-                case Tab.All:
-                    _hint.text = Loc.Get("items.inv.hint.all");
-                    break;
                 case Tab.Spells:
                     _hint.text = Loc.Get("items.inv.hint.abilities");
                     break;
@@ -486,13 +486,27 @@ namespace Assets.Scripts.Items.UI
             }
 
             var slots = ItemPresenter.SlotOrder;
-            _slotIndex = Mathf.Clamp(_slotIndex, 0, slots.Length - 1);
+            _slotIndex = Mathf.Clamp(_slotIndex, 0, slots.Length);
+
+            var all = new Entry
+            {
+                Preview = ShowAllDetail,
+                Confirm = () => EnterList(),
+            };
+            all.Row = BuildRow(null, Loc.Get("items.inv.title.all-equipment"), Loc.Get("items.inv.all.row-caption"),
+                string.Empty, null, out all.Cursor);
+            var allGlyph = new Label("≡") { pickingMode = PickingMode.Ignore };
+            allGlyph.AddToClassList("cd-inv-row__glyph");
+            all.Row.Q(className: "cd-inv-row__icon").Add(allGlyph);
+            WireSlotRow(all, AllEquipmentIndex);
+            _slotEntries.Add(all);
+            _left?.Add(all.Row);
 
             for (int i = 0; i < slots.Length; i++)
             {
                 var slot = slots[i];
                 var worn = WornItem(slot);
-                int index = i;
+                int index = i + 1;
 
                 var entry = new Entry
                 {
@@ -509,33 +523,60 @@ namespace Assets.Scripts.Items.UI
                     worn,
                     out entry.Cursor);
                 entry.Row.EnableInClassList("cd-inv-row--empty", worn == null);
-                entry.Row.RegisterCallback<MouseEnterEvent>(_ =>
-                {
-                    // Hovering a slot takes the cursor back from the list, so the mouse is never stuck
-                    // on one side after brushing past the other.
-                    if (_focus == Focus.List)
-                    {
-                        _focus = Focus.Slots;
-                        _listIndex = -1;
-                        RefreshHint();
-                    }
-                    else if (_slotIndex == index)
-                    {
-                        return;
-                    }
-                    MoveSlotTo(index);
-                });
-                entry.Row.RegisterCallback<ClickEvent>(_ =>
-                {
-                    _focus = Focus.Slots;
-                    MoveSlotTo(index);
-                    EnterList();
-                });
+                WireSlotRow(entry, index);
                 _slotEntries.Add(entry);
                 _left?.Add(entry.Row);
             }
 
-            BuildCandidates(slots[_slotIndex]);
+            BuildListFor(_slotIndex);
+        }
+
+        private void WireSlotRow(Entry entry, int index)
+        {
+            entry.Row.RegisterCallback<MouseEnterEvent>(_ =>
+            {
+                // Hovering a slot takes the cursor back from the list, so the mouse is never stuck
+                // on one side after brushing past the other.
+                if (_focus == Focus.List)
+                {
+                    _focus = Focus.Slots;
+                    _listIndex = -1;
+                    RefreshHint();
+                }
+                else if (_slotIndex == index)
+                {
+                    return;
+                }
+                MoveSlotTo(index);
+            });
+            entry.Row.RegisterCallback<ClickEvent>(_ =>
+            {
+                _focus = Focus.Slots;
+                MoveSlotTo(index);
+                EnterList();
+            });
+        }
+
+        /// <summary>The list beside the slot column: every piece on the All row, else what fits that slot.</summary>
+        private void BuildListFor(int slotIndex)
+        {
+            if (slotIndex == AllEquipmentIndex)
+            {
+                BuildAllCandidates();
+            }
+            else
+            {
+                BuildCandidates(ItemPresenter.SlotOrder[slotIndex - 1]);
+            }
+        }
+
+        /// <summary>The All row under the cursor: how much gear there is, and the hero's stats.</summary>
+        private void ShowAllDetail()
+        {
+            var hero = FindHero(_selectedHeroKey);
+            SetDetailHead(null, Loc.Get("items.inv.title.all-equipment"), hero != null ? hero.DisplayName : string.Empty, null);
+            AddNote(Loc.Format("items.inv.all.count-note", ("count", InventoryManager.Instance.GetAllEquipment().Count)));
+            AddStatSection(StatsWith(CurrentGear()), null);
         }
 
         /// <summary>
@@ -642,9 +683,9 @@ namespace Assets.Scripts.Items.UI
             return parts.Count == 0 ? item.ItemKey : item.ItemKey + "|" + string.Join(",", parts);
         }
 
-        /// <param name="showSlot">Lead the caption with the item's slot - the All tab, where the list
-        /// is not already one slot's.</param>
-        /// <param name="wornBySelected">The selected hero wears this copy (All tab only): the row
+        /// <param name="showSlot">Lead the caption with the item's slot - the All list, which is not
+        /// already one slot's.</param>
+        /// <param name="wornBySelected">The selected hero wears this copy (All list only): the row
         /// previews taking it off, and Enter does that.</param>
         private void AddCandidate(ItemSaveData item, string wornBy, int copies = 1, bool showSlot = false,
             bool wornBySelected = false)
@@ -722,36 +763,15 @@ namespace Assets.Scripts.Items.UI
         }
 
         /// <summary>
-        /// The All tab: every piece of equipment the party owns, in the bag and worn by anyone, with
-        /// no slot filter - sorted by slot, then rarity (best first), then name. The left column shows
-        /// what the selected hero wears, read-only; the rows work as on the Equipment list.
+        /// The All row's list: every piece of equipment the party owns, in the bag and worn by anyone,
+        /// with no slot filter - sorted by slot, then rarity (best first), then name.
         /// </summary>
-        private void BuildAll()
+        private void BuildAllCandidates()
         {
-            var hero = FindHero(_selectedHeroKey);
-            SetText(_leftTitle, Loc.Get("items.inv.title.equipped"));
+            _list?.Clear();
+            _listEntries.Clear();
+            SetShown(_emptyLabel, false);
             SetText(_listTitle, Loc.Get("items.inv.title.all-equipment"));
-            if (hero == null)
-            {
-                ShowEmpty(Loc.Get("items.inv.empty.no-hero-to-equip"));
-                ClearDetail();
-                return;
-            }
-
-            foreach (var slot in ItemPresenter.SlotOrder)
-            {
-                var worn = WornItem(slot);
-                var slotRow = BuildRow(
-                    worn != null ? worn.Icon : null,
-                    worn != null ? worn.DisplayName : ItemPresenter.SlotLabel(slot),
-                    worn != null ? ItemPresenter.SlotLabel(slot) : Loc.Get("items.inv.empty-slot"),
-                    string.Empty,
-                    worn,
-                    out _);
-                slotRow.EnableInClassList("cd-inv-row--empty", worn == null);
-                slotRow.AddToClassList("cd-inv-row--static");
-                _left?.Add(slotRow);
-            }
 
             // Loose copies stack by kind, as on the Equipment list; worn copies are one row each,
             // since each names its wearer.
@@ -785,7 +805,6 @@ namespace Assets.Scripts.Items.UI
             if (rows.Count == 0)
             {
                 ShowEmpty(Loc.Get("items.inv.empty.no-equipment"));
-                ClearDetail();
                 return;
             }
 
@@ -855,8 +874,8 @@ namespace Assets.Scripts.Items.UI
 
         private void MoveSlotTo(int index)
         {
-            _slotIndex = Mathf.Clamp(index, 0, ItemPresenter.SlotOrder.Length - 1);
-            BuildCandidates(ItemPresenter.SlotOrder[_slotIndex]);
+            _slotIndex = Mathf.Clamp(index, 0, ItemPresenter.SlotOrder.Length);
+            BuildListFor(_slotIndex);
             RenderCursor();
         }
 
@@ -996,17 +1015,20 @@ namespace Assets.Scripts.Items.UI
             RefreshAfterGearChange();
         }
 
-        /// <summary>Equipment returns to the slots after a change; the All list keeps its cursor
+        /// <summary>A slot's list returns to the slots after a change; the All list keeps its cursor
         /// where it was, since the list is sorted by item rather than by who wears it.</summary>
         private void RefreshAfterGearChange()
         {
             int keep = _listIndex;
-            _focus = _tab == Tab.Equipment ? Focus.Slots : Focus.List;
+            bool keepList = OnAllRow;
+            _focus = Focus.Slots;
             RefreshHeroes();
             RefreshBody();
-            if (_tab == Tab.All)
+            if (keepList)
             {
+                _focus = Focus.List;
                 SetListIndex(keep);
+                RefreshHint();
             }
         }
 
@@ -1636,7 +1658,7 @@ namespace Assets.Scripts.Items.UI
         /// </summary>
         private List<GearPiece> PreviewGear()
         {
-            if ((_tab == Tab.Equipment || _tab == Tab.All) && _listIndex >= 0 && _listIndex < _listEntries.Count
+            if (_tab == Tab.Equipment && _listIndex >= 0 && _listIndex < _listEntries.Count
                 && _listEntries[_listIndex].Gear != null)
             {
                 return _listEntries[_listIndex].Gear;
@@ -1888,7 +1910,7 @@ namespace Assets.Scripts.Items.UI
         {
             if (_tab == Tab.Equipment && _focus == Focus.Slots)
             {
-                int count = ItemPresenter.SlotOrder.Length;
+                int count = ItemPresenter.SlotOrder.Length + 1;
                 MoveSlotTo(((_slotIndex + delta) % count + count) % count);
                 return;
             }

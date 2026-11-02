@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Key: Screech
   Icon: {fileID: -2526447242650933920, guid: 5be6efdf3e9b7ee45bcf2b70f5f77488, type: 3}
-  Delivery: 0
+  Delivery: 3
   ProjectileArtAngle: 0
   TargetType: 1
   Rarity: 1

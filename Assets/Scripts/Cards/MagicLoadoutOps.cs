@@ -230,6 +230,31 @@ namespace Assets.Scripts.Cards
             return locked;
         }
 
+        /// <summary>
+        /// The kit after a hero learns <paramref name="learned"/> and the player says where it goes
+        /// (owner, 2026-11-02: learning Smite used to push the Paladin's heal out silently, because a
+        /// hero who never chose a kit auto-fills in grid order). <paramref name="replace"/> is the slot
+        /// it takes, or -1 for a free one; with no free slot, -1 leaves the kit as it was. The other
+        /// abilities keep their places.
+        /// </summary>
+        public static List<string> CarryLearned(IList<string> carried, string learned, int slotCount, int replace)
+        {
+            var result = carried != null ? new List<string>(carried) : new List<string>();
+            if (string.IsNullOrEmpty(learned) || result.Contains(learned))
+            {
+                return result;
+            }
+            if (replace >= 0 && replace < result.Count)
+            {
+                result[replace] = learned;
+            }
+            else if (replace < 0 && result.Count < slotCount)
+            {
+                result.Add(learned);
+            }
+            return result;
+        }
+
         /// <summary>Charges the hero's known-magic entry carries for <paramref name="key"/>, or 0
         /// when they do not know it. The node's charge count is the spell's real power dial.</summary>
         public static int ChargesFor(IList<KeyValuePair<string, int>> known, string key)

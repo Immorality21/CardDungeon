@@ -363,6 +363,7 @@ backlog.**
 |---|---|---|
 | **7** | Buildings, materials, and a staged unlock of the game | phases 1-4 ✅ 2026-09-05; **phase 6 started 2026-09-17** — the rule is set (*a level grants access, capacity or information, never a raw stat*), and the **Forge** and **Campfire** both have ladders. Bestiary / Merchant next; Sphere Hall is phase 5. **Phase 7 (crafting) started 2026-10-29**: recipes, the Forge's Craft tab, 8 recipes |
 | **7b** | **Hall of Knowledge** — the Bestiary renamed, with recipes and recipe trees beside the monsters (owner, 2026-10-29) | ✅ **built 2026-10-29**: a Recipes tab, every recipe in its tree, unfound ones as selectable ??? rows. **Next: a hint on a ??? row** (where it drops), unlocked by upgrading the Hall - the owner's plan; the row is the slot for it |
+| **7e** | **The campfire's upgrades don't make sense** (owner, playtest 2026-10-29; parked for the roadmap 2026-11-02) — its levels unlock XP-split modes (Mentor, Catch Up) for 300/600 gold, but a split only moves XP between heroes, so paying gold for it reads as a tax. Options on the table: the modes free from the start and a different upgrade for the fire; levels priced in materials; no campfire levels at all | open, later |
 | **7c** | **Combo upgrades at the Forge** — left as they are; how they should work is to be rethought (owner, 2026-10-29) | open |
 | **7d** | **Recipes from quests** — a third source beside drops and floor clears (owner, 2026-10-29) | waits for hub quests |
 | **3** | Sharpen hub sinks | open |

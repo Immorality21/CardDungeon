@@ -17,15 +17,31 @@ namespace Assets.Scripts.Cards
             ICombatUnit caster = null,
             MagicSO magic = null)
         {
+            var delivery = magic != null ? magic.Delivery : MagicDelivery.Projectile;
+
             // Every spell gathers light around its caster first, as in FFVIII. Physical abilities
-            // (a cut, an arrow) do not, nor do summons and Ultras, which bring their own entrance.
-            if (caster != null && magic != null && IsSpell(magic))
+            // (a cut, an arrow) do not, nor do summons and Ultras, which bring their own entrance,
+            // nor a beam or a burst, which are the caster's own effect.
+            bool ownEntrance = delivery == MagicDelivery.Beam || delivery == MagicDelivery.Burst;
+            if (caster != null && magic != null && IsSpell(magic) && !ownEntrance)
             {
                 yield return SpellVfx.Cast(caster);
             }
 
-            foreach (var entry in HitsFirst(result.Entries))
+            // A burst plays once on the caster, and then every target is hit at once.
+            bool together = delivery == MagicDelivery.Burst && caster != null && caster.Transform != null;
+            if (together)
             {
+                yield return SpellVfx.Burst(caster, DeliveryColor(magic));
+            }
+
+            var entries = HitsFirst(result.Entries);
+            int lastHit = entries.FindLastIndex(e => e.Impact > 0);
+            for (int index = 0; index < entries.Count; index++)
+            {
+                var entry = entries[index];
+                // Hits after the first come in the same moment; the last one keeps the pause after it.
+                bool simultaneous = together && entry.Impact > 0 && index != lastHit;
                 // Offensive magic: fly a bolt from the caster to the target so a cast reads as a
                 // ranged strike (vs. the melee lunge), landing just before the impact. Not gated on the
                 // target being alive: the damage is already applied when this plays, so a killing cast
@@ -34,10 +50,18 @@ namespace Assets.Scripts.Cards
                 if (caster != null && entry.Impact > 0 && entry.Target != null
                     && caster.Transform != null && entry.Target.Transform != null)
                 {
-                    if (magic != null && magic.Delivery == MagicDelivery.Strike)
+                    if (delivery == MagicDelivery.Strike)
                     {
                         // A blade does not cross the stage: the cut lands where the target stands.
                         yield return StrikeOnTarget(entry.Target, magic.Icon);
+                    }
+                    else if (delivery == MagicDelivery.Beam)
+                    {
+                        yield return SpellVfx.Beam(caster, entry.Target, DeliveryColor(magic));
+                    }
+                    else if (delivery == MagicDelivery.Burst)
+                    {
+                        // Already let out of the caster, above: nothing flies.
                     }
                     else
                     {
@@ -119,10 +143,48 @@ namespace Assets.Scripts.Cards
                     CombatFeedback.Instance.PlayImpact(entry.Target, entry.Impact, entry.Crit ? 1.4f : 1f);
                     // An ability hit sounds like one (playtest 2026-10-30: Hamstring and others were silent).
                     Assets.Scripts.Audio.CombatAudio.Play(Assets.Scripts.Audio.CombatSound.Impact, entry.Crit ? 1f : 0.9f);
-                    yield return new WaitForSecondsRealtime(entry.Crit ? 0.075f : 0.04f);
+                    if (!simultaneous)
+                    {
+                        yield return new WaitForSecondsRealtime(entry.Crit ? 0.075f : 0.04f);
+                    }
                 }
 
-                yield return new WaitForSeconds(entry.Delay);
+                if (!simultaneous)
+                {
+                    yield return new WaitForSeconds(entry.Delay);
+                }
+            }
+        }
+
+        /// <summary>The colour of a beam or a burst: its first damage effect's element.</summary>
+        private static Color DeliveryColor(MagicSO magic)
+        {
+            var type = DamageType.Normal;
+            if (magic != null && magic.Effects != null)
+            {
+                foreach (var effect in magic.Effects)
+                {
+                    if (effect.EffectType == SpellEffectType.Damage)
+                    {
+                        type = effect.DamageType;
+                        break;
+                    }
+                }
+            }
+            switch (type)
+            {
+                case DamageType.Fire:
+                    return new Color(1f, 0.55f, 0.15f);
+                case DamageType.Ice:
+                    return new Color(0.55f, 0.85f, 1f);
+                case DamageType.Lightning:
+                    return new Color(1f, 0.95f, 0.35f);
+                case DamageType.Holy:
+                    return new Color(1f, 0.9f, 0.55f);
+                case DamageType.Shadow:
+                    return new Color(0.7f, 0.35f, 1f);
+                default:
+                    return new Color(1f, 0.25f, 0.35f);
             }
         }
 

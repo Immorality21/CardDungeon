@@ -276,5 +276,31 @@ namespace Tests.EditMode
 
             CollectionAssert.AreEqual(new[] { "Slash", "Sunder" }, chosen);
         }
+
+        // ---------------------------------------------------------------- learning one
+
+        [Test]
+        public void CarryLearned_WithAFreeSlot_AddsItAtTheEnd()
+        {
+            var kit = MagicLoadoutOps.CarryLearned(new[] { "HolyStrike", "HolyTouch" }, "Smite", 3, -1);
+
+            CollectionAssert.AreEqual(new[] { "HolyStrike", "HolyTouch", "Smite" }, kit);
+        }
+
+        [Test]
+        public void CarryLearned_InPlaceOfOne_KeepsTheOthersWhereTheyWere()
+        {
+            var kit = MagicLoadoutOps.CarryLearned(new[] { "HolyStrike", "HolyTouch" }, "Smite", 2, 0);
+
+            CollectionAssert.AreEqual(new[] { "Smite", "HolyTouch" }, kit, "the heal stays");
+        }
+
+        [Test]
+        public void CarryLearned_WithEverySlotFullAndNoneNamed_ChangesNothing()
+        {
+            var kit = MagicLoadoutOps.CarryLearned(new[] { "HolyStrike", "HolyTouch" }, "Smite", 2, -1);
+
+            CollectionAssert.AreEqual(new[] { "HolyStrike", "HolyTouch" }, kit);
+        }
     }
 }

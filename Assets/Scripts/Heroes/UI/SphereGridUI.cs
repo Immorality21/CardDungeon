@@ -2,11 +2,14 @@ using System;
 using System.Collections.Generic;
 using Assets.Scripts.Balance;
 using Assets.Scripts.Cards;
+using Assets.Scripts.Dungeon;
+using Assets.Scripts.IO;
 using Assets.Scripts.Progression;
 using Assets.Scripts.UnitStats;
 using UnityEngine;
 using UnityEngine.UIElements;
 using ImmoralityGaming.Localization;
+using ImmoralityGaming.Menu;
 
 namespace Assets.Scripts.Heroes.UI
 {
@@ -37,6 +40,14 @@ namespace Assets.Scripts.Heroes.UI
         private readonly Label _feedbackLabel;
         private readonly Button _closeButton;
         private readonly SphereGridView _view;
+
+        // Asked when an ability is learned: carry it now, and in place of what (see OfferToCarry).
+        private readonly VisualElement _learn;
+        private readonly Label _learnTitle;
+        private readonly Label _learnMessage;
+        private readonly VisualElement _learnOptions;
+        private readonly KeyboardNavigator _learnNav;
+        private readonly FileHandler _files = new FileHandler();
 
         private readonly List<HeroSO> _heroes = new List<HeroSO>();
         private HeroSO _selectedHero;
@@ -93,6 +104,15 @@ namespace Assets.Scripts.Heroes.UI
             _activateButton = root.Q<Button>("grid-activate");
             _feedbackLabel = root.Q<Label>("grid-feedback");
             _closeButton = root.Q<Button>("grid-close");
+            _learn = root.Q<VisualElement>("grid-learn");
+            _learnTitle = root.Q<Label>("grid-learn-title");
+            _learnMessage = root.Q<Label>("grid-learn-message");
+            _learnOptions = root.Q<VisualElement>("grid-learn-options");
+            if (_learnOptions != null)
+            {
+                _learnNav = new KeyboardNavigator(_learnOptions);
+                _learnNav.Cancelled += CloseLearn;
+            }
 
             var graphHost = root.Q<VisualElement>("grid-graph");
             _view = new SphereGridView();
@@ -167,6 +187,7 @@ namespace Assets.Scripts.Heroes.UI
             {
                 return;
             }
+            CloseLearn();
             _isShown = false;
             _root.focusable = false;
             _root.style.display = DisplayStyle.None;
@@ -820,6 +841,10 @@ namespace Assets.Scripts.Heroes.UI
                 return;
             }
 
+            // What the hero carries before learning anything, so a new ability cannot reshuffle it.
+            bool teaches = node.Kind == SphereNodeKind.MagicKnown && !string.IsNullOrEmpty(node.GrantedMagicKey);
+            var carriedBefore = teaches ? CarriedNow(_selectedHero) : null;
+
             if (HeroRoster.TryActivateNode(_selectedHero, _selectedNodeKey))
             {
                 // Learning a spell is what "discovered" means now, so the Forge can be told here.
@@ -840,6 +865,10 @@ namespace Assets.Scripts.Heroes.UI
                     : Loc.Format("grid.feedback.activated", ("node", SphereGridPresenter.NodeName(node))));
                 Refresh();
                 NodeActivated?.Invoke(node.Key);
+                if (teaches)
+                {
+                    OfferToCarry(_selectedHero, node.GrantedMagicKey, carriedBefore);
+                }
                 return;
             }
             else if (!HeroRoster.CanPayEssence(node))
@@ -859,10 +888,134 @@ namespace Assets.Scripts.Heroes.UI
             Refresh();
         }
 
+        // --- learning an ability ---------------------------------------------------------
+
+        private bool IsLearnShown => _learn != null && _learn.style.display == DisplayStyle.Flex;
+
+        /// <summary>The abilities <paramref name="hero"/> carries into the next run, as the loadout resolves them.</summary>
+        private List<string> CarriedNow(HeroSO hero)
+        {
+            var save = HeroRoster.GetHeroSave(hero);
+            var nodes = save != null && save.ActivatedNodes != null ? save.ActivatedNodes : new List<string>();
+            var known = SphereGridOps.KnownMagicForNodes(hero.SphereGrid, nodes);
+            var loadout = _files.Load<MagicLoadoutSaveData>();
+            return MagicLoadoutOps.Resolve(known, loadout.ChosenFor(hero.SaveKey), SlotCount(hero, nodes));
+        }
+
+        private static int SlotCount(HeroSO hero, List<string> nodes)
+        {
+            return EquippedMagicState.DefaultSlotCount + SphereGridOps.SlotBonusForNodes(hero.SphereGrid, nodes);
+        }
+
+        /// <summary>Writes <paramref name="kit"/> as the hero's chosen loadout.</summary>
+        private void SaveKit(HeroSO hero, List<string> kit)
+        {
+            var loadout = _files.Load<MagicLoadoutSaveData>();
+            loadout.For(hero.SaveKey).EquippedKeys = kit;
+            _files.Save(loadout);
+        }
+
+        /// <summary>
+        /// A hero just learned <paramref name="magicKey"/> (owner, 2026-11-02): what they carried before
+        /// is kept as their choice, so the new ability can never push one out unasked, and the player is
+        /// asked whether to carry it - into a free slot, or in place of one they name. "Not now" leaves the
+        /// kit alone; the Storehouse changes it later. Mid-run the run's own slots decide, so nobody is asked.
+        /// </summary>
+        private void OfferToCarry(HeroSO hero, string magicKey, List<string> carriedBefore)
+        {
+            if (hero == null || carriedBefore == null || carriedBefore.Contains(magicKey))
+            {
+                return;
+            }
+            // A run underway keeps its own slots; the Storehouse fills free ones from the loadout.
+            if (RunKitSource.EntryFor(RunKitSource.Load(_files), hero.SaveKey) != null)
+            {
+                return;
+            }
+
+            SaveKit(hero, carriedBefore);
+            var save = HeroRoster.GetHeroSave(hero);
+            int slots = SlotCount(hero, save != null && save.ActivatedNodes != null ? save.ActivatedNodes : new List<string>());
+            bool free = carriedBefore.Count < slots;
+
+            // The tutorial's guide walks one node and moves on: no question in its way.
+            if (IsGuiding || _learn == null || _learnOptions == null)
+            {
+                if (free)
+                {
+                    SaveKit(hero, MagicLoadoutOps.CarryLearned(carriedBefore, magicKey, slots, -1));
+                }
+                return;
+            }
+
+            string ability = MagicName(magicKey);
+            if (_learnTitle != null)
+            {
+                _learnTitle.text = Loc.Format("grid.learn.title", ("hero", hero.DisplayName), ("ability", ability));
+            }
+            if (_learnMessage != null)
+            {
+                _learnMessage.text = free
+                    ? Loc.Get("grid.learn.free")
+                    : Loc.Format("grid.learn.full", ("slots", slots));
+            }
+
+            _learnOptions.Clear();
+            if (free)
+            {
+                AddLearnOption(Loc.Get("grid.learn.carry"),
+                    () => SaveKit(hero, MagicLoadoutOps.CarryLearned(carriedBefore, magicKey, slots, -1)));
+            }
+            else
+            {
+                for (int i = 0; i < carriedBefore.Count; i++)
+                {
+                    int slot = i;
+                    AddLearnOption(Loc.Format("grid.learn.replace", ("ability", MagicName(carriedBefore[i]))),
+                        () => SaveKit(hero, MagicLoadoutOps.CarryLearned(carriedBefore, magicKey, slots, slot)));
+                }
+            }
+            AddLearnOption(Loc.Get("grid.learn.not-now"), null);
+
+            _learn.style.display = DisplayStyle.Flex;
+            _learnNav?.Reset();
+            _learnOptions.schedule.Execute(() => _learnNav?.SelectFirst());
+        }
+
+        private void AddLearnOption(string label, Action choose)
+        {
+            var button = new Button { text = label, focusable = false };
+            button.AddToClassList("cd-button");
+            button.AddToClassList("cd-button--wide");
+            button.clicked += () =>
+            {
+                choose?.Invoke();
+                CloseLearn();
+            };
+            _learnOptions.Add(button);
+        }
+
+        private void CloseLearn()
+        {
+            if (_learn != null)
+            {
+                _learn.style.display = DisplayStyle.None;
+            }
+            _learnNav?.Reset();
+        }
+
         private void OnKeyDown(KeyDownEvent evt)
         {
             if (!_isShown)
             {
+                return;
+            }
+
+            // The question owns the keyboard while it is up.
+            if (IsLearnShown)
+            {
+                _learnNav?.HandleKey(evt);
+                evt.StopPropagation();
                 return;
             }
 

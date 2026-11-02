@@ -320,7 +320,6 @@
                 <ui:Label text="#ui.hub.inventory" class="cd-inv-header__title" />
                 <ui:VisualElement name="inventory-tabs" class="cd-inv-tabs">
                     <ui:Button name="tab-equipment" text="#ui.hub.tab-equipment" class="cd-inv-tab cd-inv-tab--active" />
-                    <ui:Button name="tab-all" text="#ui.hub.tab-all" class="cd-inv-tab" />
                     <ui:Button name="tab-spells" text="#ui.hub.tab-spells" class="cd-inv-tab" />
                     <ui:Button name="tab-consumables" text="#ui.hub.tab-consumables" class="cd-inv-tab" />
                     <ui:Button name="tab-materials" text="#ui.hub.tab-materials" class="cd-inv-tab" />
@@ -402,6 +401,15 @@
             </ui:VisualElement>
 
             <ui:Label name="grid-hint" text="#ui.hub.grid-hint" class="cd-inv-hint" />
+
+            <!-- Asked when an ability is learned: carry it, in place of which, or not now (SphereGridUI.OfferToCarry). -->
+            <ui:VisualElement name="grid-learn" class="cd-dialog-scrim cd-inv-confirm cd-hidden">
+                <ui:VisualElement class="cd-window cd-inv-confirm__window">
+                    <ui:Label name="grid-learn-title" text="" class="cd-title" />
+                    <ui:Label name="grid-learn-message" text="" class="cd-message" />
+                    <ui:VisualElement name="grid-learn-options" class="sg-learn__options" />
+                </ui:VisualElement>
+            </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- CAMPAIGN MAP (fixed size on both axes, same reason as the sphere grid: a pannable
