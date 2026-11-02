@@ -25,6 +25,9 @@ namespace Assets.Scripts.Hub
         Inventory = 3,
 
         Bestiary = 4,
-        SphereGrid = 5
+        SphereGrid = 5,
+
+        /// <summary>The tavern: the quest board (2026-11-02). Not the old hero shop, which is gone.</summary>
+        Tavern = 6
     }
 }

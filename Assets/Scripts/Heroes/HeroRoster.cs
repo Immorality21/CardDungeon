@@ -47,6 +47,34 @@ namespace Assets.Scripts.Heroes
             return keys;
         }
 
+        /// <summary>
+        /// Banks <paramref name="amount"/> XP on every hero the player owns, benched ones included (a
+        /// quest's reward, owner 2026-11-02). Hub-side, so it is written at once; returns how many heroes
+        /// were paid.
+        /// </summary>
+        public static int GrantXpToOwned(PartyRosterSO catalog, int amount)
+        {
+            if (amount <= 0)
+            {
+                return 0;
+            }
+            var keys = GetOwnedKeys(catalog);
+            var handler = new FileHandler();
+            var save = handler.Load<PartySaveData>();
+            foreach (var key in keys)
+            {
+                var entry = save.Heroes.Find(h => h != null && h.HeroKey == key);
+                if (entry == null)
+                {
+                    entry = new HeroSaveData { HeroKey = key };
+                    save.Heroes.Add(entry);
+                }
+                entry.CurrentXp += amount;
+            }
+            handler.Save(save);
+            return keys.Count;
+        }
+
         /// <summary>The owned heroes as definitions, resolved against the catalog and de-duplicated.</summary>
         public static List<HeroSO> GetOwnedHeroes(PartyRosterSO catalog)
         {

@@ -310,6 +310,35 @@
             <ui:Label name="bestiary-hint" text="#ui.hub.bestiary-hint" class="cd-inv-hint" />
         </ui:VisualElement>
 
+        <!-- TAVERN: the quest board (2026-11-02). Same frame as the Hall of Knowledge; TavernUI fills it. -->
+        <ui:VisualElement name="tavern-view" class="cd-window cd-window--flush cd-inv-window cd-dock-center cd-hidden">
+            <ui:VisualElement class="cd-inv-header">
+                <ui:Label text="#ui.hub.tavern" class="cd-inv-header__title" />
+                <ui:Label name="tavern-gold" text="" class="cd-camp-header__cap" />
+                <ui:Button name="tavern-close" text="#ui.common.back" class="cd-inv-close" />
+            </ui:VisualElement>
+            <ui:VisualElement class="cd-inv-body">
+                <ui:VisualElement class="cd-inv-col cd-shop-col--list">
+                    <ui:Label text="#ui.hub.tavern-list-title" class="cd-inv-col__title" />
+                    <ui:ScrollView name="tavern-list" class="cd-inv-list" mode="Vertical" />
+                </ui:VisualElement>
+                <ui:VisualElement class="cd-inv-col cd-inv-col--detail">
+                    <ui:VisualElement class="cd-inv-detail__head">
+                        <ui:VisualElement name="tavern-icon" class="cd-inv-detail__icon cd-bestiary__portrait" />
+                        <ui:VisualElement class="cd-inv-detail__titles">
+                            <ui:Label name="tavern-name" text="" class="cd-inv-detail__name" />
+                            <ui:Label name="tavern-sub" text="" class="cd-inv-detail__sub" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:ScrollView name="tavern-detail" class="cd-inv-detail__body" mode="Vertical" horizontal-scroller-visibility="Hidden" />
+                    <ui:Button name="tavern-action" text="" class="cd-inv-tab sg-activate" />
+                    <ui:Button name="tavern-reroll" text="" class="cd-inv-tab sg-activate" />
+                    <ui:Label name="tavern-feedback" text="" class="cd-camp-feedback sg-feedback" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:Label text="#ui.hub.tavern-hint" class="cd-inv-hint" />
+        </ui:VisualElement>
+
         <!-- INVENTORY -->
         <!-- One fixed frame for all four tabs: header band with the tabs, the hero strip, three
              columns and a hint line. Every region is present on every tab and sized in px, so the

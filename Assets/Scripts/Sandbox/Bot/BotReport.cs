@@ -74,6 +74,13 @@ namespace Assets.Scripts.Sandbox.Bot
         public int ItemsEquipped;
         public string Built;
         public int GoldLeft;
+
+        /// <summary>The tavern: quests collected this visit, how many paid other than promised, the
+        /// board as it was left (key progress/count), and one line per accept or collect.</summary>
+        public int QuestsCollected;
+        public int QuestMismatches;
+        public string QuestBoard = "";
+        public List<string> QuestLog = new List<string>();
     }
 
     /// <summary>One whole playthrough from a new save.</summary>

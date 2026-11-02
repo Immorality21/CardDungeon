@@ -216,6 +216,7 @@ and the wrong one for a gate.
 | Hall of Progression (`sphere-hall`) | from the start | 1 Rotted Timber |
 | Hall of Knowledge (`bestiary`) | from the start | 4 Scrap Iron |
 | Merchant | from the start | 10 Scrap Iron · 1 Rotted Timber (was 8 + 2 until playtest 2 finding 14: timber only drops from caches) |
+| Tavern | after `SealedArchive` | 4 Scrap Iron · 2 Cut Stone |
 | Forge | after `TutorialRun` | 3 Cut Stone · 3 Scrap Iron (was 3 Ember Iron + 2 Slag Coal until 2026-11-02: neither drops before the Ashen Deep, so a recipe found in the Archive waited on a Forge nobody could build) |
 
 The Sphere Hall is deliberately the cheapest thing in town and is **not** gated on a run: the grid
@@ -465,11 +466,63 @@ into floor 1; home again, every lot but the Hall of Progression, the road and Ma
 Read **`docs/TUTORIAL.md`** before changing any of it — including why `CanPayFor` must use
 `InventoryManager.Instance`, not `HasInstance`.
 
-## The tavern is gone
+## The tavern is back - as the quest board *(2026-11-02)*
+
+**Not the old hero shop.** The owner brought the name back for **hub quests**: `HubService.Tavern`,
+the `tavern` lot (after the Sealed Archive, `bld_tavern.png`), and `TavernUI` on `tavern-view` - a list
+and a page like the Hall of Knowledge, its own Up/Down cursor, Enter presses the one button.
+
+- **A board of three, drawn from a pool** (owner, 2026-11-02: quests and bounties are one thing).
+  `Resources/QuestCatalog.asset` is the pool; `QuestSaveData.Board` holds three keys in slot order,
+  filled at random from the quests whose `RequiredRunKeys` are cleared and that are not already up
+  (`QuestOps.FillBoard`, run by `QuestRewards.LoadBoard` whenever the tavern opens or news is checked).
+- **Reroll** swaps one quest not yet taken for another, in its slot, for `QuestOps.RerollGold` (100,
+  flat - a free daily one waits on the player's days). Nothing is spent when nothing else can be drawn.
+- **Accept, then turn in** (owner): only what happens after accepting counts; the reward waits at the
+  tavern (`QuestState`: Offered, Accepted, Ready). **Collecting recycles the quest**: it leaves the
+  board, its progress is dropped, it can be drawn again, and the slot is refilled at once.
+- **Kinds** (`QuestKind`, appended only): `KillCount` - a `Target` enemy, a kind (`TargetTraits`), or
+  anything when both are empty, optionally `RevisitOnly` (a run played again, `RunFear.IsRevisit`);
+  `Wipes` (the party falls, not a quit); `ClearFloors` (stairs taken).
+- **Everything counts at once** (owner): `QuestTracker` subscribes to `EnemyDefeated`, `LevelForfeited`
+  and `LevelCleared` at `BeforeSceneLoad` and writes `Quests.json` there and then, wipe or no wipe.
+  Called-in bodies count too. Rules are the pure **`QuestOps`** (`QuestOpsTests`); the writes are
+  `QuestRewards` (a claim is saved before it pays).
+- **Rewards:** an item and a count (a recipe already known is skipped), gold, and `RewardXp` banked on
+  **every owned hero, benched ones included** (`HeroRoster.GrantXpToOwned`). A quest-reward recipe
+  counts as a recipe source for `CraftingContentTests`.
+- The town's gold pip shows while a board quest is untaken or waiting to be collected.
+- **A collected quest sits out** until `QuestOps.CooldownCollections` (3) other quests have been collected
+  (`QuestSaveData.Cooldowns`, counted on `Completed`): the bot found the quests that complete themselves
+  (kill anything, take the stairs) coming straight back. A slot nothing can fill stays empty.
+- **XP is the small part of a payout** (owner, 2026-11-02): the first draft paid 1,140 XP a hero over one
+  bot game, near the ~1,400 the whole campaign pays from kills. Gold and items carry the value now.
+- **The pool (2026-11-02, rewards a first draft):**
+
+  | quest | asks | pays | after |
+  |---|---|---|---|
+  | Rattling in the Catacombs | 5 Skeletons | Bone Scepter recipe, 50 gold, 20 XP | Sealed Archive |
+  | The Dead Do Not Rest | 15 undead | 1 Void Shard, 100 gold, 40 XP | Sealed Archive |
+  | Pest Control | 10 beasts | 3 Ember Iron, 80 gold, 30 XP | Sealed Archive |
+  | The Warden Wakes Again | the Abyssal Warden, on a revisit | 2 Void Shards, 150 gold, 40 XP | the Threshold |
+  | The Mirefather's Due | the Mirefather | 2 Mire Hide, 150 gold, 40 XP | Catacombs |
+  | Brimstone Work | 8 demons | 1 Cinder Glass, 120 gold, 40 XP | Drowned March |
+  | Learning the Hard Way | 3 wipes | 150 gold, 20 XP | - |
+  | The Long Way Down | 5 floors | 200 gold, 30 XP | - |
+  | Thin the Ranks | 30 enemies | 150 gold, 20 XP | - |
+
+  A quest whose enemies are behind the player (undead in the Ashen Deep) is still doable on a revisit;
+  the bot cannot do it, since it never revisits. **The bot plays the board** (`BotHub.Quests`): accepts
+  everything, rerolls only revisit quests, and checks every payout against the quest (`BotHubVisit.QuestLog`).
+
+  The Bone Scepter: Oak Staff + 4 Cut Stone + 3 Scrap Iron + 150 gold; +6 INT +5 SPR, for a wizard or
+  a cleric. Cinder Glass is otherwise revisit-only, so Brimstone Work is a second way to it.
+
+## The old tavern (the hero shop) is gone
 
 Retired 2026-09-05 with this refactor (`NEXT_STEPS.md` §5b: *"the tavern is gone; heroes are unlocked
-through progression only. Gold never buys a hero again."*). `TavernUI`, `tavern-view`,
-`MetaProgressSaveData.TavernStock`, `ShopPricing.RecruitPrice`, `HeroSO.RecruitCost` and
+through progression only. Gold never buys a hero again."*). The old `TavernUI` and `tavern-view` (the
+names were reused for the quest board above), `MetaProgressSaveData.TavernStock`, `ShopPricing.RecruitPrice`, `HeroSO.RecruitCost` and
 `HeroRoster.RemoveOwned` are all deleted. `HeroRoster.GetRecruitable` became **`GetUnownedHeroes`** —
 it is the "not yet unlocked" set an unlock system wants.
 

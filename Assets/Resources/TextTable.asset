@@ -3104,6 +3104,106 @@ MonoBehaviour:
     - Forge combos up to Lv 5, as far as the craft goes.
     Reviewed: 0
     Note: 
+  - Key: quest.kill-skeletons.name
+    Values:
+    - Rattling in the Catacombs
+    Reviewed: 0
+    Note: tavern quest name: kill 5 Skeletons
+  - Key: quest.kill-skeletons.description
+    Values:
+    - 'The bone-carver down the road wants the Catacombs quiet again, and pays in trade secrets.'
+    Reviewed: 0
+    Note: tavern quest flavour line
+  - Key: quest.kill-undead.name
+    Values:
+    - The Dead Do Not Rest
+    Reviewed: 0
+    Note: tavern quest name: kill 15 undead of any kind
+  - Key: quest.kill-undead.description
+    Values:
+    - 'Something below keeps the dead walking. The tavern keeper will trade a shard of the dark for proof you thinned them out.'
+    Reviewed: 0
+    Note: tavern quest flavour line
+  - Key: quest.warden-revisit.name
+    Values:
+    - The Warden Wakes Again
+    Reviewed: 0
+    Note: tavern quest name: kill the Abyssal Warden on a revisit
+  - Key: quest.warden-revisit.description
+    Values:
+    - 'Word is the Warden stirs whenever someone walks its halls twice. Go back, harder, and put it down for good.'
+    Reviewed: 0
+    Note: tavern quest flavour line
+  - Key: quest.hard-way.name
+    Values:
+    - Learning the Hard Way
+    Reviewed: 0
+    Note: tavern quest name: the whole party falls 3 times
+  - Key: quest.hard-way.description
+    Values:
+    - 'Every delver at the bar has been carried out at least once. Get carried out three times and the next round is on the house.'
+    Reviewed: 0
+    Note: tavern quest flavour line
+  - Key: quest.kill-beasts.name
+    Values:
+    - Pest Control
+    Reviewed: 0
+    Note: tavern quest name: kill 10 Beasts
+  - Key: quest.kill-beasts.description
+    Values:
+    - 'Drakelings in the archive, hounds in the foundry. Anything with teeth and no sense will do.'
+    Reviewed: 0
+    Note: tavern quest flavour line
+  - Key: quest.clear-floors.name
+    Values:
+    - The Long Way Down
+    Reviewed: 0
+    Note: tavern quest name: clear 5 floors
+  - Key: quest.clear-floors.description
+    Values:
+    - 'The cartographer pays by the floor. Take the stairs and tell her what you saw.'
+    Reviewed: 0
+    Note: tavern quest flavour line
+  - Key: quest.thin-the-ranks.name
+    Values:
+    - Thin the Ranks
+    Reviewed: 0
+    Note: tavern quest name: kill 30 enemies of any kind
+  - Key: quest.thin-the-ranks.description
+    Values:
+    - 'Fewer of them is better for everyone. Any of them.'
+    Reviewed: 0
+    Note: tavern quest flavour line
+  - Key: quest.mirefather.name
+    Values:
+    - 'The Mirefather''s Due'
+    Reviewed: 0
+    Note: tavern quest name: kill the Mirefather
+  - Key: quest.mirefather.description
+    Values:
+    - 'The bog has a king, and the reed-cutters want him gone. Bring back proof.'
+    Reviewed: 0
+    Note: tavern quest flavour line
+  - Key: quest.kill-demons.name
+    Values:
+    - Brimstone Work
+    Reviewed: 0
+    Note: tavern quest name: kill 8 Demons
+  - Key: quest.kill-demons.description
+    Values:
+    - 'The ash runs thick with things that should not be here. Send eight of them back.'
+    Reviewed: 0
+    Note: tavern quest flavour line
+  - Key: building.tavern.name
+    Values:
+    - Tavern
+    Reviewed: 0
+    Note: hub lot name
+  - Key: building.tavern.description
+    Values:
+    - Ale, rumours, and a board of jobs nobody local wants.
+    Reviewed: 0
+    Note: hub lot panel description
   - Key: building.merchant.name
     Values:
     - Merchant
@@ -3252,7 +3352,7 @@ MonoBehaviour:
   - Key: event.cutpurse.option-1.success-1.text
     Values:
     - 'You get a hand on the rope and pull it towards you. The man looks at you and
-      says: ''Thanks. You look like you could use someone with nible skills.'''
+      says: ''Thanks. You look like you could use someone with nimble skills.'''
     Reviewed: 1
     Note: 
   - Key: event.cutpurse.option-1.failure-1.text
@@ -9794,6 +9894,146 @@ MonoBehaviour:
     - Not now
     Reviewed: 0
     Note: sphere grid learn dialog button; the Storehouse changes it later
+  - Key: ui.hub.tavern
+    Values:
+    - Tavern
+    Reviewed: 0
+    Note: tavern window title
+  - Key: ui.hub.tavern-list-title
+    Values:
+    - Quest board
+    Reviewed: 0
+    Note: tavern list column title
+  - Key: ui.hub.tavern-hint
+    Values:
+    - "↑↓ quest · Enter accept or collect · R reroll · Esc back"
+    Reviewed: 0
+    Note: tavern key hint
+  - Key: hub.tavern.empty.title
+    Values:
+    - No quests
+    Reviewed: 0
+    Note: tavern, nothing on the board
+  - Key: hub.tavern.empty.sub
+    Values:
+    - Check back later.
+    Reviewed: 0
+    Note: tavern, nothing on the board
+  - Key: hub.tavern.state.offered
+    Values:
+    - On the board
+    Reviewed: 0
+    Note: quest row caption, not taken yet
+  - Key: hub.tavern.state.progress
+    Values:
+    - '{done} / {count}'
+    Reviewed: 0
+    Note: quest row caption while taken
+  - Key: hub.tavern.state.ready
+    Values:
+    - Done - collect your reward
+    Reviewed: 0
+    Note: quest row caption, finished and waiting
+  - Key: hub.tavern.goal
+    Values:
+    - 'Kill {count} {enemy}.'
+    Reviewed: 0
+    Note: quest page goal line; enemy is plural for more than one
+  - Key: hub.tavern.goal-kind
+    Values:
+    - 'Kill {count} {kind} - any of them count.'
+    Reviewed: 0
+    Note: quest goal for a kind of enemy; kind = Undead, Demon, ...
+  - Key: hub.tavern.reward-count
+    Values:
+    - '{count}x {item}'
+    Reviewed: 0
+    Note: quest reward line for more than one of an item
+  - Key: hub.tavern.goal-any
+    Values:
+    - 'Kill {count} enemies of any kind.'
+    Reviewed: 0
+    Note: quest goal: kill anything
+  - Key: hub.tavern.goal-wipes
+    Values:
+    - 'Fall in battle {count} times - the whole party.'
+    Reviewed: 0
+    Note: quest goal: party wipes
+  - Key: hub.tavern.goal-floors
+    Values:
+    - 'Take the stairs down {count} times.'
+    Reviewed: 0
+    Note: quest goal: floors cleared
+  - Key: hub.tavern.goal-revisit
+    Values:
+    - 'Only on a revisit: a run you have cleared, played again harder.'
+    Reviewed: 0
+    Note: quest goal note for revisit-only kill quests
+  - Key: hub.tavern.reward-gold
+    Values:
+    - '{gold} gold'
+    Reviewed: 0
+    Note: quest reward line
+  - Key: hub.tavern.action.reroll
+    Values:
+    - 'Reroll ({gold} gold)'
+    Reviewed: 0
+    Note: tavern button: swap a quest not yet taken for another
+  - Key: hub.tavern.feedback.rerolled
+    Values:
+    - A new job goes up on the board.
+    Reviewed: 0
+    Note: tavern feedback after a reroll
+  - Key: hub.tavern.feedback.reroll-gold
+    Values:
+    - Not enough gold to reroll.
+    Reviewed: 0
+    Note: tavern feedback
+  - Key: hub.tavern.feedback.reroll-none
+    Values:
+    - No other quest to swap in yet.
+    Reviewed: 0
+    Note: tavern feedback
+  - Key: hub.tavern.progress
+    Values:
+    - 'Killed so far: {done} of {count}'
+    Reviewed: 0
+    Note: quest page progress line
+  - Key: hub.tavern.reward
+    Values:
+    - Reward
+    Reviewed: 0
+    Note: quest page section title
+  - Key: hub.tavern.reward-xp
+    Values:
+    - '+{xp} XP for every hero, benched ones too'
+    Reviewed: 0
+    Note: quest page reward line
+  - Key: hub.tavern.action.accept
+    Values:
+    - Accept
+    Reviewed: 0
+    Note: tavern button
+  - Key: hub.tavern.action.in-progress
+    Values:
+    - In progress
+    Reviewed: 0
+    Note: tavern button, disabled while the quest runs
+  - Key: hub.tavern.action.collect
+    Values:
+    - Collect reward
+    Reviewed: 0
+    Note: tavern button
+  - Key: hub.tavern.feedback.accepted
+    Values:
+    - 'Accepted: {quest}. Kills count from now on.'
+    Reviewed: 0
+    Note: tavern feedback after accepting
+  - Key: hub.tavern.feedback.collected
+    Values:
+    - Reward collected.
+    Reviewed: 0
+    Note: tavern feedback after collecting
   - Key: items.inv.all.slot-caption
     Values:
     - "{slot} \xB7 {caption}"
@@ -11453,6 +11693,26 @@ MonoBehaviour:
     - 'On a hit: 25% chance to Burn the target.'
     Reviewed: 0
     Note: 
+  - Key: item.bone-scepter.name
+    Values:
+    - Bone Scepter
+    Reviewed: 0
+    Note: a caster weapon for a wizard or cleric; the tavern quest reward recipe makes it
+  - Key: item.bone-scepter.description
+    Values:
+    - A rod of Catacombs bone, its skull still clutching a sliver of pale light.
+    Reviewed: 0
+    Note: item description
+  - Key: item.recipe-bone-scepter.name
+    Values:
+    - Recipe - Bone Scepter
+    Reviewed: 0
+    Note: recipe item name
+  - Key: item.recipe-bone-scepter.description
+    Values:
+    - A bone-carver's notes on fitting an oak staff with a grave's worth of skull.
+    Reviewed: 0
+    Note: recipe item description
   - Key: item.recipe-slag-cleaver.name
     Values:
     - Recipe - Slag Cleaver

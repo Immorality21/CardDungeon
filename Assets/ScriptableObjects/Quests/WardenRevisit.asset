@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ea8119caf9e5554f8867f7f923c63ad, type: 3}
+  m_Name: WardenRevisit
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Hub.Quests.QuestSO
+  Key: WardenRevisit
+  Kind: 0
+  Target: {fileID: 11400000, guid: 770983482ac1400fa05bc9d41b51f956, type: 2}
+  TargetTraits: 0
+  RevisitOnly: 1
+  Count: 1
+  Icon: {fileID: 0}
+  RequiredRunKeys:
+  - TutorialRun
+  RewardItem: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+  RewardItemCount: 2
+  RewardGold: 150
+  RewardXp: 40

@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ea8119caf9e5554f8867f7f923c63ad, type: 3}
+  m_Name: KillSkeletons
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Hub.Quests.QuestSO
+  Key: KillSkeletons
+  Kind: 0
+  Target: {fileID: 11400000, guid: eaa6b30e7c013504ca95da0365eb252a, type: 2}
+  TargetTraits: 0
+  RevisitOnly: 0
+  Count: 5
+  Icon: {fileID: 0}
+  RequiredRunKeys:
+  - SealedArchive
+  RewardItem: {fileID: 11400000, guid: 63d9cfdcfe534113b787496ecb8ee9e4, type: 2}
+  RewardItemCount: 1
+  RewardGold: 50
+  RewardXp: 20

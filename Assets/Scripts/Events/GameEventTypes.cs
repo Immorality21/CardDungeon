@@ -43,7 +43,9 @@ namespace Assets.Scripts.Events
         /// <summary>A sandbox session's setup.</summary>
         Sandbox,
         /// <summary>A save written by an older version being brought up to date.</summary>
-        Migration
+        Migration,
+        /// <summary>A quest's reward, collected at the tavern.</summary>
+        Quest
     }
 
     public enum Currency

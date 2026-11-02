@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ea8119caf9e5554f8867f7f923c63ad, type: 3}
+  m_Name: ClearFloors
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Hub.Quests.QuestSO
+  Key: ClearFloors
+  Kind: 2
+  Target: {fileID: 0}
+  TargetTraits: 0
+  RevisitOnly: 0
+  Count: 5
+  Icon: {fileID: 21300000, guid: 3a3cad480915410eb5d843b62b3449e8, type: 3}
+  RequiredRunKeys: []
+  RewardItem: {fileID: 0}
+  RewardItemCount: 1
+  RewardGold: 200
+  RewardXp: 30

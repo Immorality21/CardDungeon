@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2cb20e78cae32343afe2a28f87b1cc8, type: 3}
+  m_Name: tavern
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Hub.BuildingSO
+  Key: tavern
+  Service: 6
+  Position: {x: 790, y: 420}
+  HitSize: {x: 150, y: 110}
+  DrawOffset: {x: -21, y: -72}
+  DrawSize: {x: 192, y: 192}
+  DrawOrder: 20
+  AbsentSprite: {fileID: 0}
+  AvailableSprite: {fileID: 21300000, guid: e2ab04e90dc34fe68147e4a7f02d3b2c, type: 3}
+  LevelSprites:
+  - {fileID: 21300000, guid: 7feb55d08ec4448ebbc048106de9308f, type: 3}
+  IdleFrames: []
+  IdleFps: 8
+  Lights:
+  - Point: {x: 96, y: 120}
+    Radius: 36
+    Color: {r: 1, g: 0.66, b: 0.3, a: 1}
+    Intensity: 0.35
+    Flicker: 0.4
+    EmbersPerSecond: 0
+    SmokePerSecond: 0.6
+  PlacedByDefault: 0
+  MaxLevel: 1
+  PlacementCost:
+  - Material: {fileID: 11400000, guid: c0de5211aa060000000000000000ab06, type: 2}
+    Amount: 4
+  - Material: {fileID: 11400000, guid: c0de5211aa020000000000000000ab02, type: 2}
+    Amount: 2
+  GoldPerUpgrade: 0
+  LevelGrantKeys: []
+  RequiredRunKeys:
+  - SealedArchive

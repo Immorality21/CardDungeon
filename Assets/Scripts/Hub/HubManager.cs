@@ -61,6 +61,7 @@ namespace Assets.Scripts.Hub
         private VisualElement _gridView;
         private VisualElement _forgeView;
         private VisualElement _bestiaryView;
+        private VisualElement _tavernView;
         private VisualElement _inventoryView;
         private VisualElement _lotView;
 
@@ -108,6 +109,7 @@ namespace Assets.Scripts.Hub
         private SphereGridUI _sphereGrid;
         private MagicForgeUI _forge;
         private BestiaryUI _bestiary;
+        private TavernUI _tavern;
         private InventoryHubUI _inventory;
 
         private FileHandler _fileHandler;
@@ -239,6 +241,7 @@ namespace Assets.Scripts.Hub
             _gridView = root.Q<VisualElement>("grid-view");
             _forgeView = root.Q<VisualElement>("forge-view");
             _bestiaryView = root.Q<VisualElement>("bestiary-view");
+            _tavernView = root.Q<VisualElement>("tavern-view");
             _inventoryView = root.Q<VisualElement>("inventory-view");
             _lotView = root.Q<VisualElement>("lot-view");
 
@@ -294,6 +297,7 @@ namespace Assets.Scripts.Hub
             _sphereGrid = new SphereGridUI(_gridView, _partyRoster);
             _forge = new MagicForgeUI(_forgeView);
             _bestiary = new BestiaryUI(_bestiaryView);
+            _tavern = new TavernUI(_tavernView, _partyRoster);
             _inventory = new InventoryHubUI(_inventoryView, _partyRoster);
 
             if (_campaignMap != null)
@@ -312,6 +316,7 @@ namespace Assets.Scripts.Hub
             _sphereGrid.SelectionChanged += RefreshTutorial;
             _forge.OnClosed += ShowTown;
             _bestiary.OnClosed += ShowTown;
+            _tavern.OnClosed += ShowTown;
             _inventory.OnClosed += ShowTown;
             _inventory.CanClose = () => TutorialOps.AllowsLeaving(_tutorialStep);
             _inventory.Equipped += RefreshTutorial;
@@ -443,6 +448,8 @@ namespace Assets.Scripts.Hub
                     return AnyForgeUpgradeAffordable() || ForgeHasNewRecipes();
                 case HubService.Bestiary:
                     return BestiaryHasNewEntries();
+                case HubService.Tavern:
+                    return TavernHasNews();
                 default:
                     return false;
             }
@@ -881,6 +888,9 @@ namespace Assets.Scripts.Hub
                 case HubService.SphereGrid:
                     OnVisitSphereGrid();
                     break;
+                case HubService.Tavern:
+                    OnVisitTavern();
+                    break;
             }
         }
 
@@ -1139,6 +1149,7 @@ namespace Assets.Scripts.Hub
             SetShown(_gridView, false);
             SetShown(_forgeView, false);
             SetShown(_bestiaryView, false);
+            SetShown(_tavernView, false);
             SetShown(_inventoryView, false);
             SetShown(_lotView, false);
             _selectedLot = null;
@@ -2037,6 +2048,20 @@ namespace Assets.Scripts.Hub
             CoverTown();
             SetShown(_lotView, false);
             _bestiary.Show();
+        }
+
+        private void OnVisitTavern()
+        {
+            CoverTown();
+            SetShown(_lotView, false);
+            _tavern.Show();
+        }
+
+        /// <summary>A quest on the board not yet taken, or one done and waiting to be collected.</summary>
+        private static bool TavernHasNews()
+        {
+            return Assets.Scripts.Hub.Quests.QuestOps.HasNews(
+                Assets.Scripts.Hub.Quests.QuestRewards.LoadBoard(), Assets.Scripts.Hub.Quests.QuestRewards.Pool());
         }
 
         private void OnVisitInventory()

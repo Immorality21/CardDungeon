@@ -355,7 +355,7 @@ backlog.**
 | — | **Scaling items** — items that grow with use (`ItemSO.Milestones`: "after 50 kills, +3 STR"; counters per copy in the save) | mechanism ✅ 2026-10-07; **four items use it** (Oak Staff, Runed Blade, Swift Boots, the Delver's Blade). The hub shows grown stats since 2026-10-07 (`GearPiece`: every hub stat total and swap preview reads each copy's own counters; a grown copy gets its own Storehouse row). |
 | — | **Reactions** — items, enemies and summons that act on their own when something happens in a fight (`TriggeredEffect`): a sword that heals its wearer on a kill, an imp that explodes when it dies, armour that may poison whoever hits it, an orc that enrages when an ally falls | mechanism ✅ 2026-10-07; **first three enemy reactions ✅ 2026-10-07** - Cinder Imp *Cinder Burst* (explodes on death), Slag Hound *Pack Fury* (enrages when an ally falls), Gilded Hoarder *Molten Gold* (burns back whoever hits it with fire); seen firing in play (`Sandbox/EnemyReactions`). **They make Emberfall's finale harder (wipes 0.21 → 0.45), accepted by the owner - retune the floor in the balance pass** (`BALANCING.md` §5ac). **27 gear pieces carry reactions.** To do: reactions on summons (none yet); decide whether a reaction is described on the item card / Bestiary (ignored for now, owner 2026-10-07) |
 | — | **Passive sphere-grid nodes** — a node grants a `TriggeredEffect` list | decided yes (owner, 2026-10-07); **after the first real demo**. One appended `SphereNodeKind`, read by `Hero.GetTriggers` |
-| — | **Achievements and hub quests** | not started; they listen to `GameEvents` (`Events/CLAUDE.md`: count kept changes, or hold a tally until `LevelCleared`). Bounties are `HUB.md` §3d |
+| — | **Achievements and hub quests** | **hub quests started 2026-11-02**: the tavern's board of three from a pool of nine, reroll for 100 gold, collected quests recycled; kinds: kill (enemy, kind, any, on a revisit), wipes, floors; rewards an item, gold, XP for every owned hero (Hub guide). Later: a free daily reroll once days are logged; Bounties (HUB 3d) are this board. Achievements not started; they listen to `GameEvents` (`Events/CLAUDE.md`: count kept changes, or hold a tally until `LevelCleared`). Bounties are `HUB.md` §3d |
 
 ### [The hub becomes a place](plans/HUB.md)
 
@@ -365,10 +365,10 @@ backlog.**
 | **7b** | **Hall of Knowledge** — the Bestiary renamed, with recipes and recipe trees beside the monsters (owner, 2026-10-29) | ✅ **built 2026-10-29**: a Recipes tab, every recipe in its tree, unfound ones as selectable ??? rows. **Next: a hint on a ??? row** (where it drops), unlocked by upgrading the Hall - the owner's plan; the row is the slot for it |
 | **7e** | **The campfire's upgrades don't make sense** (owner, playtest 2026-10-29; parked for the roadmap 2026-11-02) — its levels unlock XP-split modes (Mentor, Catch Up) for 300/600 gold, but a split only moves XP between heroes, so paying gold for it reads as a tax. Options on the table: the modes free from the start and a different upgrade for the fire; levels priced in materials; no campfire levels at all | open, later |
 | **7c** | **Combo upgrades at the Forge** — left as they are; how they should work is to be rethought (owner, 2026-10-29) | open |
-| **7d** | **Recipes from quests** — a third source beside drops and floor clears (owner, 2026-10-29) | waits for hub quests |
+| **7d** | **Recipes from quests** — a third source beside drops and floor clears (owner, 2026-10-29) | ✅ **first one 2026-11-02**: the Bone Scepter, from the tavern's Skeleton quest |
 | **3** | Sharpen hub sinks | open |
 | **3c** | **Essence is the revisit currency** — only revisits pay it; it buys Essence-priced grid nodes (**awakenings**) and combo upgrades; the Forge's ability upgrades are retired | ✅ **built 2026-10-06**; the Warrior has two awakenings. Every hero has awakenings but the Rogue (his two are the workbook's "Maybe" rows, Ambush and Coup de Grace) |
-| **3d** | **Bounties** — rotating contracts on cleared runs paying named materials | opened 2026-10-06; depends on Revisits |
+| **3d** | **Bounties** — rotating contracts on cleared runs paying named materials | **folded into the tavern's quest board 2026-11-02** (owner: quests and bounties are one thing) |
 
 ### [Revisits](plans/REVISITS.md)
 

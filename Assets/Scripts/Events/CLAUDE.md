@@ -41,6 +41,8 @@ gain methods take a **required** `EconomySource` for that reason: the compiler f
 ## Who listens today
 
 - `InventoryManager` - item counters (kills, boss kills, victories, abilities used) for items that grow.
+- `Hub/Quests/QuestTracker` - kill quests (`Quests.json`), counted at once on `EnemyDefeated`
+  (owner, 2026-11-02: a kill is progress even if the floor is lost).
 - `Progression/RunHistoryRecorder` - the run history (`RunHistory.json`): a static class that
   subscribes itself at `BeforeSceneLoad`, after `GameEvents` is reset at `SubsystemRegistration`, so
   no scene carries it. It is the worked example of both rules below: kills count at once, XP and items

@@ -1562,6 +1562,11 @@
     justify-content: center;
 }
 
+/* A quest done and waiting at the tavern: its name in gold. */
+.cd-tavern-row--ready .cd-inv-row__name {
+    color: rgb(255, 214, 102);
+}
+
 .sg-learn__options {
     flex-direction: column;
     align-items: stretch;

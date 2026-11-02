@@ -72,6 +72,10 @@ buildings. The odds used are the true chance, which can be better than the playe
 - **Town** (`BotHub`): places what it can pay for, fields everyone the party cap allows, buys and
   wears gear, spends XP with `SphereGridOps.GreedySpend`, starts the next open run on the list.
 - **It retries** a run it wiped on, like a player, up to `MaxAttemptsPerRun`.
+- **Quests** (`BotHub.Quests`, 2026-11-02): once the tavern is built it collects every finished quest,
+  checks the payout against the quest (item count, gold, XP on every owned hero), takes everything on the
+  board and rerolls only revisit quests, since it never revisits. Each town visit reports `QuestsCollected`,
+  `QuestMismatches`, the board and a `QuestLog` line per accept, reroll and collect.
 
 **Not played yet:** summons, non-damaging abilities (buffs, debuffs, shields), combo upgrades,
 the potion belt, swapping abilities by hand, revisits (it retries a run it wiped on, but never replays one it cleared). Expect it to play a little worse than a

@@ -28,6 +28,10 @@ namespace Assets.Scripts.Sandbox.Bot
             int goldForGear = Mathf.RoundToInt(MetaProgressManager.Instance.Gold * profile.GearGoldShare);
 
             Build(hub, profile, visit, MetaProgressManager.Instance.Gold - goldForGear);
+            if (IsBuilt(hub, HubService.Tavern))
+            {
+                Quests(roster, visit);
+            }
             var heroes = Field(roster);
             if (IsBuilt(hub, HubService.Forge))
             {
@@ -177,6 +181,84 @@ namespace Assets.Scripts.Sandbox.Bot
                 built.Add(building.SaveKey + " " + next);
             }
             visit.Built = string.Join(", ", built);
+        }
+
+        /// <summary>
+        /// The tavern: collects every finished quest, checking the payout against what the quest
+        /// promises (the item, the gold, the XP on every owned hero), then takes every quest on the
+        /// board. Never rerolls.
+        /// </summary>
+        private static void Quests(PartyRosterSO roster, BotHubVisit visit)
+        {
+            var save = Assets.Scripts.Hub.Quests.QuestRewards.LoadBoard();
+            var pool = Assets.Scripts.Hub.Quests.QuestRewards.Pool();
+            foreach (var quest in Assets.Scripts.Hub.Quests.QuestOps.BoardQuests(save, pool))
+            {
+                if (Assets.Scripts.Hub.Quests.QuestOps.StateOf(save, quest) != Assets.Scripts.Hub.Quests.QuestState.Ready)
+                {
+                    continue;
+                }
+                var owned = HeroRoster.GetOwnedHeroes(roster);
+                var xpBefore = owned.Select(h => HeroRoster.GetHeroSave(h)?.CurrentXp ?? 0).ToList();
+                int goldBefore = MetaProgressManager.Instance.Gold;
+                int itemBefore = ItemCount(quest.RewardItem);
+                bool known = quest.RewardItem != null && InventoryManager.Instance.AlreadyKnown(quest.RewardItem);
+
+                if (!Assets.Scripts.Hub.Quests.QuestRewards.Collect(quest, roster))
+                {
+                    visit.QuestLog.Add($"{quest.Key}: COLLECT FAILED");
+                    continue;
+                }
+
+                int gold = MetaProgressManager.Instance.Gold - goldBefore;
+                int items = ItemCount(quest.RewardItem) - itemBefore;
+                var xpAfter = owned.Select(h => HeroRoster.GetHeroSave(h)?.CurrentXp ?? 0).ToList();
+                var xpGains = xpAfter.Select((x, i) => x - xpBefore[i]).ToList();
+                int wantItems = quest.RewardItem == null || known ? 0 : quest.RewardItemCount;
+                bool ok = gold == quest.RewardGold && items == wantItems && xpGains.All(g => g == quest.RewardXp);
+                visit.QuestsCollected++;
+                visit.QuestLog.Add($"{quest.Key}: collected - {(quest.RewardItem != null ? quest.RewardItem.Key : "no item")} +{items} (want {wantItems}), "
+                                   + $"gold +{gold} (want {quest.RewardGold}), XP +{string.Join("/", xpGains)} on {owned.Count} heroes (want {quest.RewardXp} each) "
+                                   + (ok ? "OK" : "MISMATCH"));
+                if (!ok)
+                {
+                    visit.QuestMismatches++;
+                }
+            }
+
+            // The bot never revisits a run, so a revisit-only quest would hold its slot forever: reroll it.
+            save = Assets.Scripts.Hub.Quests.QuestRewards.LoadBoard();
+            foreach (var quest in Assets.Scripts.Hub.Quests.QuestOps.BoardQuests(save, pool))
+            {
+                if (quest.RevisitOnly
+                    && Assets.Scripts.Hub.Quests.QuestOps.StateOf(save, quest) == Assets.Scripts.Hub.Quests.QuestState.Offered)
+                {
+                    int goldBefore = MetaProgressManager.Instance.Gold;
+                    bool rerolled = Assets.Scripts.Hub.Quests.QuestRewards.Reroll(quest);
+                    visit.QuestLog.Add(rerolled
+                        ? $"{quest.Key}: rerolled for {goldBefore - MetaProgressManager.Instance.Gold} gold"
+                        : $"{quest.Key}: could not reroll (gold {goldBefore})");
+                }
+            }
+
+            save = Assets.Scripts.Hub.Quests.QuestRewards.LoadBoard();
+            foreach (var quest in Assets.Scripts.Hub.Quests.QuestOps.BoardQuests(save, pool))
+            {
+                if (Assets.Scripts.Hub.Quests.QuestOps.StateOf(save, quest) == Assets.Scripts.Hub.Quests.QuestState.Offered
+                    && !quest.RevisitOnly
+                    && Assets.Scripts.Hub.Quests.QuestRewards.Accept(quest))
+                {
+                    visit.QuestLog.Add($"{quest.Key}: accepted");
+                }
+            }
+            save = Assets.Scripts.Hub.Quests.QuestRewards.LoadBoard();
+            visit.QuestBoard = string.Join(", ", Assets.Scripts.Hub.Quests.QuestOps.BoardQuests(save, pool).Select(q =>
+                $"{q.Key} {Assets.Scripts.Hub.Quests.QuestOps.ProgressOf(save, q)}/{q.Count}"));
+        }
+
+        private static int ItemCount(ItemSO item)
+        {
+            return item == null ? 0 : InventoryManager.Instance.GetItems().Where(i => i.ItemKey == item.Key).Sum(i => i.Quantity);
         }
 
         private static List<HeroSO> Field(PartyRosterSO roster)

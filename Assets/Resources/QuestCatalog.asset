@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 370376c630a74ee4abc937b460b9721d, type: 3}
+  m_Name: QuestCatalog
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Hub.Quests.QuestCatalogSO
+  Quests:
+  - {fileID: 11400000, guid: a6f01c810d73db5438e9d350d88351da, type: 2}
+  - {fileID: 11400000, guid: 120a9af222cfcab4a921be06abb8b889, type: 2}
+  - {fileID: 11400000, guid: a1008625253d81e4a8ce84fefeb070e8, type: 2}
+  - {fileID: 11400000, guid: 65afe196ff531644ab023fdb616dd458, type: 2}
+  - {fileID: 11400000, guid: 2766b737daf1c5e42bf995dbcbab3de2, type: 2}
+  - {fileID: 11400000, guid: 77af8320dc29e4a4c82ede4eab1d9704, type: 2}
+  - {fileID: 11400000, guid: ac95fe10be3cfdb43984fa476590e703, type: 2}
+  - {fileID: 11400000, guid: 31c079f383e7e3043a3b426318f3ec63, type: 2}
+  - {fileID: 11400000, guid: b0d1da91fb7c5b343855039aa7e7d1ae, type: 2}

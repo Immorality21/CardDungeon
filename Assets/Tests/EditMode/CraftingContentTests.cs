@@ -84,6 +84,14 @@ namespace Tests.EditMode
                 Add(level.GuaranteedMaterials);
                 Add(level.RecipeTable);
             }
+            // A quest's reward, collected at the tavern (2026-11-02).
+            foreach (var quest in LoadAll<Assets.Scripts.Hub.Quests.QuestSO>())
+            {
+                if (quest.RewardItem != null)
+                {
+                    Add(new[] { new LootDrop { Item = quest.RewardItem } });
+                }
+            }
             return dropped;
         }
 
