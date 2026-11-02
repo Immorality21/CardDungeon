@@ -17,7 +17,8 @@ namespace Assets.Scripts.Enemies.Behaviors
         CastMagic,   // cast one of the enemy's Spells (see EnemyMagicPlan)
         BuffAlly,    // a positive stat buff on one of its own side
         Guard,       // cover an ally against single-target blows until its next turn
-        Summon       // call more enemies into the fight
+        Summon,      // call more enemies into the fight
+        ChargeCast   // wind up a named spell (EnemyDecision.Magic); it is cast next turn
     }
 
     /// <summary>
@@ -37,6 +38,29 @@ namespace Assets.Scripts.Enemies.Behaviors
         /// <summary>What a <see cref="EnemyActionType.Summon"/> calls, and how many of it.</summary>
         public EnemySO SummonDefinition;
         public int SummonCount;
+
+        /// <summary>Further groups called in the same turn (<see cref="EnemyActionEntry.AlsoSummons"/>).</summary>
+        public List<SummonGroup> AlsoSummons;
+
+        /// <summary>Every body this Summon calls, in order: the primary kind, then each further group.</summary>
+        public IEnumerable<EnemySO> SummonedBodies()
+        {
+            for (int i = 0; SummonDefinition != null && i < SummonCount; i++)
+            {
+                yield return SummonDefinition;
+            }
+            if (AlsoSummons == null)
+            {
+                yield break;
+            }
+            foreach (var group in AlsoSummons)
+            {
+                for (int i = 0; group != null && group.Enemy != null && i < group.Count; i++)
+                {
+                    yield return group.Enemy;
+                }
+            }
+        }
 
         /// <summary>The magic to cast, for <see cref="EnemyActionType.CastMagic"/>.</summary>
         public Assets.Scripts.Cards.MagicSO Magic;

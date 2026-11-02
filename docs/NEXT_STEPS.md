@@ -121,6 +121,15 @@ Then the balance pass, starting with what this pass already showed:
 
 ### Decisions already taken — do not relitigate
 
+- **The game's identity: Final Fantasy, with roguelike stakes** *(owner, 2026-11-02)*. The battles,
+  grids, summons, Ultras and the town are Final Fantasy, and so is a run's dungeon: charges and health
+  are a run resource that refuges restore, and there is no way back to town mid-run. What stays
+  roguelike is **the stake**: a wipe restarts the run from its first floor and forfeits the floor in
+  progress, and that is what gives event gambles, refuge timing and charge spending their weight
+  (without it the right play is "try everything, retry if it goes wrong"). Consolation gold and
+  banking on the stairs stay with it. **Generated floors vary from attempt to attempt, and that
+  swinginess is part of it** too: if it goes bad later, tighten the band (`EnemyManager.BandFraction`)
+  rather than fix the floors. Hand-drawn floors are for set pieces, such as a telegraphed boss.
 - **Death is mandatory to progress.** Deeper tiers should be unclearable until the player invests.
   Do **not** add a death penalty or reduce the payout for dying (§3b).
 - **A range, not a checklist.** Each tier asks for more *total* investment than the last, and the
@@ -376,7 +385,7 @@ backlog.**
 | **3b** | The retry economy — death pays, deliberately | **decided** — do not relitigate |
 | **0b** | Elemental layer — follow-ups | open |
 | **0c** | Campaign graph — follow-ups | open; gains hero gating from §5b |
-| **0h** | **The run shape, revisited** (outside playtest 2026-10-30) | open: the enemy band (75-125% per floor) is a first pass; enemy scaling and "is this a roguelike?" to be looked at together, later (owner) |
+| **0h** | **The run shape, revisited** (outside playtest 2026-10-30) | **decided 2026-11-02**: Final Fantasy with roguelike stakes (do-not-relitigate list); the run restart and the floor-to-floor variance stay. Open: enemy scaling |
 
 ### [Dungeon rooms](plans/DUNGEON_ROOMS.md) — art, movement, shapes, hidden rooms, routes
 
@@ -414,6 +423,11 @@ backlog.**
 
 ## Shipped ledger
 
+- **The test boss: the Barrow King** (2026-11-02, owner) — the Enemies guide, `BALANCING.md` §5ba. An optional
+  one-floor run after the Catacombs, a wall on purpose (about 95% wipes for a party that came straight there), hand-drawn, a refuge before the throne; three phases. Two engine pieces:
+  a reaction on crossing a health line (`TriggerKind.OnHealthBelow`, the phase change) and a wound-up, named
+  spell (a telegraphed `CastMagic`, `EnemyActionType.ChargeCast`). Then a guard: 3 Skeletons and a Bone Golem
+  that shield him (`EnemySO.ShieldedBySummons`, `AlsoSummons`). `BossPhaseTests`; seen in play.
 - **Localization follow-ups, two icons, the Warlock's head** (2026-11-01) — `plans/POLISH_CONTENT.md` §22, `PIXEL_ART.md`.
   Enum names, raw grid keys and English grammar in code are gone from the screen; Smite and Divine Protection have
   their own icons, and ten weak icons were redone; the Warlock and his Demon Form were redrawn to the Paladin's proportions.

@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b753c97801c16b845bbda14aa6ecb352, type: 3}
+  m_Name: BarrowThrone_1
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Dungeon.ManualLevelLayoutSO
+  Key: BarrowThrone_1
+  Rooms:
+  - RoomTemplate: {fileID: 11400000, guid: 64ecddbc64bf9b646a6318b5d026adf9, type: 2}
+    GridPosition: {x: 0, y: 0}
+    EnemySpawnOverride: []
+    GuaranteeAllSpawns: 1
+    Kind: 0
+  - RoomTemplate: {fileID: 11400000, guid: 12f1d6108622cc04692831131c044dd7, type: 2}
+    GridPosition: {x: 4, y: 0}
+    EnemySpawnOverride: []
+    GuaranteeAllSpawns: 1
+    Kind: 1
+  - RoomTemplate: {fileID: 11400000, guid: 496ec30d197761e46954dc2632e3e0b0, type: 2}
+    GridPosition: {x: 8, y: 0}
+    EnemySpawnOverride: []
+    GuaranteeAllSpawns: 1
+    Kind: 1
+  - RoomTemplate: {fileID: 11400000, guid: 64ecddbc64bf9b646a6318b5d026adf9, type: 2}
+    GridPosition: {x: 9, y: 4}
+    EnemySpawnOverride: []
+    GuaranteeAllSpawns: 1
+    Kind: 1
+  - RoomTemplate: {fileID: 11400000, guid: 12f1d6108622cc04692831131c044dd7, type: 2}
+    GridPosition: {x: 13, y: 0}
+    EnemySpawnOverride: []
+    GuaranteeAllSpawns: 1
+    Kind: 1
+  - RoomTemplate: {fileID: 11400000, guid: d49386704949d5b48a02e6488bf2c377, type: 2}
+    GridPosition: {x: 17, y: 0}
+    EnemySpawnOverride: []
+    GuaranteeAllSpawns: 1
+    Kind: 0
+  Doors:
+  - RoomIndexA: 0
+    RoomIndexB: 1
+  - RoomIndexA: 1
+    RoomIndexB: 2
+  - RoomIndexA: 2
+    RoomIndexB: 3
+  - RoomIndexA: 2
+    RoomIndexB: 4
+  - RoomIndexA: 4
+    RoomIndexB: 5
+  StartRoomIndex: 0
+  ExitRoomIndex: 5

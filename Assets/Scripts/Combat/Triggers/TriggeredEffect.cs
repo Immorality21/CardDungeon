@@ -42,7 +42,11 @@ namespace Assets.Scripts.Combat.Triggers
 
         /// <summary>A physical blow aimed at the bearer did not land on it: a Luck dodge or a held
         /// evasion (Shadowstep). An attacker's blind miss is not the bearer's dodge.</summary>
-        OnDodge = 9
+        OnDodge = 9,
+
+        /// <summary>The bearer's health fell to or below <see cref="TriggeredEffect.HealthBelow"/> of its
+        /// maximum, from above it, and it still stands - a boss's phase change. Author it once per combat.</summary>
+        OnHealthBelow = 10
     }
 
     /// <summary>How often a trigger may fire for one bearer.</summary>
@@ -130,6 +134,10 @@ namespace Assets.Scripts.Combat.Triggers
 
         [Tooltip("OnDealDamage / OnTakeDamage only: ignore damage-over-time ticks - only blows and abilities count.")]
         public bool IgnoreOverTime;
+
+        [Tooltip("OnHealthBelow only: the share of maximum health the bearer has to fall to, 0..1.")]
+        [Range(0f, 1f)]
+        public float HealthBelow;
 
         [Tooltip("Who the effects land on.")]
         public TriggerTarget Target;

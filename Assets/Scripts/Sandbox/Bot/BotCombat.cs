@@ -26,7 +26,7 @@ namespace Assets.Scripts.Sandbox.Bot
         public static void Act(ICombatUnit unit, Party party, BotFight fight, int potionReserve)
         {
             var combat = CombatManager.Instance;
-            var enemies = combat.GetAliveEnemies();
+            var enemies = combat.GetTargetableEnemies();
             var weakest = enemies.OrderBy(e => e.Stats.Health).FirstOrDefault();
             if (!(unit is Hero hero))
             {

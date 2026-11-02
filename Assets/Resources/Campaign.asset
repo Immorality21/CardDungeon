@@ -123,3 +123,12 @@ MonoBehaviour:
     Optional: 1
     Continues: 0
     MapPosition: {x: 380, y: 130}
+  - Run: {fileID: 11400000, guid: 5623f5127260a8f44a799436462ed65c, type: 2}
+    Requires:
+    - {fileID: 11400000, guid: 4ac8b58699a191b44a32f08f373a61d5, type: 2}
+    RequiresHeroes: []
+    UnlockMode: 0
+    Secret: 0
+    Optional: 1
+    Continues: 0
+    MapPosition: {x: 570, y: -190}

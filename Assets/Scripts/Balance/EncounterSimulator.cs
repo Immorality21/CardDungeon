@@ -398,18 +398,20 @@ namespace Assets.Scripts.Balance
 
                 var actingAlly = allies.Of(actor);
                 var troop = replacement != null ? replacement.Of(actor) : null;
+                // A boss shielded by what it called cannot be picked while they stand (SummonShield).
+                var reachable = SummonShield.Targetable(enemies);
                 if (troop != null)
                 {
-                    TakeReplacementTurn(troop, enemies, buffTracker, resolver, null);
+                    TakeReplacementTurn(troop, reachable, buffTracker, resolver, null);
                 }
                 else if (actingAlly != null)
                 {
-                    TakeAllyTurn(actingAlly, enemies, buffTracker, resolver, allies.With(heroes), tagTracker, comboDetector);
+                    TakeAllyTurn(actingAlly, reachable, buffTracker, resolver, allies.With(heroes), tagTracker, comboDetector);
                 }
                 else if (actor.IsHero)
                 {
                     // Party-wide heals and buffs reach allies, as GetAliveHeroes does in the live fight.
-                    TakeHeroTurn(actor, heroes, allies.With(heroes), enemies, buffTracker, tagTracker, comboDetector,
+                    TakeHeroTurn(actor, heroes, allies.With(heroes), reachable, buffTracker, tagTracker, comboDetector,
                         resolver, settings, ref potionsLeft, result, summonsAllowed, lastSummonTurn,
                         allies.HasOut(actor), ultras, allies, turnManager, out var called);
                     if (called != null && called.IsAlly)
@@ -1842,7 +1844,14 @@ namespace Assets.Scripts.Balance
             switch (decision.Type)
             {
                 case EnemyActionType.CastMagic:
+                    enemy.ChargingEntryIndex = -1;
+                    enemy.ChargeTarget = null;
                     ResolveCast(enemy, decision, buffTracker);
+                    break;
+
+                case EnemyActionType.ChargeCast:
+                    enemy.ChargingEntryIndex = decision.EntryIndex;
+                    enemy.ChargeTarget = null;
                     break;
 
                 case EnemyActionType.ChargeHeavy:
@@ -1964,15 +1973,14 @@ namespace Assets.Scripts.Balance
                 summoner.ActionUses.TryGetValue(decision.EntryIndex, out int used);
                 summoner.ActionUses[decision.EntryIndex] = used + 1;
             }
-            if (decision.SummonDefinition == null)
-            {
-                return 0;
-            }
-
             int called = 0;
-            for (int i = 0; i < decision.SummonCount && CountAlive(enemies) < EnemyFormation.DesignMax; i++)
+            foreach (var kind in decision.SummonedBodies())
             {
-                var body = SimUnit.FromEnemy(decision.SummonDefinition, summoner.Tuning);
+                if (CountAlive(enemies) >= EnemyFormation.DesignMax)
+                {
+                    break;
+                }
+                var body = SimUnit.FromEnemy(kind, summoner.Tuning);
                 body.IsSummoned = true;
                 enemies.Add(body);
                 turnManager?.AddUnit(body, actsNext: false);

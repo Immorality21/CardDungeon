@@ -197,9 +197,15 @@ namespace Assets.Scripts.Enemies.Behaviors
                 var pending = actions[context.ChargingEntryIndex];
                 if (pending != null && pending.CanTelegraph)
                 {
-                    return pending.Kind == EnemyActionKind.AoeAttack
-                        ? EnemyActionType.AoeAttack
-                        : EnemyActionType.HeavyAttack;
+                    switch (pending.Kind)
+                    {
+                        case EnemyActionKind.AoeAttack:
+                            return EnemyActionType.AoeAttack;
+                        case EnemyActionKind.CastMagic:
+                            return EnemyActionType.CastMagic;
+                        default:
+                            return EnemyActionType.HeavyAttack;
+                    }
                 }
             }
 
@@ -251,9 +257,7 @@ namespace Assets.Scripts.Enemies.Behaviors
             var chosen = actions[candidate];
             if (chosen.IsTelegraphed)
             {
-                return chosen.Kind == EnemyActionKind.AoeAttack
-                    ? EnemyActionType.ChargeAoe
-                    : EnemyActionType.ChargeHeavy;
+                return ChargeTypeOf(chosen);
             }
 
             switch (chosen.Kind)
@@ -414,8 +418,9 @@ namespace Assets.Scripts.Enemies.Behaviors
         /// What the ability banner says as an enemy acts on <paramref name="decision"/>, or null for no
         /// banner (playtest 3 finding 12: the enemy did something and the player could not tell what).
         /// A cast names its spell; any other action its authored <see cref="EnemyActionEntry.DisplayName"/>.
-        /// A plain swing and the wind-up turn of a telegraph say nothing - the wind-up already floats
-        /// "Charging!", and its name shows when it lands.
+        /// A plain swing and the wind-up turn of a blow say nothing - the wind-up already floats
+        /// "Charging!", and its name shows when it lands. A spell's wind-up names the spell, so the
+        /// player knows what is coming and has a turn to answer it.
         /// </summary>
         public static string AnnouncedName(EnemyDecision decision, IList<EnemyActionEntry> actions)
         {
@@ -430,6 +435,7 @@ namespace Assets.Scripts.Enemies.Behaviors
                 case EnemyActionType.ChargeAoe:
                     return null;
                 case EnemyActionType.CastMagic:
+                case EnemyActionType.ChargeCast:
                     return decision.Magic != null && !string.IsNullOrEmpty(decision.Magic.DisplayName)
                         ? decision.Magic.DisplayName
                         : null;
@@ -452,18 +458,32 @@ namespace Assets.Scripts.Enemies.Behaviors
             {
                 return new EnemyDecision
                 {
-                    Type = entry.Kind == EnemyActionKind.AoeAttack
-                        ? EnemyActionType.ChargeAoe
-                        : EnemyActionType.ChargeHeavy,
-                    Target = entry.Kind == EnemyActionKind.AoeAttack
-                        ? null
-                        : EnemyTargeting.PickByThreat(context.Heroes, context.Threat, rolls.Target),
+                    Type = ChargeTypeOf(entry),
+                    // A wound-up spell picks its targets as it lands, like a party-wide blow.
+                    Target = entry.Kind == EnemyActionKind.HeavyAttack
+                        ? EnemyTargeting.PickByThreat(context.Heroes, context.Threat, rolls.Target)
+                        : null,
+                    Magic = entry.Kind == EnemyActionKind.CastMagic ? entry.Magic : null,
                     Multiplier = entry.Multiplier,
                     EntryIndex = index
                 };
             }
 
             return Deliver(entry, self, context, rolls, index);
+        }
+
+        /// <summary>The wind-up decision for a telegraphed entry.</summary>
+        private static EnemyActionType ChargeTypeOf(EnemyActionEntry entry)
+        {
+            switch (entry.Kind)
+            {
+                case EnemyActionKind.AoeAttack:
+                    return EnemyActionType.ChargeAoe;
+                case EnemyActionKind.CastMagic:
+                    return EnemyActionType.ChargeCast;
+                default:
+                    return EnemyActionType.ChargeHeavy;
+            }
         }
 
         private static EnemyDecision Deliver(
@@ -563,6 +583,7 @@ namespace Assets.Scripts.Enemies.Behaviors
                     {
                         Type = EnemyActionType.Summon,
                         SummonDefinition = entry.Summons,
+                        AlsoSummons = entry.AlsoSummons,
                         SummonCount = Mathf.Clamp(entry.SummonCount, 1, Mathf.Max(1, context.OpenSlots)),
                         EntryIndex = index
                     };

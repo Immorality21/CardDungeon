@@ -469,6 +469,8 @@ namespace Assets.Scripts.Combat
                 case EnemyActionType.ChargeAoe:
                 case EnemyActionType.AoeAttack:
                     return new IconDesc { Name = "burst", Tint = Orange };
+                case EnemyActionType.ChargeCast:
+                    return new IconDesc { Name = "burst", Tint = Purple };
                 default:
                     return new IconDesc { Name = "sword", Tint = IntentRed };
             }

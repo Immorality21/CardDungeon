@@ -94,6 +94,9 @@ namespace Assets.Scripts.Rooms
                 case EnemyActionType.ChargeAoe:
                     yield return ExecuteEnemyChargeAoe(enemy, decision.EntryIndex);
                     break;
+                case EnemyActionType.ChargeCast:
+                    yield return ExecuteEnemyChargeCast(enemy, decision);
+                    break;
                 case EnemyActionType.AoeAttack:
                     yield return ExecuteEnemyAoeAttack(enemyUnit, enemy, party, decision.Multiplier);
                     break;
@@ -140,6 +143,13 @@ namespace Assets.Scripts.Rooms
         /// </summary>
         private IEnumerator ExecuteEnemyCast(ICombatUnit enemyUnit, Enemy enemy, EnemyDecision decision, Party party)
         {
+            // The delivery of a wound-up spell ends its wind-up.
+            if (enemy != null && enemy.IsCharging)
+            {
+                enemy.ClearCharge();
+                SetChargingVisual(enemy, false);
+            }
+
             var targets = new List<ICombatUnit>();
             foreach (var target in decision.MagicTargets)
             {
@@ -273,6 +283,37 @@ namespace Assets.Scripts.Rooms
             yield return new WaitForSeconds(_turnDelay);
         }
 
+        /// <summary>
+        /// The wind-up of a telegraphed spell: the banner has named it (<see cref="EnemyActionPlanner.AnnouncedName"/>),
+        /// and a spell aimed at the whole party marks every hero, like a party-wide blow's wind-up.
+        /// </summary>
+        private IEnumerator ExecuteEnemyChargeCast(Enemy enemy, EnemyDecision decision)
+        {
+            if (enemy == null)
+            {
+                yield break;
+            }
+
+            enemy.BeginCharge(decision.EntryIndex, null);
+            SetChargingVisual(enemy, true);
+            CombatAudio.Play(CombatSound.BossSignature);
+            yield return SpellVfx.Cast(enemy);
+            ShowFloatingLabel(enemy.Transform.position, Loc.Get("combat.float.channeling"), new Color(0.75f, 0.45f, 1f));
+
+            if (_currentParty != null && decision.Magic != null && decision.Magic.TargetType == MagicTargetType.AllEnemies)
+            {
+                foreach (var hero in GetAliveHeroes(_currentParty))
+                {
+                    if (hero.Transform != null)
+                    {
+                        ShowFloatingLabel(hero.Transform.position + new Vector3(0f, 0.4f, 0f), "!", new Color(0.75f, 0.45f, 1f), 0.2f);
+                    }
+                }
+            }
+
+            yield return new WaitForSeconds(_turnDelay);
+        }
+
         private IEnumerator ExecuteEnemyAoeAttack(ICombatUnit enemyUnit, Enemy enemy, Party party, float multiplier)
         {
             if (enemy != null)
@@ -399,11 +440,15 @@ namespace Assets.Scripts.Rooms
             }
 
             var called = new List<ICombatUnit>();
-            if (decision.SummonDefinition != null && _currentCombatRoom != null && EnemyManager.HasInstance)
+            if (_currentCombatRoom != null && EnemyManager.HasInstance)
             {
-                for (int i = 0; i < decision.SummonCount && GetAliveEnemies().Count < EnemyFormation.DesignMax; i++)
+                foreach (var kind in decision.SummonedBodies())
                 {
-                    var body = EnemyManager.Instance.SpawnSingle(decision.SummonDefinition, _currentCombatRoom);
+                    if (GetAliveEnemies().Count >= EnemyFormation.DesignMax)
+                    {
+                        break;
+                    }
+                    var body = EnemyManager.Instance.SpawnSingle(kind, _currentCombatRoom);
                     if (body == null)
                     {
                         break;
@@ -431,6 +476,12 @@ namespace Assets.Scripts.Rooms
 
             CombatAudio.Play(CombatSound.BossSignature);
             ShowFloatingLabel(enemyUnit.Transform.position, Loc.Get("combat.float.enemy-summon"), new Color(1f, 0.55f, 0.3f));
+            // A boss that hides behind what it called says so, or the player wonders where it went.
+            if (SummonShield.IsShielded(enemyUnit, GetAliveEnemies()))
+            {
+                ShowFloatingLabel(enemyUnit.Transform.position + new Vector3(0f, 0.35f, 0f), Loc.Get("combat.float.shielded"),
+                    new Color(0.55f, 0.8f, 1f), 0.18f);
+            }
             yield return new WaitForSeconds(_turnDelay);
         }
 

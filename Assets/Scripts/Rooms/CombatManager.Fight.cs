@@ -553,6 +553,13 @@ namespace Assets.Scripts.Rooms
                 ShowFloatingLabel(reaction.Bearer.Transform.position + new Vector3(0f, 0.55f, 0f),
                     reaction.Name, new Color(1f, 0.8f, 0.35f), 0.14f);
             }
+            // A phase change is the fight turning, so it gets the ability banner as well as the float.
+            if (reaction.Trigger != null && reaction.Trigger.When == TriggerKind.OnHealthBelow
+                && !reaction.Bearer.IsHero && !string.IsNullOrEmpty(reaction.Name))
+            {
+                OnEnemyAbilityUsed?.Invoke(reaction.Bearer, reaction.Name);
+                CombatAudio.Play(CombatSound.BossSignature);
+            }
             if (reaction.Result != null && reaction.Result.Entries.Count > 0)
             {
                 StartCoroutine(_presenter.Present(reaction.Result));

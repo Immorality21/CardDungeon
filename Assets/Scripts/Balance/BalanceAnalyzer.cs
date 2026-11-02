@@ -1590,10 +1590,14 @@ namespace Assets.Scripts.Balance
             {
                 float ceiling = metrics.DangerCeiling(rules);
 
+                // A level marked hard on purpose (RunLevelEntry.IntendedHard) is still measured, as the
+                // floor simulation's wipe check does it: an Info, never a failure.
                 if (metrics.SoloDangerIndex >= 1f)
                 {
-                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Critical, BalanceCategory.Enemy, metrics.Reference,
-                        $"{metrics.Reference} beats the party on paper (danger {metrics.SoloDangerIndex:0.00})")
+                    report.Issues.Add(new BalanceIssue(metrics.IntendedHard ? BalanceSeverity.Info : BalanceSeverity.Critical,
+                        BalanceCategory.Enemy, metrics.Reference,
+                        $"{metrics.Reference} beats the party on paper (danger {metrics.SoloDangerIndex:0.00})"
+                        + (metrics.IntendedHard ? " (marked IntendedHard)" : ""))
                     {
                         Asset = metrics.Definition,
                         Detail = $"The party needs {metrics.PartyTurnsToKill:0.0} turns to kill it; it needs fewer "
@@ -1604,7 +1608,8 @@ namespace Assets.Scripts.Balance
                 }
                 else if (metrics.SoloDangerIndex > ceiling)
                 {
-                    report.Issues.Add(new BalanceIssue(BalanceSeverity.Warning, BalanceCategory.Enemy, metrics.Reference,
+                    report.Issues.Add(new BalanceIssue(metrics.IntendedHard ? BalanceSeverity.Info : BalanceSeverity.Warning,
+                        BalanceCategory.Enemy, metrics.Reference,
                         $"{metrics.Reference} is above its danger band ({metrics.SoloDangerIndex:0.00} > {ceiling:0.00})")
                     {
                         Asset = metrics.Definition,

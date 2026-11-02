@@ -118,6 +118,10 @@ namespace Assets.Scripts.Enemies
                  "in play and in the balance model alike.")]
         public List<Combat.Triggers.TriggeredEffect> Triggers = new List<Combat.Triggers.TriggeredEffect>();
 
+        [Tooltip("Cannot be targeted while anything it called into the fight still stands (SummonShield): " +
+                 "the party has to cut through the guard first. Area attacks pass over it too.")]
+        public bool ShieldedBySummons;
+
         [Tooltip("Recoils when struck - the hit reaction. Off for anything that should read as heavy: " +
                  "bosses, golems, statues. Presentation only.")]
         public bool Flinches = true;

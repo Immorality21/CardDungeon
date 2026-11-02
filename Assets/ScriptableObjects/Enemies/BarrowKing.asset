@@ -1,0 +1,146 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56867968c6cadda4fa0871e6572f8249, type: 3}
+  m_Name: BarrowKing
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Enemies.EnemySO
+  Key: BarrowKing
+  Sprite: {fileID: 21300000, guid: 85f2b5850d8b4d368d94b6345efd4dc3, type: 3}
+  AnimationFrames:
+  - {fileID: 7117089384654556301, guid: af87baff00f54c659a92621b22c557f2, type: 3}
+  - {fileID: 5615914248920303263, guid: af87baff00f54c659a92621b22c557f2, type: 3}
+  - {fileID: 7516915374471179199, guid: af87baff00f54c659a92621b22c557f2, type: 3}
+  AnimationFps: 4
+  HitFrames: []
+  IsBoss: 1
+  CombatScale: 1.8
+  Traits: 132
+  BaseStats:
+    Values:
+    - Type: 7
+      Amount: 750
+    - Type: 1
+      Amount: 30
+    - Type: 2
+      Amount: 5
+    - Type: 3
+      Amount: 18
+    - Type: 4
+      Amount: 24
+    - Type: 5
+      Amount: 5
+  XpReward: 80
+  GoldReward: 70
+  AttackDamageType: 0
+  Archetype: 4
+  Behavior: {fileID: 11400000, guid: ec09d99aed81017479d754240d068871, type: 2}
+  Spells:
+  - Magic: {fileID: 11400000, guid: 668273c5e4b70844e977a9df53876bdd, type: 2}
+    CastWeight: 1
+  - Magic: {fileID: 11400000, guid: a1189a974a194414fb3d5e5ea98f2929, type: 2}
+    CastWeight: 1
+  Resistances:
+  - DamageType: 5
+    Percent: 50
+  - DamageType: 4
+    Percent: -50
+  StatusImmunities: 10000000
+  LootTable:
+  - Item: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+    Chance: 1
+    MinQuantity: 2
+    MaxQuantity: 2
+  - Item: {fileID: 11400000, guid: c0de5211aa090000000000000000ab09, type: 2}
+    Chance: 1
+    MinQuantity: 1
+    MaxQuantity: 2
+  SalvageTable: []
+  Triggers:
+  - LabelKey: enemy.barrow-king.reaction-1.label
+    TextKey: 
+    When: 10
+    Chance: 1
+    Limit: 2
+    FilterDamageType: 0
+    DamageType: 0
+    IgnoreOverTime: 0
+    HealthBelow: 0.6
+    Target: 0
+    Effects:
+    - EffectType: 2
+      Power: 30
+      PowerMode: 3
+      ScalingStat: 0
+      DamageType: 0
+      BuffType: 1
+      Duration: 99
+      UnlockLevel: 0
+      ApplyChance: 100
+      BonusVsTrait: 0
+      BonusPercent: 0
+      BonusVsStatus: 0
+      BonusPerDebuff: 0
+      DrainToParty: 0
+    - EffectType: 10
+      Power: 0
+      PowerMode: 0
+      ScalingStat: 0
+      DamageType: 0
+      BuffType: 0
+      Duration: 0
+      UnlockLevel: 0
+      ApplyChance: 100
+      BonusVsTrait: 0
+      BonusPercent: 0
+      BonusVsStatus: 0
+      BonusPerDebuff: 0
+      DrainToParty: 0
+  - LabelKey: enemy.barrow-king.reaction-2.label
+    TextKey: 
+    When: 10
+    Chance: 1
+    Limit: 2
+    FilterDamageType: 0
+    DamageType: 0
+    IgnoreOverTime: 0
+    HealthBelow: 0.25
+    Target: 0
+    Effects:
+    - EffectType: 2
+      Power: 0
+      PowerMode: 0
+      ScalingStat: 0
+      DamageType: 0
+      BuffType: 14
+      Duration: 3
+      UnlockLevel: 0
+      ApplyChance: 100
+      BonusVsTrait: 0
+      BonusPercent: 0
+      BonusVsStatus: 0
+      BonusPerDebuff: 0
+      DrainToParty: 0
+    - EffectType: 10
+      Power: 0
+      PowerMode: 0
+      ScalingStat: 0
+      DamageType: 0
+      BuffType: 0
+      Duration: 0
+      UnlockLevel: 0
+      ApplyChance: 100
+      BonusVsTrait: 0
+      BonusPercent: 0
+      BonusVsStatus: 0
+      BonusPerDebuff: 0
+      DrainToParty: 0
+  ShieldedBySummons: 1
+  Flinches: 0

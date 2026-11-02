@@ -6,6 +6,13 @@ it has been played; anything that turns out wrong becomes a backlog item in `NEX
 Most of it came out of playtest 3 (2026-10-26 to 2026-10-28); the first section is the outside
 playtest's fixes (2026-10-30).
 
+## The test boss: the Barrow King (2026-11-02)
+
+- [ ] **The Barrow Throne** - optional, after the Catacombs. Does each phase read? The phase banners (The Crown Cracks, Last Rite), the named wind-ups (Grave Tide, Requiem) and the skeletons at 60%.
+- [ ] **The guard** - at 60% he calls 3 Skeletons and a Bone Golem and cannot be targeted until they fall ("Shielded"). Does it read?
+- [ ] **Its difficulty** - now after the Catacombs and a wall: a party that came straight there wipes about 95% of the time (simulator). Does it read as "come back stronger"?
+- [ ] **The floor** - empty rooms to the throne for now. The door to the side room was not seen.
+
 ## Texts, icons and the Warlock (2026-11-01)
 
 - [ ] **The new Warlock** - idle, wince, fall and walk at the Paladin's proportions. Demon Form too. Your call on the look.

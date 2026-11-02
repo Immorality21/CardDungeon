@@ -475,7 +475,7 @@ namespace Assets.Scripts.Rooms
             {
                 var unit = _parting[0];
                 _parting.RemoveAt(0);
-                var enemies = GetAliveEnemies();
+                var enemies = GetTargetableEnemies();
                 if (enemies.Count == 0)
                 {
                     _parting.Clear();
@@ -602,10 +602,10 @@ namespace Assets.Scripts.Rooms
                     {
                         return new List<ICombatUnit> { chosen };
                     }
-                    var weakest = GetAliveEnemies().OrderBy(e => e.Stats.Health).FirstOrDefault();
+                    var weakest = GetTargetableEnemies().OrderBy(e => e.Stats.Health).FirstOrDefault();
                     return weakest != null ? new List<ICombatUnit> { weakest } : new List<ICombatUnit>();
                 case MagicTargetType.AllEnemies:
-                    return GetAliveEnemies();
+                    return GetTargetableEnemies();
                 case MagicTargetType.Self:
                     return new List<ICombatUnit> { caster };
                 case MagicTargetType.FallenAlly:

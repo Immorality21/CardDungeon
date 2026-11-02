@@ -532,6 +532,14 @@ namespace Assets.Scripts.Rooms
         /// itself for anything else aimed at its own side, every living enemy for an area attack. A
         /// single-enemy ability returns every candidate and the caller picks.
         /// </summary>
+        /// <summary>The enemies the party can pick or hit: the living, less a boss shielded by what it
+        /// called (<see cref="SummonShield"/>). Every hero-side target list reads this, never
+        /// <see cref="GetAliveEnemies"/>; Inspect still sees everyone.</summary>
+        public List<ICombatUnit> GetTargetableEnemies()
+        {
+            return SummonShield.Targetable(GetAliveEnemies());
+        }
+
         public List<ICombatUnit> SummonAbilityTargets(MagicSO magic, ICombatUnit summon)
         {
             if (magic == null)
@@ -542,7 +550,7 @@ namespace Assets.Scripts.Rooms
             {
                 case MagicTargetType.SingleEnemy:
                 case MagicTargetType.AllEnemies:
-                    return GetAliveEnemies();
+                    return GetTargetableEnemies();
                 case MagicTargetType.AllAllies:
                     return HeroSideUnits();
                 case MagicTargetType.FallenAlly:

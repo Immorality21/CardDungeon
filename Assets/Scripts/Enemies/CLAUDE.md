@@ -82,6 +82,38 @@ All immune to Poison and **weak to Fire** (-50%); PixelLab art, two candidates e
 Caustic Spit and Toxic Deluge are `EnemyOnly` (`Enemies/Abilities/`). Rooms: Sump Channel, Bloat Nest,
 Seep Pool. Slimes drop the Antidote Salve (25%). Sandbox: `SeepingCistern`.
 
+## The Barrow King - the test boss *(2026-11-02)*
+
+The owner's **fixed, telegraphed boss**: one hand-drawn floor (`Runs/BarrowThrone`; the rooms before
+the throne are empty for now, authored `Connector`) and a king who fights in **three phases**. It is the
+template for a boss built to be *read* rather than survived. Built from three pieces, all data:
+
+- **Phases are health bands.** Every action carries `SelfHealthAbove` / `SelfHealthBelow` conditions,
+  so the repertoire changes at 60% and 25% (the closed-form model already prices these).
+- **A phase change is a reaction**, `TriggerKind.OnHealthBelow` with `TriggeredEffect.HealthBelow`: it
+  fires once as the bar crosses the line, gets the ability banner, and here makes the king stronger
+  and sheds his curses (**The Crown Cracks**, 60%: +30% Strength, cure) or hastes him (**Last Rite**, 25%).
+- **Big spells are wound up and named.** A `CastMagic` entry with a named `Magic` can be `Telegraphed`:
+  the wind-up turn banners the spell (`EnemyActionType.ChargeCast`), marks every hero for a party-wide
+  one, and casts it the turn after. **Grave Tide** (phase 2) and **Requiem** (phase 3, Silence) are his.
+
+| phase | health | does |
+|---|---|---|
+| 1 | over 60% | blows; **Grave Cleave** (2x, wound up, every 3rd turn); **Crushing Presence** (-2 Endurance) |
+| 2 | 60-25% | **Rise, My Guard** (3 Skeletons and a Bone Golem, once); **Grave Tide** (Shadow to all, -2 Agility, every 3rd turn) |
+| 3 | under 25% | **Requiem** (heavier Shadow to all + Silence 50%, every 2nd turn); blows at 1.4x |
+
+**He cannot be targeted while his guard stands** (`EnemySO.ShieldedBySummons`, the pure `SummonShield`):
+every hero-side target list reads `CombatManager.GetTargetableEnemies()`, which leaves him out of single
+picks and area attacks alike, and floats "Shielded" when they arrive; Inspect still sees him. The
+simulator filters the same way. A Summon can call several kinds in one turn (`EnemyActionEntry.AlsoSummons`).
+
+Undead + Bloodless, weak to Holy (the Paladin's element), resists Shadow, 64 px at `CombatScale` 1.8,
+does not flinch. Opens after the Catacombs; pinned 750 HP / 30 Str / 18 Agi / 24 Int at floor Difficulty
+4.0, so a party that came straight there wipes about 95% of the time - a wall on purpose (`IntendedHard`,
+owner 2026-11-02; `BALANCING.md` §5ba). Sandbox:
+`Sandbox/BarrowKing`. Checked in play 2026-11-02: every phase, banner and wind-up fired in order.
+
 ## Reactions (`EnemySO.Triggers`) - what an enemy does on its own *(2026-10-07)*
 
 An enemy can carry `TriggeredEffect`s: when something happens to it in a fight (it dies, an ally falls,

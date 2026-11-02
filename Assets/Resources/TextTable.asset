@@ -11975,3 +11975,78 @@ MonoBehaviour:
     - a Succubus
     Reviewed: 0
     Note: 'Troop name with its article: a squad''s ''an Imp'''
+  - Key: enemy.barrow-king.name
+    Values:
+    - The Barrow King
+    Reviewed: 0
+    Note: 'Enemy name: the test boss'
+  - Key: enemy.barrow-king.plural
+    Values:
+    - Barrow Kings
+    Reviewed: 0
+    Note: 'Enemy name, plural: the run history''s ''2 Bog Shamans'''
+  - Key: enemy.barrow-king.reaction-1.label
+    Values:
+    - The Crown Cracks
+    Reviewed: 0
+    Note: 'Barrow King phase 2 (60% health): grows stronger, sheds every curse'
+  - Key: enemy.barrow-king.reaction-2.label
+    Values:
+    - Last Rite
+    Reviewed: 0
+    Note: 'Barrow King phase 3 (25% health): hastened, sheds every curse'
+  - Key: ability.grave-tide.name
+    Values:
+    - Grave Tide
+    Reviewed: 0
+    Note: Barrow King spell, wound up a turn ahead
+  - Key: ability.grave-tide.description
+    Values:
+    - Cold barrow water floods the hall and drags at every limb.
+    Reviewed: 0
+    Note: Enemy ability description
+  - Key: ability.requiem.name
+    Values:
+    - Requiem
+    Reviewed: 0
+    Note: Barrow King's last-phase spell, wound up a turn ahead
+  - Key: ability.requiem.description
+    Values:
+    - The king sings the dead to rest, and the living with them.
+    Reviewed: 0
+    Note: Enemy ability description
+  - Key: move.rise-my-guard.name
+    Values:
+    - Rise, My Guard
+    Reviewed: 0
+    Note: Barrow King summons two skeletons at the start of phase 2
+  - Key: move.grave-cleave.name
+    Values:
+    - Grave Cleave
+    Reviewed: 0
+    Note: Barrow King's wound-up heavy blow in phase 1
+  - Key: move.crushing-presence.name
+    Values:
+    - Crushing Presence
+    Reviewed: 0
+    Note: Barrow King's Endurance cut
+  - Key: run.barrow-throne.name
+    Values:
+    - The Barrow Throne
+    Reviewed: 0
+    Note: 'Run name: the test boss, one hand-drawn floor after the Threshold'
+  - Key: run.barrow-throne.description
+    Values:
+    - A sealed barrow below the Threshold. Its king does not stay down.
+    Reviewed: 0
+    Note: Run description on the story map
+  - Key: run.barrow-throne.level-1.name
+    Values:
+    - The Barrow Throne
+    Reviewed: 0
+    Note: Level name
+  - Key: combat.float.shielded
+    Values:
+    - Shielded
+    Reviewed: 0
+    Note: Floats over a boss that cannot be targeted while what it called still stands

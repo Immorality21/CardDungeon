@@ -144,8 +144,8 @@ namespace Assets.Scripts.Enemies.Editor
             {
                 if (entry != null && entry.Telegraphed && !entry.CanTelegraph)
                 {
-                    warning = $"'{Describe(entry)}' is marked Telegraphed, but only HeavyAttack and "
-                            + "AoeAttack can wind up. The flag is ignored.";
+                    warning = $"'{Describe(entry)}' is marked Telegraphed, but only HeavyAttack, "
+                            + "AoeAttack and a CastMagic that names its Magic can wind up. The flag is ignored.";
                     return true;
                 }
             }
@@ -252,6 +252,8 @@ namespace Assets.Scripts.Enemies.Editor
                     EditorGUILayout.PropertyField(
                         entry.FindPropertyRelative("Magic"),
                         new GUIContent("Magic", "Leave empty to draw from this enemy's own Draw list."));
+                    EditorGUILayout.PropertyField(entry.FindPropertyRelative("Telegraphed"),
+                        new GUIContent("Telegraphed", "Spend a turn naming the spell, then cast it. Needs a named Magic."));
                     if (entry.FindPropertyRelative("Magic").objectReferenceValue == null)
                     {
                         EditorGUILayout.HelpBox(
@@ -285,6 +287,7 @@ namespace Assets.Scripts.Enemies.Editor
                 case EnemyActionKind.Summon:
                     EditorGUILayout.PropertyField(entry.FindPropertyRelative("Summons"));
                     EditorGUILayout.PropertyField(entry.FindPropertyRelative("SummonCount"));
+                    EditorGUILayout.PropertyField(entry.FindPropertyRelative("AlsoSummons"), true);
                     EditorGUILayout.PropertyField(entry.FindPropertyRelative("MaxUses"));
                     EditorGUILayout.HelpBox(
                         "Called bodies pay no XP, gold or loot, and never push the stage past five.",

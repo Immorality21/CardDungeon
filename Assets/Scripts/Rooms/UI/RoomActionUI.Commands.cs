@@ -62,7 +62,7 @@ namespace Assets.Scripts.Rooms
         {
             SetShown(_heroBar, false);
 
-            var enemies = CombatManager.Instance.GetAliveEnemies();
+            var enemies = CombatManager.Instance.GetTargetableEnemies();
             if (enemies.Count <= 1)
             {
                 CombatManager.Instance.SubmitAttackAction(enemies.Count == 1 ? enemies[0] : null);

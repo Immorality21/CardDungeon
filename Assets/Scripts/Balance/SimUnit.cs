@@ -118,7 +118,7 @@ namespace Assets.Scripts.Balance
     /// <c>GetEffectiveStat(MaxHealth)</c>. It did not always, which is why this note exists: the
     /// model was right and the game was short by exactly the gear bonus.
     /// </summary>
-    public class SimUnit : ICombatUnit, IStatusImmune, ITriggerSource, IHasTraits, Heroes.IAbilityUpgrades, IHasMomentum, IHasFocus, IOutgoingDamage
+    public class SimUnit : ICombatUnit, IStatusImmune, ITriggerSource, IHasTraits, Heroes.IAbilityUpgrades, IHasMomentum, IHasFocus, IOutgoingDamage, ISummonedBody
     {
         /// <summary>What a hero's worn sets add to their ability damage - set by <c>PartyBaseline</c>,
         /// as <c>Hero.OutgoingDamage</c> reads it in the game.</summary>
@@ -234,6 +234,9 @@ namespace Assets.Scripts.Balance
 
         /// <summary>A body another enemy called into this fight. Mirrors <c>Enemy.IsSummoned</c>.</summary>
         public bool IsSummoned;
+
+        EnemySO ISummonedBody.Definition => Definition;
+        bool ISummonedBody.IsSummoned => IsSummoned;
 
         public bool IsBoss => Definition != null && Definition.IsBoss;
 

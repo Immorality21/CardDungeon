@@ -171,7 +171,7 @@ namespace Assets.Scripts.Rooms
             // Each hit picks its targets again from whoever is still standing (Flurry's slashes).
             for (int hit = 0; hit < UltraOps.HitsOf(ultra); hit++)
             {
-                var targets = UltraOps.StrikeTargets(ultra, (ICombatUnit)hero, GetAliveEnemies(), HeroSideUnits(),
+                var targets = UltraOps.StrikeTargets(ultra, (ICombatUnit)hero, GetTargetableEnemies(), HeroSideUnits(),
                     count => UnityEngine.Random.Range(0, count), chosen);
                 if (targets.Count == 0)
                 {

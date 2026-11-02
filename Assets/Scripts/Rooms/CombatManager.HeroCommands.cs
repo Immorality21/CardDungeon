@@ -99,12 +99,12 @@ namespace Assets.Scripts.Rooms
             var magic = first.Magic;
             if (magic.TargetType == MagicTargetType.AllEnemies)
             {
-                return GetAliveEnemies();
+                return GetTargetableEnemies();
             }
             var living = first.Targets != null ? first.Targets.Where(t => t != null && t.IsAlive).ToList() : new List<ICombatUnit>();
             if (living.Count == 0 && magic.TargetType == MagicTargetType.SingleEnemy)
             {
-                var weakest = GetAliveEnemies().OrderBy(e => e.Stats.Health).FirstOrDefault();
+                var weakest = GetTargetableEnemies().OrderBy(e => e.Stats.Health).FirstOrDefault();
                 if (weakest != null)
                 {
                     living.Add(weakest);
@@ -120,7 +120,7 @@ namespace Assets.Scripts.Rooms
                 // Rivet Storm: each shot picks its own enemy from whoever is still standing.
                 for (int hit = 0; hit < castAction.Magic.RandomHits; hit++)
                 {
-                    var standing = GetAliveEnemies();
+                    var standing = GetTargetableEnemies();
                     if (standing.Count == 0)
                     {
                         break;

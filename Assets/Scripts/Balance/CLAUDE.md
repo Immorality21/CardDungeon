@@ -416,7 +416,9 @@ in order; `carryHealth: false` is the before-and-after. **The closed form flags,
 (`ConfirmByFloorSimulation`) and reported as an Info when the party clears it, because attrition composes
 per enemy and overstates dense rooms of fast enemies. A floor marked **`RunLevelEntry.IntendedHard`**
 (owner's call - the Flooded Nave, 2026-10-22) is reported as an Info too, even when the simulator wipes:
-a deliberate wall is still measured, it just does not fail the suite. Attrition and wipe rate are calibrated against
+a deliberate wall is still measured, it just does not fail the suite. Since 2026-11-02 that covers its
+enemies' danger index too (`EnemyMetrics.IntendedHard`: "beats the party on paper" and "above its danger
+band" become Infos), so a boss can be built as a wall - the Barrow King. Attrition and wipe rate are calibrated against
 each other in `docs/BALANCING.md` §5h — **death starts around attrition 0.70** — so tune with the
 cheap closed-form dial and confirm with the floor sim. **That calibration was measured on one-enemy
 rooms and does not extend to dense ones** (§5k): on a floor of three-enemy rooms the closed form runs

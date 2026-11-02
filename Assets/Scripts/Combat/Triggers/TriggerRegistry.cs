@@ -86,6 +86,7 @@ namespace Assets.Scripts.Combat.Triggers
 
         private void OnHealthChange(HealthChange change)
         {
+            FireHealthBelow(change);
             if (change.Landed <= 0 || change.Source.Reaction || !IsAHit(change.Cause))
             {
                 return;
@@ -124,9 +125,32 @@ namespace Assets.Scripts.Combat.Triggers
             return cause == HealthCause.Attack || cause == HealthCause.Ability || cause == HealthCause.OverTime;
         }
 
-        /// <summary>Fires every trigger <paramref name="bearer"/> carries for <paramref name="kind"/>.</summary>
+        /// <summary>
+        /// A phase change: any fall in health (a hit, a tick, a reaction, a price) that crosses a
+        /// threshold fires it, once per crossing. A blow that crosses two fires both, in authored order.
+        /// </summary>
+        private void FireHealthBelow(HealthChange change)
+        {
+            var bearer = change.Target;
+            if (bearer == null || !bearer.IsAlive || change.After >= change.Before)
+            {
+                return;
+            }
+            float max = bearer.GetEffectiveStat(UnitStats.StatType.MaxHealth);
+            if (max <= 0f)
+            {
+                return;
+            }
+            float before = change.Before / max;
+            float after = change.After / max;
+            Fire(bearer, TriggerKind.OnHealthBelow, change.Attacker, change.Source.DamageType, change.Cause,
+                trigger => before > trigger.HealthBelow && after <= trigger.HealthBelow);
+        }
+
+        /// <summary>Fires every trigger <paramref name="bearer"/> carries for <paramref name="kind"/>
+        /// (that also passes <paramref name="accepts"/>, when given).</summary>
         private void Fire(ICombatUnit bearer, TriggerKind kind, ICombatUnit other, DamageType? damageType = null,
-            HealthCause? cause = null)
+            HealthCause? cause = null, Func<TriggeredEffect, bool> accepts = null)
         {
             if (!(bearer is ITriggerSource source))
             {
@@ -142,6 +166,10 @@ namespace Assets.Scripts.Combat.Triggers
             {
                 var trigger = carried.Trigger;
                 if (trigger == null || trigger.When != kind || trigger.Effects == null || trigger.Effects.Count == 0)
+                {
+                    continue;
+                }
+                if (accepts != null && !accepts(trigger))
                 {
                     continue;
                 }

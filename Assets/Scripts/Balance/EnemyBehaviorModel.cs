@@ -257,9 +257,9 @@ namespace Assets.Scripts.Balance
                     case EnemyActionKind.CastMagic:
                         damage += claim * castMultiplier;
                         profile.CastShare += claim;
-                        if (castMultiplier <= 0f)
+                        if (castMultiplier <= 0f || entry.IsTelegraphed)
                         {
-                            profile.IdleShare += claim;
+                            profile.IdleShare += claim;   // a wound-up spell's first turn lands nothing
                         }
                         break;
                 }
@@ -372,10 +372,21 @@ namespace Assets.Scripts.Balance
                 }
                 int cap = entry.MaxUses > 0 ? entry.MaxUses : UnlimitedSummonUses;
                 float uses = Mathf.Min(cap, claims[i] * SummonerTurnsPerFight);
-                float bodies = Mathf.Min(uses * Mathf.Max(1, entry.SummonCount), Combat.EnemyFormation.DesignMax - 1);
+                float room = Combat.EnemyFormation.DesignMax - 1;
+                float bodies = Mathf.Min(uses * Mathf.Max(1, entry.SummonCount), room);
                 if (bodies > 0f)
                 {
                     result.Add(new KeyValuePair<EnemySO, float>(entry.Summons, bodies));
+                    room -= bodies;
+                }
+                foreach (var group in entry.AlsoSummons ?? new List<SummonGroup>())
+                {
+                    float more = group != null && group.Enemy != null ? Mathf.Min(uses * Mathf.Max(1, group.Count), room) : 0f;
+                    if (more > 0f)
+                    {
+                        result.Add(new KeyValuePair<EnemySO, float>(group.Enemy, more));
+                        room -= more;
+                    }
                 }
             }
             return result;

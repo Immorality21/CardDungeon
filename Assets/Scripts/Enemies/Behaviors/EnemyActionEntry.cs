@@ -48,6 +48,16 @@ namespace Assets.Scripts.Enemies.Behaviors
         Summon
     }
 
+    /// <summary>A further group a Summon calls in the same turn: <see cref="Count"/> of <see cref="Enemy"/>.</summary>
+    [Serializable]
+    public class SummonGroup
+    {
+        public EnemySO Enemy;
+
+        [Min(1)]
+        public int Count = 1;
+    }
+
     /// <summary>The gate on whether an action is available at all this turn.</summary>
     public enum EnemyConditionKind
     {
@@ -143,7 +153,7 @@ namespace Assets.Scripts.Enemies.Behaviors
 
         [Tooltip("Spend one turn winding up, then deliver on the next. The wind-up is the player's " +
                  "window to heal, guard or kill it first, so anything big should telegraph. " +
-                 "HeavyAttack and AoeAttack only.")]
+                 "HeavyAttack, AoeAttack, and a CastMagic that names its Magic (the wind-up names the spell).")]
         public bool Telegraphed;
 
         [Tooltip("Damage multiplier, for Attack / HeavyAttack / AoeAttack.")]
@@ -171,6 +181,10 @@ namespace Assets.Scripts.Enemies.Behaviors
         [Min(1)]
         public int SummonCount = 1;
 
+        [Tooltip("Summon only: more kinds called in the same turn, after Summons - a skeleton guard and " +
+                 "a golem at once. The stage's five bodies still cap the whole call.")]
+        public List<SummonGroup> AlsoSummons = new List<SummonGroup>();
+
         [Tooltip("Summon only: how many times per fight this action can be used. 0 means no limit " +
                  "beyond the stage's five bodies.")]
         [Min(0)]
@@ -183,9 +197,11 @@ namespace Assets.Scripts.Enemies.Behaviors
         [Tooltip("Every one of these must hold for the action to be available.")]
         public List<EnemyActionCondition> Conditions = new List<EnemyActionCondition>();
 
-        /// <summary>True for the two kinds that can be wound up over two turns.</summary>
+        /// <summary>True for the kinds that can be wound up over two turns. A cast can only when it names
+        /// its spell, because the wind-up announces what is coming and the delivery must keep that promise.</summary>
         public bool CanTelegraph =>
-            Kind == EnemyActionKind.HeavyAttack || Kind == EnemyActionKind.AoeAttack;
+            Kind == EnemyActionKind.HeavyAttack || Kind == EnemyActionKind.AoeAttack
+            || (Kind == EnemyActionKind.CastMagic && Magic != null);
 
         /// <summary>Whether this entry actually spends a turn winding up.</summary>
         public bool IsTelegraphed => Telegraphed && CanTelegraph;

@@ -275,6 +275,12 @@ revisit extras on top) - a first pass. The balance model still prices the unband
 the band keeps it close to. Catacombs difficulty is intended; the death screen now tells the player
 to replay earlier runs (`RunDefinitionSO.ReplayHintOnWipe`).
 
+**Decided 2026-11-02 (owner): Final Fantasy, with roguelike stakes.** "Is this a roguelike?" - no, but
+it keeps the roguelike's stake: a wipe restarts the run from floor 1. Not restarting would make floors
+trivial and every event a free gamble. The floor-to-floor variance is part of it too; tighten the band
+if it goes bad later. The full entry is in `NEXT_STEPS.md`'s do-not-relitigate list. Still open from
+the tester's questions: whether enemies should scale with the party or the map.
+
 ### 0c. Campaign graph — follow-ups
 
 `CampaignSO` + `CampaignOps` + `CampaignMapUI` shipped 2026-08-25 with five runs and the first

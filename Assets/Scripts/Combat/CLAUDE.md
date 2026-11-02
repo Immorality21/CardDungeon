@@ -95,7 +95,9 @@ every enemy is tagged since 2026-10-07 (see the Enemies guide). **The undead are
   **On-kill reactions count only foes**: a Sacrifice credits the Cultist but never pays an on-kill item.
 - **Reactions (`Combat/Triggers/`).** `TriggeredEffect` on `ItemSO`, `EnemySO` and `SummonSO`: *when*
   (`TriggerKind`: OnCombatStart, OnTurnStart/End, OnDealDamage, OnTakeDamage, OnKill, OnDefeated,
-  OnAllyDefeated, OnAbilityUsed, **OnDodge** - a physical blow aimed at the bearer missed it by Luck or a
+  OnAllyDefeated, OnAbilityUsed, **OnHealthBelow** (2026-11-02: the bearer's bar falls to or below
+  `TriggeredEffect.HealthBelow` of its maximum from above it - a boss's phase change; any fall counts,
+  and `CombatManager.ShowReaction` gives an enemy's the ability banner), **OnDodge** - a physical blow aimed at the bearer missed it by Luck or a
   held evasion, off `HitAvoided`, raised at the three dodge sites; a blind attacker's miss is not a
   dodge), chance, limit (per turn / per combat), an optional element filter, `IgnoreOverTime` (only
   blows and abilities count - "when struck"), the item pane's wording (`Text`; the pane lists nothing

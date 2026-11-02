@@ -3659,3 +3659,43 @@ seeds 3001 and 3002:
 health, though the before column is one game. Emberfall is still the wall (3 of 6). The bot plays no ability that deals no damage, so
 Snare, Whisper of Madness and Steal are unmeasured: a player has more early power than these figures show. Open: whether
 the first bosses need tuning back up; do that after a human has played it.
+
+## §5ba — The Barrow King, the test boss (2026-11-02)
+
+One hand-drawn floor after the Threshold (two trash rooms, a cache, a refuge, the throne room), measured
+with `BalanceAnalyzer.SimulateFloor` against the straight-line party for that point. The thinking policy
+barely answers to the king's numbers - its ending health went from 80% to 57% while attack-only play went
+from 0% to 99% wipes - so **attack-only wipe rate is the dial that says "this needs playing"**:
+
+| HP / Str / Agi / Int | Adaptive wipe | ending health | attack-only wipe |
+|---|---|---|---|
+| 170 / 10 / 6 / 7 (first draft) | 0% | 80% | 0% |
+| 240 / 16 / 8 / 9 | 0% | 66% | 22% |
+| **300 / 14 / 10 / 10 (shipped)** | **0%** | **64%** | **72%** |
+| 300 / 16 / 12 / 11 | 0% | 60% | 95% |
+
+300 / 16 / 12 / 11 fails the closed form (danger 1.15, "beats the party on paper"): it does not see the
+phase reactions, the refuge before the throne or the party's Ultras, all of which the simulator plays. The
+first played fight (two heroes at 200 grid XP, attack only) wiped with the king at 37%, as the simulator
+predicts for that policy.
+
+**Same day, the owner's changes:** the rooms before the throne emptied, and phase 2 calls three Skeletons
+and a Bone Golem that **shield the king** (he cannot be targeted while they stand). Same stats, a much
+harder fight: Adaptive **26% wipes, 37% ending health**; MagicFirst 60%; attack-only 100%. Left there - an
+optional boss built to be hard - for the owner to judge in play.
+
+**Then moved behind the Catacombs and made a wall** (owner: "it should NOT be easy at all, a wipe rate of 95%
+for a party that went straight there"). The straight-line party there is **three** heroes (Warrior,
+Paladin, Mage); the Tinkerer only joins after the Drowned March. The wipe rate holds near zero and then
+climbs steeply:
+
+| floor Difficulty, HP / Str / Agi / Int | Adaptive wipe | ending health | MagicFirst wipe |
+|---|---|---|---|
+| 3.0, 500 / 20 / 13 / 15 | 0% | 68% | 4% |
+| 3.5, 600 / 24 / 15 / 18 | 37% | 48% | 85% |
+| 3.5, 650 / 26 / 16 / 20 | 57% | 39% | 96% |
+| 4.0, 700 / 28 / 17 / 22 | 83% | 28% | 99% |
+| **4.0, 750 / 30 / 18 / 24 (shipped)** | **97%** | **18%** | **100%** |
+
+Floor Difficulty also scales the guard he calls. The level is `IntendedHard`, and the analyzer now lets
+that flag cover an enemy's danger index as well as the floor's wipe rate (danger 2.05 is an Info).

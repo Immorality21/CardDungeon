@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.Enemies
 {
-    public class Enemy : MonoBehaviour, ICombatUnit, IStatusImmune, Combat.Triggers.ITriggerSource, IFlinches, IHasTraits
+    public class Enemy : MonoBehaviour, ICombatUnit, IStatusImmune, Combat.Triggers.ITriggerSource, IFlinches, IHasTraits, ISummonedBody
     {
         public bool IsImmuneTo(BuffType type)
         {
@@ -81,6 +81,8 @@ namespace Assets.Scripts.Enemies
         /// dungeon save counts.
         /// </summary>
         [System.NonSerialized] public bool IsSummoned;
+
+        bool ISummonedBody.IsSummoned => IsSummoned;
 
         /// <summary>Fresh per-combat runtime state: cadence, telegraph and limited-action counts.</summary>
         public void ResetForCombat()

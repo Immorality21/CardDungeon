@@ -62,6 +62,7 @@ namespace Tests.EditMode
         {
             AssertNoIssues(
                 issue => issue.Category == BalanceCategory.Enemy
+                         && issue.Severity >= BalanceSeverity.Warning
                          && (issue.Title.Contains("danger band") || issue.Title.Contains("beats the party")),
                 "An enemy's danger index sits outside the band for its tier.");
         }

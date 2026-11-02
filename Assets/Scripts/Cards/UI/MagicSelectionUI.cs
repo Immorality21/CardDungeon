@@ -385,7 +385,7 @@ namespace Assets.Scripts.Cards.UI
                     SubmitCast(new List<ICombatUnit> { _currentHero });
                     return;
                 case MagicTargetType.AllEnemies:
-                    SubmitCast(CombatManager.Instance.GetAliveEnemies());
+                    SubmitCast(CombatManager.Instance.GetTargetableEnemies());
                     return;
                 case MagicTargetType.AllAllies:
                     SubmitCast(CombatManager.Instance.GetAliveHeroes(GameManager.Instance.Party));
@@ -402,7 +402,7 @@ namespace Assets.Scripts.Cards.UI
             string prompt;
             if (targetType == MagicTargetType.SingleEnemy)
             {
-                targets = CombatManager.Instance.GetAliveEnemies();
+                targets = CombatManager.Instance.GetTargetableEnemies();
                 prompt = Loc.Get("abilities.menu.prompt-enemy");
             }
             else if (targetType == MagicTargetType.FallenAlly)
@@ -697,7 +697,7 @@ namespace Assets.Scripts.Cards.UI
         private static List<ICombatUnit> SummonCandidates(SummonSO summon)
         {
             return summon.TargetType == MagicTargetType.SingleEnemy
-                ? CombatManager.Instance.GetAliveEnemies()
+                ? CombatManager.Instance.GetTargetableEnemies()
                 : CombatManager.Instance.PickableAllies(summon.TargetType);
         }
 

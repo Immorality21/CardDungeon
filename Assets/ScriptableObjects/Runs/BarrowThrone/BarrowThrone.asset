@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ebc985730f692f54eafd123ca62fd64f, type: 3}
+  m_Name: BarrowThrone
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Dungeon.RunDefinitionSO
+  Key: BarrowThrone
+  SequenceIndex: 3
+  Repeatable: 1
+  Challenge: 0
+  ReplayHintOnWipe: 0
+  JoinsOnClear: {fileID: 0}
+  Levels:
+  - LevelTemplate: {fileID: 11400000, guid: 80f8eb76099eb8740bec33ea8896d68d, type: 2}
+    LevelNameKey: run.barrow-throne.level-1.name
+    ManualLayout: {fileID: 11400000, guid: 9498379f576b52440a04a9760f3985f5, type: 2}
+    BossEnemy: {fileID: 11400000, guid: 7e7258e3f337f0b4ebd704c9e80e6088, type: 2}
+    BossAdds: []
+    EnemyTuning:
+      Difficulty: 4
+      StatScales: []
+      XpMultiplier: 2.5
+      GoldMultiplier: 1
+      Overrides:
+      - Enemy: {fileID: 11400000, guid: 7e7258e3f337f0b4ebd704c9e80e6088, type: 2}
+        Stats:
+          Values:
+          - Type: 7
+            Amount: 750
+          - Type: 1
+            Amount: 30
+          - Type: 4
+            Amount: 24
+          - Type: 3
+            Amount: 18
+        XpReward: 0
+        GoldReward: 0
+    RescueHero: {fileID: 0}
+    AllowRoomEvents: 0
+    IntendedHard: 1

@@ -1,0 +1,184 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91b3c2fba8298ea4bbe2d1f705988216, type: 3}
+  m_Name: BehaviorBarrowKing
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Enemies.Behaviors.EnemyBehaviorSO
+  DisplayName: Barrow King
+  Archetype: 4
+  Actions:
+  - Label: 'Phase 2 opens: call 3 skeletons and a bone golem'
+    DisplayNameKey: move.rise-my-guard.name
+    Kind: 8
+    Priority: 30
+    Weight: 1
+    ChanceGate: 0
+    Telegraphed: 0
+    Multiplier: 1
+    Power: 0
+    Duration: 3
+    TargetStat: 1
+    ApplyChance: 100
+    Summons: {fileID: 11400000, guid: eaa6b30e7c013504ca95da0365eb252a, type: 2}
+    SummonCount: 3
+    AlsoSummons:
+    - Enemy: {fileID: 11400000, guid: 244a2bd9a1a7c2942a3bc5e0e4d14224, type: 2}
+      Count: 1
+    MaxUses: 1
+    Magic: {fileID: 0}
+    Conditions:
+    - Kind: 1
+      Value: 0.6
+      Stat: 1
+  - Label: 'Phase 3: Requiem every 2nd turn'
+    DisplayNameKey: 
+    Kind: 5
+    Priority: 20
+    Weight: 1
+    ChanceGate: 0
+    Telegraphed: 1
+    Multiplier: 1
+    Power: 0
+    Duration: 3
+    TargetStat: 1
+    ApplyChance: 100
+    Summons: {fileID: 0}
+    SummonCount: 1
+    AlsoSummons: []
+    MaxUses: 1
+    Magic: {fileID: 11400000, guid: a1189a974a194414fb3d5e5ea98f2929, type: 2}
+    Conditions:
+    - Kind: 1
+      Value: 0.25
+      Stat: 1
+    - Kind: 5
+      Value: 2
+      Stat: 1
+  - Label: 'Phase 2: Grave Tide every 3rd turn'
+    DisplayNameKey: 
+    Kind: 5
+    Priority: 15
+    Weight: 1
+    ChanceGate: 0
+    Telegraphed: 1
+    Multiplier: 1
+    Power: 0
+    Duration: 3
+    TargetStat: 1
+    ApplyChance: 100
+    Summons: {fileID: 0}
+    SummonCount: 1
+    AlsoSummons: []
+    MaxUses: 1
+    Magic: {fileID: 11400000, guid: 668273c5e4b70844e977a9df53876bdd, type: 2}
+    Conditions:
+    - Kind: 1
+      Value: 0.6
+      Stat: 1
+    - Kind: 2
+      Value: 0.25
+      Stat: 1
+    - Kind: 5
+      Value: 3
+      Stat: 1
+  - Label: 'Phase 1: wound-up cleave every 3rd turn'
+    DisplayNameKey: move.grave-cleave.name
+    Kind: 1
+    Priority: 10
+    Weight: 1
+    ChanceGate: 0
+    Telegraphed: 1
+    Multiplier: 2
+    Power: 0
+    Duration: 3
+    TargetStat: 1
+    ApplyChance: 100
+    Summons: {fileID: 0}
+    SummonCount: 1
+    AlsoSummons: []
+    MaxUses: 1
+    Magic: {fileID: 0}
+    Conditions:
+    - Kind: 2
+      Value: 0.6
+      Stat: 1
+    - Kind: 5
+      Value: 3
+      Stat: 1
+    - Kind: 6
+      Value: 0
+      Stat: 1
+  - Label: Endurance cut, phases 1-2
+    DisplayNameKey: move.crushing-presence.name
+    Kind: 4
+    Priority: 5
+    Weight: 1
+    ChanceGate: 0.35
+    Telegraphed: 0
+    Multiplier: 1
+    Power: 2
+    Duration: 3
+    TargetStat: 2
+    ApplyChance: 75
+    Summons: {fileID: 0}
+    SummonCount: 1
+    AlsoSummons: []
+    MaxUses: 1
+    Magic: {fileID: 0}
+    Conditions:
+    - Kind: 4
+      Value: 0
+      Stat: 2
+    - Kind: 2
+      Value: 0.25
+      Stat: 1
+  - Label: Phase 3 blow
+    DisplayNameKey: 
+    Kind: 0
+    Priority: 0
+    Weight: 1
+    ChanceGate: 0
+    Telegraphed: 0
+    Multiplier: 1.4
+    Power: 0
+    Duration: 3
+    TargetStat: 1
+    ApplyChance: 100
+    Summons: {fileID: 0}
+    SummonCount: 1
+    AlsoSummons: []
+    MaxUses: 1
+    Magic: {fileID: 0}
+    Conditions:
+    - Kind: 1
+      Value: 0.25
+      Stat: 1
+  - Label: Blow
+    DisplayNameKey: 
+    Kind: 0
+    Priority: 0
+    Weight: 1
+    ChanceGate: 0
+    Telegraphed: 0
+    Multiplier: 1
+    Power: 0
+    Duration: 3
+    TargetStat: 1
+    ApplyChance: 100
+    Summons: {fileID: 0}
+    SummonCount: 1
+    AlsoSummons: []
+    MaxUses: 1
+    Magic: {fileID: 0}
+    Conditions:
+    - Kind: 2
+      Value: 0.25
+      Stat: 1

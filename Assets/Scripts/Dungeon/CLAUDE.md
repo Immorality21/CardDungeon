@@ -32,6 +32,7 @@
 | The Blood Stair | `BloodStair` | 5, all hand-drawn | no | The Threshold (optional, **`Challenge`**) | Abyssal Warden (floor 4), **Cinder Tyrant** (floor 5) |
 | The Drowned Chapel | `DrownedChapel` | 2 | no | The Drowned March **+ the Tinkerer** (optional, **`Secret`**) | Abyssal Warden (120 HP override) + 2 Bog Shamans |
 | The Seeping Cistern | `SeepingCistern` | 2 | no | The Warrens (optional, **`Secret`**, **`Challenge`**) | **Mother Ooze** (160 HP / 16 Str override) + 2 Spore Bloaters - the **Rogue** is the captive on floor 1 |
+| The Barrow Throne | `BarrowThrone` | 1, hand-drawn | **yes** | The Catacombs (optional) | **The Barrow King** - the test boss: three phases, telegraphed, `IntendedHard` (Enemies guide) |
 
 **The Blood Stair is a challenge run** *(2026-09-28)*. `RunDefinitionSO.Challenge` means *opens early,
 meant late*: it sits on the map right after the tutorial so a new player sees that far bigger fights

@@ -125,6 +125,11 @@ namespace Assets.Scripts.Balance
 
         public int LevelIndex = -1;
 
+        /// <summary>The level this placement belongs to is marked hard on purpose
+        /// (<c>RunLevelEntry.IntendedHard</c>): its findings are reported, never failures.</summary>
+        public bool IntendedHard => Run != null && Run.Levels != null && LevelIndex >= 0 && LevelIndex < Run.Levels.Count
+            && Run.Levels[LevelIndex] != null && Run.Levels[LevelIndex].IntendedHard;
+
         /// <summary>Short label for the placement column: the level, or "(unplaced)".</summary>
         public string LevelLabel = "";
 
