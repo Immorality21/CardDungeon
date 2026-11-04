@@ -208,6 +208,11 @@ namespace Assets.Scripts.Cards
                  "on the Boar's path. Not when the fight is already won.")]
         public MagicSO PartingAbility;
 
+        [Tooltip("With a PartingAbility: frames played once, and held, as it winds up its parting blow " +
+                 "(Ifrit erupting into flame), before the blow lands and it fades. Same size and facing " +
+                 "as its idle frames. Empty = it holds its idle pose for the wind-up.")]
+        public Sprite[] PartingFrames;
+
         [Tooltip("A mech (UltraKind.Mount): the idle frames once its rider has climbed in - the mech " +
                  "with the rider drawn aboard. The rider is hidden while these play. Empty keeps the " +
                  "mech's own frames and leaves the rider hidden all the same.")]

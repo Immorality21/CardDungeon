@@ -258,28 +258,35 @@ namespace Tests.EditMode
         /// <summary>
         /// Every hero starts with two abilities and buys the third slot next to the root; the Mage
         /// is the exception, starting with three and the slot to carry them (owner, 2026-11-01).
+        /// The heroes who join late (Ranger, Rogue, Tinkerer) get that slot free with the rest of
+        /// their trunk (owner, playtest 2026-11-04).
         /// </summary>
-        [TestCase("Warrior", "Slash", "Sunder")]
-        [TestCase("Paladin", "HolyStrike", "HolyTouch")]
-        [TestCase("Cleric", "Mend", "DivineBolt")]
-        [TestCase("Ranger", "AimedShot", "Snare")]
-        [TestCase("Rogue", "Backstab", "Steal")]
-        [TestCase("Tinkerer", "Disassemble", "RivetGun")]
-        [TestCase("Warlock", "Bloodbolt", "DrainLife")]
-        [TestCase("Cultist", "EldritchLash", "WhisperOfMadness")]
-        public void EveryHero_StartsWithTwoAbilities_AndTheThirdSlotBesideTheRoot(string hero, string first, string second)
+        [TestCase("Warrior", "Slash", "Sunder", false)]
+        [TestCase("Paladin", "HolyStrike", "HolyTouch", false)]
+        [TestCase("Cleric", "Mend", "DivineBolt", false)]
+        [TestCase("Ranger", "AimedShot", "Snare", true)]
+        [TestCase("Rogue", "Backstab", "Steal", true)]
+        [TestCase("Tinkerer", "Disassemble", "RivetGun", true)]
+        [TestCase("Warlock", "Bloodbolt", "DrainLife", false)]
+        [TestCase("Cultist", "EldritchLash", "WhisperOfMadness", false)]
+        public void EveryHero_StartsWithTwoAbilities_AndTheThirdSlotBesideTheRoot(string hero, string first, string second,
+            bool joinsLate)
         {
             var grid = Grid(hero);
             var none = new List<string>();
 
             CollectionAssert.AreEquivalent(new[] { first, second },
                 SphereGridOps.KnownMagicForNodes(grid, none).Select(pair => pair.Key));
-            Assert.AreEqual(0, SphereGridOps.SlotBonusForNodes(grid, none));
 
             var slot = SphereGridOps.FindNode(grid, hero.ToLowerInvariant() + "-trunk-slot");
             Assert.AreEqual(SphereNodeKind.MagicSlot, slot.Kind);
             Assert.That(slot.Neighbors, Does.Contain(grid.StartNodeKey));
-            Assert.Greater(slot.XpCost, 0);
+            Assert.AreEqual(joinsLate ? 1 : 0, SphereGridOps.SlotBonusForNodes(grid, none));
+            Assert.AreEqual(joinsLate, slot.UnlockedByDefault);
+            if (!joinsLate)
+            {
+                Assert.Greater(slot.XpCost, 0);
+            }
         }
 
         [Test]

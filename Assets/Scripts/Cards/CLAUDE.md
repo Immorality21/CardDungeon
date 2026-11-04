@@ -568,7 +568,16 @@ Two consequences worth holding on to:
   picker, weakest enemy as the fallback); and `SummonSO.PartingAbility`, cast at the enemies by a unit
   summon as it leaves while any stand (`CombatManager.QueueParting`/`ResolveParting`, before the turn
   closes; the sim's `AfterReplacementTurn`; not for `JoinParty` in the sim yet). `SummonContentTests`
-  accepts a parting blow in place of a Signature.
+  accepts a parting blow in place of a Signature. **A parting summon holds the stage until its blow has
+  landed** (owner, playtest 2026-11-04: Hellfire went by too fast to see): `QueueParting` tells its caller
+  not to send it off, `ResolveParting` names the blow over it, plays `SummonSO.PartingFrames` once and
+  holds them (`PartingSeconds`, 1.1 s; Ifrit's are a PixelLab eruption, `Ifrit_parting_0..6`), lands the
+  blow, then runs `SummonPresenter.Depart`. A party it replaced steps back in only after that
+  (`_restorePartyAfterParting`). **Hellfire erupts on the enemies** (owner, same playtest: no fire on them):
+  `MagicSO.ImpactFrames` are drawn frames that `EffectPresenter` raises on every target hit at once,
+  through `SpellVfx.Erupt` (a column rising out of the floor, 1.5x the body, 12 fps, fading on its own),
+  and the hits land together `EruptLands` in. It needs no caster and replaces the Delivery's effect, so
+  any ability can use it. Hellfire's are a PixelLab flame loop, `Hellfire_fx_0..6`.
 - **The Tinkerer's Auto Turret** *(2026-10-11)*: a `JoinParty` summon with **`SummonSO.ActsAlone`** - its turns need no orders: `CombatManager`'s loop skips `OnHeroTurnStarted` (no menu, so no Dismiss) and casts its `AttackAbility` at a random enemy. 50% of her health, 70% INT, 3 turns, 2 charges; `TurretShot` (2 + INT) carries a **dormant** Blind (0%) that the grid's **`SphereNodeKind.SummonApplyChance`** node (+35) wakes: `SummonGrant.ApplyChanceBonus` reaches its abilities through `SummonUnit : IAbilityUpgrades` (the sim's `SimUnit.FromSummon` fills `AbilityUpgrades`). The sim already plays allies without orders. `SummonContentTests` asks an acts-alone summon for an Attack instead of a Signature.
 - **A summon's abilities can lay tags** *(2026-10-07)*: `SummonSO.UsesTags` makes
   `ExecuteSummonAbility` (and the sim's `TakeReplacementTurn`) pass the tag tracker and combo detector,

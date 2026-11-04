@@ -8,11 +8,9 @@ playtest's fixes (2026-10-30).
 
 ## Playtest notes, round of 2026-11-02 (built, not seen in play)
 
-- [ ] **The quest board** - three quests drawn from a pool of nine (conditions: runs cleared), Reroll an untaken one for 100 gold (R), a collected quest goes back into the pool and the slot refills. New kinds: 3 wipes, 5 floors, the Warden on a revisit. Are the rewards right, and is 100 gold a fair reroll? Seen through scripted presses only.
-- [ ] **The tavern and its first quest** - offered after the Sealed Archive (4 Scrap Iron, 2 Cut Stone). Accept "Rattling in the Catacombs", kill 5 Skeletons, collect: the Bone Scepter recipe and +50 XP on every hero, benched too. Second quest "The Dead Do Not Rest": 15 undead of any kind (a Skeleton counts for both), 1 Void Shard and +120 XP each. The flow was checked through scripted presses on a copy of a bot save; the kills were raised by hand, not fought. Are the rewards worth the trip?
-- [ ] **Learning an ability asks** - buy Smite on the Paladin: a prompt names it and offers Carry it (a free slot) or Replace <ability> (all slots full), or Not now. His heal is never pushed out unasked. Keyboard: arrows + Enter, Esc = Not now. Not asked during the tutorial's guided node.
-- [ ] **Storehouse All equipment** - the cursor starts on it; see the Hub section.
-- [ ] **Floating Eye** - Eye Laser is a red beam straight to the hero, no bolt; Screech swells the eye and rings race out, then every hero is hit at the same moment.
+- [ ] **Ifrit's parting Hellfire** (2026-11-04) - when he leaves (dismissed, fallen or out of turns) he stays put, the name floats over him, he erupts into flame (new PixelLab frames), Hellfire lands, then he fades and the party steps back in. A column of fire rises under every enemy as it hits. Readable now? Seen in the sandbox through screenshots only.
+- [ ] **Late heroes start stronger** (2026-11-04) - the Ranger, Rogue and Tinkerer join with their trunk and third ability slot already filled (115 XP of nodes, free). Do they hold their own on arrival?
+- [ ] **Summon prices** (2026-11-04) - every summon node now asks Void Shard plus Cut Stone, Scrap Iron, Rotted Timber or Hex Silk (all found by the Catacombs); the Mage's three now cost materials too. Its +1 charge node keeps the late material. Affordable when you reach it?
 - [ ] **Stone Sentinel's Slam** - a fist icon instead of Slash; may lower Endurance 1 for 2 turns (60%) instead of a bleed.
 - [ ] **The Forge** - now 3 Cut Stone + 3 Scrap Iron, both found in the Threshold and the Archive (was Ember Iron + Slag Coal, which only the Ashen Deep has).
 
@@ -26,8 +24,6 @@ playtest's fixes (2026-10-30).
 ## Texts, icons and the Warlock (2026-11-01)
 
 - [ ] **The new Warlock** - idle, wince, fall and walk at the Paladin's proportions. Demon Form too. Your call on the look.
-- [ ] **New icons** - Smite, Divine Protection, the three cloaks, Sacred Shield, Ward, Mesmerize, Hamstring, Twin Strike, Earthsplitter, the Flamethrower Mech.
-- [ ] **Grid node lines** - abilities, summons and Ultras by name, resistances saying Physical.
 
 ## Crafting as the gold sink (2026-11-01)
 
@@ -40,29 +36,13 @@ playtest's fixes (2026-10-30).
 Synthetic key events reached every handler below; what is not known is whether a **real** key press
 does (focus), so press them for real.
 
-- [ ] **Keyboard the tester reported broken, not reproduced:** Enter on the story map, arrows in the
-      town, Right in the Storehouse (now: next tab, All), the revisit condition picker. If one still fails
-      with a real key, it is focus, not the handler.
-- [ ] **Z / X / C** - Z confirms and X backs out everywhere Enter / Escape do; C opens and closes the
-      dungeon pause menu.
-- [X] **Run complete / level entry** - Enter works without a Tab first.
-- [X] **Doors** - in a room like the tester's (party by a side door, another door in the bottom wall),
-      Down picks the bottom-wall door.
 - [ ] **Tutorial** - on a forced step the cursor starts on the button the tutorial wants.
-- [X] **Sphere grid cursor** - never stuck on a node near the start.
 - [ ] **Hover tips** - stats, the campfire's Combat numbers, resistances; and the tip following the hub's
       keyboard cursor.
 - [ ] **Campfire hero status** - stats with meanings, ATK / CRIT / DODGE / P.DEF / M.DEF, the Momentum and
       Focus lines.
-- [X] **Ability text** - "18 damage" in combat; "18 damage, scales with Strength" in the Storehouse.
-- [X] **Target picker footer** - highlighting an enemy shows what it attacks with and known weaknesses.
-- [X] **A killing projectile** - the enemy's HP plate stays until the projectile lands.
-- [X] **Ability sounds** - Hamstring and other weapon abilities swing; every ability hit makes an impact
-      sound.
 - [ ] **Revisit ranks** - rank I / II / III read apart (gold / orange / red with a badge).
-- [ ] **Floating Eye** - Eye Laser on one hero, Screech on the party.
 - [ ] **Empty loadout** - putting away a hero's last ability leaves them with none, in and after a run.
-- [ ] **Storehouse All equipment** - no longer a tab (owner, 2026-11-02): the first row of the Equipment tab's slot column, where the cursor starts. Every item listed, Enter equips / reassigns / takes off and the cursor stays in the list.
 - [ ] **Catacombs** - the first wipe there (after the tutorial) adds the replay hint to the death screen.
 
 ## Hub and menus
@@ -72,14 +52,6 @@ does (focus), so press them for real.
       Storehouse. Forging from a *worn* base puts the result on that hero. A recipe drop on a kill or a
       floor clear (Emberfall, Chapel of Knives), and that it never drops again once known. The town's
       gold pip on the Forge for newly found recipes.
-
-## Art
-
-- [X] **Hero redraws** - the Warrior (new design), Ranger and Rogue at the Paladin's head size.
-- [X] **Stairs and chests** per level theme; the Wight faces the party.
-- [X] **Every ability has its own icon** (131). Weaker ones to judge: the three elemental cloaks, Aegis vs
-      Sacred Shield, Watcher Gaze vs Mesmerize, Ward, Mug, Hamstring vs Maim, Twin Strike
-      (`PIXEL_ART.md`).
 
 ## The owner's to-dos
 

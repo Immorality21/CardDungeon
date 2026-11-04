@@ -39,6 +39,12 @@
   Fourth and higher slots are the branches' `MagicSlot` nodes. `tinkerer-trunk-3` and `warlock-trunk-3`
   are stat nodes that took the slot's old place, since the Tinkerer's branches and the Demon Army hung
   off it. `HeroPassKitTests` pins all of this.
+- **The late heroes arrive with their trunk built** *(owner, playtest 2026-11-04)*. The Ranger (Drowned
+  March), Rogue (Seeping Cistern) and Tinkerer join when the rest of the party already has hundreds of
+  XP in its grids, and joining with only the root made them dead weight that punished fielding them. Their
+  trunk spine (`trunk-1`, `start`, the third trunk stat node) and `trunk-slot` are `UnlockedByDefault` at
+  0 XP: 115 XP of nodes, so they stand at the branch fork with three slots and the `StarterBank` goes
+  into a branch. Free nodes must be priced 0 (`SphereGridCostCurveTests`).
 - **A node's frontier grows only out of what the hero holds.** Until 2026-09-05 adjacency to the
   *start node* granted reachability whether or not the start had been bought — so a new hero's
   **second** node was purchasable while the first still read as unbought, and the entry node could be

@@ -908,7 +908,7 @@ MonoBehaviour:
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
       Amount: 2
-    - Material: {fileID: 11400000, guid: c0de5211aa050000000000000000ab05, type: 2}
+    - Material: {fileID: 11400000, guid: c0de5211aa090000000000000000ab09, type: 2}
       Amount: 3
     EssenceCost: 0
     RequiredNodes: []
@@ -1004,7 +1004,7 @@ MonoBehaviour:
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
       Amount: 2
-    - Material: {fileID: 11400000, guid: c0de5211aa030000000000000000ab03, type: 2}
+    - Material: {fileID: 11400000, guid: c0de5211aa010000000000000000ab01, type: 2}
       Amount: 3
     EssenceCost: 0
     RequiredNodes: []

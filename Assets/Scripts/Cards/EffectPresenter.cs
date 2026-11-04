@@ -36,6 +36,24 @@ namespace Assets.Scripts.Cards
             }
 
             var entries = HitsFirst(result.Entries);
+
+            // Drawn impact frames go up on every target hit at once, and the hits land together while
+            // they burn. Needs no caster: Ifrit's parting Hellfire is cast as he goes.
+            bool erupts = magic != null && magic.ImpactFrames != null && magic.ImpactFrames.Length > 0;
+            if (erupts)
+            {
+                foreach (var entry in entries)
+                {
+                    if (entry.Impact > 0 && entry.Target != null && entry.Target.Transform != null)
+                    {
+                        SpellVfx.Erupt(entry.Target, magic.ImpactFrames);
+                    }
+                }
+                Assets.Scripts.Audio.CombatAudio.Play(Assets.Scripts.Audio.CombatSound.Impact, 1f);
+                yield return new WaitForSeconds(SpellVfx.EruptLands);
+                together = true;
+            }
+
             int lastHit = entries.FindLastIndex(e => e.Impact > 0);
             for (int index = 0; index < entries.Count; index++)
             {
@@ -47,7 +65,7 @@ namespace Assets.Scripts.Cards
                 // target being alive: the damage is already applied when this plays, so a killing cast
                 // used to show no bolt and the unit simply dropped. Deaths resolve after this
                 // (CombatManager.ResolveDeaths), so the target is still on the stage.
-                if (caster != null && entry.Impact > 0 && entry.Target != null
+                if (!erupts && caster != null && entry.Impact > 0 && entry.Target != null
                     && caster.Transform != null && entry.Target.Transform != null)
                 {
                     if (delivery == MagicDelivery.Strike)
@@ -77,13 +95,19 @@ namespace Assets.Scripts.Cards
                 if (entry.Target != null && entry.Target.Transform != null && FloatingTextHandler.HasInstance)
                 {
                     var position = entry.Target.Transform.position + entry.PositionOffset;
+                    // Over a column of flame the number goes above it: inside, white on fire, it was
+                    // unreadable (playtest 2026-11-04, Hellfire).
+                    if (erupts && entry.Impact > 0)
+                    {
+                        position = new Vector3(position.x, SpellVfx.EruptTop(entry.Target) + 0.15f, position.z) + entry.PositionOffset;
+                    }
                     FloatingTextHandler.Instance.CreateFloatingText(
                         position,
                         entry.Text,
                         entry.Color,
                         1f,
                         0.8f,
-                        entry.Crit ? 0.24f : 0.15f,
+                        entry.Crit ? 0.24f : erupts ? 0.2f : 0.15f,
                         TextFadeMode.FadeUp);
 
                     // A critical hit is called out like a critical basic attack (ExecuteAttack).

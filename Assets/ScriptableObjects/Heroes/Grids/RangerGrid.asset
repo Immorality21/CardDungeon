@@ -16,8 +16,8 @@ MonoBehaviour:
   Nodes:
   - Key: ranger-start
     Kind: 0
-    XpCost: 30
-    UnlockedByDefault: 0
+    XpCost: 0
+    UnlockedByDefault: 1
     MaterialCosts: []
     EssenceCost: 0
     RequiredNodes: []
@@ -40,8 +40,8 @@ MonoBehaviour:
     - ranger-trunk-1
   - Key: ranger-trunk-1
     Kind: 0
-    XpCost: 20
-    UnlockedByDefault: 0
+    XpCost: 0
+    UnlockedByDefault: 1
     MaterialCosts: []
     EssenceCost: 0
     RequiredNodes: []
@@ -85,8 +85,8 @@ MonoBehaviour:
     Neighbors: []
   - Key: ranger-trunk-2
     Kind: 0
-    XpCost: 45
-    UnlockedByDefault: 0
+    XpCost: 0
+    UnlockedByDefault: 1
     MaterialCosts: []
     EssenceCost: 0
     RequiredNodes: []
@@ -111,8 +111,8 @@ MonoBehaviour:
     - ranger-start
   - Key: ranger-trunk-slot
     Kind: 2
-    XpCost: 20
-    UnlockedByDefault: 0
+    XpCost: 0
+    UnlockedByDefault: 1
     MaterialCosts: []
     EssenceCost: 0
     RequiredNodes: []
@@ -734,7 +734,7 @@ MonoBehaviour:
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
       Amount: 2
-    - Material: {fileID: 11400000, guid: c0de5211aa030000000000000000ab03, type: 2}
+    - Material: {fileID: 11400000, guid: c0de5211aa010000000000000000ab01, type: 2}
       Amount: 3
     EssenceCost: 0
     RequiredNodes: []
@@ -1137,7 +1137,7 @@ MonoBehaviour:
     MaterialCosts:
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
       Amount: 2
-    - Material: {fileID: 11400000, guid: c0de5211aa030000000000000000ab03, type: 2}
+    - Material: {fileID: 11400000, guid: c0de5211aa020000000000000000ab02, type: 2}
       Amount: 3
     EssenceCost: 0
     RequiredNodes: []

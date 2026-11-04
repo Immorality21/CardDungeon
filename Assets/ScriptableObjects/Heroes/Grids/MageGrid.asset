@@ -883,7 +883,11 @@ MonoBehaviour:
     Kind: 4
     XpCost: 155
     UnlockedByDefault: 0
-    MaterialCosts: []
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 2
+    - Material: {fileID: 11400000, guid: c0de5211aa090000000000000000ab09, type: 2}
+      Amount: 3
     EssenceCost: 0
     RequiredNodes: []
     Position: {x: -458, y: -485}
@@ -971,7 +975,11 @@ MonoBehaviour:
     Kind: 4
     XpCost: 155
     UnlockedByDefault: 0
-    MaterialCosts: []
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 2
+    - Material: {fileID: 11400000, guid: c0de5211aa020000000000000000ab02, type: 2}
+      Amount: 3
     EssenceCost: 0
     RequiredNodes: []
     Position: {x: 0, y: -810}
@@ -1059,7 +1067,11 @@ MonoBehaviour:
     Kind: 4
     XpCost: 155
     UnlockedByDefault: 0
-    MaterialCosts: []
+    MaterialCosts:
+    - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
+      Amount: 2
+    - Material: {fileID: 11400000, guid: c0de5211aa010000000000000000ab01, type: 2}
+      Amount: 3
     EssenceCost: 0
     RequiredNodes: []
     Position: {x: 458, y: -485}

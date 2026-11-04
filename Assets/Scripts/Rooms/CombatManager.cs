@@ -212,6 +212,12 @@ namespace Assets.Scripts.Rooms
 
         // Summons that left with a parting blow still to land (Ifrit's Hellfire), cast before the turn closes.
         private readonly List<SummonUnit> _parting = new List<SummonUnit>();
+        // Whether each of those fell (it crumbles as it goes) or was sent home / ran out of turns.
+        private readonly Dictionary<SummonUnit, bool> _partingFell = new Dictionary<SummonUnit, bool>();
+        // A party-replacing summon with a parting blow left: the party steps back in after the blow.
+        private bool _restorePartyAfterParting;
+        // How long the wind-up before a parting blow holds the stage.
+        private const float PartingSeconds = 1.1f;
 
         // ---- Ultras (COMBAT_DEPTH §13): each hero's gauge (kept for the run in
         // ---- DungeonManager.UltraGauges, read when the fight opens and written back on every change),

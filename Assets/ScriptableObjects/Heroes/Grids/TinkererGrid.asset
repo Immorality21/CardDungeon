@@ -37,8 +37,8 @@ MonoBehaviour:
     Neighbors: []
   - Key: tinkerer-trunk-1
     Kind: 0
-    XpCost: 20
-    UnlockedByDefault: 0
+    XpCost: 0
+    UnlockedByDefault: 1
     MaterialCosts: []
     EssenceCost: 0
     RequiredNodes: []
@@ -61,8 +61,8 @@ MonoBehaviour:
     - tinkerer-sig
   - Key: tinkerer-start
     Kind: 0
-    XpCost: 30
-    UnlockedByDefault: 0
+    XpCost: 0
+    UnlockedByDefault: 1
     MaterialCosts: []
     EssenceCost: 0
     RequiredNodes: []
@@ -111,8 +111,8 @@ MonoBehaviour:
     - tinkerer-patch
   - Key: tinkerer-trunk-slot
     Kind: 2
-    XpCost: 20
-    UnlockedByDefault: 0
+    XpCost: 0
+    UnlockedByDefault: 1
     MaterialCosts: []
     EssenceCost: 0
     RequiredNodes: []
@@ -808,7 +808,7 @@ MonoBehaviour:
     XpCost: 120
     UnlockedByDefault: 0
     MaterialCosts:
-    - Material: {fileID: 11400000, guid: c0de5211aa040000000000000000ab04, type: 2}
+    - Material: {fileID: 11400000, guid: c0de5211aa060000000000000000ab06, type: 2}
       Amount: 3
     - Material: {fileID: 11400000, guid: c0de5211aa0a0000000000000000ab0a, type: 2}
       Amount: 1
@@ -949,8 +949,8 @@ MonoBehaviour:
     - tinkerer-c-6
   - Key: tinkerer-trunk-3
     Kind: 0
-    XpCost: 45
-    UnlockedByDefault: 0
+    XpCost: 0
+    UnlockedByDefault: 1
     MaterialCosts: []
     EssenceCost: 0
     RequiredNodes: []

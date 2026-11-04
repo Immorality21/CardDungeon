@@ -524,6 +524,13 @@ replaced — the tavern is removed and heroes become progression unlocks; see §
 
 ### 4b. Summons — the capability the deep grid pays out, and a second difficulty dial
 
+> **Material prices (owner, playtest 2026-11-04):** a summon node is paid in Void Shard plus a material
+> the main path yields **by the Catacombs** (Cut Stone, Scrap Iron, Rotted Timber, Hex Silk). The
+> playtest found the Golem (Mire Hide) and the Seraph (Gild Leaf) unbuyable when reached, and the Mage's
+> three summons free of materials. The **+1 charge** node keeps the old biome material (Mire Hide, Gild
+> Leaf, Ember Iron, Slag Coal, Mire Reed), so the deep regions still pay into summons. The tables below
+> show the old summon materials, which the charge nodes still use.
+
 **Not shipped. This is the spec.** It is the payload `docs/BALANCING.md` §0 rule 3 depends on: right
 now committing to one sphere-grid branch buys a bigger stat, which is the one thing rule 3 says it
 must *not* be. A summon is what "arriving somewhere early" is supposed to arrive at.

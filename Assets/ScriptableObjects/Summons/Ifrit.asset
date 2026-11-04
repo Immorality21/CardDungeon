@@ -63,6 +63,14 @@ MonoBehaviour:
   AttackAbility: {fileID: 0}
   UsesTags: 0
   PartingAbility: {fileID: 11400000, guid: 3009b4bc5d38f0643924ffe61146c895, type: 2}
+  PartingFrames:
+  - {fileID: 21300000, guid: 278240125a6740d49d3deb803e13857d, type: 3}
+  - {fileID: 21300000, guid: fe9da825b94d4324ad3869651789c7d6, type: 3}
+  - {fileID: 21300000, guid: 86cea9309e1c4a90b202f693175563f3, type: 3}
+  - {fileID: 21300000, guid: 26e9a3b5ba4940ad99fcfad105acf99f, type: 3}
+  - {fileID: 21300000, guid: 632b03ccfd0b44c69e78f39b7e0b3ea3, type: 3}
+  - {fileID: 21300000, guid: f6c4d6b15c2c4495aa36117bdef5ee8d, type: 3}
+  - {fileID: 21300000, guid: 2da57a1bef92451991459ec226b122dc, type: 3}
   MountedFrames: []
   RotateActions: 0
   ActsAlone: 0

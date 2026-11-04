@@ -181,6 +181,27 @@ namespace Assets.Scripts.Hub
             _newGameRequested = true;
         }
 
+        // The purse follows every gold or Essence change, so it stays right while a screen that spends
+        // or pays (the tavern, the merchant, the forge) is open over the town.
+        private void OnEnable()
+        {
+            GameEvents.Subscribe<CurrencyChanged>(OnCurrencyChanged);
+        }
+
+        private void OnDisable()
+        {
+            GameEvents.Unsubscribe<CurrencyChanged>(OnCurrencyChanged);
+        }
+
+        private void OnCurrencyChanged(CurrencyChanged change)
+        {
+            if (_goldLabel == null || _essenceLabel == null || !MetaProgressManager.HasInstance)
+            {
+                return;
+            }
+            RefreshCurrencyHeader();
+        }
+
         private void Start()
         {
             _fileHandler = new FileHandler();

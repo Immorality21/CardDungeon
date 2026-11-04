@@ -293,7 +293,7 @@ namespace Assets.Scripts.Rooms
             {
                 return;
             }
-            QueueParting(ally, exit);
+            bool parting = QueueParting(ally, exit);
             ally.Stay.Leave(exit);
             _turnManager.RemoveUnit(ally);
             _threat.Clear(ally);
@@ -305,7 +305,10 @@ namespace Assets.Scripts.Rooms
                     enemy.ChargeTarget = null;
                 }
             }
-            StartCoroutine(SummonPresenter.Depart(ally, exit == SummonExit.Fell));
+            if (!parting)
+            {
+                StartCoroutine(SummonPresenter.Depart(ally, exit == SummonExit.Fell));
+            }
 
             // Close the gap it left in the column. Not at the end of the fight: the stage is coming down.
             if (exit != SummonExit.Victory && CombatStage.HasInstance)
@@ -390,7 +393,7 @@ namespace Assets.Scripts.Rooms
                 EndSummon(exit);
                 return;
             }
-            QueueParting(unit, exit);
+            bool parting = QueueParting(unit, exit);
             unit.Stay.Leave(exit);
             _turnManager.RemoveUnit(unit);
             foreach (var enemy in AliveEnemyComponents())
@@ -400,7 +403,10 @@ namespace Assets.Scripts.Rooms
                     enemy.ChargeTarget = null;
                 }
             }
-            StartCoroutine(SummonPresenter.Depart(unit, exit == SummonExit.Fell));
+            if (!parting)
+            {
+                StartCoroutine(SummonPresenter.Depart(unit, exit == SummonExit.Fell));
+            }
         }
 
         /// <summary>
@@ -422,10 +428,7 @@ namespace Assets.Scripts.Rooms
             {
                 // A troop that already went home (fell, or its time ran out) left the stage then.
                 bool stillHere = !unit.Stay.HasLeft;
-                if (stillHere)
-                {
-                    QueueParting(unit, exit);
-                }
+                bool parting = stillHere && QueueParting(unit, exit);
                 unit.Stay.Leave(exit);
                 _turnManager.RemoveUnit(unit);
                 foreach (var enemy in AliveEnemyComponents())
@@ -435,13 +438,26 @@ namespace Assets.Scripts.Rooms
                         enemy.ChargeTarget = null;
                     }
                 }
-                if (stillHere)
+                if (stillHere && !parting)
                 {
                     StartCoroutine(SummonPresenter.Depart(unit, exit == SummonExit.Fell));
                 }
             }
 
             _turnManager.Resume();
+            // A summon with a parting blow still holds the stage: the party steps back in once it has
+            // gone (ResolveParting), not under it.
+            if (_parting.Count > 0)
+            {
+                _restorePartyAfterParting = true;
+                return;
+            }
+            RestorePartyOnStage();
+        }
+
+        private void RestorePartyOnStage()
+        {
+            _restorePartyAfterParting = false;
             if (CombatStage.HasInstance)
             {
                 CombatStage.Instance.RestoreParty();
@@ -454,20 +470,29 @@ namespace Assets.Scripts.Rooms
         }
 
         /// <summary>A summon with a parting blow (<see cref="SummonSO.PartingAbility"/>) is leaving a fight
-        /// that is not over: its blow lands before the turn closes (<see cref="ResolveParting"/>).</summary>
-        private void QueueParting(SummonUnit unit, SummonExit exit)
+        /// that is not over: its blow lands before the turn closes (<see cref="ResolveParting"/>). Returns
+        /// whether it was queued - such a summon stays on the stage until its blow has landed, so the
+        /// caller does not send it off.</summary>
+        private bool QueueParting(SummonUnit unit, SummonExit exit)
         {
-            if (unit != null && exit != SummonExit.Victory && unit.Summon != null
-                && unit.Summon.PartingAbility != null && !_parting.Contains(unit))
+            if (unit == null || exit == SummonExit.Victory || unit.Summon == null || unit.Summon.PartingAbility == null)
+            {
+                return false;
+            }
+            if (!_parting.Contains(unit))
             {
                 _parting.Add(unit);
+                _partingFell[unit] = exit == SummonExit.Fell;
             }
+            return true;
         }
 
         /// <summary>
-        /// Lands every queued parting blow (Ifrit's Hellfire): cast with the leaving summon as the caster
-        /// on the Boar's path - no tags, no combo, no charge - at every enemy standing. Fallen or not, it
-        /// casts off the stats it arrived with. Shown without a projectile: the caster is already going.
+        /// Lands every queued parting blow (Ifrit's Hellfire): the summon stays where it stood, names the
+        /// blow and plays its <see cref="SummonSO.PartingFrames"/>, the blow lands - cast with the leaving
+        /// summon as the caster on the Boar's path (no tags, no combo, no charge) at every enemy standing,
+        /// off the stats it arrived with - and only then does it go. A party it replaced steps back in
+        /// after the last one has gone. With no enemy left it just goes.
         /// </summary>
         private IEnumerator ResolveParting()
         {
@@ -475,22 +500,55 @@ namespace Assets.Scripts.Rooms
             {
                 var unit = _parting[0];
                 _parting.RemoveAt(0);
-                var enemies = GetTargetableEnemies();
-                if (enemies.Count == 0)
+                if (unit == null)
                 {
-                    _parting.Clear();
-                    yield break;
+                    continue;
                 }
-                var magic = unit.Summon.PartingAbility;
-                var targets = magic.TargetType == MagicTargetType.SingleEnemy
-                    ? new List<ICombatUnit> { enemies.OrderBy(e => e.Stats.Health).First() }
-                    : enemies;
-                HoldHealthDisplay();
-                var result = _calculator.Execute(new SpellcastAction { Magic = magic, Caster = unit, Targets = targets }, BuffTracker);
-                yield return _presenter.Present(result, null, magic);
-                HealthDisplay.ReleaseAll();
-                ResolveDeaths();
+                bool fell = _partingFell.TryGetValue(unit, out var f) && f;
+                _partingFell.Remove(unit);
+                var enemies = GetTargetableEnemies();
+                if (enemies.Count > 0)
+                {
+                    yield return PlayParting(unit);
+                    var magic = unit.Summon.PartingAbility;
+                    var targets = magic.TargetType == MagicTargetType.SingleEnemy
+                        ? new List<ICombatUnit> { enemies.OrderBy(e => e.Stats.Health).First() }
+                        : enemies;
+                    HoldHealthDisplay();
+                    var result = _calculator.Execute(new SpellcastAction { Magic = magic, Caster = unit, Targets = targets }, BuffTracker);
+                    yield return _presenter.Present(result, null, magic);
+                    HealthDisplay.ReleaseAll();
+                    ResolveDeaths();
+                }
+                yield return SummonPresenter.Depart(unit, fell);
             }
+            if (_restorePartyAfterParting)
+            {
+                RestorePartyOnStage();
+            }
+        }
+
+        /// <summary>The wind-up before a parting blow: its name over the summon, a roar, and the drawn
+        /// frames played once and held, so the blow reads as the summon's last act.</summary>
+        private IEnumerator PlayParting(SummonUnit unit)
+        {
+            var magic = unit.Summon.PartingAbility;
+            ShowFloatingLabel(unit.transform.position + new Vector3(0f, 0.9f, 0f), magic.DisplayName,
+                new Color(1f, 0.6f, 0.25f), 0.18f);
+            CombatAudio.Play(CombatSound.BossSignature);
+            if (CombatFeedback.HasInstance)
+            {
+                CombatFeedback.Instance.Shake(0.12f, PartingSeconds);
+            }
+            var frames = unit.Summon.PartingFrames != null
+                ? System.Array.FindAll(unit.Summon.PartingFrames, f => f != null)
+                : new Sprite[0];
+            if (frames.Length > 0)
+            {
+                var animator = unit.GetComponent<SpriteAnimator>() ?? unit.gameObject.AddComponent<SpriteAnimator>();
+                animator.PlayOnceAndHold(frames, PartingSeconds);
+            }
+            yield return new WaitForSeconds(frames.Length > 0 ? PartingSeconds : PartingSeconds * 0.5f);
         }
 
         /// <summary>

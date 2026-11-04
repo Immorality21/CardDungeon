@@ -42,6 +42,11 @@ namespace Assets.Scripts.Cards
         [Range(-180f, 180f)]
         public float ProjectileArtAngle;
 
+        [Tooltip("Optional: drawn frames that erupt on every target it damages, all at once, where they " +
+                 "stand (Ifrit's Hellfire: a column of flame). Replaces the Delivery's own effect, and the " +
+                 "hits land together while the frames play. Presentation only.")]
+        public Sprite[] ImpactFrames;
+
         public MagicTargetType TargetType;
         public MagicRarity Rarity;
         public List<SpellEffect> Effects = new List<SpellEffect>();

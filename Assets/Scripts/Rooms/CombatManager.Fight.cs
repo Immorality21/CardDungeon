@@ -59,7 +59,18 @@ namespace Assets.Scripts.Rooms
             _allies.Clear();
             _standIns.Clear();
             _mounts.Clear();
+            // A parting summon is removed from the stage only once its blow has landed; one the last
+            // fight never resolved must not stand on into this one.
+            foreach (var leftover in _parting)
+            {
+                if (leftover != null)
+                {
+                    Destroy(leftover.gameObject);
+                }
+            }
             _parting.Clear();
+            _partingFell.Clear();
+            _restorePartyAfterParting = false;
             // Every gauge opens the fight where the run left it (UltraOps: kept for the run).
             _ultraGauge.Clear();
             _gaugeCredit.Clear();

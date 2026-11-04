@@ -160,6 +160,72 @@ namespace Assets.Scripts.Combat
             }
         }
 
+        private const float EruptRise = 0.15f;
+        private const float EruptBurn = 0.55f;
+        private const float EruptFade = 0.25f;
+        private const float EruptFps = 12f;
+        private const float EruptHeightShare = 1.5f;
+
+        /// <summary>How long after <see cref="Erupt"/> starts the column is at full height - when the
+        /// caller lands the hit, so the flames are still roaring as the number comes up.</summary>
+        public const float EruptLands = EruptRise + 0.2f;
+
+        /// <summary>
+        /// A column of drawn flame (<c>MagicSO.ImpactFrames</c>, Ifrit's Hellfire) rising out of the
+        /// floor under <paramref name="target"/>, burning through its frames and fading. Over the
+        /// body, a third taller than it. Not blocking: every target's column can go up at once.
+        /// </summary>
+        /// <summary>Where the top of <see cref="Erupt"/>'s column reaches over <paramref name="target"/>,
+        /// so what is said about the hit can be put above the flames rather than in them.</summary>
+        public static float EruptTop(ICombatUnit target)
+        {
+            Bounds body = BodyOf(target);
+            return body.min.y + Mathf.Max(0.5f, body.size.y) * EruptHeightShare;
+        }
+
+        public static void Erupt(ICombatUnit target, Sprite[] frames)
+        {
+            if (target == null || target.Transform == null || frames == null || frames.Length == 0)
+            {
+                return;
+            }
+            CoroutineHandler.Handle(EruptRoutine(target, frames));
+        }
+
+        private static IEnumerator EruptRoutine(ICombatUnit target, Sprite[] frames)
+        {
+            Bounds body = BodyOf(target);
+            var sr = new GameObject("EruptVfx").AddComponent<SpriteRenderer>();
+            sr.sortingOrder = OverUnitOrder;
+            sr.sprite = frames[0];
+
+            float spriteHeight = Mathf.Max(0.01f, frames[0].bounds.size.y);
+            float scale = Mathf.Max(0.5f, body.size.y) * EruptHeightShare / spriteHeight;
+            float total = EruptRise + EruptBurn + EruptFade;
+            float elapsed = 0f;
+            while (elapsed < total && sr != null)
+            {
+                elapsed += Time.deltaTime;
+                sr.sprite = frames[Mathf.FloorToInt(elapsed * EruptFps) % frames.Length];
+
+                // Grows up out of the floor: the base stays on the ground line, the top rises.
+                float rise = Mathf.Clamp01(elapsed / EruptRise);
+                float grown = 1f - (1f - rise) * (1f - rise);
+                float height = spriteHeight * scale * grown;
+                sr.transform.localScale = new Vector3(scale, scale * grown, 1f);
+                sr.transform.position = new Vector3(body.center.x, body.min.y + height * 0.5f, 0f);
+
+                float fade = Mathf.Clamp01((elapsed - EruptRise - EruptBurn) / EruptFade);
+                sr.color = WithAlpha(Color.white, 1f - fade);
+                yield return null;
+            }
+
+            if (sr != null)
+            {
+                Object.Destroy(sr.gameObject);
+            }
+        }
+
         // A beam: how long it takes to open, how long it stays at full width, and how long it fades.
         private const float BeamOpen = 0.06f;
         private const float BeamHold = 0.16f;

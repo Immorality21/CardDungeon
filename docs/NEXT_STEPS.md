@@ -291,6 +291,26 @@ backlog.**
   2026-10-30:** starting Ultras moved to the trunk (free), the gauge kept for the run and filled by
   taken/dealt/healed. To do: see it in play. **The remaining Ultra nodes on the grid are later on the
   roadmap** (owner, 2026-10-31), hero by hero; they do not block anything.
+- **Summons are too short-lived — next after the playtest** (owner, playtest 2026-11-04): "most of them
+  disappear after 3 turns. I think that is too weak, since they generally are not too strong." How to
+  tune it is open. Today (`SummonSO.TurnsActive`):
+  - **Summons that replace the party leave after 3 turns:** Golem, Seraph, Exatrix, Dark Twin, Ifrit,
+    Archon, Imp and the Demon Army. The Succubus stays 4.
+  - **Summons that join the party:** the Turret and Writhing Spawn stay 3 turns, Grey Fang, the Watcher
+    and the Blood Idol 4. The mechs and the Horror stay for the whole fight (99).
+  - **Special attacks:** `TurnsActive` 3 is how long the effect lasts, not a body on the field. These are
+    the Boar, Lion, Stag, Galewing, Crows, Ferret, Phoenix, Angel, Qyraxis, Glacius and Iron Charger.
+  - **Most have 1 charge a run**, so a 3-turn summon is a 3-turn event per run, bought for ~2,000 XP and
+    materials.
+
+  **Options:**
+  - Longer `TurnsActive` (5, or until the summon is killed, FF-style). This works with the "+1 turn"
+    upgrade nodes, which would then need new values.
+  - More power per turn.
+  - The charge comes back at a refuge.
+
+  Measure with the summon budget harness (`BALANCING.md` §5aa) and the per-summon frontier
+  (`FloorFrontier.BySummon`), then retest in the sandbox. `plans/SPECIALIZATION.md` §4b.
 - **No way back to town mid-run** (owner, 2026-10-30) — ✅ **built the same day**: a mid-run level
   clear offers only Continue, the pause menu's Leave became **Quit to Title** (the title's Continue
   goes straight back down), and the Threshold is three runs (Dungeon Entrance → Upper Halls → The
@@ -332,7 +352,7 @@ backlog.**
 | **5b** | Heroes are unlocked, not bought — the tavern is removed | ✅ **done** — shipped 2026-09-06; **every hero has a source since 2026-09-30** (run clear, room event, secret run) |
 | **5** | Roster — open questions | open; the party-cap bullet **resolved 2026-09-17** by deleting the purchase |
 | **4b** | Summons — the capability the deep grid pays out | **both kinds shipped 2026-09-28** (the Warrior's Boar and Golem); **the Paladin's three 2026-09-30** — Aegis Lion (taunt), Judgement Seraph (hitter replacement), Dawn Stag (mass heal), one per branch; **the Ranger's two 2026-10-01** — Galewing (a hawk: 2 hits to all + Endurance cut) and Exatrix (party replacement whose Attack **delays** — the new `TurnDelay` effect). **The Tinkerer 2026-10-07** — rebuilt from the owner's vision: Disassemble at the root, three branches each ending in a **mech Ultra** (the new `Mount` kind) instead of a summon, two machine enemies to take apart (`plans/SPECIALIZATION.md`, "The Tinkerer"; open: the mechs need the balance pass). **The Cleric, Rogue, Mage and Cultist followed: every hero has theirs.** **Next:** measure the per-summon frontier |
-| **4d** | **Every hero starts with two abilities** (owner, 2026-10-29) | ✅ **done** 2026-11-01. Second free ability beside the root: Warrior Sunder, Paladin Holy Touch, Cleric Divine Bolt, Ranger Snare, Rogue Steal, Tinkerer Rivet Gun, Warlock Drain Life, Cultist Whisper of Madness. **The Mage is the exception**: three abilities and a free third slot. Everyone else buys the third slot beside the root for 20 XP; fourth and higher slots stay on the branches. The node each ability left is now an upgrade of it. `Heroes/CLAUDE.md`, `BALANCING.md` §5az |
+| **4d** | **Every hero starts with two abilities** (owner, 2026-10-29) | ✅ **done** 2026-11-01. Second free ability beside the root: Warrior Sunder, Paladin Holy Touch, Cleric Divine Bolt, Ranger Snare, Rogue Steal, Tinkerer Rivet Gun, Warlock Drain Life, Cultist Whisper of Madness. **The Mage is the exception**: three abilities and a free third slot. Everyone else buys the third slot beside the root for 20 XP, except the late heroes (Ranger, Rogue, Tinkerer), whose whole trunk and third slot are free since 2026-11-04 (playtest: they joined too weak to field); fourth and higher slots stay on the branches. The node each ability left is now an upgrade of it. `Heroes/CLAUDE.md`, `BALANCING.md` §5az |
 | **4** | Sphere grid — follow-ups | mostly superseded by §4c. **Ability upgrades (`MagicUpgrade`) built 2026-10-09** with the Ranger as showcase; the Warlock has them too, the rest one or two so far (the Mage none). **Outside playtest 2026-10-30:** "+3 to a stat is boring" - make upgrades meaningful (nothing major yet, owner); Cairn Golem's upgrade sits on the far side of the Warrior tree - fix in the grid rework |
 | — | **The Warlock and the Cultist** | ✅ **both built** (Warlock 2026-10-04, Cultist 2026-10-05; the plan file was retired 2026-10-05 - mechanics in the Magic guide, numbers in `BALANCING.md` §5aa). **Still to pick up:** (1) **Felguards / bigger demon troops** - deferred until the Warlock grid has room; **material-gated** when they come (owner, 2026-10-04) so a third tier cannot spike the army early. `SummonOps.SquadFor` promotes the *weakest* troop first, so a third tier appears only once every troop is a Succubus: a Felguard node should add promotions on top of that or be a dedicated "promote one troop to the top tier" kind. (2) **A Cultist balance pass** - every number is a first draft; run the summon budget harness (§5aa) over Writhing Spawn, The Watcher, the Abyssal Nightmare, the Blood Idol (its 20% blood price and threat) and the Sacrifice horror. (3) ~~Life Tap's charge restore for the Cleric~~ - she has it: Inspire and Miracle of Hope, both `RestoreCharge`, no health price. (4) ~~Ultras for the other six heroes~~ - every hero has Ultras since the 2026-10-11 workbook pass (the Mage's is MultiCast) |
 | — | **The Mage — an elemental caster** | ✅ **on the roster 2026-10-07** — rescued in the new **Sealed Archive** (main line, before the March); three-branch grid (storm / frost / fire, Fire Cloak early for the Ashen Deep), new Chain Lightning. **Open:** his signature and Ultra are MultiCast (spend Focus to cast 2-4 times, owner 2026-10-07, details open); summons are drafts in the hero workbook |

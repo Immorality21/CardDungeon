@@ -268,6 +268,7 @@ public class MagicSOEditor : Editor
         {
             EditorGUILayout.PropertyField(serializedObject.FindProperty("ProjectileArtAngle"));
         }
+        EditorGUILayout.PropertyField(serializedObject.FindProperty("ImpactFrames"), true);
         EditorGUILayout.PropertyField(serializedObject.FindProperty("TargetType"));
         EditorGUILayout.PropertyField(serializedObject.FindProperty("RandomHits"),
             new GUIContent("Random Hits", "More than 1: fires this many shots, each at a random standing "
