@@ -12,7 +12,7 @@ namespace Tests.EditMode
 {
     /// <summary>
     /// The balance model's side of summons (§4b): the simulated summoner holds its charge for the
-    /// floor's hardest room, summons there, refills at a refuge, and a "summon build" beelines to the
+    /// floor's hardest room, summons there, is not refilled at a refuge, and a "summon build" beelines to the
     /// summon node that a greedy spend never reaches.
     /// </summary>
     public class SummonSimulationTests
@@ -177,7 +177,7 @@ namespace Tests.EditMode
         }
 
         [Test]
-        public void RunFloor_ALaterFloor_HasNoSummonUntilARefugeRefillsIt()
+        public void RunFloor_ALaterFloor_HasNoSummonEvenAfterARefuge()
         {
             var drained = Settings();
             drained.StartsWithFullCharges = false;
@@ -187,7 +187,7 @@ namespace Tests.EditMode
             var withRest = Settings(restRooms: 1);
             withRest.StartsWithFullCharges = false;
             var rested = EncounterSimulator.RunFloor(Party(Summoner()), ThreeRoomsBossLast(), withRest);
-            Assert.AreEqual(1f, rested.AverageSummonsUsed, 1e-4f, "A refuge before the boss room restores it.");
+            Assert.AreEqual(0f, rested.AverageSummonsUsed, "A refuge restores abilities, not summons.");
         }
 
         // --- the summon build ------------------------------------------------------------

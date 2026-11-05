@@ -299,15 +299,25 @@ namespace Assets.Scripts.Progression
         }
 
         /// <summary>
-        /// Consolation reward on party death, scaled by how far the run reached.
-        /// Turns a wipe from "lost everything" into permanent progress.
+        /// Consolation reward on party death, per floor of the run the party <b>cleared</b> before
+        /// the one it fell on. Dying on a run's first floor pays nothing (owner, 2026-11-04: losing
+        /// to the Barrow King on its one floor paid gold for a fight that was lost).
         /// </summary>
+        public static int RunProgressGoldOnDeath(int levelIndexReached)
+        {
+            return GoldPerLevelOnDeath * Mathf.Max(0, levelIndexReached);
+        }
+
         public void AwardRunProgressOnDeath(int levelIndexReached)
         {
-            int levelsReached = Mathf.Max(0, levelIndexReached) + 1;
-            _saveData.Gold += GoldPerLevelOnDeath * levelsReached;
+            int gold = RunProgressGoldOnDeath(levelIndexReached);
+            if (gold <= 0)
+            {
+                return;
+            }
+            _saveData.Gold += gold;
             Save();
-            Publish(Currency.Gold, GoldPerLevelOnDeath * levelsReached, EconomySource.RunDeath);
+            Publish(Currency.Gold, gold, EconomySource.RunDeath);
         }
 
         // --- Combo upgrades (per combo key) ---

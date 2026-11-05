@@ -28,8 +28,19 @@ namespace Assets.Scripts.Items
         // Each item level above the current depth multiplies the chance by this factor.
         private const float OverLevelFalloff = 0.5f;
 
-        /// <summary>Probability [0,1] that <paramref name="item"/> drops at the given 0-based run level.</summary>
-        public static float DropChance(ItemSO item, int runLevelIndex)
+        // Gear left behind by the campaign: each level an item sits more than UnderLevelGrace below
+        // the campaign depth multiplies its chance by this factor (owner, 2026-11-04: Leather Caps
+        // still dropping in the Drowned March).
+        private const float UnderLevelFalloff = 0.5f;
+        private const int UnderLevelGrace = 1;
+
+        /// <summary>
+        /// Probability [0,1] that <paramref name="item"/> drops at the given 0-based run level.
+        /// <paramref name="campaignStep"/> is how far into the campaign the run sits
+        /// (<c>RunDefinitionSO.SequenceIndex</c>): it only fades out <b>equipment</b> the campaign has
+        /// outgrown, and never raises a chance, so a later run does not hand out better gear sooner.
+        /// </summary>
+        public static float DropChance(ItemSO item, int runLevelIndex, int campaignStep = 0)
         {
             if (item == null)
             {
@@ -46,6 +57,15 @@ namespace Assets.Scripts.Items
                 chance *= Mathf.Pow(OverLevelFalloff, levelsOver);
             }
 
+            if (item.Category == ItemCategory.Equipment)
+            {
+                int levelsUnder = Mathf.Max(0, campaignStep) + depth - item.ItemLevel - UnderLevelGrace;
+                if (levelsUnder > 0)
+                {
+                    chance *= Mathf.Pow(UnderLevelFalloff, levelsUnder);
+                }
+            }
+
             return Mathf.Clamp01(chance);
         }
 
@@ -53,9 +73,9 @@ namespace Assets.Scripts.Items
         /// Whether the item drops, given a caller-supplied <paramref name="roll"/> in [0,1)
         /// (e.g. <c>Random.Range(0f, 1f)</c>). Kept explicit so drops are deterministic under test.
         /// </summary>
-        public static bool ShouldDrop(ItemSO item, int runLevelIndex, float roll)
+        public static bool ShouldDrop(ItemSO item, int runLevelIndex, float roll, int campaignStep = 0)
         {
-            return roll < DropChance(item, runLevelIndex);
+            return roll < DropChance(item, runLevelIndex, campaignStep);
         }
 
         // ============================================================
@@ -67,7 +87,7 @@ namespace Assets.Scripts.Items
         /// <see cref="LootDrop.Chance"/> is that flat number at any depth; otherwise it falls back on
         /// the item's rarity and level, which is what gear has always done.
         /// </summary>
-        public static float DropChance(LootDrop drop, int runLevelIndex)
+        public static float DropChance(LootDrop drop, int runLevelIndex, int campaignStep = 0)
         {
             if (drop == null || drop.Item == null)
             {
@@ -77,7 +97,7 @@ namespace Assets.Scripts.Items
             {
                 return Mathf.Clamp01(drop.Chance);
             }
-            return DropChance(drop.Item, runLevelIndex);
+            return DropChance(drop.Item, runLevelIndex, campaignStep);
         }
 
         /// <summary>
@@ -129,7 +149,7 @@ namespace Assets.Scripts.Items
         /// and the scrap it is made of. One roll decides whether an entry lands and a second sizes it,
         /// and the caller supplies the source so a drop is reproducible under test.
         /// </summary>
-        public static List<LootAward> Roll(IList<LootDrop> table, int runLevelIndex, Func<float> roll)
+        public static List<LootAward> Roll(IList<LootDrop> table, int runLevelIndex, Func<float> roll, int campaignStep = 0)
         {
             var awards = new List<LootAward>();
             if (table == null || roll == null)
@@ -152,7 +172,7 @@ namespace Assets.Scripts.Items
                 // The roll is still consumed either way: how many randoms a table draws is part of
                 // the sequence a deterministic caller sees, and changing it would move every result
                 // downstream of a guaranteed entry.
-                float chance = DropChance(drop, runLevelIndex);
+                float chance = DropChance(drop, runLevelIndex, campaignStep);
                 bool missed = roll() >= chance;
                 if (missed && chance < 1f)
                 {

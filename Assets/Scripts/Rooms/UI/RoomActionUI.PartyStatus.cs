@@ -307,11 +307,11 @@ namespace Assets.Scripts.Rooms
             }
             _detailRows.Clear();
             AddRunStoryRows();
-            if (DungeonManager.ActiveRun != null)
+            int cleared = DungeonManager.RunLevelIndex;
+            if (DungeonManager.ActiveRun != null && cleared > 0)
             {
-                int levels = DungeonManager.RunLevelIndex + 1;
-                _detailRows.Add(MakeVictoryRow(Loc.Format("room.death.row.level-gold", ("level", levels)),
-                    Loc.Format("room.reward.plus", ("amount", MetaProgressManager.GoldPerLevelOnDeath * levels))));
+                _detailRows.Add(MakeVictoryRow(Loc.Format("room.death.row.level-gold", ("level", cleared)),
+                    Loc.Format("room.reward.plus", ("amount", MetaProgressManager.RunProgressGoldOnDeath(cleared)))));
             }
             _detailRows.Add(MakeVictoryRow(Loc.Get("room.death.row.earlier-floors"), Loc.Get("room.death.kept")));
             int pending = MetaProgressManager.HasInstance ? MetaProgressManager.Instance.PendingRunGold : 0;
@@ -323,8 +323,9 @@ namespace Assets.Scripts.Rooms
 
             // Point at the way to get stronger. Nothing after a wipe used to link losing to the
             // sphere grid (revisit playtest finding 5). The XP is read off disk: saves are deferred,
-            // so disk holds what survives this wipe. Worded "XP Gained", never "banked" - the owner
-            // wants that word out of the game (playtest 3 finding 17).
+            // so disk holds what survives this wipe. Worded "XP to spend", never "banked" (the owner
+            // wants that word out of the game, playtest 3 finding 17) nor "gained" (it read as XP for
+            // the lost fight, 2026-11-04).
             int unspent = UnspentPartyXp();
             _detailRows.Add(MakeVictoryRow(unspent > 0 ? Loc.Format("room.death.row.xp", ("xp", unspent)) : Loc.Get("room.death.row.grow"),
                 Loc.Get("room.death.row.xp-where")));

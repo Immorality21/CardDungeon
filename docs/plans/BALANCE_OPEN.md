@@ -212,7 +212,8 @@ dominates.
 **What the code does:** `AwardLevelClear` banks `GoldPerLevelCleared` (25) plus that level's whole
 pending kill-gold pool into permanent save the moment the exit room clears; `HandlePartyDeath` only
 calls `DiscardPendingGold`, which forfeits the *current* floor; `AwardRunProgressOnDeath` pays a
-further 10 gold per floor reached. So dying on floor 3 banks floors 1–2 in full and drops the player
+further 10 gold per floor **cleared** before the wipe (per floor *reached* until 2026-11-04, when the
+owner found a loss to the one-floor Barrow King paying gold). So dying on floor 3 banks floors 1–2 in full and drops the player
 back at the hub strictly richer. At ~5 gold an enemy over ~12 enemies a floor plus the 25 flat, a
 cleared floor is ~85 gold and a run that dies on floor 3 pays roughly **190 gold**.
 

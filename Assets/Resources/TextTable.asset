@@ -5914,9 +5914,9 @@ MonoBehaviour:
     Note: Death screen text outside a run; {where} = level name
   - Key: room.death.row.level-gold
     Values:
-    - Gold for reaching level {level}
+    - Gold for floors cleared ({level})
     Reviewed: 0
-    Note: Death screen row label; {level} = level reached
+    Note: Death screen row label; {level} = floors of this run cleared before the wipe
   - Key: room.reward.plus
     Values:
     - +{amount}
@@ -5950,9 +5950,10 @@ MonoBehaviour:
     Note: Death screen row label
   - Key: room.death.row.xp
     Values:
-    - '{xp} XP Gained'
+    - '{xp} XP to spend'
     Reviewed: 0
-    Note: Death screen row label; {xp} = unspent XP of the party
+    Note: Death screen row label; {xp} = unspent XP of the party (earned on earlier floors, never
+      on the one lost)
   - Key: room.death.row.grow
     Values:
     - Grow stronger
@@ -10068,12 +10069,12 @@ MonoBehaviour:
     Note: 
   - Key: ability.screech.name
     Values:
-    - Screech
+    - Shockwave
     Reviewed: 0
     Note: The Floating Eye's attack on the whole party.
   - Key: ability.screech.description
     Values:
-    - A piercing shriek that hits the whole party.
+    - A pulse of force from the eye that hits the whole party.
     Reviewed: 0
     Note: 
   - Key: run.threshold-entrance.name

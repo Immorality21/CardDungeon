@@ -55,6 +55,35 @@ namespace Tests.EditMode
         }
 
         [Test]
+        public void DropChance_LaterRun_FadesOutgrownGear()
+        {
+            var cap = MakeItem(ItemRarity.Common, 1);
+
+            float threshold = LootRoller.DropChance(cap, 0, campaignStep: 0);
+            float oneLevelBehind = LootRoller.DropChance(cap, 0, campaignStep: 1);
+            float drownedMarch = LootRoller.DropChance(cap, 0, campaignStep: 3);
+
+            Assert.AreEqual(threshold, oneLevelBehind, 1e-5f, "One level behind is still in grace.");
+            Assert.AreEqual(threshold * 0.25f, drownedMarch, 1e-5f);
+        }
+
+        [Test]
+        public void DropChance_LaterRun_NeverRaisesGearAboveItsDepth()
+        {
+            var helm = MakeItem(ItemRarity.Rare, 4);
+
+            Assert.AreEqual(LootRoller.DropChance(helm, 0), LootRoller.DropChance(helm, 0, campaignStep: 3), 1e-5f);
+        }
+
+        [Test]
+        public void DropChance_LaterRun_DoesNotFadeMaterials()
+        {
+            var stone = MakeMaterial("stone");
+
+            Assert.AreEqual(LootRoller.DropChance(stone, 0), LootRoller.DropChance(stone, 0, campaignStep: 5), 1e-5f);
+        }
+
+        [Test]
         public void DropChance_NullItem_IsZero()
         {
             Assert.AreEqual(0f, LootRoller.DropChance((ItemSO)null, 0));
@@ -86,15 +115,16 @@ namespace Tests.EditMode
         }
 
         [Test]
-        public void DropChance_ItemAtOrBelowDepth_NotBoosted()
+        public void DropChance_ItemBelowDepth_NeverBoostedAndFadesOnceOutgrown()
         {
             var item = MakeItem(ItemRarity.Common, 1);
 
-            // Deeper than the item's level must not exceed the base rarity chance.
-            float deep = LootRoller.DropChance(item, 5);
             float atDepth = LootRoller.DropChance(item, 0);
+            float oneBelow = LootRoller.DropChance(item, 1);
+            float deep = LootRoller.DropChance(item, 5);
 
-            Assert.AreEqual(atDepth, deep, 0.0001f, "under-level items stay at base rarity chance");
+            Assert.AreEqual(atDepth, oneBelow, 0.0001f, "one level below is still in grace");
+            Assert.Less(deep, atDepth, "gear the floor has outgrown drops less (2026-11-04)");
         }
 
         [Test]

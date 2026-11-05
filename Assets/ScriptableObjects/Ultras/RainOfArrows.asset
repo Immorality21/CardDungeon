@@ -46,6 +46,9 @@ MonoBehaviour:
     DrainToParty: 0
   Hits: 5
   RandomTargets: 1
+  Delivery: 0
+  HitIcon: {fileID: 21300000, guid: 7fce12d2d12a4cc5bfa70f3b8a500ddf, type: 3}
+  HitArtAngle: 45
   Creature: {fileID: 0}
   StatAbilities: []
   Mech: {fileID: 0}

@@ -1081,7 +1081,8 @@ namespace Assets.Scripts.Balance
                 if (restAfter.Contains(i))
                 {
                     Rest(heroes, settings.RestHealFraction);
-                    // A refuge restores every charge, as it does in the game (RoomActionUI.ApplyRest).
+                    // A refuge restores ability charges, as it does in the game (RoomActionUI.ApplyRest).
+                    // Summon charges are not restored there (owner, 2026-11-04).
                     RefillCharges(heroes);
                 }
 
@@ -1158,16 +1159,6 @@ namespace Assets.Scripts.Balance
                         if (slot != null)
                         {
                             slot.Charges = slot.MaxCharges;
-                        }
-                    }
-                }
-                if (hero.Summons != null)
-                {
-                    foreach (var summon in hero.Summons)
-                    {
-                        if (summon != null)
-                        {
-                            summon.Charges = summon.MaxCharges;
                         }
                     }
                 }

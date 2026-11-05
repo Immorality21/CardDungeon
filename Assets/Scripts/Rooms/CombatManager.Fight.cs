@@ -763,7 +763,8 @@ namespace Assets.Scripts.Rooms
                 table = new List<LootDrop>();
             }
             foreach (var award in LootRoller.Roll(
-                         table, DungeonManager.RunLevelIndex, () => UnityEngine.Random.Range(0f, 1f)))
+                         table, DungeonManager.RunLevelIndex, () => UnityEngine.Random.Range(0f, 1f),
+                         DungeonManager.LootCampaignStep))
             {
                 // A revisit below its best fear does not pay the scarce materials (docs/plans/REVISITS.md).
                 // A recipe already known teaches nothing, so it is not dropped again.

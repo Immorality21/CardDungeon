@@ -60,7 +60,7 @@ namespace Assets.Scripts.Rooms
         /// stopped producing gear entirely.</para>
         /// </summary>
         public static ItemSO PickTreasureItem(
-            IList<ItemSO> candidates, int runLevelIndex, Func<float> roll)
+            IList<ItemSO> candidates, int runLevelIndex, Func<float> roll, int campaignStep = 0)
         {
             if (candidates == null || roll == null)
             {
@@ -77,7 +77,7 @@ namespace Assets.Scripts.Rooms
                     continue;
                 }
 
-                if (LootRoller.ShouldDrop(item, runLevelIndex, roll()))
+                if (LootRoller.ShouldDrop(item, runLevelIndex, roll(), campaignStep))
                 {
                     return item;
                 }

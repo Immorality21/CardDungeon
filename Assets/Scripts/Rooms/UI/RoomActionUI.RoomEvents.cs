@@ -735,7 +735,8 @@ namespace Assets.Scripts.Rooms
             }
 
             return RoomKindRewards.PickTreasureItem(
-                candidates, DungeonManager.RunLevelIndex, () => UnityEngine.Random.Range(0f, 1f));
+                candidates, DungeonManager.RunLevelIndex, () => UnityEngine.Random.Range(0f, 1f),
+                DungeonManager.LootCampaignStep);
         }
 
         /// <summary>
@@ -832,12 +833,8 @@ namespace Assets.Scripts.Rooms
                 DungeonManager.Instance.MagicState.RefillCharges();
                 lines.Add(Loc.Get("room.refuge.ability-charges"));
             }
-            if (DungeonManager.HasInstance && DungeonManager.Instance.Summons != null
-                && DungeonManager.Instance.Summons.GetSaveData().Count > 0)
-            {
-                DungeonManager.Instance.Summons.RefillCharges();
-                lines.Add(Loc.Get("room.refuge.summon-charges"));
-            }
+            // Summon charges are deliberately not refilled here: a summon per refuge was too strong
+            // (owner, 2026-11-04). They fill at a run's start only.
 
             TakePayload();
 

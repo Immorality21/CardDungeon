@@ -355,6 +355,9 @@ namespace Assets.Scripts.Cards
                 castable.DisplayName = ultra.Label;
                 castable.Description = ultra.Description;
                 castable.TargetType = ultra.TargetType;
+                castable.Icon = ultra.HitIcon;
+                castable.Delivery = ultra.Delivery;
+                castable.ProjectileArtAngle = ultra.HitArtAngle;
                 castable.Effects = new List<SpellEffect>(ultra.Effects ?? new List<SpellEffect>());
                 castable.Tags = new List<MagicTag>();
                 CastableCache[key] = castable;

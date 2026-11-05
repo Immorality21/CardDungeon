@@ -430,7 +430,8 @@ namespace Assets.Scripts.Rooms.Events
                     continue;
                 }
 
-                if (!LootRoller.ShouldDrop(item, DungeonManager.RunLevelIndex, Random.Range(0f, 1f)))
+                if (!LootRoller.ShouldDrop(item, DungeonManager.RunLevelIndex, Random.Range(0f, 1f),
+                        DungeonManager.LootCampaignStep))
                 {
                     continue;
                 }

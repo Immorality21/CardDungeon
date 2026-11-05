@@ -122,7 +122,7 @@ namespace Assets.Scripts.Cards
             return true;
         }
 
-        /// <summary>Every summon back to full. Run start and refuges, nowhere else.</summary>
+        /// <summary>Every summon back to full. Run start only - a refuge does not refill summons (2026-11-04).</summary>
         public void RefillCharges()
         {
             foreach (var slots in _heroSummons.Values)

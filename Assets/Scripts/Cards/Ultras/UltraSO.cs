@@ -97,6 +97,19 @@ namespace Assets.Scripts.Cards
                  "weakest - the Warrior's Flurry.")]
         public bool RandomTargets;
 
+        [Tooltip("Strike: how each hit is shown reaching its target, as on an ability. Strike draws " +
+                 "HitIcon across the target (Flurry's slashes), Projectile flies it from the hero " +
+                 "(Rain of Arrows). Presentation only.")]
+        public MagicDelivery Delivery = MagicDelivery.Projectile;
+
+        [Tooltip("Strike: the art each hit shows - the blade or the arrow. Empty draws the plain bolt.")]
+        public Sprite HitIcon;
+
+        [Tooltip("Strike: which way HitIcon's art points, in degrees (0 = right, 45 = up and to the " +
+                 "right), as MagicSO.ProjectileArtAngle.")]
+        [Range(-180f, 180f)]
+        public float HitArtAngle;
+
         [Header("Sacrifice")]
         [Tooltip("Sacrifice: the creature that rises. Its StatPercents read the SACRIFICED hero's stats " +
                  "(base + gear), so every stat they had carries over; it arrives at full health and stays " +

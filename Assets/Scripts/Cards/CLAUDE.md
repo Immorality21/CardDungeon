@@ -376,7 +376,7 @@ Two consequences worth holding on to:
 - **`SummonOps`** folds the grant into copies of the effects and builds a throwaway, tagless,
   `summon:`-keyed `MagicSO` so it resolves through the same `EffectResolver` with no combo and no
   Forge bonus. **`SummonState`** (`DungeonManager.Summons`) holds charges on the ability economy: full
-  at run start, refilled at refuges, carried in `Run.json` / the dungeon save. **`Run.json` is merged
+  at run start and **not** refilled at refuges (owner, 2026-11-04: too strong), carried in `Run.json` / the dungeon save. **`Run.json` is merged
   per hero after the opening floor** (`SummonState.MergeSaveData`): overwriting it dropped a benched
   hero's entry, and `Restore` starts a hero it cannot find at full, so sitting one floor out refilled
   the summon. `SummonSlot.IsImplemented` still gates on the kind, so a kind added later greys the
@@ -528,7 +528,7 @@ Two consequences worth holding on to:
   The Warlock's **Rain of Fire** and **Soul Harvest** are Strikes. A Strike may land **several times** (`UltraSO.Hits`), each hit picking its
   targets again from whoever stands (`UltraOps.StrikeTargets`, shared with the sim), and with
   `RandomTargets` a single-enemy Strike picks a random enemy per hit instead of the weakest - the
-  Warrior's **Flurry** (4 hits, branch B). His **Take Cover** (branch A) is a Strike on the party
+  Warrior's **Flurry** (4 hits, branch B). Each hit is shown by `UltraSO.Delivery` + `HitIcon` + `HitArtAngle`, copied onto the castable (2026-11-04: Flurry slashes with Slash's art as a Strike, Rain of Arrows flies Aimed Shot's arrow; with no `HitIcon` a hit is the plain bolt). His **Take Cover** (branch A) is a Strike on the party
   of `BuffType.Guarded` 30 for 1 turn: a resistance to **every** element, Normal included
   (`CombatBuffTracker.ApplyResistanceToAll`), so every damage path that already passes
   `GetResistanceBonus` cuts the hit with no new plumbing; a gold shield on the HP bar. **The balance sim models Ultras**
@@ -625,7 +625,7 @@ Two consequences worth holding on to:
 - **Combo system**: `MagicComboSO` (`RequiredTags` + `BonusEffects`), `ComboDetector`, `MagicTagTracker` (active tags on units with durations).
 - **Buff system**: `CombatBuffTracker` (stat buffs + status effects with turn durations); `BuffType`; handlers under `Buffs/` via `BuffHandlerRegistry`.
 - **Effects/**: `IEffectExecutor`, `EffectExecutorFactory`, `Damage/Heal/Buff/DebuffEffectExecutor`.
-- **EffectResult** / **EffectPresenter**: floating-text presentation of a cast's results. **How a hit arrives is `MagicSO.Delivery`** *(2026-10-07)*: `Projectile` (default, 0 - every older asset keeps its bolt) flies the icon from the caster (Fireball, arrows, darts, shadow bolts); `Strike` draws the icon across the target where it stands, no flight (Slash, Cleave, Sunder, Backstab, Consecrate, Purge, and the melee summon/Ultra abilities). `Beam` (2026-11-02, the Floating Eye's laser) is a straight line from caster to target that lands at once, and `Burst` (Screech) swells the caster and sends rings out before every target is hit in the same moment; both are coloured by the first damage effect's element and skip the cast glow (`SpellVfx.Beam` / `SpellVfx.Burst`). Presentation only. A projectile turns to face where it flies, which assumes the art points **right**; **`MagicSO.ProjectileArtAngle`** says where it really points (Aimed Shot's arrow 45, Volley and Cinderstorm -90) and is subtracted. **Set it whenever an ability gets a new projectile icon** - an arrow drawn diagonally flies sideways otherwise. A killing hit plays its delivery and impact too - both used to be gated on `IsAlive`, and since damage is applied before presentation, a lethal cast showed nothing and the unit simply dropped.
+- **EffectResult** / **EffectPresenter**: floating-text presentation of a cast's results. **How a hit arrives is `MagicSO.Delivery`** *(2026-10-07)*: `Projectile` (default, 0 - every older asset keeps its bolt) flies the icon from the caster (Fireball, arrows, darts, shadow bolts); `Strike` draws the icon across the target where it stands, no flight (Slash, Cleave, Sunder, Backstab, Consecrate, Purge, and the melee summon/Ultra abilities). `Beam` (2026-11-02, the Floating Eye's laser) is a straight line from caster to target that lands at once, and `Burst` (Shockwave, asset `Screech`) swells the caster and sends rings out before every target is hit in the same moment; both are coloured by the first damage effect's element and skip the cast glow (`SpellVfx.Beam` / `SpellVfx.Burst`). Presentation only. A projectile turns to face where it flies, which assumes the art points **right**; **`MagicSO.ProjectileArtAngle`** says where it really points (Aimed Shot's arrow 45, Volley and Cinderstorm -90) and is subtracted. **Set it whenever an ability gets a new projectile icon** - an arrow drawn diagonally flies sideways otherwise. A killing hit plays its delivery and impact too - both used to be gated on `IsAlive`, and since damage is applied before presentation, a lethal cast showed nothing and the unit simply dropped.
 
 ## UI (`Cards/UI`)
 

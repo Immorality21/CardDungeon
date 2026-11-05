@@ -111,6 +111,10 @@ namespace Assets.Scripts.Dungeon
         public static RunDefinitionSO ActiveRun;
         public static int RunLevelIndex;
 
+        /// <summary>How far into the campaign the active run sits, for fading out outgrown gear
+        /// (<see cref="Items.LootRoller.DropChance(Items.ItemSO, int, int)"/>). 0 with no run.</summary>
+        public static int LootCampaignStep => ActiveRun != null ? ActiveRun.SequenceIndex : 0;
+
         /// <summary>
         /// Tooling hand-off (the sandbox): when non-empty, these heroes enter the dungeon instead of
         /// the save's selected party — including heroes not in the roster catalog yet. Their XP and
