@@ -3796,6 +3796,51 @@ MonoBehaviour:
       can grow too.
     Reviewed: 0
     Note: 
+  - Key: tutorial.charges-last-the-level.text
+    Values:
+    - 'Ability charges and health carry over from fight to fight and floor to floor. Only a refuge or a new level restores them.'
+    Reviewed: 0
+    Note: 'First-time hint, in a fight: the first time a hero opens Abilities'
+  - Key: tutorial.refuge-once.text
+    Values:
+    - 'A refuge heals the party and restores ability charges - once. Rest when the party needs it.'
+    Reviewed: 0
+    Note: 'First-time hint, in the dungeon: the first refuge entered with its rest still waiting'
+  - Key: tutorial.summon-once-per-level.text
+    Values:
+    - 'A summon can be called once per level, and it stays until it falls. Save it for the fight that needs it.'
+    Reviewed: 0
+    Note: 'First-time hint, in a fight: the first hero turn with a summon ready'
+  - Key: tutorial.ultra-ready.text
+    Values:
+    - 'An Ultra is ready. The gauge keeps its charge between fights for the whole level, and taking damage fills it fastest.'
+    Reviewed: 0
+    Note: 'First-time hint, in a fight: the first hero turn with an Ultra ready'
+  - Key: tutorial.revisit-and-fear.text
+    Values:
+    - 'Cleared levels can be played again, harder than before. A replay pays Essence, which buys Awakenings in the Hall of Progression. Raise its Fear level for more.'
+    Reviewed: 0
+    Note: 'First-time hint, story map: the first time a cleared level can be replayed'
+  - Key: tutorial.party-full.text
+    Values:
+    - 'You have more heroes than places in the party. Choose who goes at the campfire: only the heroes who go earn XP.'
+    Reviewed: 0
+    Note: 'First-time hint, town: the first time more heroes are owned than the party holds'
+  - Key: ui.room.pause-hints
+    Values:
+    - 'Hints'
+    Reviewed: 0
+    Note: 'Pause menu button: every first-time hint seen so far'
+  - Key: ui.room.hints-title
+    Values:
+    - 'Hints'
+    Reviewed: 0
+    Note: 'Title of the pause menu Hints window'
+  - Key: room.hints.none
+    Values:
+    - 'No hints yet. They appear the first time something new comes up.'
+    Reviewed: 0
+    Note: 'Hints window, before any hint was seen'
   - Key: tutorial.revisit-hall-on-grid.text
     Values:
     - The Paladin has XP to spend too. Spend it on either hero, or go back when you

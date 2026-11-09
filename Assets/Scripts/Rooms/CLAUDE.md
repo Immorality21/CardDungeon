@@ -9,7 +9,7 @@
 > `.Bestiary` what fighting teaches; `.Feedback` floating text.
 > `UI/RoomActionUI.cs` holds the fields and the wiring; `.Commands` the fight's bars, command menu, turn order
 > and hotkeys; `.RoomEvents`; `.Pause` pause, map, potions, dialogs; `.Walking`; `.PartyStatus`; `.Hud`;
-> `.LevelClear` victory and level clear; `.Bot`. A partial class shares its fields, so this splits the reading,
+> `.LevelClear` victory and level clear; `.Hints` first-time hints and the pause menu's Hints window (`docs/TUTORIAL.md`); `.Bot`. A partial class shares its fields, so this splits the reading,
 > not the coupling: a pure rule still belongs in an `*Ops`/planner class (the `EnemyActionPlanner` pattern).
 
 ## Dungeon Generation Pipeline (RoomManager)

@@ -11,7 +11,14 @@ Most of it came out of playtest 3 (2026-10-26 to 2026-10-28).
 - [ ] **Until it falls** - party-replacers and allies stay the whole fight. Too strong (a summon soloing fights), or right?
 - [ ] **Signatures come back** every 3 of the summon's turns ("★ Quake (2)" while waiting). Seen in the sandbox with the Golem.
 - [ ] **The new moves** - Boulder Toss, Wings of Mercy, Dawnward, Dread Howl, Smoke Step, Flame Mantle + Claw, Life Kiss, Pack Howl, Unmake, Feed. Only Boulder Toss was seen in play. Names, icons and numbers are drafts.
-- [ ] **The rename** - run is "level" and level is "floor" on every screen. Anything still saying the old word?
+
+## First-time hints (2026-11-09)
+
+- [ ] **The six lines** - charges/health carry over, a refuge is one rest, a summon once per level, the Ultra gauge
+      is kept, cleared levels can be replayed (story map), the party is full (town). Each once per save, the first
+      time it matters (`docs/TUTORIAL.md`). Right moments, right words? All drafts. Seen in play: charges and summon;
+      the refuge, Ultra, replay and full-party lines only by their tests.
+- [ ] **Hints in the pause menu** - every line seen, oldest first. Does it read well? The town has no menu to show it in.
 
 ## Playtest notes, round of 2026-11-02 (built, not seen in play)
 
@@ -30,14 +37,6 @@ Most of it came out of playtest 3 (2026-10-26 to 2026-10-28).
       screen yet: only its rule is tested.
 - [ ] **The 14 late recipes** - does a late run feel worth chasing, are their prices fair, and do the agent-written texts read right?
 
-## Hub and menus
-
-- [ ] **Crafting at the Forge** (2026-10-29) - the Craft tab lists the Forge's three basic recipes plus
-      any found; have/need per input, gold on the right; Forge spends them and the item lands in the
-      Storehouse. Forging from a *worn* base puts the result on that hero. A recipe drop on a kill or a
-      floor clear (Emberfall, Chapel of Knives), and that it never drops again once known. The town's
-      gold pip on the Forge for newly found recipes.
-
 ## The owner's to-dos
 
 - [ ] **Boss finisher names** are placeholders: Bog Surge, Abyssal Tide, Death Nova, Acid Deluge, Coin
@@ -47,19 +46,3 @@ Most of it came out of playtest 3 (2026-10-26 to 2026-10-28).
       and the hit); change both.
 - [ ] **The Hero Workbook** still says "Heal -> Renew" for the Paladin's healer branch; the game's copy
       now says "Holy Touch -> Renew".
-
-## Room events in every biome (added 2026-10-31)
-
-- **Choked Passage: crashed on WebGL (itch.io).** Clean in the editor. Copy the browser console (F12) when it happens again.
-- **Door of Fire on Emberfall:** can a party beat the Prince (308 health) and two Elementals (73 each)? Is the chest worth the key?
-- **Walking into opened rooms:** every event that opens a room now takes the party straight in. Does that read well?
-- **Wall objects:** do the Sluice and the Door read as part of the wall, at any spot on it?
-- **Weighing Scale at 120 gold:** usually affordable when the party reaches it?
-- **Sewerwalker on the Rogue:** does it feel like a rogue set?
-- **Event density:** Reed Cage and Crucible at 25% per room on small floors. Too many events a floor?
-
-## The battle screen (2026-11-01)
-
-- A fight on every biome: do the units read as standing on the floor? Is 27% the right height for the band?
-- The command menu's two columns with the keyboard: Up/Down through the list, Left/Right across.
-- A party-replacing summon, a squad and an ally column on the new floor.

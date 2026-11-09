@@ -119,5 +119,14 @@ namespace Assets.Scripts.Tutorial
         EquipPotion = 28,
         BeltPacked = 29,
         BeltReady = 30,
+
+        // First-time hints (docs/TUTORIAL.md, "First-time hints"): one line, once per save, the first time
+        // the moment comes. Not steps - any save sees them - and each is kept for the pause menu's Hints.
+        ChargesLastTheLevel = 31, // a fight, the first time a hero opens Abilities
+        RefugeOnce = 32,          // a room, the first refuge entered with its rest still waiting
+        SummonOncePerLevel = 33,  // a fight, the first hero turn with a summon ready
+        UltraReady = 34,          // a fight, the first hero turn with an Ultra ready
+        RevisitAndFear = 35,      // the story map, the first time a cleared level can be replayed
+        PartyFull = 36,           // the town, the first time more heroes are owned than the party holds
     }
 }

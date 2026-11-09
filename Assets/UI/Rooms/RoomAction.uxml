@@ -49,6 +49,13 @@
             <ui:Label name="ability-banner-name" text="" class="cd-ability-banner__name" />
         </ui:VisualElement>
 
+        <!-- A first-time hint (docs/TUTORIAL.md, "First-time hints"): one line under the top banners, for
+             a few seconds, never in the way of a choice. Said once per save; the pause menu's Hints lists
+             every one seen. Shown by RoomActionUI.ShowHintOnce. -->
+        <ui:VisualElement name="hint-notice" class="cd-hint-notice cd-hidden" picking-mode="Ignore">
+            <ui:Label name="hint-notice-text" text="" class="cd-hint-notice__text" picking-mode="Ignore" />
+        </ui:VisualElement>
+
         <!-- Turn-order list (FFX-style, top-right): upcoming turns, current on top -->
         <ui:VisualElement name="turn-order" class="cd-turn-order cd-dock-top-right cd-hidden">
             <ui:Label name="turn-order-title" text="#ui.room.turn-order-title" class="cd-turn-order__title" />
@@ -191,6 +198,13 @@
             <ui:Button name="potion-back" text="#ui.common.back" class="cd-button cd-button--narrow" />
         </ui:VisualElement>
 
+        <!-- Every first-time hint seen so far, oldest first (pause menu, Hints). Filled by RoomActionUI.OpenHints. -->
+        <ui:VisualElement name="hints-window" class="cd-window cd-window--hints cd-dock-center cd-hidden">
+            <ui:Label text="#ui.room.hints-title" class="cd-title" />
+            <ui:ScrollView name="hints-list" class="cd-list cd-hints-list" mode="Vertical" />
+            <ui:Button name="hints-back" text="#ui.common.back" class="cd-button cd-button--wide" />
+        </ui:VisualElement>
+
         <!-- Pause overlay. Last in the document so it paints over everything else, and the only
              window that can come up on top of a fight. Holds what the hub owns between runs but
              the dungeon had no way to reach: the audio dials, and the way out.
@@ -198,7 +212,7 @@
              The audio rows carry the same element names as MainMenu.uxml's options-view, because
              AudioOptionsUI is a plain view-controller that queries its root by name - so the dungeon
              gets the hub's dials with no second implementation to drift. -->
-        <ui:VisualElement name="pause-window" class="cd-window cd-window--flush cd-dock-center cd-hidden">
+        <ui:VisualElement name="pause-window" class="cd-window cd-window--flush cd-window--pause cd-dock-center cd-hidden">
             <ui:Label text="#ui.room.paused" class="cd-title" />
 
             <!-- Resume first - the default cursor and the common case - then Map, the audio dials
@@ -206,6 +220,7 @@
             <ui:Button name="pause-resume" text="#ui.room.pause-resume" class="cd-button cd-button--wide" />
             <ui:Button name="pause-map" text="#ui.room.pause-map" class="cd-button cd-button--wide" />
             <ui:Button name="pause-potions" text="#ui.room.pause-potions" class="cd-button cd-button--wide" />
+            <ui:Button name="pause-hints" text="#ui.room.pause-hints" class="cd-button cd-button--wide" />
             <ui:Label text="#ui.room.audio" class="cd-section-head" />
             <!-- Each dial: a fixed label column, the nudge buttons either side of a 10-segment bar (one
                  segment per AudioOptions.Step, lit by AudioOptionsUI), the percentage after. Mute is a

@@ -144,6 +144,12 @@ namespace Assets.Scripts.Hub
         // The story map's one challenge warning, for the visit it is shown on; empty otherwise.
         private string _challengeWarning = string.Empty;
 
+        // The first-time hints the hub says (docs/TUTORIAL.md, "First-time hints"), for the visit they
+        // are shown on: the story map's revisit line, and the town's full-party line (checked once a visit).
+        private string _revisitHint = string.Empty;
+        private string _townHint = string.Empty;
+        private bool _townHintChecked;
+
         // Which view the party screen was opened from, so Back goes where the player came from.
         private bool _partyOpenedFromProgress;
 
@@ -1490,6 +1496,7 @@ namespace Assets.Scripts.Hub
                 SetShown(_lotView, false);
                 _campaignMap.Show(_runSaveData.RunKey, _runSaveData.CurrentLevelIndex);
                 WarnOfChallengeOnce();
+                HintRevisitOnce();
                 return;
             }
 
@@ -1820,6 +1827,14 @@ namespace Assets.Scripts.Hub
             {
                 text = _challengeWarning;
             }
+            else if (screen == TutorialScreen.CampaignMap && string.IsNullOrEmpty(text))
+            {
+                text = _revisitHint;
+            }
+            if (string.IsNullOrEmpty(text) && screen == TutorialScreen.Town)
+            {
+                text = TownHint();
+            }
             if (string.IsNullOrEmpty(text) && screen == TutorialScreen.Town)
             {
                 text = RecipeNudge();
@@ -1904,6 +1919,63 @@ namespace Assets.Scripts.Hub
             }
             _challengeWarning = line.Replace("{run}", CampaignOps.DisplayNameOf(run));
             meta.MarkChallengeWarned();
+        }
+
+        /// <summary>
+        /// The map was just opened: the first time it offers a cleared level to play again, say what a
+        /// revisit is (the Fear picker, Essence) for this visit, and write it down. Waits a visit when the
+        /// challenge warning has the banner, and until the tutorial is over.
+        /// </summary>
+        private void HintRevisitOnce()
+        {
+            _revisitHint = string.Empty;
+            if (_tutorial == null || _campaignMap == null || !MetaProgressManager.HasInstance
+                || !string.IsNullOrEmpty(_challengeWarning))
+            {
+                return;
+            }
+            var meta = MetaProgressManager.Instance;
+            if (!meta.TutorialFinished || meta.HasSeenHint(TutorialCue.RevisitAndFear)
+                || !TutorialHints.OffersRevisit(_campaignMap.States))
+            {
+                return;
+            }
+            string line = _tutorial.TextFor(TutorialCue.RevisitAndFear);
+            if (string.IsNullOrEmpty(line))
+            {
+                return;
+            }
+            _revisitHint = line;
+            meta.MarkHintSeen(TutorialCue.RevisitAndFear);
+        }
+
+        /// <summary>
+        /// The town's first-time line, checked once a visit: the first time more heroes are owned than
+        /// the party takes down, say that the campfire chooses who goes and that XP goes only to them.
+        /// Kept for the rest of the visit once said.
+        /// </summary>
+        private string TownHint()
+        {
+            if (_townHintChecked)
+            {
+                return _townHint;
+            }
+            _townHintChecked = true;
+            var meta = MetaProgressManager.Instance;
+            if (_tutorial == null || _partyRoster == null || !meta.TutorialFinished
+                || meta.HasSeenHint(TutorialCue.PartyFull))
+            {
+                return _townHint;
+            }
+            int owned = HeroRoster.GetOwnedKeys(_partyRoster).Count;
+            string line = _tutorial.TextFor(TutorialCue.PartyFull);
+            if (!TutorialHints.PartyIsFull(owned, meta.GetPartyCap()) || string.IsNullOrEmpty(line))
+            {
+                return _townHint;
+            }
+            _townHint = line;
+            meta.MarkHintSeen(TutorialCue.PartyFull);
+            return _townHint;
         }
 
         /// <summary>

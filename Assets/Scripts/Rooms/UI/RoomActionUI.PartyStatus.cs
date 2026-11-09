@@ -262,7 +262,12 @@ namespace Assets.Scripts.Rooms
             }
             var tutorial = UnityEngine.Resources.Load<Tutorial.TutorialSO>(Tutorial.TutorialSO.ResourcePath);
             string text = tutorial != null ? tutorial.TextFor(Tutorial.TutorialCue.FirstDeath) : string.Empty;
-            return string.IsNullOrEmpty(text) ? string.Empty : "\n\n" + text;
+            if (string.IsNullOrEmpty(text))
+            {
+                return string.Empty;
+            }
+            MetaProgressManager.Instance.MarkHintSeen(Tutorial.TutorialCue.FirstDeath);
+            return "\n\n" + text;
         }
 
         /// <summary>

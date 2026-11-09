@@ -2864,6 +2864,58 @@
 
 /* The enemy ability banner: one line, top-center, a plain dark bar like FFX's, so it never reads
    as the summon banner's gold. */
+/* A first-time hint in the dungeon (docs/TUTORIAL.md): under the top banners (they sit at 48px), gold-
+   framed like the town's tutorial banner but smaller - it informs, it does not point. */
+.cd-hint-notice {
+    position: absolute;
+    top: 118px;
+    left: 50%;
+    translate: -50% 0;
+    max-width: 700px;
+    padding: 8px 18px;
+    background-color: rgba(9, 5, 18, 0.94);
+    border-width: 2px;
+    border-color: var(--cd-gold);
+    border-radius: 8px;
+}
+
+.cd-hint-notice__text {
+    font-size: 18px;
+    color: var(--cd-text-light);
+    white-space: normal;
+    -unity-text-align: middle-center;
+}
+
+/* The dungeon's pause menu: four buttons, the audio dials and the way out are taller than a window's
+   usual 62% cap, and squeezing it crushed the dial rows into each other (2026-11-09, with Hints). */
+.cd-window--pause {
+    max-height: 94%;
+}
+
+.cd-window--pause > * {
+    flex-shrink: 0;
+}
+
+/* The pause menu's Hints window: every line seen, oldest first. */
+.cd-window--hints {
+    width: 720px;
+    max-height: 80%;
+}
+
+.cd-hints-list {
+    flex-shrink: 1;
+    margin-bottom: 10px;
+}
+
+.cd-hints-entry {
+    font-size: 17px;
+    color: var(--cd-text-light);
+    white-space: normal;
+    padding: 8px 4px;
+    border-bottom-width: 1px;
+    border-color: rgba(214, 168, 64, 0.35);
+}
+
 .cd-ability-banner {
     position: absolute;
     top: 48px;

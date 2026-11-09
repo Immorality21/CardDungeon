@@ -35,7 +35,7 @@ effects, threat, enemy verbs and the health/event plumbing are in (`plans/COMBAT
 
 What is live now:
 
-1. **Playtest** — `TO_PLAYTEST.md`, including the events playtest.
+1. **Playtest** — `TO_PLAYTEST.md` (the events, hub/menu and battle-screen rounds were played 2026-11-09).
 2. **Balance** (§0–§0g, `BALANCING.md`) — passes keep running; a pass starts from design, not dials
    (below). The balance tool's misread floors are under "Later, small".
 3. **The backlog below** — "Next up" first.
@@ -282,15 +282,9 @@ backlog.**
 
 ### Next up
 
-- **Rethink Ultras — first** (owner, 2026-10-30). The gauge should **keep its charge between fights**
-  (today it empties at the end of each), and Ultras should be **unlocked from the start** instead of
-  bought on the sphere grid. A broader rethink, not a tweak: `plans/COMBAT_DEPTH.md` §13. **Decided
-  2026-10-30:** one fill rule for all (damage dealt, damage taken, healing done; the Mage stays on
-  Focus), the charge lasts the run, one Ultra free per hero with more in some branches, old Ultra nodes
-  decided hero by hero; taking damage fills fastest; starting Ultras picked (§13). **Built
-  2026-10-30:** starting Ultras moved to the trunk (free), the gauge kept for the run and filled by
-  taken/dealt/healed. To do: see it in play. **The remaining Ultra nodes on the grid are later on the
-  roadmap** (owner, 2026-10-31), hero by hero; they do not block anything.
+- **First-time hints** (owner, 2026-11-09) - ✅ **built the same day**: one line, once per save, the first time
+  charges, a refuge, a summon, an Ultra, a replay or a full party matters, and a Hints list in the pause menu
+  (`TUTORIAL.md`, "First-time hints"). Open: combos (named when they first fire, or left hidden?), and Hints in town.
 - **Summons are too short-lived** (owner, playtest 2026-11-04) — ✅ **decided and built 2026-11-08**: a
   summon is **once per level** (the code's run; no grid sells a second use, refuges refill nothing) and
   every unit summon **stays until it falls** (`SummonOps.UntilDefeated`). The +1 charge / +1 turn nodes
@@ -299,8 +293,6 @@ backlog.**
   summon budget harness (`BALANCING.md` §5aa) - a party-replacer that stays the whole fight may carry fights
   alone - and teach the simulator to use summon `Actions`. Later: grid nodes that teach a summon a move.
   `plans/SPECIALIZATION.md` §4b.
-- **Rename on screen: run → level, level → floor** (owner, 2026-11-08). Player-facing text and new doc
-  writing only; code, assets and save files keep Run/Level.
 - **No way back to town mid-run** (owner, 2026-10-30) — ✅ **built the same day**: a mid-run level
   clear offers only Continue, the pause menu's Leave became **Quit to Title** (the title's Continue
   goes straight back down), and the Threshold is three runs (Dungeon Entrance → Upper Halls → The
@@ -324,6 +316,8 @@ backlog.**
 
 ### Later, small
 
+- **The Choked Passage crashed on WebGL** (itch.io build, 2026-10-31), clean in the editor. Copy the browser
+  console (F12) when it happens again. Moved here from `TO_PLAYTEST.md` when the events were played (2026-11-09).
 - **The balance tool reads some floors wrong** (owner, 2026-10-31, from playtesting): some were harder in play than
   the simulator says. The bot agrees on The Broken Orrery (0% against 27% wipes) and The Counting Room (18% against
   51%, mostly one five-body room, not the boss); Sunken Depths and the Lich match. To separate party from model, run the
@@ -355,7 +349,7 @@ backlog.**
 | **9** | Status effects — over-time, Silence, the cure loop | ✅ shipped 2026-09-03; **Blind + per-debuff apply chance 2026-10-09**; next: **status resistances** - gear (and later other sources) that grant immunity or resistance to an ailment (owner, 2026-10-09) |
 | **11** | Threat — a reason for a defensive build | ✅ threat shipped 2026-09-28; balance model + threat UI open |
 | **12** | Enemy action vocabulary — the missing verbs | ✅ **BuffAlly, Guard, Summon shipped 2026-10-08** (Bog Shaman, Steam Automaton, Gilded Hoarder); Steal / Flee dropped by the owner |
-| **13** | Hero identity — the Ultra gauge | unique commands **deleted** 2026-09-08 — a command *is* an ability; the **Ultra** gauge (working name for a Limit/Overdrive, 2026-10-04) is what is left; per-hero styles collected in Hero Vision. **Rethink next (owner, 2026-10-30):** the gauge keeps its charge between fights, Ultras unlocked from the start — see Next up |
+| **13** | Hero identity — the Ultra gauge | unique commands **deleted** 2026-09-08 — a command *is* an ability; the **Ultra** gauge (working name for a Limit/Overdrive, 2026-10-04) is what is left; per-hero styles collected in Hero Vision. **rethought and built 2026-10-30** (the charge lasts the level, a free starting Ultra per hero), **playtested and fine for now 2026-11-09** (owner); the remaining Ultra nodes on the grid are later, hero by hero |
 
 ### [Events and reactions](plans/EVENTS.md)
 
@@ -406,7 +400,7 @@ backlog.**
 | **1** | Spike: one biome (crypt) on one floor, sandbox only (`Sandbox/RoomSpike`) | ✅ **built 2026-10-30, signed off by the owner** |
 | **7** | **Tile walking, moved first** (owner, 2026-10-30): arrows/WASD walk, doors open by walking through them, doors drawn by the tilemap | ✅ **built 2026-10-30**: clicks walk, contents are solid and used with Enter, doors swing, all nine heroes have 4-direction walk cycles; **next: phase 2** |
 | **2** | Biomes and props on every floor | ✅ **built 2026-10-31**: five biomes on every level, foes a full tile, saves stamped, manual layouts converted, the old look retired |
-| **3** | Events you can see, per biome and level | ✅ **all five biomes built 2026-10-31** from the owner's workbook; Shrine dropped for now (owner). **Next: the events playtest** (`TO_PLAYTEST.md`), and the Choked Passage's WebGL crash |
+| **3** | Events you can see, per biome and level | ✅ **all five biomes built 2026-10-31** from the owner's workbook; Shrine dropped for now (owner). **playtested by the owner 2026-11-09**; open: the Choked Passage's WebGL crash (Later, small) |
 | **4-6, 8** | Authored shapes · hidden rooms · branching routes · Elites | later |
 | — | **No more room bar** (owner, 2026-10-31): every room action triggered by interacting with its object | ✅ **built 2026-10-31**; every object is kept within reach, since nothing else opens it now |
 | — | **More room events, per biome** (owner, 2026-10-31) | ✅ [Room Event Workbook](https://claude.ai/artifact/94jVJSDSqNPnwWWqUD9z6H) built, 31 events. Open: **more curses on the Drowned Chapel's floors** (owner): A Candle Under Water's fail is the only one, so the Drowned Font usually has nothing to wash; it heals as well for now |
@@ -434,6 +428,14 @@ backlog.**
 
 ## Shipped ledger
 
+- **Ultras rethought** (2026-10-30, owner; playtested and fine for now 2026-11-09) — `plans/COMBAT_DEPTH.md` §13. One fill
+  rule for all (damage taken fills fastest, then dealt and healing done; the Mage stays on Focus), the gauge keeps its
+  charge for the whole level, one Ultra free per hero on the trunk. The remaining Ultra nodes on the grid are later,
+  hero by hero; they block nothing.
+- **On screen, a run is a "level" and a run's level is a "floor"** (2026-11-08, owner) — root `CLAUDE.md`. Player text
+  and new doc writing only; code, assets and save files keep Run/Level.
+- **Playtested by the owner 2026-11-09:** the room events in every biome, the hub and menu changes (crafting at the
+  Forge), and the FFIV-style battle screen.
 - **The test boss: the Barrow King** (2026-11-02, owner) — the Enemies guide, `BALANCING.md` §5ba. An optional
   one-floor run after the Catacombs, a wall on purpose (about 95% wipes for a party that came straight there), hand-drawn, a refuge before the throne; three phases. Two engine pieces:
   a reaction on crossing a health line (`TriggerKind.OnHealthBelow`, the phase change) and a wound-up, named

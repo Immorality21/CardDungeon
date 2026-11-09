@@ -624,6 +624,7 @@ namespace Assets.Scripts.Progression
                 return;
             }
             _saveData.ChallengeWarned = true;
+            MarkHintSeen(Tutorial.TutorialCue.ChallengeAhead);
             Save();
         }
 
@@ -637,7 +638,32 @@ namespace Assets.Scripts.Progression
                 return;
             }
             _saveData.ReplayHintShown = true;
+            MarkHintSeen(Tutorial.TutorialCue.ReplayToGetStronger);
             Save();
+        }
+
+        /// <summary>The first-time hints already said, oldest first (<c>Tutorial.TutorialCue</c> values).</summary>
+        public IReadOnlyList<int> HintsSeen => _saveData.HintsSeen ?? (IReadOnlyList<int>)System.Array.Empty<int>();
+
+        public bool HasSeenHint(Tutorial.TutorialCue cue)
+        {
+            return _saveData.HintsSeen != null && _saveData.HintsSeen.Contains((int)cue);
+        }
+
+        /// <summary>A first-time hint was said. Persists immediately; returns false when it had been already.</summary>
+        public bool MarkHintSeen(Tutorial.TutorialCue cue)
+        {
+            if (HasSeenHint(cue))
+            {
+                return false;
+            }
+            if (_saveData.HintsSeen == null)
+            {
+                _saveData.HintsSeen = new List<int>();
+            }
+            _saveData.HintsSeen.Add((int)cue);
+            Save();
+            return true;
         }
 
         /// <summary>Whether the tutorial's return to the Hall of Progression has been walked.</summary>

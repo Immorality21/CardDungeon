@@ -275,7 +275,7 @@ through the spent object, not by a real door on the floor's map. **Stand-ins to 
 "rats" are a Ghoul (no rat enemy), the statue is a Stone Sentinel, the Apprentice's wraith is a Wight, the Thirteenth
 Step's fight is the Lich. New gear copies an existing item's numbers: not balanced yet.
 
-**Next from here:** the events playtest (`docs/TO_PLAYTEST.md`), the other biomes being built (below). The *Cleanup*
+**Next from here:** the events were playtested by the owner on 2026-11-09 (the Choked Passage's WebGL crash is still open, `NEXT_STEPS.md` "Later, small"); the other biomes being built (below). The *Cleanup*
 below is done.
 
 ## Phase 3: the other four biomes (2026-10-31)

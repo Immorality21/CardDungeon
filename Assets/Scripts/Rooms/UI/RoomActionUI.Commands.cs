@@ -56,6 +56,28 @@ namespace Assets.Scripts.Rooms
 
             SetShown(_heroBar, true);
             FocusRoot();
+            HintAtHeroTurn(hero);
+        }
+
+        /// <summary>
+        /// The first-time hints a hero's turn can bring (docs/TUTORIAL.md): the first time a summon or an
+        /// Ultra is there to use, before the player decides whether to spend it.
+        /// </summary>
+        private void HintAtHeroTurn(ICombatUnit hero)
+        {
+            if (!(hero is Heroes.Hero heroComponent))
+            {
+                return;
+            }
+            var summons = DungeonManager.HasInstance ? DungeonManager.Instance.Summons : null;
+            if (summons != null && summons.HasAnyUsable(heroComponent.HeroKey))
+            {
+                ShowHintOnce(Tutorial.TutorialCue.SummonOncePerLevel);
+            }
+            if (CombatManager.Instance.KnownUltras(hero).Count > 0 && CombatManager.Instance.CanUseUltra(hero))
+            {
+                ShowHintOnce(Tutorial.TutorialCue.UltraReady);
+            }
         }
 
         private void OnHeroAttack()
@@ -92,6 +114,7 @@ namespace Assets.Scripts.Rooms
                 slots.Add(new Cards.MagicSlot { Magic = ability, Charges = 1, MaxCharges = 1, Unlimited = true });
             }
             CombatManager.Instance.RequestMagicSlots(_currentHeroTurn, slots);
+            ShowHintOnce(Tutorial.TutorialCue.ChargesLastTheLevel);
         }
 
         /// <summary>The hero's Ultras, always as a list - even one - as FFX's Overdrive menu does, so
@@ -688,6 +711,14 @@ namespace Assets.Scripts.Rooms
             if (PotionsOpen)
             {
                 _potions.HandleKey(evt);
+                evt.StopPropagation();
+                return;
+            }
+
+            // Opened from pause like the map, and never up with it.
+            if (HintsOpen)
+            {
+                HandleHintsKey(evt);
                 evt.StopPropagation();
                 return;
             }

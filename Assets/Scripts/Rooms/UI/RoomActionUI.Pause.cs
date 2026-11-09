@@ -38,7 +38,7 @@ namespace Assets.Scripts.Rooms
         /// </summary>
         private bool CanOpenPause()
         {
-            if (_pauseWindow == null || IsShown(_pauseWindow) || IsShown(_mapWindow) || PotionsOpen || IsDialogUp())
+            if (_pauseWindow == null || IsShown(_pauseWindow) || IsShown(_mapWindow) || PotionsOpen || HintsOpen || IsDialogUp())
             {
                 return false;
             }
@@ -133,7 +133,7 @@ namespace Assets.Scripts.Rooms
         private bool CanOpenMap()
         {
             // A side room is not on the floor's map.
-            if (_mapWindow == null || IsShown(_mapWindow) || PotionsOpen || IsDialogUp() || (_currentRoom != null && _currentRoom.IsSideRoom))
+            if (_mapWindow == null || IsShown(_mapWindow) || PotionsOpen || HintsOpen || IsDialogUp() || (_currentRoom != null && _currentRoom.IsSideRoom))
             {
                 return false;
             }

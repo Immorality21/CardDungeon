@@ -285,6 +285,7 @@ namespace Assets.Scripts.Rooms
             _summonBannerName = root.Q<Label>("summon-banner-name");
             _abilityBanner = root.Q<VisualElement>("ability-banner");
             _abilityBannerName = root.Q<Label>("ability-banner-name");
+            BindHints(root);
 
             _fightBtn.clicked += OnFight;
             _fleeBtn.clicked += OnFlee;
@@ -453,6 +454,10 @@ namespace Assets.Scripts.Rooms
             if (!hasEnemy)
             {
                 SettleRoom();
+                if (room.Kind == RoomKind.Rest && room.HasPendingPayload)
+                {
+                    ShowHintOnce(Tutorial.TutorialCue.RefugeOnce);
+                }
             }
 
             // Boss rooms: announce the boss and remove Flee — the climax can't be skipped.
@@ -515,6 +520,8 @@ namespace Assets.Scripts.Rooms
             _mapFromPause = false;
             CloseMap();
             _potions?.Close();
+            _hintsFromPause = false;
+            CloseHints();
             ClosePause();
         }
 

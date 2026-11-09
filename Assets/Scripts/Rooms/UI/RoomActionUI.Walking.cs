@@ -93,7 +93,7 @@ namespace Assets.Scripts.Rooms
             // The scrim follows the dialogs rather than being set at each of the many places one
             // opens, so no path can leave the room dimmed or a dialog undimmed.
             bool dialogUp = IsShown(_eventWindow) || IsShown(_detailWindow) || IsShown(_mapWindow) || IsShown(_pauseWindow)
-                || PotionsOpen;
+                || PotionsOpen || HintsOpen;
             if (IsShown(_dialogScrim) != dialogUp)
             {
                 SetShown(_dialogScrim, dialogUp);
@@ -121,6 +121,12 @@ namespace Assets.Scripts.Rooms
             if (IsShown(_detailWindow))
             {
                 _detailNav?.SelectFirst();
+            }
+
+            // The Hints window's only button is Back, so Enter must find it without an arrow press.
+            if (HintsOpen)
+            {
+                _hintsNav?.SelectFirst();
             }
 
             var text = NavHintText();
@@ -167,7 +173,7 @@ namespace Assets.Scripts.Rooms
         /// </summary>
         private bool OwnsNavigationKeys()
         {
-            return IsShown(_pauseWindow) || IsShown(_mapWindow) || PotionsOpen || IsShown(_heroBar)
+            return IsShown(_pauseWindow) || IsShown(_mapWindow) || PotionsOpen || HintsOpen || IsShown(_heroBar)
                 || IsShown(_combatBar) || IsDialogUp() || DoorNavActive();
         }
 
@@ -181,7 +187,7 @@ namespace Assets.Scripts.Rooms
         {
             return _doorsLive
                 && !IsShown(_combatBar) && !IsShown(_heroBar) && !IsShown(_pauseWindow)
-                && !IsShown(_mapWindow) && !PotionsOpen && !IsShown(_detailWindow) && !IsShown(_eventWindow)
+                && !IsShown(_mapWindow) && !PotionsOpen && !HintsOpen && !IsShown(_detailWindow) && !IsShown(_eventWindow)
                 && !IsShown(_victoryWindow) && !IsShown(_levelWindow);
         }
 

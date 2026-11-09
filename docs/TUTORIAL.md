@@ -140,6 +140,32 @@ banner says so (`TutorialCue.ChallengeAhead`; `{run}` in the line becomes the ru
 Not a step - any save sees it, like the first-death lesson. Rule: `TutorialOps.ChallengeToWarnOf`;
 wiring: `HubManager.WarnOfChallengeOnce`.
 
+### First-time hints (2026-11-09, owner)
+
+The guided steps teach the town. **The rules that break RPG habits** were taught nowhere, so each now gets
+**one line, once per save, the first time it matters** - not a step, any save sees it:
+
+| cue | said | where |
+|---|---|---|
+| `ChargesLastTheLevel` | ability charges and health carry over; only a refuge or a new level restores them | a fight, the first time a hero opens Abilities |
+| `RefugeOnce` | a refuge heals and restores charges, once | the first refuge entered with its rest waiting |
+| `SummonOncePerLevel` | once per level, stays until it falls, save it | the first hero turn with a summon ready |
+| `UltraReady` | the gauge keeps its charge for the level; damage taken fills it fastest | the first hero turn with an Ultra ready |
+| `RevisitAndFear` | cleared levels can be replayed, pay Essence (Awakenings), Fear raises it | the story map, the first time it offers a replay (after the tutorial; waits a visit when the challenge warning has the banner) |
+| `PartyFull` | more heroes than places; the campfire picks who goes; only they earn XP | the town, the first time more heroes are owned than the cap (after the tutorial) |
+
+- **Rules** are the pure `TutorialHints` (`TutorialHintsTests`); **seen** is `MetaProgressSaveData.HintsSeen`
+  (cue values, in the order seen), written by `MetaProgressManager.MarkHintSeen`. The three older lines said once
+  (first death, challenge warning, replay hint) are recorded there too, so the log holds them.
+- **In the dungeon** the line is a notice under the top banners (`hint-notice`, `RoomActionUI.ShowHintOnce`):
+  9 seconds, never takes the keyboard or blocks a choice, two at once take turns. **In town** it is the tutorial
+  banner (`HubManager.HintRevisitOnce`, `TownHint`), for that visit, below the guided steps' own lines.
+- **The pause menu's Hints** (`hints-window`, `RoomActionUI.OpenHints`) lists every line seen, oldest first;
+  Back / Escape return to pause. The town has no Escape menu, so it is only reachable in the dungeon for now.
+- **Words** are `tutorial.<cue>.text` in the text table (cues 31-36 in `Tutorial.asset`'s Lines); all are first drafts.
+- **Not taught on purpose**: combos (the owner has not decided between naming them once they fire and leaving them
+  hidden), threat, material sources, recipes.
+
 ### Hand-testing it: `Tools ▸ Tutorial` (2026-10-25)
 
 - **Play From New Game (throwaway save)** - play mode from the title screen against a fresh
@@ -183,6 +209,8 @@ Roughly in the order they bite. The first two are decisions for the owner.
 - [ ] **Main Menu is locked during the guided steps**, as asked — so the only way out of a guided
       town is Alt-F4. Fine while the steps are this short; revisit if a step ever gets long. (Options
       is only reachable from the title screen today.)
+- [ ] **Hints in town.** The pause menu's Hints window exists only in the dungeon; the town has no
+      Escape menu to hang it on (2026-11-09).
 - [ ] **Skip and replay.** §20 wants both; neither exists. Skip = `FinishTutorial()` behind a button
       on the banner; replay = an Options toggle that clears both flags. *(The dev-only half is done:
       `Tools ▸ Tutorial ▸ Play From New Game`, 2026-10-25.)*

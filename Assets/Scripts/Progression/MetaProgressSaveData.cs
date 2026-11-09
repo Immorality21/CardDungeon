@@ -109,6 +109,10 @@ namespace Assets.Scripts.Progression
         // Visiting is the whole step - nothing has to be bought - so it is stored, not derived.
         public bool TutorialHallRevisited;
 
+        // The first-time hints already said (Tutorial.TutorialCue values, in the order they were seen),
+        // so each is said once per save and the pause menu's Hints window can list them again.
+        public List<int> HintsSeen = new List<int>();
+
         // Potion potency steps bought at the Merchant (PotionBeltSO.PotencyTiers). The belt's size
         // lives with the other carry caps in ResourceMaximums.json.
         public int PotionPotency;
