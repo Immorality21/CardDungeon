@@ -84,6 +84,10 @@ MonoBehaviour:
     - Type: 7
       Amount: 29
   AttackStat: 3
+  RangedAttack: 1
+  AttackProjectile: {fileID: 21300000, guid: 7fce12d2d12a4cc5bfa70f3b8a500ddf, type: 3}
+  AttackProjectileArtAngle: 45
+  AttackProjectileColor: {r: 1, g: 1, b: 1, a: 1}
   Momentum:
     PercentPerStack: 0
     MaxStacks: 0

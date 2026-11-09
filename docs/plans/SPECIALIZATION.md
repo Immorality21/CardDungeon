@@ -737,7 +737,7 @@ answers.
 
 - **Node:** one step past the `warrior-a-hold` tip, depth 12: **410 XP + 2 Void Shard + 3 Mire Hide**.
   It mirrors the Boar past `warrior-b-edge`, so both Warrior branches now end in a summon.
-- **Stats:** HP **250%** · Endurance **150%** · Strength **60%** · Agility **80%** · Intelligence and
+- **Stats:** HP **200%** · Endurance **100%** *(were 250% / 150% until 2026-11-09: both halves of its effective health grew with the Warrior, so late bosses could not break it; the two HP upgrades went +50 → +25 too)* · Strength **60%** · Agility **80%** · Intelligence and
   Spirit **100%** (so its abilities scale sensibly) · resistances copied from the summoner. For a
   sense of size: a ~60 HP Warrior brings a ~150 HP body.
 - **Stays:** **3 of its own turns**, the immediate first one included. **Charges:** 1.

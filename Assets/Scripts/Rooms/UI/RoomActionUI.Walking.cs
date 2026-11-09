@@ -153,11 +153,6 @@ namespace Assets.Scripts.Rooms
                 return Loc.Get("room.keys.combat-bar");
             }
 
-            if (IsShown(_heroBar))
-            {
-                return Loc.Get("room.keys.hero-bar");
-            }
-
             if (DoorNavActive())
             {
                 return Loc.Get("room.keys.doors");

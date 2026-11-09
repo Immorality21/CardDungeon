@@ -70,6 +70,20 @@ namespace Assets.Scripts.Heroes
                  "useless with a stick. None falls back to Strength.")]
         public StatType AttackStat = StatType.Strength;
 
+        [Tooltip("A ranged hero (the Mage, the Ranger): the basic Attack is shot across the stage " +
+                 "instead of a step forward. Presentation only - the damage is the same.")]
+        public bool RangedAttack;
+
+        [Tooltip("RangedAttack: what flies - an arrow, a bolt. Empty uses the glowing bolt spells use.")]
+        public Sprite AttackProjectile;
+
+        [Tooltip("RangedAttack: the way the projectile art points, in degrees (0 = to the right), so " +
+                 "it flies head first. An arrow drawn tip to the top right is 45.")]
+        public float AttackProjectileArtAngle;
+
+        [Tooltip("RangedAttack: tints the projectile. White keeps the art's own colours.")]
+        public Color AttackProjectileColor = Color.white;
+
         /// <summary>
         /// <see cref="AttackStat"/> with the nonsense cases folded away: unset, or any stat that is a
         /// pool rather than an output, both mean Strength. Lives here rather than at each reader so

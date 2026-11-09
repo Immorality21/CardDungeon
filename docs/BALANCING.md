@@ -3728,3 +3728,14 @@ the Drowned March, the Barrow Throne and the Ashen Deep. 7 wipes in 16 attempts,
   spent every summon in the Slag Halls and met Emberfall's boss with none: 38% -> 1%. Twice the Lion went on a
   floor-1 or floor-2 emergency at the Catacombs and the Lich fight had nothing left.
 - Not measured: none of this is in the simulator, which plays a summon's Signature and Attack only.
+
+## §5bd — The Golem scaled twice with the Warrior (2026-11-09)
+
+Owner's playtest: as the Warrior grew, the Cairn Golem became hard to break, even for bosses. It copies **two**
+halves of effective health, max health (250%, 350% with both upgrades) **and** Endurance (150%), and they multiply.
+A Warrior with 200 HP and 30 END has 500 effective HP against physical hits; that Golem had about 2,250, 4.5 times as much.
+Now **HP 200% · END 100%**, and the two HP upgrade nodes are **+25 each** (they were +50). Fully upgraded that is about
+1,250, 2.5 times the Warrior. **The lesson: a unit summon should multiply only one of the two halves of effective health.**
+In 2 bot games over the whole campaign (seed 4200, one of them Golem-first), every Golem fight ended with the Golem down
+after 3-4 of its own turns. In the §5bc run it had stayed through whole boss fights. Not measured: whether that is now too
+short at a boss. The bot still spends it on trash at half health.

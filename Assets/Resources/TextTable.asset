@@ -6026,11 +6026,6 @@ MonoBehaviour:
     - "\u2190 \u2192 choose \xB7 Enter confirm \xB7 step back out to flee"
     Reviewed: 0
     Note: Keyboard hint while the Fight/Flee bar is up
-  - Key: room.keys.hero-bar
-    Values:
-    - "\u2191\u2193 choose \xB7 Enter confirm"
-    Reviewed: 0
-    Note: Keyboard hint while the combat command window is up
   - Key: room.keys.doors
     Values:
     - "Arrows / WASD walk \xB7 Enter use \xB7 P potions"
@@ -6186,21 +6181,6 @@ MonoBehaviour:
     - None
     Reviewed: 0
     Note: Victory window loot row value when nothing dropped
-  - Key: room.victory.way-out
-    Values:
-    - The way out
-    Reviewed: 0
-    Note: Victory window row label after the run's last level
-  - Key: room.victory.way-down
-    Values:
-    - The way down
-    Reviewed: 0
-    Note: Victory window row label after a level's exit fight
-  - Key: room.victory.way-open
-    Values:
-    - open
-    Reviewed: 0
-    Note: Victory window row value for the way down/out
   - Key: room.hud.level-default
     Values:
     - The Dungeon

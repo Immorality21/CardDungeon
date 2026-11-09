@@ -310,8 +310,18 @@ namespace Assets.Scripts.Rooms
                         new Color(0.75f, 0.85f, 1f), 0.14f);
                 }
             }
-            CombatAudio.Play(CombatSound.MeleeSwing);
-            yield return LungeAnimation(attacker.Transform, lungeDirection);
+            // A ranged hero (the Mage, the Ranger) shoots the blow across the stage instead of stepping in.
+            var ranged = attacker is Hero shooter && shooter.HeroSO != null && shooter.HeroSO.RangedAttack ? shooter.HeroSO : null;
+            if (ranged != null && attacker.Transform != null && target.Transform != null)
+            {
+                CombatAudio.Play(CombatSound.MagicCast, 0.7f);
+                yield return ShootAnimation(attacker.Transform.position, target.Transform.position, ranged);
+            }
+            else
+            {
+                CombatAudio.Play(CombatSound.MeleeSwing);
+                yield return LungeAnimation(attacker.Transform, lungeDirection);
+            }
 
             // A basic attack is always physical: a blinded attacker may miss it outright, and then
             // the target's Luck may dodge it (DefenseRules).
@@ -412,6 +422,43 @@ namespace Assets.Scripts.Rooms
 
             yield return new WaitForSecondsRealtime(crit ? 0.075f : 0.045f);
 
+        }
+
+        /// <summary>
+        /// A ranged hero's basic Attack: the projectile flies from the hero to the target on a shallow
+        /// arc, turned head first, and the hit lands as it arrives. Shorter and flatter than an
+        /// ability's bolt, so a basic attack stays as quick as the lunge it replaces.
+        /// </summary>
+        private IEnumerator ShootAnimation(Vector3 from, Vector3 to, HeroSO hero)
+        {
+            var go = new GameObject("AttackProjectile");
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sprite = hero.AttackProjectile != null ? hero.AttackProjectile : CombatIcons.Get("burst");
+            sr.color = hero.AttackProjectileColor;
+            sr.sortingOrder = 850;
+            go.transform.localScale = Vector3.one * 0.35f;
+            go.transform.position = from;
+
+            Vector3 control = (from + to) * 0.5f + Vector3.up * 0.4f;
+            const float duration = 0.28f;
+            float elapsed = 0f;
+            Vector3 previous = from;
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                float p = Mathf.Clamp01(elapsed / duration);
+                Vector3 position = Vector3.Lerp(Vector3.Lerp(from, control, p), Vector3.Lerp(control, to, p), p);
+                Vector2 direction = position - previous;
+                if (direction.sqrMagnitude > 0.000001f)
+                {
+                    float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+                    go.transform.rotation = Quaternion.Euler(0f, 0f, angle - hero.AttackProjectileArtAngle);
+                }
+                go.transform.position = position;
+                previous = position;
+                yield return null;
+            }
+            Destroy(go);
         }
 
         private IEnumerator LungeAnimation(Transform unit, Vector3 direction)

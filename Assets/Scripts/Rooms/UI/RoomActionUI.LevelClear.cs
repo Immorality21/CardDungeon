@@ -108,12 +108,6 @@ namespace Assets.Scripts.Rooms
                 _victoryRewards.Add(MakeVictoryRow(Loc.Get("room.victory.loot"), Loc.Get("room.victory.loot-none")));
             }
 
-            if (result.LevelCleared)
-            {
-                // After the run's last boss there is no further floor - the stairs lead out.
-                _victoryRewards.Add(MakeVictoryRow(result.RunCompleted ? Loc.Get("room.victory.way-out") : Loc.Get("room.victory.way-down"), Loc.Get("room.victory.way-open")));
-            }
-
             if (_victoryRewards is ScrollView rewardsScroll)
             {
                 rewardsScroll.scrollOffset = Vector2.zero;

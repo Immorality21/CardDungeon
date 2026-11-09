@@ -884,7 +884,7 @@ MonoBehaviour:
     UpgradeAmount: 1
     GrantedSummonKey: CairnGolem
     GrantedUltraKey: 
-    SummonAmount: 50
+    SummonAmount: 25
     Neighbors:
     - warrior-a-hold
   - Key: warrior-golem-stay
@@ -906,7 +906,7 @@ MonoBehaviour:
     UpgradeAmount: 1
     GrantedSummonKey: CairnGolem
     GrantedUltraKey: 
-    SummonAmount: 50
+    SummonAmount: 25
     Neighbors:
     - warrior-golem-bulk
   - Key: warrior-golem-charge

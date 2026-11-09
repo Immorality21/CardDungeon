@@ -43,9 +43,9 @@ MonoBehaviour:
   StatPercents:
     Values:
     - Type: 7
-      Amount: 250
+      Amount: 200
     - Type: 2
-      Amount: 150
+      Amount: 100
     - Type: 1
       Amount: 60
     - Type: 3
