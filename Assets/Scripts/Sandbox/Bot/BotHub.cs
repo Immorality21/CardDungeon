@@ -45,7 +45,7 @@ namespace Assets.Scripts.Sandbox.Bot
             InventoryManager.Instance.Save();
             if (IsBuilt(hub, HubService.SphereGrid))
             {
-                SpendXp(heroes, visit);
+                SpendXp(heroes, profile, visit);
             }
 
             visit.GoldLeft = MetaProgressManager.Instance.Gold;
@@ -268,7 +268,7 @@ namespace Assets.Scripts.Sandbox.Bot
             return HeroRoster.GetSelectedHeroes(roster, cap);
         }
 
-        private static void SpendXp(List<HeroSO> heroes, BotHubVisit visit)
+        private static void SpendXp(List<HeroSO> heroes, BotProfile profile, BotHubVisit visit)
         {
             foreach (var hero in heroes.Where(h => h != null && h.SphereGrid != null))
             {
@@ -277,6 +277,11 @@ namespace Assets.Scripts.Sandbox.Bot
                 {
                     continue;
                 }
+                if (profile != null && profile.Grid == BotGridPlan.SummonFirst && !WalkToSummon(hero, profile, visit))
+                {
+                    continue;   // saving XP for the next step on the path
+                }
+                save = HeroRoster.GetHeroSave(hero);
                 var already = save.ActivatedNodes ?? new List<string>();
                 var plan = SphereGridOps.GreedySpend(hero.SphereGrid, already, save.CurrentXp, out _,
                     EquippedMagicState.DefaultSlotCount);
@@ -289,6 +294,52 @@ namespace Assets.Scripts.Sandbox.Bot
                     visit.NodesBought++;
                 }
             }
+        }
+
+        /// <summary>
+        /// Buys along the path to the hero's summon (<see cref="BotGridPlan.SummonFirst"/>). False when it
+        /// stopped to save XP for the next step - the rest of the bank waits for it. True when the summon is
+        /// owned, there is none, or the summon's materials or Essence are not in hand (XP is not what is
+        /// short, so the caller spends the bank cheapest-first: a party that hoards XP for a node it cannot
+        /// pay for fell 4 times at the Counting Room, 2026-11-09).
+        /// </summary>
+        private static bool WalkToSummon(HeroSO hero, BotProfile profile, BotHubVisit visit)
+        {
+            string focus = string.IsNullOrEmpty(profile.FocusSummon)
+                || !hero.SphereGrid.Nodes.Any(n => n != null && n.Kind == SphereNodeKind.Summon && n.GrantedSummonKey == profile.FocusSummon)
+                ? null : profile.FocusSummon;
+            var save = HeroRoster.GetHeroSave(hero);
+            var path = SphereGridOps.PathToSummon(hero.SphereGrid, save.ActivatedNodes, focus);
+            if (path.Count == 0)
+            {
+                return true;
+            }
+            // Saving XP is only worth it when XP is what stands between the hero and the summon: when its
+            // materials or Essence are not in hand, walk what the bank pays for and spend the rest.
+            var summonNode = SphereGridOps.FindNode(hero.SphereGrid, path[path.Count - 1]);
+            bool priceInHand = (!SphereGridOps.HasMaterialCost(summonNode) || HeroRoster.CanPayMaterials(summonNode))
+                && (!SphereGridOps.HasEssenceCost(summonNode) || HeroRoster.CanPayEssence(summonNode));
+            if (!priceInHand)
+            {
+                visit.SummonPathBlocked = (visit.SummonPathBlocked + " " + hero.Key + ":" + summonNode.Key + "(materials)").Trim();
+            }
+            foreach (var key in path)
+            {
+                var node = SphereGridOps.FindNode(hero.SphereGrid, key);
+                save = HeroRoster.GetHeroSave(hero);
+                if (save.CurrentXp < node.XpCost)
+                {
+                    return !priceInHand;
+                }
+                if (!HeroRoster.TryActivateNode(hero, key))
+                {
+                    visit.SummonPathBlocked = (visit.SummonPathBlocked + " " + hero.Key + ":" + key).Trim();
+                    return true;
+                }
+                visit.NodesBought++;
+                visit.SummonPathNodes++;
+            }
+            return true;
         }
 
         private static void BuyGear(List<HeroSO> heroes, int budget, BotHubVisit visit)

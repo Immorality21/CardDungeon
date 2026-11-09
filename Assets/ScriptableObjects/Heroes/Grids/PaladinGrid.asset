@@ -876,7 +876,7 @@ MonoBehaviour:
     Neighbors:
     - paladin-lion-power
   - Key: paladin-lion-charge
-    Kind: 7
+    Kind: 5
     XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts:
@@ -898,7 +898,7 @@ MonoBehaviour:
     UpgradeAmount: 1
     GrantedSummonKey: AegisLion
     GrantedUltraKey: 
-    SummonAmount: 1
+    SummonAmount: 25
     Neighbors:
     - paladin-lion-stay
   - Key: paladin-seraph
@@ -950,7 +950,7 @@ MonoBehaviour:
     Neighbors:
     - paladin-b-tip-a
   - Key: paladin-seraph-stay
-    Kind: 6
+    Kind: 5
     XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
@@ -968,11 +968,11 @@ MonoBehaviour:
     UpgradeAmount: 1
     GrantedSummonKey: JudgementSeraph
     GrantedUltraKey: 
-    SummonAmount: 1
+    SummonAmount: 30
     Neighbors:
     - paladin-seraph-power
   - Key: paladin-seraph-charge
-    Kind: 7
+    Kind: 14
     XpCost: 540
     UnlockedByDefault: 0
     MaterialCosts:
@@ -994,7 +994,7 @@ MonoBehaviour:
     UpgradeAmount: 1
     GrantedSummonKey: JudgementSeraph
     GrantedUltraKey: 
-    SummonAmount: 1
+    SummonAmount: 25
     Neighbors:
     - paladin-seraph-stay
   - Key: paladin-stag
@@ -1068,7 +1068,7 @@ MonoBehaviour:
     Neighbors:
     - paladin-stag-power
   - Key: paladin-stag-charge
-    Kind: 7
+    Kind: 5
     XpCost: 540
     UnlockedByDefault: 0
     MaterialCosts:
@@ -1090,7 +1090,7 @@ MonoBehaviour:
     UpgradeAmount: 1
     GrantedSummonKey: DawnStag
     GrantedUltraKey: 
-    SummonAmount: 1
+    SummonAmount: 10
     Neighbors:
     - paladin-stag-stay
   - Key: paladin-a-awaken

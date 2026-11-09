@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Assets.Scripts.Combat;
 using Assets.Scripts.UnitStats;
 using UnityEngine;
@@ -1035,6 +1036,47 @@ namespace Assets.Scripts.Heroes
                 }
             }
             return cheapest == int.MaxValue ? -1 : cheapest;
+        }
+
+        /// <summary>
+        /// The nodes still to buy, in a legal order, to own the summon that is cheapest to reach from
+        /// <paramref name="activated"/> - or, with <paramref name="summonKey"/>, that summon only. Empty
+        /// when the hero already owns it (or any summon, without a key), or the grid teaches none. The
+        /// bot's "summon first" plan: commit to one branch and walk it, instead of
+        /// <see cref="GreedySpend"/>'s cheapest-first (2026-11-09).
+        /// </summary>
+        public static List<string> PathToSummon(SphereGridSO grid, IEnumerable<string> activated, string summonKey = null)
+        {
+            var result = new List<string>();
+            if (grid == null || grid.Nodes == null)
+            {
+                return result;
+            }
+            // Nodes owned from the start (a signature, a starting ability) are never in the saved list.
+            var owned = ActiveNodes(grid, SanitizeActivated(grid, activated));
+            var summons = grid.Nodes.Where(n => n != null && n.Kind == SphereNodeKind.Summon
+                && (string.IsNullOrEmpty(summonKey) || n.GrantedSummonKey == summonKey)).ToList();
+            if (summons.Any(n => owned.Contains(n.Key)))
+            {
+                return result;
+            }
+
+            int bestCost = int.MaxValue;
+            foreach (var node in summons)
+            {
+                var path = UnlockPathTo(grid, node.Key).Where(k => !owned.Contains(k)).ToList();
+                if (path.Count == 0)
+                {
+                    continue;   // unreachable
+                }
+                int cost = path.Sum(k => FindNode(grid, k).XpCost);
+                if (cost < bestCost)
+                {
+                    bestCost = cost;
+                    result = path;
+                }
+            }
+            return result;
         }
 
         /// <summary>

@@ -3699,3 +3699,32 @@ climbs steeply:
 
 Floor Difficulty also scales the guard he calls. The level is `IntendedHard`, and the analyzer now lets
 that flag cover an enemy's danger index as well as the floor's wipe rate (danger 2.05 is an Info).
+
+## §5bb — Early runs after the quest hub and loot changes: a bot check (2026-11-09)
+
+Not a tuning pass: six bot games (`EarlySettings`, one per profile, seed 3000), no summons played. **Every game
+finished; 10 wipes in 46 attempts**, against 15 on the same runs on 2026-11-01 (§5au), so a little easier, not
+broken. The wipes sit where the curve wants them: the Counting Room 4 of 10 plays (2 boss fights lost, the rest
+the floor), the Lich's Sepulchre 3 of 9 (1 boss lost), the Bone Galleries, the Broken Orrery and Sunken Depths 1
+each; the Threshold and Collapsed Caverns none. **The Safe profiles wiped most (3 each) and OddsOnly/ClearEverything
+not at all**: taking events pays. **One game is not a reading**: the day before, OddsOnly/ClearEverything alone
+(seed 3100) cleared everything first try and read as "far too easy". Summons were not played, and since
+2026-11-08 they are once per level and stay until they fall, so a player who summons will find these runs easier
+than the bot does.
+
+## §5bc — The first bot games with summons: the Golem-first Warrior (2026-11-09)
+
+One game, OddsOnly/ClearEverything, `SummonFirst` on the Cairn Golem (`docs/BOT.md`), seed 3000, the early runs plus
+the Drowned March, the Barrow Throne and the Ashen Deep. 7 wipes in 16 attempts, every run cleared. A direction only.
+
+- **The Golem arrives after the Catacombs, not before.** The path is 720 XP over 8 nodes (the node alone 195) plus
+  2 Void Shard and 3 Cut Stone, and the Void Shards were the wall: every early town visit reported the Golem
+  waiting on materials. A focused player gets the branch's ability and stats on the way, not the summon.
+- **A party-replacer that stays the whole fight takes the boss's whole fight.** The Mire Throne: the party went in
+  at 49% and came out at 49% (13 summon turns, 5 Quakes). The Barrow Throne (simulator: ~95% wipes for a party
+  straight from the Catacombs) was cleared first try, 100% -> 70%, with 4 summons and 26 summon turns. The
+  recharging Signature works: 7 Quakes in one 19-turn Golem fight at Rotwater Deep.
+- **When the summon is spent matters more than which.** The bot calls one at half health, so on the Ashen Deep it
+  spent every summon in the Slag Halls and met Emberfall's boss with none: 38% -> 1%. Twice the Lion went on a
+  floor-1 or floor-2 emergency at the Catacombs and the Lich fight had nothing left.
+- Not measured: none of this is in the simulator, which plays a summon's Signature and Attack only.

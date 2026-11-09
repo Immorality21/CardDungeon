@@ -363,6 +363,24 @@ Two consequences worth holding on to:
 
 ## Summons (`Cards/Summons/`) — docs/plans/SPECIALIZATION.md §4b
 
+- **Once per level, until it falls** *(owner, 2026-11-08)*. Every summon has `BaseCharges` 1 and no grid sells
+  another (`SummonCharge` nodes are gone from every grid, the enum member stays for serialization); a run
+  ("level" on screen) gives one use, refuges refill nothing. Every unit-building summon (`ReplaceParty`,
+  `JoinParty`, squad troops) is authored at `TurnsActive` = **`SummonOps.UntilDefeated` (99)**: it stays until
+  it falls, is dismissed or the fight ends, and `Describe` says "stays until it falls". The old nodes kept
+  their place and price: a unit summon's **+1 turn** node became **+health** (`SummonPower`, the size of its
+  existing power node) and its **+1 charge** node **+25% damage** (`SummonDamage`); a special attack's
+  **+1 charge** became a second power node (the Murder of Crows, with none, a second +1 turn). The grid
+  shows a unit summon's `SummonPower` as "+N% health" (`grid.payload.summon-health`). `SummonContentTests`
+  guards all of it.
+- **Signatures recharge** *(owner, 2026-11-08)*: `SummonSO.SignatureCooldown` (default 3, 0 = once per
+  summoning) - used on arrival it is back on the summon's 4th own turn. `SummonStay.TurnsUntilSignature`
+  drives the greyed "★ Quake (2)" row (`room.command.signature-wait`); the simulator shares `SummonStay`, so it
+  re-casts on the same clock. **Every unit summon also got one more move** (Claude's drafts, approved by the
+  owner): Golem Boulder Toss, Seraph Wings of Mercy, Archon Dawnward, Exatrix Dread Howl, Dark Twin Smoke
+  Step, Ifrit Flame Mantle + a Claw attack, Succubus Life Kiss, Grey Fang Pack Howl, Watcher Unmake,
+  Writhing Spawn Feed (`Summons/Abilities/`, icons borrowed from related abilities). **The simulator never
+  plays a summon's `Actions`** (Signature, then Attack), so it under-prices these moves.
 - **`SummonSO`** (`SO/Summon`): key, name, creature `Sprite` + optional `AnimationFrames`, `Kind`
   (`SpecialAttack`, `ReplaceParty` and **`JoinParty`**, all built), `TargetType`,
   `Effects` (ordinary `SpellEffect`s), `BaseCharges` and `Facing` — art is drawn facing right (the

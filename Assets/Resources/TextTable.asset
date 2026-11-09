@@ -1177,6 +1177,116 @@ MonoBehaviour:
     - The golem sinks its weight into the ground and hardens.
     Reviewed: 0
     Note: 
+  - Key: ability.golem-boulder-toss.name
+    Values:
+    - 'Boulder Toss'
+    Reviewed: 0
+    Note: 'Summon move (CairnGolem)'
+  - Key: ability.golem-boulder-toss.description
+    Values:
+    - 'The golem tears a stone from the floor and throws it. Whatever it hits is knocked back from its next move.'
+    Reviewed: 0
+    Note: 'Summon move (CairnGolem)'
+  - Key: ability.seraph-wings-of-mercy.name
+    Values:
+    - 'Wings of Mercy'
+    Reviewed: 0
+    Note: 'Summon move (JudgementSeraph)'
+  - Key: ability.seraph-wings-of-mercy.description
+    Values:
+    - 'The seraph folds its wings around itself. The wounds close, and the light stays on it as a shield.'
+    Reviewed: 0
+    Note: 'Summon move (JudgementSeraph)'
+  - Key: ability.archon-dawnward.name
+    Values:
+    - 'Dawnward'
+    Reviewed: 0
+    Note: 'Summon move (Archon)'
+  - Key: ability.archon-dawnward.description
+    Values:
+    - 'The Archon turns its face to a sun no one else can see, and mends in it.'
+    Reviewed: 0
+    Note: 'Summon move (Archon)'
+  - Key: ability.exatrix-dread-howl.name
+    Values:
+    - 'Dread Howl'
+    Reviewed: 0
+    Note: 'Summon move (Exatrix)'
+  - Key: ability.exatrix-dread-howl.description
+    Values:
+    - 'A sound from the dark between the torches. Hands that hear it hold their weapons a little looser.'
+    Reviewed: 0
+    Note: 'Summon move (Exatrix)'
+  - Key: ability.twin-smoke-step.name
+    Values:
+    - 'Smoke Step'
+    Reviewed: 0
+    Note: 'Summon move (DarkTwin)'
+  - Key: ability.twin-smoke-step.description
+    Values:
+    - 'It is never quite where the blow lands. The next physical attack goes through smoke.'
+    Reviewed: 0
+    Note: 'Summon move (DarkTwin)'
+  - Key: ability.ifrit-flame-mantle.name
+    Values:
+    - 'Flame Mantle'
+    Reviewed: 0
+    Note: 'Summon move (Ifrit)'
+  - Key: ability.ifrit-flame-mantle.description
+    Values:
+    - 'The Ifrit lets its fire run over its skin. Whatever strikes it is burned for the trouble.'
+    Reviewed: 0
+    Note: 'Summon move (Ifrit)'
+  - Key: ability.ifrit-claw.name
+    Values:
+    - 'Claw'
+    Reviewed: 0
+    Note: 'Summon move (Ifrit)'
+  - Key: ability.ifrit-claw.description
+    Values:
+    - 'A swipe of burning talons.'
+    Reviewed: 0
+    Note: 'Summon move (Ifrit)'
+  - Key: ability.succubus-life-kiss.name
+    Values:
+    - 'Life Kiss'
+    Reviewed: 0
+    Note: 'Summon move (Succubus)'
+  - Key: ability.succubus-life-kiss.description
+    Values:
+    - 'A kiss that takes more than it gives. Half of what it draws out mends the succubus.'
+    Reviewed: 0
+    Note: 'Summon move (Succubus)'
+  - Key: ability.fang-pack-howl.name
+    Values:
+    - 'Pack Howl'
+    Reviewed: 0
+    Note: 'Summon move (GreyFang)'
+  - Key: ability.fang-pack-howl.description
+    Values:
+    - 'Grey Fang throws back its head and howls, and the party runs with the pack.'
+    Reviewed: 0
+    Note: 'Summon move (GreyFang)'
+  - Key: ability.watcher-unmake.name
+    Values:
+    - 'Unmake'
+    Reviewed: 0
+    Note: 'Summon move (Watcher)'
+  - Key: ability.watcher-unmake.description
+    Values:
+    - 'It looks closer. Armour, hide, whatever holds the thing together comes loose.'
+    Reviewed: 0
+    Note: 'Summon move (Watcher)'
+  - Key: ability.spawn-feed.name
+    Values:
+    - 'Feed'
+    Reviewed: 0
+    Note: 'Summon move (WrithingSpawn)'
+  - Key: ability.spawn-feed.description
+    Values:
+    - 'A tendril finds an open wound and drinks. The spawn grows on it.'
+    Reviewed: 0
+    Note: 'Summon move (WrithingSpawn)'
   - Key: ability.golem-quake.name
     Values:
     - Quake
@@ -3065,7 +3175,7 @@ MonoBehaviour:
     Note: 
   - Key: building.campfire.level-1.grant
     Values:
-    - The run's XP is split evenly between everyone who marches out.
+    - XP earned on a level is split evenly between everyone who marches out.
     Reviewed: 0
     Note: 
   - Key: building.campfire.level-2.grant
@@ -3607,7 +3717,7 @@ MonoBehaviour:
     Note: 
   - Key: tutorial.gear-equipped.text
     Values:
-    - 'Equipped. Check back after each run: better gear drops deeper down. Return
+    - 'Equipped. Check back after each level: better gear drops deeper down. Return
       to town when you are ready.'
     Reviewed: 0
     Note: 
@@ -3634,7 +3744,7 @@ MonoBehaviour:
     Note: 
   - Key: tutorial.upgrade-belt.text
     Values:
-    - Buy this step to carry one more Healing potion on every run.
+    - Buy this step to carry one more Healing potion into every level.
     Reviewed: 0
     Note: 
   - Key: tutorial.belt-upgraded.text
@@ -3660,7 +3770,8 @@ MonoBehaviour:
     Note: 
   - Key: tutorial.belt-packed.text
     Values:
-    - Packed. The belt refills at the start of each run. Go back when you are ready.
+    - Packed. The belt refills at the start of each level. Go back when you are
+      ready.
     Reviewed: 0
     Note: 
   - Key: tutorial.belt-ready.text
@@ -3676,7 +3787,7 @@ MonoBehaviour:
     Note: 
   - Key: tutorial.challenge-ahead.text
     Values:
-    - '{run} is meant for a much stronger party. Try other runs first.'
+    - '{run} is meant for a much stronger party. Try other levels first.'
     Reviewed: 0
     Note: 
   - Key: tutorial.revisit-hall-in-town.text
@@ -4296,7 +4407,7 @@ MonoBehaviour:
     Note: 
   - Key: ui.hub.run-complete
     Values:
-    - Run Complete!
+    - Level Complete!
     Reviewed: 0
     Note: 
   - Key: ui.hub.sharing-the-xp
@@ -4451,7 +4562,7 @@ MonoBehaviour:
     Note: 
   - Key: ui.room.level-clear-title
     Values:
-    - Level Cleared!
+    - Floor Cleared!
     Reviewed: 0
     Note: 
   - Key: ui.room.level-clear-xp-heading
@@ -5223,13 +5334,13 @@ MonoBehaviour:
     Note: Room event odds line (vague read)
   - Key: event-text.affliction.minus
     Values:
-    - '{hero}: {buff} {amount} for the rest of the level.'
+    - '{hero}: {buff} {amount} for the rest of the floor.'
     Reviewed: 0
     Note: Room event outcome line, level-long debuff; {hero} = hero name, {buff}
       = stat/buff name (enum), {amount} = negative number incl. minus sign
   - Key: event-text.affliction.plus
     Values:
-    - '{hero}: {buff} +{amount} for the rest of the level.'
+    - '{hero}: {buff} +{amount} for the rest of the floor.'
     Reviewed: 0
     Note: Room event outcome line, level-long buff; {hero} = hero name, {buff} =
       stat/buff name (enum), {amount} = positive number
@@ -5353,7 +5464,7 @@ MonoBehaviour:
       max health
   - Key: dungeon.campaign.missing-run
     Values:
-    - (missing run)
+    - (missing level)
     Reviewed: 0
     Note: Run name shown when a campaign node has no run asset
   - Key: dungeon.revisit.summary
@@ -5606,12 +5717,12 @@ MonoBehaviour:
     Note: Stairs confirm title on the last floor
   - Key: room.descend.message
     Values:
-    - Stairs lead down to the next level.
+    - Stairs lead down to the next floor.
     Reviewed: 0
     Note: Stairs confirm text
   - Key: room.descend.message.last
     Values:
-    - The way is clear. This is the last level of the run.
+    - The way is clear. This is the last floor of the level.
     Reviewed: 0
     Note: Stairs confirm text on the last floor
   - Key: room.descend.confirm
@@ -5637,7 +5748,7 @@ MonoBehaviour:
   - Key: room.captive.message
     Values:
     - '{hero} was held captive here. {blurb}They join you for good once you clear
-      this level. If you fall before that, they are lost.'
+      this floor. If you fall before that, they are lost.'
     Reviewed: 0
     Note: Captive freed dialog; {hero} = hero name, {blurb} = hero blurb followed
       by a blank line, or empty
@@ -5747,7 +5858,12 @@ MonoBehaviour:
     Values:
     - "\u2605 {ability}"
     Reviewed: 0
-    Note: Combat command for a summon's once-per-stay signature; {ability} = ability
+    Note: Combat command for a summon's signature; {ability} = ability
+  - Key: room.command.signature-wait
+    Values:
+    - "★ {ability} ({turns})"
+    Reviewed: 0
+    Note: Combat command for a summon's signature while it recharges; {turns} = its own turns until it is back
       name
   - Key: room.command.inspect
     Values:
@@ -5851,7 +5967,7 @@ MonoBehaviour:
     Note: Pause menu button after the first press
   - Key: room.pause.note
     Values:
-    - Continue on the title screen brings you back to this run.
+    - Continue on the title screen brings you back to this level.
     Reviewed: 0
     Note: Pause menu note under the leave button
   - Key: room.pause.note-armed
@@ -5904,7 +6020,7 @@ MonoBehaviour:
       {where})
   - Key: room.death.summary-run
     Values:
-    - Your party has fallen in {where}. The run is over.
+    - Your party has fallen in {where}. The level is over.
     Reviewed: 0
     Note: Death screen text during a run; {where} = level name
   - Key: room.death.summary
@@ -6047,7 +6163,7 @@ MonoBehaviour:
     Note: Dungeon HUD level name when nothing else names it
   - Key: room.hud.run-line
     Values:
-    - "{run} \xB7 Level {level} of {total}"
+    - "{run} \xB7 Floor {level} of {total}"
     Reviewed: 0
     Note: Dungeon HUD run line; {run} = run name, {level} = level number, {total}
       = levels in run
@@ -6075,22 +6191,22 @@ MonoBehaviour:
     Note: Dungeon HUD gold; {amount} = pending gold
   - Key: room.level-clear.title.run
     Values:
-    - Run Complete!
+    - Level Complete!
     Reviewed: 0
     Note: Level-clear window title after the run's last level
   - Key: room.level-clear.title
     Values:
-    - Level Cleared!
+    - Floor Cleared!
     Reviewed: 0
     Note: Level-clear window title
   - Key: room.level-clear.next.done
     Values:
-    - The run is complete.
+    - The level is complete.
     Reviewed: 0
     Note: Level-clear window, what comes next
   - Key: room.level-clear.next.story-map
     Values:
-    - The run continues from the story map.
+    - The level continues from the story map.
     Reviewed: 0
     Note: Level-clear window, what comes next
   - Key: room.level-clear.next.continue
@@ -6105,12 +6221,12 @@ MonoBehaviour:
     Note: Level-clear window, what comes next; {level} = next level name
   - Key: room.level-clear.subtitle.level
     Values:
-    - Level {number} of {count}
+    - Floor {number} of {count}
     Reviewed: 0
     Note: Level-clear subtitle; {number} = level number, {count} = levels in run
   - Key: room.level-clear.subtitle.named
     Values:
-    - '{name} - level {number} of {count}'
+    - '{name} - floor {number} of {count}'
     Reviewed: 0
     Note: Level-clear subtitle; {name} = level name, {number}, {count} as above
   - Key: room.level-clear.subtitle.run
@@ -6567,12 +6683,12 @@ MonoBehaviour:
     Note: summon description part (taunt)
   - Key: abilities.summon.charge-one
     Values:
-    - 1 charge per run
+    - once per level
     Reviewed: 0
     Note: summon description part
   - Key: abilities.summon.charges
     Values:
-    - '{count} charges per run'
+    - '{count} times per level'
     Reviewed: 0
     Note: summon description part
   - Key: abilities.summon.stands-beside
@@ -6610,6 +6726,11 @@ MonoBehaviour:
     - '{count} turns'
     Reviewed: 0
     Note: 'summon description part: stay'
+  - Key: abilities.summon.until-defeated
+    Values:
+    - stays until it falls
+    Reviewed: 0
+    Note: 'summon description part: stay of a unit that stays the whole fight'
   - Key: abilities.summon.parting
     Values:
     - '{ability} as it leaves'
@@ -7367,7 +7488,7 @@ MonoBehaviour:
     Note: campfire mode description
   - Key: hub.campaign.status.cleared-rerun
     Values:
-    - Cleared - can be run again
+    - Cleared - can be played again
     Reviewed: 0
     Note: campaign map detail panel status
   - Key: hub.campaign.status.cleared
@@ -7754,7 +7875,7 @@ MonoBehaviour:
     Note: lot feedback after upgrading; building = building name, level = new level
   - Key: hub.progress.level-count
     Values:
-    - Level {level} of {count}
+    - Floor {level} of {count}
     Reviewed: 0
     Note: run progress screen; level = floor number, count = floors in run
   - Key: hub.progress.level-count-revisit
@@ -7764,7 +7885,7 @@ MonoBehaviour:
     Note: run progress screen on a revisit; count-line = hub.progress.level-count
   - Key: hub.progress.party-locked
     Values:
-    - Party locked until the run ends.
+    - Party locked until the level ends.
     Reviewed: 0
     Note: run progress screen when the party is locked
   - Key: hub.progress.hero-hp
@@ -7779,7 +7900,7 @@ MonoBehaviour:
     Note: run progress screen with no heroes
   - Key: hub.progress.nothing-left
     Values:
-    - Nothing left to run.
+    - Nothing left to play.
     Reviewed: 0
     Note: feedback when the run is non-repeatable and already cleared
   - Key: hub.complete.fallback-run
@@ -7890,7 +8011,7 @@ MonoBehaviour:
     Note: story map detail with nothing selected
   - Key: hub.campaign.in-progress-level
     Values:
-    - "In progress \xB7 Level {level} of {count}"
+    - "In progress \xB7 Floor {level} of {count}"
     Reviewed: 0
     Note: story map detail status for the run underway; level = floor number, count
       = floors
@@ -7912,8 +8033,8 @@ MonoBehaviour:
     Note: story map detail status while picking revisit conditions
   - Key: hub.campaign.revisit-blurb
     Values:
-    - 'Each condition raises the Fear level by its number: a harder run with bigger
-      rewards. Get stronger at the Hall of Progression.'
+    - 'Each condition raises the Fear level by its number: a harder revisit with
+      bigger rewards. Get stronger at the Hall of Progression.'
     Reviewed: 0
     Note: story map detail blurb while picking revisit conditions
   - Key: hub.campaign.begin-revisit
@@ -7978,7 +8099,7 @@ MonoBehaviour:
     Note: story map feedback on a locked run
   - Key: hub.campaign.finish-current
     Values:
-    - Finish the run you are on first.
+    - Finish the level you are on first.
     Reviewed: 0
     Note: story map feedback while another run is underway
   - Key: hub.campaign.no-revisit-rules
@@ -8159,17 +8280,17 @@ MonoBehaviour:
     Note: potion belt empty slot button
   - Key: hub.camp.belt-packed
     Values:
-    - Packed for this run.
+    - Packed for this level.
     Reviewed: 0
     Note: potion belt description during a run
   - Key: hub.camp.belt-desc
     Values:
-    - Refilled when a run begins. Press a slot to change it.
+    - Refilled when a level begins. Press a slot to change it.
     Reviewed: 0
     Note: potion belt description
   - Key: hub.camp.belt-packed-feedback
     Values:
-    - The belt is packed for this run.
+    - The belt is packed for this level.
     Reviewed: 0
     Note: feedback when clicking a belt slot mid-run
   - Key: hub.camp.choose-mentored
@@ -8360,12 +8481,12 @@ MonoBehaviour:
     Note: belt recipe offer subtitle
   - Key: hub.merchant.belt.capacity-change
     Values:
-    - "{now} \u2192 {next} per run"
+    - "{now} \u2192 {next} per level"
     Reviewed: 0
     Note: belt capacity upgrade; now/next = potions per run
   - Key: hub.merchant.belt.capacity-max
     Values:
-    - '{now} per run (maximum)'
+    - '{now} per level (maximum)'
     Reviewed: 0
     Note: belt capacity maxed; now = potions per run
   - Key: hub.merchant.belt.charges-change
@@ -8400,8 +8521,8 @@ MonoBehaviour:
     Note: merchant reason for a belt step
   - Key: hub.merchant.belt.slot-desc
     Values:
-    - Each slot holds one type of potion, chosen at the campfire before a run. The
-      belt refills at the start of each run, not between floors.
+    - Each slot holds one type of potion, chosen at the campfire before a level.
+      The belt refills at the start of each level, not between floors.
     Reviewed: 0
     Note: belt slot offer description
   - Key: hub.merchant.belt.recipe-desc
@@ -8412,7 +8533,7 @@ MonoBehaviour:
       the space)
   - Key: hub.merchant.belt.capacity-desc
     Values:
-    - How many {potion}s a slot carries into a run.
+    - How many {potion}s a slot carries into a level.
     Reviewed: 0
     Note: belt capacity offer description; potion = potion item name
   - Key: hub.merchant.belt.potency-desc
@@ -8621,7 +8742,7 @@ MonoBehaviour:
     Note: label before the ability slot pips
   - Key: items.abilities.charges-a-run
     Values:
-    - '{max} charges a run'
+    - '{max} charges a level'
     Reviewed: 0
     Note: carried ability row; max = charges
   - Key: items.inv.nothing-carried
@@ -8636,7 +8757,7 @@ MonoBehaviour:
     Note: abilities tab empty list; hero = hero name
   - Key: items.inv.ability.in-run
     Values:
-    - In this run
+    - In this level
     Reviewed: 0
     Note: known ability row caption
   - Key: items.inv.ability.carried
@@ -8691,7 +8812,7 @@ MonoBehaviour:
     Note: inventory list title
   - Key: items.inv.materials-note
     Values:
-    - Kept in the Storehouse between runs.
+    - Kept in the Storehouse between levels.
     Reviewed: 0
     Note: materials tab note
   - Key: items.inv.empty.no-materials
@@ -8736,7 +8857,7 @@ MonoBehaviour:
     Note: consumable/material detail subtitle; rarity = rarity name, count = quantity
   - Key: items.inv.ability-sub
     Values:
-    - "{target} \xB7 {charges} charges a run"
+    - "{target} \xB7 {charges} charges a level"
     Reviewed: 0
     Note: ability detail subtitle; target = target label, charges = charges a run
   - Key: items.inv.section.effect
@@ -8746,7 +8867,7 @@ MonoBehaviour:
     Note: ability detail section title
   - Key: items.inv.note.in-run
     Values:
-    - In this run's slots until the run ends. Charges are restored at a refuge.
+    - In this level's slots until the level ends. Charges are restored at a refuge.
     Reviewed: 0
     Note: ability detail note
   - Key: items.inv.note.carried-last
@@ -8761,7 +8882,7 @@ MonoBehaviour:
     Note: ability detail note
   - Key: items.inv.note.slots-in-use
     Values:
-    - All slots are in use this run. You can carry it from the next run.
+    - All slots are in use this level. You can carry it from the next level.
     Reviewed: 0
     Note: ability detail note
   - Key: items.inv.note.slots-full
@@ -8776,7 +8897,7 @@ MonoBehaviour:
     Note: ability detail note
   - Key: items.inv.note.carry-next-run
     Values:
-    - Enter to carry it into the next run.
+    - Enter to carry it into the next level.
     Reviewed: 0
     Note: ability detail note
   - Key: items.inv.section.reacts
@@ -9307,12 +9428,12 @@ MonoBehaviour:
     Note: Ability upgrade node payload; {amount} percentage points
   - Key: grid.upgrade.charges.one
     Values:
-    - +1 charge a run
+    - +1 charge a level
     Reviewed: 0
     Note: Ability upgrade node payload (one charge)
   - Key: grid.upgrade.charges.many
     Values:
-    - +{amount} charges a run
+    - +{amount} charges a level
     Reviewed: 0
     Note: Ability upgrade node payload; {amount} charges (not 1)
   - Key: grid.glyph.resistance
@@ -9343,7 +9464,7 @@ MonoBehaviour:
     Note: Ability slot node payload
   - Key: grid.payload.learns
     Values:
-    - "Learns {ability} \u2014 {charges} charges per run"
+    - "Learns {ability} \u2014 {charges} charges per level"
     Reviewed: 0
     Note: Known-ability node payload; {ability} ability name, {charges} per-run charges
   - Key: grid.payload.awakens
@@ -9366,6 +9487,11 @@ MonoBehaviour:
     - "Learns the summon {summon} \u2014 always carried, cast with Summon"
     Reviewed: 0
     Note: Summon node payload; {summon} summon name
+  - Key: grid.payload.summon-health
+    Values:
+    - '{summon}: +{amount}% health'
+    Reviewed: 0
+    Note: grid node payload - a unit summon's power node (health as % of the summoner's)
   - Key: grid.payload.summon-power
     Values:
     - '{summon}: +{amount} to its effect'
@@ -9383,12 +9509,12 @@ MonoBehaviour:
     Note: Summon upgrade payload (amount not 1); {summon} name, {amount} turns
   - Key: grid.payload.summon-charge.one
     Values:
-    - '{summon}: +{amount} charge per run'
+    - '{summon}: +{amount} use per level'
     Reviewed: 0
     Note: Summon upgrade payload (amount 1); {summon} name, {amount} charges
   - Key: grid.payload.summon-charge.many
     Values:
-    - '{summon}: +{amount} charges per run'
+    - '{summon}: +{amount} uses per level'
     Reviewed: 0
     Note: Summon upgrade payload (amount not 1); {summon} name, {amount} charges
   - Key: grid.payload.summon-size.one
@@ -9581,18 +9707,18 @@ MonoBehaviour:
       points
   - Key: grid.upgrade-detail.charges.one
     Values:
-    - '{ability} has 1 more charge every run.'
+    - '{ability} has 1 more charge every level.'
     Reviewed: 0
     Note: Sphere grid ability upgrade detail (+1 charge); {ability} name
   - Key: grid.upgrade-detail.charges.many
     Values:
-    - '{ability} has {amount} more charges every run.'
+    - '{ability} has {amount} more charges every level.'
     Reviewed: 0
     Note: Sphere grid ability upgrade detail; {ability} name, {amount} charges (not
       1)
   - Key: grid.detail.learns
     Values:
-    - Learns {ability} ({charges} charges per run). Give it a slot in the Storehouse
+    - Learns {ability} ({charges} charges per level). Give it a slot in the Storehouse
       to carry it.
     Reviewed: 0
     Note: Sphere grid known-ability node detail (after the ability's description);
@@ -9604,7 +9730,7 @@ MonoBehaviour:
     Note: Sphere grid awakening node detail; {from}/{to} ability names
   - Key: grid.detail.ability-slot
     Values:
-    - Carry one more ability into every run.
+    - Carry one more ability into every level.
     Reviewed: 0
     Note: Sphere grid ability slot node detail
   - Key: grid.detail.summon
@@ -9872,7 +9998,7 @@ MonoBehaviour:
     Note: sphere grid, dialog title after learning an ability
   - Key: grid.learn.free
     Values:
-    - Carry it into the next run?
+    - Carry it into the next level?
     Reviewed: 0
     Note: sphere grid learn dialog, a slot is free
   - Key: grid.learn.full
@@ -9967,7 +10093,7 @@ MonoBehaviour:
     Note: quest goal: floors cleared
   - Key: hub.tavern.goal-revisit
     Values:
-    - 'Only on a revisit: a run you have cleared, played again harder.'
+    - 'Only on a revisit: a level you have cleared, played again harder.'
     Reviewed: 0
     Note: quest goal note for revisit-only kill quests
   - Key: hub.tavern.reward-gold
@@ -10052,7 +10178,7 @@ MonoBehaviour:
     Note: inventory empty list, All tab
   - Key: tutorial.replay-to-get-stronger.text
     Values:
-    - This place is built for a stronger party. Replay earlier runs from the story
+    - This place is built for a stronger party. Replay earlier levels from the story
       map to earn XP and gear, grow your heroes in the Hall of Progression, then
       come back.
     Reviewed: 0
@@ -10570,7 +10696,7 @@ MonoBehaviour:
     Note: 
   - Key: event-text.affliction.run
     Values:
-    - '{hero} loses {amount} {stat} for the rest of the run.'
+    - '{hero} loses {amount} {stat} for the rest of the level.'
     Reviewed: 0
     Note: 
   - Key: room.event.tag.danger
@@ -10998,7 +11124,7 @@ MonoBehaviour:
     Note: 
   - Key: event.chained-bellows.prompt
     Values:
-    - Every forge on this level breathes through these. One good pull and all of
+    - Every forge on this floor breathes through these. One good pull and all of
       them will wake.
     Reviewed: 0
     Note: 
@@ -11009,7 +11135,7 @@ MonoBehaviour:
     Note: 
   - Key: event.chained-bellows.option-1.success-1.text
     Values:
-    - The whole level breathes in, and so do you.
+    - The whole floor breathes in, and so do you.
     Reviewed: 0
     Note: 
   - Key: event.chained-bellows.option-1.failure-1.text

@@ -537,6 +537,56 @@ namespace Tests.EditMode
             Assert.AreEqual(65, spent);
         }
 
+        /// <summary>start - a(20) - golem(50), and start - b(10) - c(10) - boar(40): the boar is cheaper (60 against 70).</summary>
+        private static SphereGridSO TwoSummons()
+        {
+            var golem = Node("golem", 50);
+            golem.Kind = SphereNodeKind.Summon;
+            golem.GrantedSummonKey = "Golem";
+            var boar = Node("boar", 40);
+            boar.Kind = SphereNodeKind.Summon;
+            boar.GrantedSummonKey = "Boar";
+            return Grid("start",
+                Node("start", 0, "a", "b"),
+                Node("a", 20, "golem"),
+                golem,
+                Node("b", 10, "c"),
+                Node("c", 10, "boar"),
+                boar);
+        }
+
+        [Test]
+        public void PathToSummon_WalksToTheCheapestSummon()
+        {
+            CollectionAssert.AreEqual(new List<string> { "b", "c", "boar" },
+                SphereGridOps.PathToSummon(TwoSummons(), new List<string> { "start" }));
+        }
+
+        [Test]
+        public void PathToSummon_WithAKey_WalksToThatSummon()
+        {
+            CollectionAssert.AreEqual(new List<string> { "a", "golem" },
+                SphereGridOps.PathToSummon(TwoSummons(), new List<string> { "start", "b" }, "Golem"));
+        }
+
+        [Test]
+        public void PathToSummon_SkipsNodesOwnedFromTheStart()
+        {
+            var grid = TwoSummons();
+            SphereGridOps.FindNode(grid, "b").UnlockedByDefault = true;
+
+            CollectionAssert.AreEqual(new List<string> { "c", "boar" }, SphereGridOps.PathToSummon(grid, new List<string> { "start" }),
+                "A starting node is owned though no save lists it; buying it again fails and stalls the plan.");
+        }
+
+        [Test]
+        public void PathToSummon_OwnedOrUntaught_IsEmpty()
+        {
+            CollectionAssert.IsEmpty(SphereGridOps.PathToSummon(TwoSummons(), new List<string> { "start", "b", "c", "boar" }),
+                "Owning any summon ends the plan when no key is given.");
+            CollectionAssert.IsEmpty(SphereGridOps.PathToSummon(TwoSummons(), new List<string> { "start" }, "Phoenix"));
+        }
+
         [Test]
         public void UnlockPathTo_WalksTheRequirementFirst()
         {

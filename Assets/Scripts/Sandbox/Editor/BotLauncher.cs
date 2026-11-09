@@ -125,6 +125,19 @@ namespace Assets.Scripts.Sandbox.Editor
             return profiles;
         }
 
+        /// <summary>Every profile of <see cref="AllProfiles"/>, spending XP to reach a summon first
+        /// (<see cref="BotGridPlan.SummonFirst"/>), on <paramref name="focusSummon"/> when given ("CairnGolem").</summary>
+        public static List<BotProfile> SummonFirstProfiles(string focusSummon = "")
+        {
+            var profiles = AllProfiles();
+            foreach (var profile in profiles)
+            {
+                profile.Grid = BotGridPlan.SummonFirst;
+                profile.FocusSummon = focusSummon ?? "";
+            }
+            return profiles;
+        }
+
         public static bool Launch(BotSettings settings)
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode)

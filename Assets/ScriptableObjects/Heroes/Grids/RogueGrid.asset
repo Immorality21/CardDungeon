@@ -686,7 +686,7 @@ MonoBehaviour:
     Neighbors:
     - rogue-a-tip-a
   - Key: rogue-twin-stay
-    Kind: 6
+    Kind: 5
     XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts: []
@@ -704,11 +704,11 @@ MonoBehaviour:
     UpgradeAmount: 1
     GrantedSummonKey: DarkTwin
     GrantedUltraKey: 
-    SummonAmount: 1
+    SummonAmount: 30
     Neighbors:
     - rogue-twin-power
   - Key: rogue-twin-charge
-    Kind: 7
+    Kind: 14
     XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts:
@@ -730,7 +730,7 @@ MonoBehaviour:
     UpgradeAmount: 1
     GrantedSummonKey: DarkTwin
     GrantedUltraKey: 
-    SummonAmount: 1
+    SummonAmount: 25
     Neighbors:
     - rogue-twin-stay
   - Key: rogue-death-mark
@@ -804,7 +804,7 @@ MonoBehaviour:
     Neighbors:
     - rogue-b-tip-a
   - Key: rogue-crows-charge
-    Kind: 7
+    Kind: 6
     XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts:
@@ -1109,7 +1109,7 @@ MonoBehaviour:
     Neighbors:
     - rogue-c-tip-a
   - Key: rogue-ferret-charge
-    Kind: 7
+    Kind: 5
     XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts:
@@ -1131,7 +1131,7 @@ MonoBehaviour:
     UpgradeAmount: 1
     GrantedSummonKey: GoldenFerret
     GrantedUltraKey: 
-    SummonAmount: 1
+    SummonAmount: 15
     Neighbors:
     - rogue-ferret-power
   - Key: rogue-grand-heist

@@ -40,7 +40,7 @@ MonoBehaviour:
   StatPercents:
     Values: []
   CopySummonerResistances: 1
-  TurnsActive: 3
+  TurnsActive: 99
   Actions: []
   Signature: {fileID: 0}
   AttackAbility: {fileID: 0}

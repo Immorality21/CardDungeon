@@ -684,7 +684,7 @@ MonoBehaviour:
     Neighbors:
     - warlock-c-3
   - Key: warlock-c-5
-    Kind: 6
+    Kind: 5
     XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
@@ -702,7 +702,7 @@ MonoBehaviour:
     UpgradeAmount: 1
     GrantedSummonKey: DemonArmy
     GrantedUltraKey: 
-    SummonAmount: 1
+    SummonAmount: 10
     Neighbors:
     - warlock-c-4
   - Key: warlock-c-6
@@ -798,7 +798,7 @@ MonoBehaviour:
     Neighbors:
     - warlock-c-7
   - Key: warlock-c-tip-b
-    Kind: 7
+    Kind: 14
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts:
@@ -818,7 +818,7 @@ MonoBehaviour:
     UpgradeAmount: 1
     GrantedSummonKey: DemonArmy
     GrantedUltraKey: 
-    SummonAmount: 1
+    SummonAmount: 25
     Neighbors:
     - warlock-c-7
   - Key: warlock-army

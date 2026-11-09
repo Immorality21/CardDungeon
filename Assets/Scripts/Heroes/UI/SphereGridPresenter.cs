@@ -352,7 +352,12 @@ namespace Assets.Scripts.Heroes.UI
             }
             if (node.Kind == SphereNodeKind.SummonPower)
             {
-                return Loc.Format("grid.payload.summon-power", ("summon", summon), ("amount", node.SummonAmount));
+                // A unit-building summon has no effect Power: the node adds health points (SummonOps.PercentFor).
+                var definition = Assets.Scripts.Cards.SummonCatalogSO.Resolve(node.GrantedSummonKey);
+                bool unit = definition != null && definition.Kind != Assets.Scripts.Cards.SummonKind.SpecialAttack;
+                return unit
+                    ? Loc.Format("grid.payload.summon-health", ("summon", summon), ("amount", node.SummonAmount))
+                    : Loc.Format("grid.payload.summon-power", ("summon", summon), ("amount", node.SummonAmount));
             }
             if (node.Kind == SphereNodeKind.SummonDuration)
             {

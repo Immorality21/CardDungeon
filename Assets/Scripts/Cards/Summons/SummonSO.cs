@@ -189,8 +189,12 @@ namespace Assets.Scripts.Cards
                  "caster. No charges, no Forge bonus, no tags. Attack and Dismiss are always offered.")]
         public List<MagicSO> Actions = new List<MagicSO>();
 
-        [Tooltip("ReplaceParty: the one big move, usable once per summoning.")]
+        [Tooltip("ReplaceParty: the big move. Usable on arrival, then again every SignatureCooldown of its own turns.")]
         public MagicSO Signature;
+
+        [Tooltip("How many of its own turns the Signature takes to come back after use: 3 = turns 1, 4, 7... " +
+                 "0 = once per summoning (owner, 2026-11-08: a summon that stays the whole fight needs it back).")]
+        [Min(0)] public int SignatureCooldown = 3;
 
         [Tooltip("ReplaceParty, optional: what its Attack command does, in place of the plain " +
                  "Strength swing - a single-enemy ability cast with the summon as the caster, unlimited " +

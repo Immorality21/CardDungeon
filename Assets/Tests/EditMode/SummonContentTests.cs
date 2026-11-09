@@ -52,7 +52,8 @@ namespace Tests.EditMode
             foreach (var summon in AllSummonAssets())
             {
                 Assert.IsNotNull(summon.Sprite, $"{summon.name} has no creature sprite - the summoning moment would show nothing.");
-                Assert.GreaterOrEqual(summon.BaseCharges, 1, $"{summon.name} has no charges.");
+                // Once per level (owner, 2026-11-08): one charge, no refill until the next level.
+                Assert.AreEqual(1, summon.BaseCharges, $"{summon.name} is not once per level.");
                 if (summon.Kind == SummonKind.SpecialAttack)
                 {
                     Assert.IsNotEmpty(summon.Effects, $"{summon.name} does nothing.");
@@ -66,7 +67,7 @@ namespace Tests.EditMode
                     Assert.That(summon.SquadTiers.All(t => !t.IsSquad), $"{summon.name} nests a squad in a squad.");
                     Assert.LessOrEqual(summon.SquadSize, summon.MaxSquadSize, $"{summon.name} starts above its own cap.");
                     Assert.LessOrEqual(summon.MaxSquadSize, 4, $"{summon.name} can field more troops than the hero side has slots.");
-                    Assert.GreaterOrEqual(summon.TurnsActive, 1, $"{summon.name} never stays.");
+                    Assert.GreaterOrEqual(summon.TurnsActive, SummonOps.UntilDefeated, $"{summon.name} leaves on a clock; a unit summon stays until it falls.");
                     continue;
                 }
 
@@ -75,7 +76,7 @@ namespace Tests.EditMode
                     $"{summon.name} brings no health - it would fall to the first blow, or arrive dead.");
                 Assert.Greater(summon.StatPercents[Assets.Scripts.UnitStats.StatType.Strength], 0,
                     $"{summon.name} has no Strength, so its Attack does nothing.");
-                Assert.GreaterOrEqual(summon.TurnsActive, 1, $"{summon.name} never stays.");
+                Assert.GreaterOrEqual(summon.TurnsActive, SummonOps.UntilDefeated, $"{summon.name} leaves on a clock; a unit summon stays until it falls.");
                 // Its big move: a Signature, or a parting blow as it leaves (Ifrit's Hellfire). One that
                 // acts alone (the Auto Turret) never picks a move, so it needs its Attack instead.
                 if (summon.ActsAlone)
@@ -139,6 +140,31 @@ namespace Tests.EditMode
                     Assert.Contains(node.GrantedSummonKey, taught,
                         $"{grid.name}/{node.Key} upgrades '{node.GrantedSummonKey}', which this grid never teaches - it would do nothing.");
                     Assert.Greater(node.SummonAmount, 0, $"{grid.name}/{node.Key} adds nothing.");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Once per level, until it falls (owner, 2026-11-08): no grid sells a second use, and no grid
+        /// sells extra turns to a unit summon that already stays the whole fight - either node would buy
+        /// nothing, or undo the rule.
+        /// </summary>
+        [Test]
+        public void NoGrid_SellsChargesOrTurnsOnUnitSummons()
+        {
+            var catalog = SummonCatalogSO.Load();
+            foreach (var grid in AllGrids())
+            {
+                foreach (var node in grid.Nodes.Where(n => n != null))
+                {
+                    Assert.AreNotEqual(SphereNodeKind.SummonCharge, node.Kind,
+                        $"{grid.name}/{node.Key} sells a summon charge; summons are once per level.");
+                    var summon = catalog.Find(node.GrantedSummonKey);
+                    if (node.Kind == SphereNodeKind.SummonDuration && summon != null)
+                    {
+                        Assert.AreEqual(SummonKind.SpecialAttack, summon.Kind,
+                            $"{grid.name}/{node.Key} adds turns to {summon.name}, which stays until it falls.");
+                    }
                 }
             }
         }

@@ -371,11 +371,15 @@ namespace Assets.Scripts.Rooms
             }
             if (summon.Summon != null && summon.Summon.Signature != null)
             {
-                // The star says "once": after it is spent the row stays, greyed, so the player can
-                // see what they have already used rather than wondering where it went.
+                // The star marks the big move. While it recharges the row stays, greyed, with the turns
+                // until it is back, so the player can plan around it rather than wonder where it went.
+                int wait = summon.Stay.TurnsUntilSignature;
+                string signatureLabel = wait > 0
+                    ? Loc.Format("room.command.signature-wait", ("ability", summon.Summon.Signature.DisplayName), ("turns", wait))
+                    : Loc.Format("room.command.signature", ("ability", summon.Summon.Signature.DisplayName));
                 _commands.Add(new CommandEntry
                 {
-                    Command = HeroCommand.SummonAbility, Label = Loc.Format("room.command.signature", ("ability", summon.Summon.Signature.DisplayName)),
+                    Command = HeroCommand.SummonAbility, Label = signatureLabel,
                     Enabled = !silenced && summon.Stay.CanUseSignature, Ability = summon.Summon.Signature
                 });
             }

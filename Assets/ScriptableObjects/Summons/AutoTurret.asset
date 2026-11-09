@@ -33,7 +33,7 @@ MonoBehaviour:
   Triggers: []
   Flinches: 0
   HitFrames: []
-  BaseCharges: 2
+  BaseCharges: 1
   StatPercents:
     Values:
     - Type: 7
@@ -51,7 +51,7 @@ MonoBehaviour:
     - Type: 6
       Amount: 50
   CopySummonerResistances: 0
-  TurnsActive: 3
+  TurnsActive: 99
   Actions: []
   Signature: {fileID: 0}
   AttackAbility: {fileID: 11400000, guid: 66815f8adac64449ac371c85e9e9feeb, type: 2}

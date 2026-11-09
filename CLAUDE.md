@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Card Dungeon is a 2D procedural dungeon generation game built with **Unity 6 (6000.5.8f1)** and **C#**. It generates grid-based dungeons with interconnected rooms, doors, and configurable room types via ScriptableObjects. Features a turn-based combat system inspired by Final Fantasy X's CTB (Conditional Turn-Based) system. Magic is learned on a per-hero **sphere grid** and carried into a run in a scarce set of charge-based slots chosen at the hub (the player-facing word for all of it is **Ability**, not Magic — the code still says `MagicSO`), with tag combos, buffs/debuffs, and elemental damage types, plus a persistent between-run hub economy (Gold/Essence/**materials**). *(An FFVIII-style **Draw** — extracting magic from enemies mid-combat — filled that role until 2026-09-04; see `docs/plans/SPECIALIZATION.md` §9b.)*
 
+**Words on screen vs in code** *(owner, 2026-11-08)*: what the code calls a **run** (`RunDefinitionSO`, `Run.json`) the player sees as a **level**, and what the code calls a **level** inside a run (`LevelDefinitionSO`, `RunLevelEntry`) the player sees as a **floor**. Player text and new doc writing use level/floor. Code, assets, save files and older docs keep Run/Level, so in older docs "level" usually means a floor. Hero, item, building and Fear levels are unrelated.
+
 ## Roadmap
 
 **`docs/NEXT_STEPS.md` is the index** — live threads, the **decisions that must not be relitigated**,

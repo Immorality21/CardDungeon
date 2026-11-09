@@ -53,9 +53,10 @@ MonoBehaviour:
     - Type: 1
       Amount: 60
   CopySummonerResistances: 1
-  TurnsActive: 3
+  TurnsActive: 99
   Actions:
   - {fileID: 11400000, guid: 1853c34c2c2a10d4eb39ca034bbfae95, type: 2}
+  - {fileID: 11400000, guid: 51c96761eea94ff18b8d28be350bad03, type: 2}
   Signature: {fileID: 11400000, guid: 70e6984d21ccd944696f4849f3b9476b, type: 2}
   AttackAbility: {fileID: 0}
   UsesTags: 0

@@ -500,7 +500,7 @@ MonoBehaviour:
     Neighbors:
     - cleric-a-tip-a
   - Key: cleric-phoenix-charge
-    Kind: 7
+    Kind: 5
     XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts:
@@ -522,7 +522,7 @@ MonoBehaviour:
     UpgradeAmount: 1
     GrantedSummonKey: Phoenix
     GrantedUltraKey: 
-    SummonAmount: 1
+    SummonAmount: 10
     Neighbors:
     - cleric-phoenix-power
   - Key: cleric-b-1
@@ -872,7 +872,7 @@ MonoBehaviour:
     Neighbors:
     - cleric-angel-power
   - Key: cleric-angel-charge
-    Kind: 7
+    Kind: 5
     XpCost: 540
     UnlockedByDefault: 0
     MaterialCosts:
@@ -894,7 +894,7 @@ MonoBehaviour:
     UpgradeAmount: 1
     GrantedSummonKey: GuardianAngel
     GrantedUltraKey: 
-    SummonAmount: 1
+    SummonAmount: 5
     Neighbors:
     - cleric-angel-stay
   - Key: cleric-c-1
@@ -1222,7 +1222,7 @@ MonoBehaviour:
     Neighbors:
     - cleric-c-tip-a
   - Key: cleric-archon-stay
-    Kind: 6
+    Kind: 5
     XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
@@ -1240,11 +1240,11 @@ MonoBehaviour:
     UpgradeAmount: 1
     GrantedSummonKey: Archon
     GrantedUltraKey: 
-    SummonAmount: 1
+    SummonAmount: 30
     Neighbors:
     - cleric-archon-power
   - Key: cleric-archon-charge
-    Kind: 7
+    Kind: 14
     XpCost: 540
     UnlockedByDefault: 0
     MaterialCosts:
@@ -1266,7 +1266,7 @@ MonoBehaviour:
     UpgradeAmount: 1
     GrantedSummonKey: Archon
     GrantedUltraKey: 
-    SummonAmount: 1
+    SummonAmount: 25
     Neighbors:
     - cleric-archon-stay
   - Key: cleric-bolt-basic

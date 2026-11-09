@@ -56,11 +56,12 @@ MonoBehaviour:
     - Type: 5
       Amount: 100
   CopySummonerResistances: 1
-  TurnsActive: 3
+  TurnsActive: 99
   Actions:
   - {fileID: 11400000, guid: aa9b59703d1e0304796009769a819b20, type: 2}
+  - {fileID: 11400000, guid: 4d4d637d18eb4fcd99ce2ffa779fd267, type: 2}
   Signature: {fileID: 0}
-  AttackAbility: {fileID: 0}
+  AttackAbility: {fileID: 11400000, guid: c7ed072d5192487b8d5fcd801364d715, type: 2}
   UsesTags: 0
   PartingAbility: {fileID: 11400000, guid: 3009b4bc5d38f0643924ffe61146c895, type: 2}
   PartingFrames:

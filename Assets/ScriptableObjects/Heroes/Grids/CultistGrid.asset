@@ -226,7 +226,7 @@ MonoBehaviour:
     Neighbors:
     - cultist-a-1
   - Key: cultist-a-5
-    Kind: 6
+    Kind: 5
     XpCost: 195
     UnlockedByDefault: 0
     MaterialCosts: []
@@ -244,7 +244,7 @@ MonoBehaviour:
     UpgradeAmount: 1
     GrantedSummonKey: WrithingSpawn
     GrantedUltraKey: 
-    SummonAmount: 1
+    SummonAmount: 20
     Neighbors:
     - cultist-a-tip-a
   - Key: cultist-a-6
@@ -342,7 +342,7 @@ MonoBehaviour:
     Neighbors:
     - cultist-a-3
   - Key: cultist-a-tip-b
-    Kind: 7
+    Kind: 14
     XpCost: 350
     UnlockedByDefault: 0
     MaterialCosts:
@@ -362,7 +362,7 @@ MonoBehaviour:
     UpgradeAmount: 1
     GrantedSummonKey: Watcher
     GrantedUltraKey: 
-    SummonAmount: 1
+    SummonAmount: 25
     Neighbors:
     - cultist-a-7
   - Key: cultist-b-1
@@ -900,7 +900,7 @@ MonoBehaviour:
     Neighbors:
     - cultist-c-5
   - Key: cultist-c-idol-up
-    Kind: 6
+    Kind: 5
     XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts: []
@@ -918,7 +918,7 @@ MonoBehaviour:
     UpgradeAmount: 1
     GrantedSummonKey: BloodIdol
     GrantedUltraKey: 
-    SummonAmount: 1
+    SummonAmount: 30
     Neighbors:
     - cultist-c-tip-a
   - Key: cultist-b-awaken

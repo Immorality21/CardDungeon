@@ -950,7 +950,7 @@ MonoBehaviour:
     Neighbors:
     - mage-qyraxis-power
   - Key: mage-qyraxis-charge
-    Kind: 7
+    Kind: 5
     XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
@@ -968,7 +968,7 @@ MonoBehaviour:
     UpgradeAmount: 1
     GrantedSummonKey: Qyraxis
     GrantedUltraKey: 
-    SummonAmount: 1
+    SummonAmount: 4
     Neighbors:
     - mage-qyraxis-stay
   - Key: mage-glacius
@@ -1042,7 +1042,7 @@ MonoBehaviour:
     Neighbors:
     - mage-glacius-power
   - Key: mage-glacius-charge
-    Kind: 7
+    Kind: 5
     XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
@@ -1060,7 +1060,7 @@ MonoBehaviour:
     UpgradeAmount: 1
     GrantedSummonKey: Glacius
     GrantedUltraKey: 
-    SummonAmount: 1
+    SummonAmount: 5
     Neighbors:
     - mage-glacius-stay
   - Key: mage-ifrit
@@ -1112,7 +1112,7 @@ MonoBehaviour:
     Neighbors:
     - mage-c-tip
   - Key: mage-ifrit-stay
-    Kind: 6
+    Kind: 5
     XpCost: 410
     UnlockedByDefault: 0
     MaterialCosts: []
@@ -1130,11 +1130,11 @@ MonoBehaviour:
     UpgradeAmount: 1
     GrantedSummonKey: Ifrit
     GrantedUltraKey: 
-    SummonAmount: 1
+    SummonAmount: 30
     Neighbors:
     - mage-ifrit-power
   - Key: mage-ifrit-charge
-    Kind: 7
+    Kind: 14
     XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
@@ -1152,7 +1152,7 @@ MonoBehaviour:
     UpgradeAmount: 1
     GrantedSummonKey: Ifrit
     GrantedUltraKey: 
-    SummonAmount: 1
+    SummonAmount: 25
     Neighbors:
     - mage-ifrit-stay
   - Key: mage-ice-basic

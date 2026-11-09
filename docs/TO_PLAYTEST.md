@@ -3,23 +3,22 @@
 Built, and checked by the agent through the Unity MCP (scripted presses, screenshots, the simulator),
 but **not yet tried by a human with a real mouse and keyboard**. Delete an item once it has been
 played (owner, 2026-11-02: no ticking off); anything that turns out wrong becomes a backlog item in `NEXT_STEPS.md`.
-Most of it came out of playtest 3 (2026-10-26 to 2026-10-28); the first section is the outside
-playtest's fixes (2026-10-30).
+Most of it came out of playtest 3 (2026-10-26 to 2026-10-28).
+
+## Summons: once per level, until they fall (2026-11-08)
+
+- [ ] **Once per level** - every summon one use per level; the old +1 charge / +1 turn nodes are now power, damage and health nodes. Does a summon feel worth saving for the right fight?
+- [ ] **Until it falls** - party-replacers and allies stay the whole fight. Too strong (a summon soloing fights), or right?
+- [ ] **Signatures come back** every 3 of the summon's turns ("★ Quake (2)" while waiting). Seen in the sandbox with the Golem.
+- [ ] **The new moves** - Boulder Toss, Wings of Mercy, Dawnward, Dread Howl, Smoke Step, Flame Mantle + Claw, Life Kiss, Pack Howl, Unmake, Feed. Only Boulder Toss was seen in play. Names, icons and numbers are drafts.
+- [ ] **The rename** - run is "level" and level is "floor" on every screen. Anything still saying the old word?
 
 ## Playtest notes, round of 2026-11-02 (built, not seen in play)
 
-- [ ] **Ifrit's parting Hellfire** (2026-11-04) - when he leaves (dismissed, fallen or out of turns) he stays put, the name floats over him, he erupts into flame (new PixelLab frames), Hellfire lands, then he fades and the party steps back in. A column of fire rises under every enemy as it hits. Readable now? Seen in the sandbox through screenshots only.
 - [ ] **Late heroes start stronger** (2026-11-04) - the Ranger, Rogue and Tinkerer join with their trunk and third ability slot already filled (115 XP of nodes, free). Do they hold their own on arrival?
 - [ ] **Summon prices** (2026-11-04) - every summon node now asks Void Shard plus Cut Stone, Scrap Iron, Rotted Timber or Hex Silk (all found by the Catacombs); the Mage's three now cost materials too. Its +1 charge node keeps the late material. Affordable when you reach it?
 - [ ] **Stone Sentinel's Slam** - a fist icon instead of Slash; may lower Endurance 1 for 2 turns (60%) instead of a bleed.
 - [ ] **The Forge** - now 3 Cut Stone + 3 Scrap Iron, both found in the Threshold and the Archive (was Ember Iron + Slag Coal, which only the Ashen Deep has).
-
-## The test boss: the Barrow King (2026-11-02)
-
-- [ ] **The Barrow Throne** - optional, after the Catacombs. Does each phase read? The phase banners (The Crown Cracks, Last Rite), the named wind-ups (Grave Tide, Requiem) and the skeletons at 60%.
-- [ ] **The guard** - at 60% he calls 3 Skeletons and a Bone Golem and cannot be targeted until they fall ("Shielded"). Does it read?
-- [ ] **Its difficulty** - now after the Catacombs and a wall: a party that came straight there wipes about 95% of the time (simulator). Does it read as "come back stronger"?
-- [ ] **The floor** - empty rooms to the throne for now. The door to the side room was not seen.
 
 ## Texts, icons and the Warlock (2026-11-01)
 
@@ -30,20 +29,6 @@ playtest's fixes (2026-10-30).
 - [ ] **The Forge line in town** - after the first found recipe, one line on the town screen, gone once the Forge is opened. Not seen on
       screen yet: only its rule is tested.
 - [ ] **The 14 late recipes** - does a late run feel worth chasing, are their prices fair, and do the agent-written texts read right?
-
-## Outside playtest fixes (2026-10-30)
-
-Synthetic key events reached every handler below; what is not known is whether a **real** key press
-does (focus), so press them for real.
-
-- [ ] **Tutorial** - on a forced step the cursor starts on the button the tutorial wants.
-- [ ] **Hover tips** - stats, the campfire's Combat numbers, resistances; and the tip following the hub's
-      keyboard cursor.
-- [ ] **Campfire hero status** - stats with meanings, ATK / CRIT / DODGE / P.DEF / M.DEF, the Momentum and
-      Focus lines.
-- [ ] **Revisit ranks** - rank I / II / III read apart (gold / orange / red with a badge).
-- [ ] **Empty loadout** - putting away a hero's last ability leaves them with none, in and after a run.
-- [ ] **Catacombs** - the first wipe there (after the tutorial) adds the replay hint to the death screen.
 
 ## Hub and menus
 

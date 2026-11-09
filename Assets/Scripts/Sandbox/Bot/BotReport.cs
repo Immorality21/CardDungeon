@@ -21,6 +21,18 @@ namespace Assets.Scripts.Sandbox.Bot
         public int HeroesDown;
         public int PotionsUsed;
         public int UltrasUsed;
+        /// <summary>Summons called in this fight (once per level, so at most one per hero).</summary>
+        public int SummonsUsed;
+        /// <summary>Turns a summoned unit took, and how many of them were its Signature or one of its moves.</summary>
+        public int SummonTurns;
+        public int SummonSignatures;
+        public int SummonMoves;
+        /// <summary>A boss fight with no summon called: each hero's summons and charges on their first turn, so the
+        /// report says why (none known, spent earlier in the level, could not pay).</summary>
+        public string SummonNote = "";
+
+        /// <summary>Not reported: per summoned unit, the turn (its <c>TurnsTaken</c>) each of its moves was last used.</summary>
+        [NonSerialized] public Dictionary<object, Dictionary<string, int>> MoveTurns = new Dictionary<object, Dictionary<string, int>>();
         public int Casts;
         public string Outcome;
     }
@@ -66,6 +78,9 @@ namespace Assets.Scripts.Sandbox.Bot
     {
         public string Before;
         public int NodesBought;
+        /// <summary>SummonFirst: nodes bought on the path to a summon, and the steps that waited on materials or Essence.</summary>
+        public int SummonPathNodes;
+        public string SummonPathBlocked = "";
         public int XpLeft;
         public int ItemsBought;
         public int GoldSpentOnGear;

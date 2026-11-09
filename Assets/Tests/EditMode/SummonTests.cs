@@ -166,7 +166,7 @@ namespace Tests.EditMode
         [Test]
         public void Describe_ReadsLikeTheGridTooltip()
         {
-            Assert.AreEqual("+50% Strength for 3 turns · 1 charge per run", SummonOps.Describe(Boar(), null));
+            Assert.AreEqual("+50% Strength for 3 turns · once per level", SummonOps.Describe(Boar(), null));
         }
 
         // --- the percentage buff ----------------------------------------------
@@ -446,8 +446,19 @@ namespace Tests.EditMode
         [Test]
         public void Describe_ReplacementReadsAsAPlaceTaken()
         {
-            Assert.AreEqual("Takes the party's place · 250% of the summoner's health · 3 turns · 1 charge per run",
+            Assert.AreEqual("Takes the party's place · 250% of the summoner's health · 3 turns · once per level",
                 SummonOps.Describe(Golem(), null));
+        }
+
+        [Test]
+        public void Describe_UnitThatStaysTheWholeFight_ReadsUntilItFalls()
+        {
+            var golem = Golem();
+            golem.TurnsActive = SummonOps.UntilDefeated;
+
+            Assert.IsTrue(SummonOps.StaysUntilDefeated(golem, null));
+            Assert.AreEqual("Takes the party's place · 250% of the summoner's health · stays until it falls · once per level",
+                SummonOps.Describe(golem, null));
         }
 
         [Test]
@@ -477,15 +488,41 @@ namespace Tests.EditMode
         }
 
         [Test]
-        public void SummonStay_SignatureIsOncePerSummoning()
+        public void SummonStay_SignatureRecharges_EveryCooldownOfItsOwnTurns()
         {
             var golem = Golem();
             golem.Signature = ScriptableObject.CreateInstance<MagicSO>();
+            golem.SignatureCooldown = 3;
+            var stay = new SummonStay(golem, SummonOps.UntilDefeated);
+
+            Assert.IsTrue(stay.CanUseSignature, "Ready on arrival.");
+            stay.MarkSignatureUsed();
+            Assert.AreEqual(3, stay.TurnsUntilSignature);
+            stay.EndTurn();
+            stay.EndTurn();
+            Assert.AreEqual(1, stay.TurnsUntilSignature);
+            Assert.IsFalse(stay.CanUseSignature);
+            stay.EndTurn();
+            Assert.IsTrue(stay.CanUseSignature, "Used on turn 1, back on turn 4.");
+            stay.MarkSignatureUsed();
+            Assert.IsFalse(stay.CanUseSignature);
+        }
+
+        [Test]
+        public void SummonStay_SignatureWithNoCooldown_IsOncePerSummoning()
+        {
+            var golem = Golem();
+            golem.Signature = ScriptableObject.CreateInstance<MagicSO>();
+            golem.SignatureCooldown = 0;
             var stay = new SummonStay(golem, 3);
 
             Assert.IsTrue(stay.CanUseSignature);
             stay.MarkSignatureUsed();
             Assert.IsFalse(stay.CanUseSignature);
+            Assert.AreEqual(-1, stay.TurnsUntilSignature);
+            stay.EndTurn();
+            stay.EndTurn();
+            Assert.IsFalse(stay.CanUseSignature, "Cooldown 0 never brings it back.");
             Assert.IsTrue(new SummonStay(golem, 3).CanUseSignature, "A new summoning brings it back.");
         }
 

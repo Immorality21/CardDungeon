@@ -57,6 +57,18 @@ for level, fights in bosses.items():
           f"{mean([f['HeroesDown'] for f in fights]):>6.1f}{mean([f['HeroTurns'] for f in fights]):>7.1f}"
           f"{mean([f['PotionsUsed'] for f in fights]):>8.1f}")
 
+fights = [f for game in report["Games"] for run in game["Runs"] for floor in run["Floors"] for f in floor["Fights"]]
+summoned = [f for f in fights if f.get("SummonsUsed", 0) > 0]
+if summoned:
+    print(f"\n{'summons':30}{'fights':>7}{'lost':>6}{'boss':>6}{'turns':>7}{'sig':>6}{'moves':>7}")
+    print(f"{'fights with a summon':30}{len(summoned):>7}{sum(f['Outcome'] != 'Victory' for f in summoned):>6}"
+          f"{sum(f['Boss'] for f in summoned):>6}{sum(f.get('SummonTurns', 0) for f in summoned):>7}"
+          f"{sum(f.get('SummonSignatures', 0) for f in summoned):>6}{sum(f.get('SummonMoves', 0) for f in summoned):>7}")
+paths = [(game["Profile"], h.get("Before", ""), h.get("SummonPathNodes", 0), h.get("SummonPathBlocked", ""))
+         for game in report["Games"] for h in game["Hub"] if h.get("SummonPathNodes", 0) or h.get("SummonPathBlocked")]
+for profile, before, bought, blocked in paths:
+    print(f"  {profile}: before {before}: {bought} nodes on the summon path" + (f", waiting on {blocked}" if blocked else ""))
+
 drunk = sum(floor.get("PotionsBetweenRooms", 0) for game in report["Games"] for run in game["Runs"] for floor in run["Floors"])
 print(f"\npotions drunk between rooms: {drunk}")
 

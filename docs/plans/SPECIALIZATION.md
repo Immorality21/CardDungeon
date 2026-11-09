@@ -524,6 +524,13 @@ replaced — the tavern is removed and heroes become progression unlocks; see §
 
 ### 4b. Summons — the capability the deep grid pays out, and a second difficulty dial
 
+> **Once per level, until it falls (owner, 2026-11-08).** A summon is one use per level (the code's run)
+> and no grid sells a second; unit summons stay the whole fight instead of 3-4 turns. The +1 charge nodes
+> became power/damage nodes and a unit summon's +1 turn node became +health (Cards guide). Wherever this
+> section below says "charges per run" or "TurnsActive 3", that is the earlier design. Signatures now
+> recharge (every 3 of its turns) and each unit summon got one more move (same day). **Later:** grid
+> nodes that teach a summon a new move, in place of some plain power nodes.
+
 > **Material prices (owner, playtest 2026-11-04):** a summon node is paid in Void Shard plus a material
 > the main path yields **by the Catacombs** (Cut Stone, Scrap Iron, Rotted Timber, Hex Silk). The
 > playtest found the Golem (Mire Hide) and the Seraph (Gild Leaf) unbuyable when reached, and the Mage's

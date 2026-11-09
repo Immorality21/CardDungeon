@@ -27,6 +27,18 @@ namespace Assets.Scripts.Sandbox.Bot
         ToTheExit = 1,
     }
 
+    /// <summary>How a player spends XP on the sphere grid in town.</summary>
+    public enum BotGridPlan
+    {
+        /// <summary>The cheapest useful node first, as the balance model buys (<c>SphereGridOps.GreedySpend</c>).</summary>
+        CheapestFirst = 0,
+
+        /// <summary>Walks one branch to its summon as fast as possible (<c>SphereGridOps.PathToSummon</c>):
+        /// XP is saved for the next node on that path rather than spent elsewhere. Once the summon is
+        /// owned, or the path waits on materials the party does not have, it buys cheapest-first.</summary>
+        SummonFirst = 1,
+    }
+
     /// <summary>One kind of player. A batch plays every profile it is given.</summary>
     [Serializable]
     public class BotProfile
@@ -38,7 +50,15 @@ namespace Assets.Scripts.Sandbox.Bot
         /// buildings. 0.5 is the balance model's own assumption (<c>StraightPartyGearShare</c>).</summary>
         public float GearGoldShare = 0.5f;
 
-        public string Label => Events + "/" + Route;
+        public BotGridPlan Grid = BotGridPlan.CheapestFirst;
+
+        /// <summary>SummonFirst only, optional: the summon to walk to (<c>SummonSO.Key</c>, e.g. "CairnGolem")
+        /// for the hero whose grid teaches it. Every other hero, or every hero when empty, walks to its
+        /// cheapest summon.</summary>
+        public string FocusSummon = "";
+
+        public string Label => Events + "/" + Route
+            + (Grid == BotGridPlan.SummonFirst ? "/SummonFirst" + (string.IsNullOrEmpty(FocusSummon) ? "" : ":" + FocusSummon) : "");
     }
 
     /// <summary>A batch, handed from the launcher to the play session as JSON.</summary>

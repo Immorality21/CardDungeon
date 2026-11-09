@@ -291,26 +291,16 @@ backlog.**
   2026-10-30:** starting Ultras moved to the trunk (free), the gauge kept for the run and filled by
   taken/dealt/healed. To do: see it in play. **The remaining Ultra nodes on the grid are later on the
   roadmap** (owner, 2026-10-31), hero by hero; they do not block anything.
-- **Summons are too short-lived — next after the playtest** (owner, playtest 2026-11-04): "most of them
-  disappear after 3 turns. I think that is too weak, since they generally are not too strong." How to
-  tune it is open. Today (`SummonSO.TurnsActive`):
-  - **Summons that replace the party leave after 3 turns:** Golem, Seraph, Exatrix, Dark Twin, Ifrit,
-    Archon, Imp and the Demon Army. The Succubus stays 4.
-  - **Summons that join the party:** the Turret and Writhing Spawn stay 3 turns, Grey Fang, the Watcher
-    and the Blood Idol 4. The mechs and the Horror stay for the whole fight (99).
-  - **Special attacks:** `TurnsActive` 3 is how long the effect lasts, not a body on the field. These are
-    the Boar, Lion, Stag, Galewing, Crows, Ferret, Phoenix, Angel, Qyraxis, Glacius and Iron Charger.
-  - **Most have 1 charge a run**, so a 3-turn summon is a 3-turn event per run, bought for ~2,000 XP and
-    materials.
-
-  **Options:**
-  - Longer `TurnsActive` (5, or until the summon is killed, FF-style). This works with the "+1 turn"
-    upgrade nodes, which would then need new values.
-  - More power per turn.
-  - The charge comes back at a refuge.
-
-  Measure with the summon budget harness (`BALANCING.md` §5aa) and the per-summon frontier
-  (`FloorFrontier.BySummon`), then retest in the sandbox. `plans/SPECIALIZATION.md` §4b.
+- **Summons are too short-lived** (owner, playtest 2026-11-04) — ✅ **decided and built 2026-11-08**: a
+  summon is **once per level** (the code's run; no grid sells a second use, refuges refill nothing) and
+  every unit summon **stays until it falls** (`SummonOps.UntilDefeated`). The +1 charge / +1 turn nodes
+  became power, damage and health nodes (Cards guide). **Also built the same day:** Signatures recharge every
+  3 of the summon's turns, and every unit summon has one more move (Cards guide). To do: measure with the
+  summon budget harness (`BALANCING.md` §5aa) - a party-replacer that stays the whole fight may carry fights
+  alone - and teach the simulator to use summon `Actions`. Later: grid nodes that teach a summon a move.
+  `plans/SPECIALIZATION.md` §4b.
+- **Rename on screen: run → level, level → floor** (owner, 2026-11-08). Player-facing text and new doc
+  writing only; code, assets and save files keep Run/Level.
 - **No way back to town mid-run** (owner, 2026-10-30) — ✅ **built the same day**: a mid-run level
   clear offers only Continue, the pause menu's Leave became **Quit to Title** (the title's Continue
   goes straight back down), and the Threshold is three runs (Dungeon Entrance → Upper Halls → The

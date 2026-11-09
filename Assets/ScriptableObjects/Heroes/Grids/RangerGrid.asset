@@ -798,7 +798,7 @@ MonoBehaviour:
     Neighbors:
     - ranger-galewing-power
   - Key: ranger-galewing-charge
-    Kind: 7
+    Kind: 5
     XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts:
@@ -820,7 +820,7 @@ MonoBehaviour:
     UpgradeAmount: 1
     GrantedSummonKey: Galewing
     GrantedUltraKey: 
-    SummonAmount: 1
+    SummonAmount: 4
     Neighbors:
     - ranger-galewing-stay
   - Key: ranger-exatrix
@@ -872,7 +872,7 @@ MonoBehaviour:
     Neighbors:
     - ranger-b-tip-a
   - Key: ranger-exatrix-stay
-    Kind: 6
+    Kind: 5
     XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
@@ -890,11 +890,11 @@ MonoBehaviour:
     UpgradeAmount: 1
     GrantedSummonKey: Exatrix
     GrantedUltraKey: 
-    SummonAmount: 1
+    SummonAmount: 30
     Neighbors:
     - ranger-exatrix-power
   - Key: ranger-exatrix-charge
-    Kind: 7
+    Kind: 14
     XpCost: 540
     UnlockedByDefault: 0
     MaterialCosts:
@@ -916,7 +916,7 @@ MonoBehaviour:
     UpgradeAmount: 1
     GrantedSummonKey: Exatrix
     GrantedUltraKey: 
-    SummonAmount: 1
+    SummonAmount: 25
     Neighbors:
     - ranger-exatrix-stay
   - Key: ranger-c-1
@@ -1179,7 +1179,7 @@ MonoBehaviour:
     Neighbors:
     - ranger-c-tip-a
   - Key: ranger-greyfang-stay
-    Kind: 6
+    Kind: 5
     XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
@@ -1197,7 +1197,7 @@ MonoBehaviour:
     UpgradeAmount: 1
     GrantedSummonKey: GreyFang
     GrantedUltraKey: 
-    SummonAmount: 1
+    SummonAmount: 20
     Neighbors:
     - ranger-greyfang-power
   - Key: ranger-pack-hunt

@@ -814,7 +814,7 @@ MonoBehaviour:
     Neighbors:
     - warrior-boar-fury
   - Key: warrior-boar-charge
-    Kind: 7
+    Kind: 5
     XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts:
@@ -836,7 +836,7 @@ MonoBehaviour:
     UpgradeAmount: 1
     GrantedSummonKey: BloodfangBoar
     GrantedUltraKey: 
-    SummonAmount: 1
+    SummonAmount: 10
     Neighbors:
     - warrior-boar-endurance
   - Key: warrior-golem
@@ -888,7 +888,7 @@ MonoBehaviour:
     Neighbors:
     - warrior-a-hold
   - Key: warrior-golem-stay
-    Kind: 6
+    Kind: 5
     XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts: []
@@ -906,11 +906,11 @@ MonoBehaviour:
     UpgradeAmount: 1
     GrantedSummonKey: CairnGolem
     GrantedUltraKey: 
-    SummonAmount: 1
+    SummonAmount: 50
     Neighbors:
     - warrior-golem-bulk
   - Key: warrior-golem-charge
-    Kind: 7
+    Kind: 14
     XpCost: 540
     UnlockedByDefault: 0
     MaterialCosts:
@@ -932,7 +932,7 @@ MonoBehaviour:
     UpgradeAmount: 1
     GrantedSummonKey: CairnGolem
     GrantedUltraKey: 
-    SummonAmount: 1
+    SummonAmount: 25
     Neighbors:
     - warrior-golem-stay
   - Key: warrior-a-awaken
@@ -1286,7 +1286,7 @@ MonoBehaviour:
     Neighbors:
     - warrior-c-tip
   - Key: warrior-charger-charge
-    Kind: 7
+    Kind: 5
     XpCost: 475
     UnlockedByDefault: 0
     MaterialCosts:
@@ -1308,7 +1308,7 @@ MonoBehaviour:
     UpgradeAmount: 1
     GrantedSummonKey: IronCharger
     GrantedUltraKey: 
-    SummonAmount: 1
+    SummonAmount: 2
     Neighbors:
     - warrior-charger-power
   - Key: warrior-earthsplitter

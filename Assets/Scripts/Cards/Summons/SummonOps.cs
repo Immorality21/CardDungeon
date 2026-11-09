@@ -29,7 +29,7 @@ namespace Assets.Scripts.Cards
         /// or be upgraded as, a real ability.</summary>
         public const string CastKeyPrefix = "summon:";
 
-        /// <summary>Charges per run: the summon's base plus its charge upgrades, at least 1.</summary>
+        /// <summary>Charges per run (on screen: per level - every summon is authored at 1, 2026-11-08): the summon's base plus its charge upgrades, at least 1.</summary>
         public static int MaxCharges(SummonSO summon, SummonGrant grant)
         {
             if (summon == null)
@@ -300,6 +300,17 @@ namespace Assets.Scripts.Cards
             return units;
         }
 
+        /// <summary>A <see cref="SummonSO.TurnsActive"/> at or above this means the unit stays until it
+        /// falls, is dismissed or the fight ends (owner, 2026-11-08: a summon is once per level, so it
+        /// must matter when it comes). Every unit-building summon is authored at this value.</summary>
+        public const int UntilDefeated = 99;
+
+        /// <summary>Whether a unit-building summon stays for the rest of the fight rather than a count of turns.</summary>
+        public static bool StaysUntilDefeated(SummonSO summon, SummonGrant grant)
+        {
+            return summon != null && TurnsFor(summon, grant) >= UntilDefeated;
+        }
+
         /// <summary>How many of its own turns a party-replacing summon stays: its own count plus
         /// <c>SummonDuration</c> upgrades, at least 1.</summary>
         public static int TurnsFor(SummonSO summon, SummonGrant grant)
@@ -409,7 +420,7 @@ namespace Assets.Scripts.Cards
             return string.Join(Loc.Get("abilities.summon.part-separator"), parts);
         }
 
-        /// <summary>"Takes the party's place · 250% of the summoner's health · 3 turns · 1 charge per run",
+        /// <summary>"Takes the party's place · 250% of the summoner's health · until it falls · once per level",
         /// "Fights beside the party · ..." for an ally, "Takes the party's place · 2 Imps and a Succubus · ..."
         /// for a squad.</summary>
         private static string DescribeReplacement(SummonSO summon, SummonGrant grant)
@@ -438,7 +449,14 @@ namespace Assets.Scripts.Cards
                 }
             }
             int turns = TurnsFor(summon, grant);
-            parts.Add(turns == 1 ? Loc.Get("abilities.summon.turn-one") : Loc.Format("abilities.summon.turns", ("count", turns)));
+            if (turns >= UntilDefeated)
+            {
+                parts.Add(Loc.Get("abilities.summon.until-defeated"));
+            }
+            else
+            {
+                parts.Add(turns == 1 ? Loc.Get("abilities.summon.turn-one") : Loc.Format("abilities.summon.turns", ("count", turns)));
+            }
             if (summon.PartingAbility != null)
             {
                 parts.Add(Loc.Format("abilities.summon.parting", ("ability", summon.PartingAbility.DisplayName)));
