@@ -48,6 +48,8 @@
                     <ui:VisualElement name="inspect-col-right" class="cd-scan__col cd-scan__col--right" />
                 </ui:VisualElement>
             </ui:ScrollView>
+            <!-- How to learn what is still unknown (playtest 4 finding 34); hidden once nothing is. -->
+            <ui:Label name="inspect-learn" text="" class="cd-sel-desc cd-scan__learn cd-hidden" picking-mode="Ignore" />
             <ui:Button name="inspect-close" text="#ui.common.back" class="cd-button cd-button--narrow" />
         </ui:VisualElement>
 

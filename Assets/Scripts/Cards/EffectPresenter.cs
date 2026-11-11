@@ -65,7 +65,8 @@ namespace Assets.Scripts.Cards
                 // target being alive: the damage is already applied when this plays, so a killing cast
                 // used to show no bolt and the unit simply dropped. Deaths resolve after this
                 // (CombatManager.ResolveDeaths), so the target is still on the stage.
-                if (!erupts && caster != null && entry.Impact > 0 && entry.Target != null
+                // A missed or dodged blow still flies (EffectEntry.Avoided, playtest 4 finding 20).
+                if (!erupts && caster != null && (entry.Impact > 0 || entry.Avoided) && entry.Target != null
                     && caster.Transform != null && entry.Target.Transform != null)
                 {
                     if (delivery == MagicDelivery.Strike)
@@ -139,7 +140,7 @@ namespace Assets.Scripts.Cards
                 }
 
                 // A status, buff or heal shows landing on its target, not just its number.
-                if (entry.Impact <= 0 && entry.Target != null && entry.Target.Transform != null && entry.Target.IsAlive)
+                if (entry.Impact <= 0 && !entry.Avoided && entry.Target != null && entry.Target.Transform != null && entry.Target.IsAlive)
                 {
                     bool harmful = entry.Healed <= 0 && caster != null && caster.IsHero != entry.Target.IsHero;
                     SpellVfx.Afflict(entry.Target, AfflictTint(entry, harmful), harmful);
@@ -149,7 +150,8 @@ namespace Assets.Scripts.Cards
                     magic.Icon != null &&
                     entry.Target != null &&
                     entry.Target.Transform != null &&
-                    entry.Impact <= 0)
+                    entry.Impact <= 0 &&
+                    !entry.Avoided)
                 {
                     yield return ShowEffectIcon(
                         entry.Target,

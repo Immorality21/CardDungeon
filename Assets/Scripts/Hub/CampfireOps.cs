@@ -95,4 +95,63 @@ namespace Assets.Scripts.Hub
             }
         }
     }
+
+    /// <summary>Why "Lead the party" is refused for a hero, or <see cref="None"/> when it is not.</summary>
+    public enum LeadRefusal
+    {
+        None,
+        AlreadyLeads,
+        LineupLocked,
+        PartyFull,
+        NotOwned,
+    }
+
+    /// <summary>
+    /// Who leads the party (playtest 4 findings 49, 52). The leader is seat 1 of the fielded list,
+    /// as it always was; what changed is that a hero <i>not</i> marching can be made leader too, which
+    /// adds them to the party in front when there is a seat free. Pure, like <see cref="CampfireOps"/>.
+    /// </summary>
+    public static class CampfireLeadOps
+    {
+        public static LeadRefusal CanLead(IList<string> fielded, string key, int cap, bool lineupLocked)
+        {
+            if (string.IsNullOrEmpty(key))
+            {
+                return LeadRefusal.NotOwned;
+            }
+            int seat = fielded != null ? fielded.IndexOf(key) : -1;
+            if (seat == 0)
+            {
+                return LeadRefusal.AlreadyLeads;
+            }
+            if (seat > 0)
+            {
+                // Reordering the marching party is not a lineup change: it stays allowed mid-run.
+                return LeadRefusal.None;
+            }
+            if (lineupLocked)
+            {
+                return LeadRefusal.LineupLocked;
+            }
+            if (fielded != null && fielded.Count >= cap)
+            {
+                return LeadRefusal.PartyFull;
+            }
+            return LeadRefusal.None;
+        }
+
+        /// <summary>The fielded list with <paramref name="key"/> in seat 1 - moved there if marching,
+        /// added there if not - or an unchanged copy when <see cref="CanLead"/> refuses.</summary>
+        public static List<string> WithLeader(IList<string> fielded, string key, int cap, bool lineupLocked)
+        {
+            var result = fielded != null ? new List<string>(fielded) : new List<string>();
+            if (CanLead(fielded, key, cap, lineupLocked) != LeadRefusal.None)
+            {
+                return result;
+            }
+            result.Remove(key);
+            result.Insert(0, key);
+            return result;
+        }
+    }
 }

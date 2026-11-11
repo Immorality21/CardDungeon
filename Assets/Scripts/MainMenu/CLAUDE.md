@@ -65,6 +65,11 @@ deliberate **Main Menu** button.
   lines of UXML and one extra `AudioOptionsUI` construction, precisely because it has no
   dependencies.
 
+- **The Controls screen** *(playtest 4 finding 58, 2026-11-10)* - Options' **Controls** button, or **F1**
+  from anywhere on the title. `Tutorial/ControlsPanel` over `controls-overlay` (last in MainMenu.uxml),
+  listing `Tutorial/ControlsList`: the same list the dungeon's pause menu and the town show. It reads no
+  save, so the title stays dependency-free. While open it takes every key (trickle-down on the root).
+
 ## Setup
 
 MenuScene holds a `UIDocument` on the shared `PanelSettings` (`Assets/UI/CardDungeonPanelSettings.asset`,

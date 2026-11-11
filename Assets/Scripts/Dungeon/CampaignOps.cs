@@ -389,6 +389,22 @@ namespace Assets.Scripts.Dungeon
         }
 
         /// <summary>
+        /// The run's <see cref="RunDefinitionSO.JoinsOnClear"/> hero while it is still to be won - the
+        /// story map's "Clearing it: X joins" line (playtest 4 finding 22). Null when the run brings
+        /// nobody, the hero is already owned, or the roster is unknown (<paramref name="ownedKeys"/> null).
+        /// </summary>
+        public static HeroSO HeroJoiningOnClear(RunDefinitionSO run, ICollection<string> ownedKeys)
+        {
+            var hero = run != null ? run.JoinsOnClear : null;
+            string key = HeroKeyOf(hero);
+            if (string.IsNullOrEmpty(key) || ownedKeys == null || ownedKeys.Contains(key))
+            {
+                return null;
+            }
+            return hero;
+        }
+
+        /// <summary>
         /// Every hero a run hands over to a party that clears it: one captive per level, plus the
         /// hero who joins on the clear itself (<see cref="RunDefinitionSO.JoinsOnClear"/>). A hero
         /// met by chance - a room event's outcome - is deliberately not here: nothing guarantees it.

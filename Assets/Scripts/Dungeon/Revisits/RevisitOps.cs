@@ -146,22 +146,7 @@ namespace Assets.Scripts.Dungeon
                 return string.Empty;
             }
 
-            var parts = new List<string>
-            {
-                Loc.Format("dungeon.revisit.summary.stats", ("percent", Signed(fear.EnemyStatMultiplier))),
-            };
-            if (fear.EnemyHealthMultiplier > 1.001f)
-            {
-                parts.Add(Loc.Format("dungeon.revisit.summary.health", ("percent", Signed(fear.EnemyHealthMultiplier))));
-            }
-            if (fear.EnemyDamageMultiplier > 1.001f)
-            {
-                parts.Add(Loc.Format("dungeon.revisit.summary.damage", ("percent", Signed(fear.EnemyDamageMultiplier))));
-            }
-            if (fear.EnemyAgilityMultiplier > 1.001f)
-            {
-                parts.Add(Loc.Format("dungeon.revisit.summary.speed", ("percent", Signed(fear.EnemyAgilityMultiplier))));
-            }
+            var parts = new List<string> { EnemyTotals(fear) };
             if (fear.ExtraEnemiesPerRoom > 0)
             {
                 parts.Add(fear.ExtraEnemiesPerRoom == 1
@@ -175,6 +160,44 @@ namespace Assets.Scripts.Dungeon
                     : Loc.Format("dungeon.revisit.summary.healing", ("percent", Signed(fear.HeroHealingMultiplier))));
             }
             return Loc.Format("dungeon.revisit.summary", ("level", fear.Level), ("changes", string.Join(Loc.Get("dungeon.revisit.summary.separator"), parts)), ("percent", Signed(fear.RewardMultiplier)));
+        }
+
+        /// <summary>
+        /// What the revisit does to enemies <b>in all</b> (playtest 4 finding 25): each condition
+        /// multiplies on top of the base (<see cref="RunFear.ScaleEnemyStats"/>), so +50% base with
+        /// "+30% health" reads "enemy health +95%", not the condition's own +30%. With no condition on
+        /// a stat it is just the base: "enemies +50% to every stat". Shown by the Fear picker, the
+        /// revisit summary and Inspect.
+        /// </summary>
+        public static string EnemyTotals(RunFear fear)
+        {
+            if (fear == null || !fear.IsRevisit)
+            {
+                return string.Empty;
+            }
+            bool health = fear.EnemyHealthMultiplier > 1.001f;
+            bool damage = fear.EnemyDamageMultiplier > 1.001f;
+            bool speed = fear.EnemyAgilityMultiplier > 1.001f;
+            if (!health && !damage && !speed)
+            {
+                return Loc.Format("dungeon.revisit.summary.stats", ("percent", Signed(fear.EnemyStatMultiplier)));
+            }
+
+            var parts = new List<string>();
+            if (health)
+            {
+                parts.Add(Loc.Format("dungeon.revisit.total.health", ("percent", Signed(fear.TotalEnemyHealthMultiplier))));
+            }
+            if (damage)
+            {
+                parts.Add(Loc.Format("dungeon.revisit.total.damage", ("percent", Signed(fear.TotalEnemyDamageMultiplier))));
+            }
+            if (speed)
+            {
+                parts.Add(Loc.Format("dungeon.revisit.total.speed", ("percent", Signed(fear.TotalEnemyAgilityMultiplier))));
+            }
+            parts.Add(Loc.Format("dungeon.revisit.total.other", ("percent", Signed(fear.EnemyStatMultiplier))));
+            return Loc.Format("dungeon.revisit.total", ("changes", string.Join(Loc.Get("dungeon.revisit.summary.separator"), parts)));
         }
 
         private static string Signed(float multiplier)

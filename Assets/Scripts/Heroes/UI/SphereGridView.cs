@@ -515,6 +515,43 @@ namespace Assets.Scripts.Heroes.UI
             Pan = pan;
         }
 
+        /// <summary>Moves the view by <paramref name="delta"/> panel pixels (the story map's WASD).</summary>
+        public void PanBy(Vector2 delta)
+        {
+            Pan = _pan + delta;
+        }
+
+        /// <summary>
+        /// Zooms by <paramref name="factor"/> about the viewport's centre, the keyboard's counterpart of
+        /// the wheel, which zooms about the cursor (the story map's + and -).
+        /// </summary>
+        public void ZoomByAtCentre(float factor)
+        {
+            float width = resolvedStyle.width;
+            float height = resolvedStyle.height;
+            if (width <= 0f || height <= 0f || float.IsNaN(width) || float.IsNaN(height))
+            {
+                return;
+            }
+            float newZoom = Mathf.Clamp(_zoom * factor, MinZoom, MaxZoom);
+            _pan = ZoomedPan(_pan, _zoom, newZoom, new Vector2(width * 0.5f, height * 0.5f));
+            _zoom = newZoom;
+            ApplyTransform();
+        }
+
+        /// <summary>
+        /// The pan that keeps the graph point under <paramref name="anchor"/> (panel-local) where it is
+        /// when the zoom goes from <paramref name="oldZoom"/> to <paramref name="newZoom"/>. Pure.
+        /// </summary>
+        public static Vector2 ZoomedPan(Vector2 pan, float oldZoom, float newZoom, Vector2 anchor)
+        {
+            if (oldZoom <= 0f)
+            {
+                return pan;
+            }
+            return anchor - (anchor - pan) * (newZoom / oldZoom);
+        }
+
         /// <summary>
         /// Centres one node at <paramref name="zoom"/>. The tutorial uses it: a whole grid framed to
         /// fit shrinks every node to a speck, which is no way to point at one of them. Waits for

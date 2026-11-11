@@ -227,6 +227,17 @@ Hard-won gotchas (each cost a failed compile until learned):
     `RoomActionUI.FocusRoot`/`Update` and `MainMenuManager.Update`; it selects the handler whenever
     nothing else is selected. Anything new that wants the keyboard must call it too.
 
+    **The second half: UI Toolkit *focus* wanders too** (playtest 4, 2026-11-10). Keys go to the
+    focused element and bubble up, so a screen listening on its own root hears nothing once focus is
+    elsewhere. In Unity 6000.5 two things move it unasked: every arrow's `NavigationMoveEvent` (its
+    focus move runs in `PostDispatch` and only `focusController.IgnoreEvent(evt)` stops it -
+    **`StopPropagation` does not**; the 2D search stops at the first focusable element under the
+    panel, the document root, so focus jumps up to it and the screen hears only the first press), and a
+    click on a `focusable = false` button, which **blurs** focus instead of leaving it. The hub and the
+    title call `PanelKeyboard.HoldFocus(root)` once (ignores both) and `PanelKeyboard.KeepFocusIn(owner)`
+    every frame. Synthetic `KeyDownEvent`s sent to a root via the MCP skip all of this, which is how it
+    shipped green. Diagnose with `root.focusController.focusedElement`.
+
 ---
 
 17. **A keyboard-reachability probe for the shared cursor, and three traps met building it**

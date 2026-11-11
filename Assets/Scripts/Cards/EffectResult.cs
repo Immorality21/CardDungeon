@@ -34,6 +34,12 @@ namespace Assets.Scripts.Cards
         // A critical hit: the presenter adds the gold CRIT! popup, a bigger number and more punch,
         // the same dressing a critical basic attack gets in CombatManager.ExecuteAttack.
         public bool Crit;
+
+        // A physical blow that missed, was evaded or dodged (EffectResolver.HitFilter). The presenter
+        // still plays the blow reaching for its target - the arrow flies, the blade cuts - so a miss
+        // reads as an attack that missed rather than as nothing (playtest 4 finding 20: a blinded
+        // Ranger's Pack Hunt showed one arrow and then two bare "Miss" words, and read as ending early).
+        public bool Avoided;
     }
 
     public class EffectResult

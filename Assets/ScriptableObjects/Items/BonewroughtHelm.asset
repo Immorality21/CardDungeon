@@ -20,9 +20,12 @@ MonoBehaviour:
   Category: 0
   SlotType: 2
   Bonuses:
+  - StatType: 1
+    BonusType: 0
+    Value: 1
   - StatType: 2
     BonusType: 0
-    Value: 6
+    Value: 5
   - StatType: 7
     BonusType: 0
     Value: 16

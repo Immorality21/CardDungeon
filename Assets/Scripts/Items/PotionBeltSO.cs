@@ -329,6 +329,35 @@ namespace Assets.Scripts.Items
         }
 
         /// <summary>
+        /// The belt after the campfire's picker puts <paramref name="key"/> in slot
+        /// <paramref name="index"/> (playtest 4 finding 50): a type already in another slot swaps
+        /// places with what this slot held, since one type sits in one slot at most. Empty never swaps.
+        /// Returns a new list; an index out of range returns an unchanged copy.
+        /// </summary>
+        public static List<string> Assign(IList<string> loadout, int index, string key)
+        {
+            var result = loadout != null ? new List<string>(loadout) : new List<string>();
+            if (index < 0 || index >= result.Count)
+            {
+                return result;
+            }
+            string chosen = key ?? Empty;
+            string previous = result[index] ?? Empty;
+            if (chosen != Empty)
+            {
+                for (int other = 0; other < result.Count; other++)
+                {
+                    if (other != index && result[other] == chosen)
+                    {
+                        result[other] = previous;
+                    }
+                }
+            }
+            result[index] = chosen;
+            return result;
+        }
+
+        /// <summary>
         /// What the bags should hold of each type's potion as a run starts: a slotted type's capacity,
         /// and none of an unslotted one. The belt is what the party carries; potions are found nowhere else.
         /// </summary>

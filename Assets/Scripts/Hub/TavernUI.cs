@@ -352,7 +352,7 @@ namespace Assets.Scripts.Hub
             _reroll.style.display = offered ? DisplayStyle.Flex : DisplayStyle.None;
             bool canPay = MetaProgressManager.Instance != null && MetaProgressManager.Instance.Gold >= QuestOps.RerollGold;
             _reroll.SetEnabled(offered && canPay
-                && QuestOps.CanReroll(_save, QuestRewards.Pool(), MetaProgressManager.Instance.GetCompletedRunKeys(), _quests[_selected]));
+                && QuestOps.CanReroll(_save, QuestRewards.Pool(), MetaProgressManager.Instance.GetCompletedRunKeys(), _quests[_selected], QuestRewards.CampaignRuns()));
         }
 
         private void OnAction()

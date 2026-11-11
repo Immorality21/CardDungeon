@@ -21,6 +21,7 @@ namespace Assets.Scripts.Rooms
             Party = party;
             _roomActionUI = roomActionUI;
             _followParty = true;
+            _hasFocus = false;
             // WASD walks the party (PartyWalk) and the camera follows it, so the manual pan - which
             // reads the same keys from raw Input - stays off for the whole floor.
             if (MainCamera.HasInstance)
@@ -71,6 +72,8 @@ namespace Assets.Scripts.Rooms
             {
                 return;
             }
+            _focus = Party.transform.position;
+            _hasFocus = true;
             MainCamera.Instance.SetPosition(CameraTarget());
         }
 
@@ -81,6 +84,13 @@ namespace Assets.Scripts.Rooms
                 return;
             }
 
+            if (!_hasFocus)
+            {
+                _focus = Party.transform.position;
+                _hasFocus = true;
+            }
+            _focus = CameraSafeArea.FollowDeadZone(_focus, Party.transform.position, DeadZoneTiles);
+
             Vector3 target = CameraTarget();
             target.z = MainCamera.Instance.transform.position.z;
             MainCamera.Instance.transform.position = Vector3.Lerp(
@@ -90,36 +100,45 @@ namespace Assets.Scripts.Rooms
         }
 
         /// <summary>
-        /// The party, nudged so the room it stands in is not drawn under the dungeon HUD, the room
-        /// and Fight/Flee bars or the party window (<see cref="CameraSafeArea"/>). With none of them
-        /// up - the level-clear window - it is the party's own position.
+        /// The leader, followed (playtest 4 findings 18 and 55): a point that trails the leader by at
+        /// most <see cref="DeadZoneTiles"/>, looked <see cref="LookAhead"/> ahead the way the party
+        /// faces - so walking down shows what is below - and moved clear of the dungeon HUD, the Fight
+        /// bar and the party window (<see cref="CameraSafeArea.LeaderTarget"/>). It is a function of the
+        /// leader and the panels only, never of the room, so a door crossed is no jump, and never of
+        /// the camera's own position, so the lerp converges.
         /// </summary>
         private Vector2 CameraTarget()
         {
-            Vector2 target = Party.transform.position;
-            var room = Party.CurrentRoom;
+            Vector2 focus = _hasFocus ? _focus : (Vector2)Party.transform.position;
             var cam = MainCamera.Camera;
-            if (room == null || room.RoomSO == null || cam == null || _roomActionUI == null)
+            if (cam == null || _roomActionUI == null)
             {
-                return target;
+                return focus;
             }
 
             _roomActionUI.GetCameraSafePanels(_safePanels);
-            if (_safePanels.Count == 0)
-            {
-                return target;
-            }
-
-            // Tiles are centred on integer coordinates, so a room's floor runs half a tile past them.
-            // The wall face above a biome-drawn floor is part of the room on screen, so it is kept clear too.
-            var bounds = new Rect(room.GridPosition.x - 0.5f, room.GridPosition.y - 0.5f, room.RoomSO.Width, room.FootprintHeight);
             var half = new Vector2(cam.orthographicSize * cam.aspect, cam.orthographicSize);
-            return CameraSafeArea.Nudge(bounds, target, half, _safePanels, RoomSafeMargin);
+            return CameraSafeArea.LeaderTarget(focus, Party.Facing, LookAhead, LeaderViewHalf, half, _safePanels);
         }
 
         private readonly List<Rect> _safePanels = new List<Rect>();
+        private Vector2 _focus;
+        private bool _hasFocus;
 
-        /// <summary>World space kept between the room's floor and the HUD: the wall band and a breath.</summary>
-        private const float RoomSafeMargin = 0.4f;
+        /// <summary>How far the leader may stray from the followed point before it moves, in tiles.</summary>
+        private const float DeadZoneTiles = 0.5f;
+
+        /// <summary>
+        /// How far ahead of the followed point the camera looks, the way the party faces. More than the
+        /// dead zone plus the lerp's lag at a walk, so a walking leader sits near the middle and a
+        /// standing one sees a tile further where they face.
+        /// </summary>
+        private const float LookAhead = 1.5f;
+
+        /// <summary>
+        /// Half the box around the camera's point that is kept out from under the panels: the leader
+        /// and a couple of tiles around them. A room no longer is (it made every door a camera jump).
+        /// </summary>
+        private static readonly Vector2 LeaderViewHalf = new Vector2(3f, 2.5f);
     }
 }

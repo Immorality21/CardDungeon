@@ -12,6 +12,48 @@ namespace Tests.EditMode
         private static readonly Rect Hud = Rect.MinMaxRect(0f, 0.8f, 0.25f, 1f);
 
         [Test]
+        public void FollowDeadZone_SmallStep_DoesNotMove()
+        {
+            var focus = CameraSafeArea.FollowDeadZone(new Vector2(2f, 3f), new Vector2(2.4f, 2.6f), 0.5f);
+
+            Assert.AreEqual(new Vector2(2f, 3f), focus);
+        }
+
+        [Test]
+        public void FollowDeadZone_Walk_TrailsByTheZone()
+        {
+            var focus = CameraSafeArea.FollowDeadZone(Vector2.zero, new Vector2(0f, -3f), 0.5f);
+
+            Assert.AreEqual(0f, focus.x, 1e-4f);
+            Assert.AreEqual(-2.5f, focus.y, 1e-4f);
+        }
+
+        [Test]
+        public void LeaderTarget_LooksAheadTheWayThePartyFaces()
+        {
+            var target = CameraSafeArea.LeaderTarget(Vector2.zero, Vector2Int.down, 1.5f, new Vector2(2f, 1.5f), Half,
+                new System.Collections.Generic.List<Rect>());
+
+            Assert.AreEqual(0f, target.x, 1e-4f);
+            Assert.AreEqual(-1.5f, target.y, 1e-4f);
+        }
+
+        [Test]
+        public void LeaderTarget_PanelShift_IsTheSameWhereverTheLeaderStands()
+        {
+            // The kept box moves with the leader, so the panel shift is a constant offset: walking
+            // through a door moves the camera only as far as the party walked (no jump).
+            var panels = new System.Collections.Generic.List<Rect> { Hud };
+            var view = new Vector2(5f, 3f);
+            var a = CameraSafeArea.LeaderTarget(new Vector2(0f, 0f), Vector2Int.up, 1f, view, Half, panels);
+            var b = CameraSafeArea.LeaderTarget(new Vector2(7f, -4f), Vector2Int.up, 1f, view, Half, panels);
+
+            Assert.AreEqual(a.x + 7f, b.x, 1e-4f);
+            Assert.AreEqual(a.y - 4f, b.y, 1e-4f);
+            Assert.AreNotEqual(new Vector2(0f, 1f), a, "the HUD over the box must shift it");
+        }
+
+        [Test]
         public void Nudge_RoomClearOfThePanel_KeepsTheTarget()
         {
             var room = Rect.MinMaxRect(-2f, -2f, 2f, 2f);

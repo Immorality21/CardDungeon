@@ -338,6 +338,15 @@ namespace Assets.Scripts.Hub
                     _detailBody.Add(MakeLabel("→  " + name, "cm-floor", "cm-floor--ahead"));
                 }
             }
+
+            // The hero a clear brings, while they are still to be won (playtest 4 finding 22).
+            var owned = _roster != null ? HeroRoster.GetOwnedKeys(_roster) : null;
+            var joiner = CampaignOps.HeroJoiningOnClear(run, owned);
+            if (joiner != null)
+            {
+                _detailBody.Add(MakeLabel(Loc.Format("hub.campaign.clearing-joins", ("hero", joiner.DisplayName)),
+                    "cm-floor", "cm-floor--joins"));
+            }
         }
 
         private static Label MakeLabel(string text, string className, string extraClass = null)
@@ -410,6 +419,24 @@ namespace Assets.Scripts.Hub
 
             if (_picking && OnPickerKey(evt.keyCode))
             {
+                evt.StopPropagation();
+                return;
+            }
+
+            // The view's own keys (playtest 4 finding 48): WASD pans, + and - zoom. The arrows stay the
+            // node cursor, and the view already follows it.
+            var pan = MapViewKeys.PanFor(evt.keyCode);
+            float zoom = MapViewKeys.ZoomFor(evt.keyCode);
+            if (_view != null && (pan != Vector2.zero || !Mathf.Approximately(zoom, 1f)))
+            {
+                if (pan != Vector2.zero)
+                {
+                    _view.PanBy(pan);
+                }
+                else
+                {
+                    _view.ZoomByAtCentre(zoom);
+                }
                 evt.StopPropagation();
                 return;
             }
@@ -533,6 +560,8 @@ namespace Assets.Scripts.Hub
             int rewardPercent = Mathf.RoundToInt((fear.RewardMultiplier - 1f) * 100f);
             _detailBody.Add(MakeLabel(
                 Loc.Format("hub.campaign.fear-summary", ("fear", fear.Level), ("percent", rewardPercent)), "cm-fear-summary"));
+            // What the conditions add up to on top of the base (playtest 4 finding 25).
+            _detailBody.Add(MakeLabel(RevisitOps.EnemyTotals(fear), "cm-fear-summary"));
 
             int best = MetaProgressManager.HasInstance
                 ? MetaProgressManager.Instance.GetBestRevisitFear(CampaignOps.RunKeyOf(run))

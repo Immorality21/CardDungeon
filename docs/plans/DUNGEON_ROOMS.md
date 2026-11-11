@@ -339,6 +339,15 @@ bar, and the camera now clears the Fight/Flee bar, the HUD and the party window.
 in by a chest and an event), a walkable object is used by standing on it or clicking it, and the stairs, chests and
 campfires are placed even with no sprite.
 
+## Backlog from playtest 4 (2026-11-10)
+
+- **Doors between every pair of rooms, not plain corridors** (playtest 4 finding 15, owner: backlog).
+  The outside tester found doors read more clearly than an open gap in the wall: a door says "this is
+  a way through" where a gap can read as broken wall or decoration. Today side doors are `BiomeSO.DoorSide`
+  and north archways `DoorArch` (phase 7), so this is mostly *where* a door is drawn: every connection
+  gets a door sprite, including the ones now shown as an open archway or corridor. Check with the
+  hidden-room and branching-route phases, which may want an undrawn way through on purpose.
+
 ## Open questions
 
 - **How big a room grows.** The room count is fixed (decision 2); how many tiles a template gains

@@ -19,7 +19,11 @@
             <!-- The town frame's bottom band, not a strip under it: it closes the frame, and the purse
                  is two chips (the number large, the currency small beneath) like a header's. -->
             <ui:VisualElement class="hub-bar">
-                <ui:Button name="hub-menu-btn" text="#ui.hub.hub-menu-btn" class="cd-button cd-button--narrow" />
+                <ui:VisualElement class="hub-bar__buttons">
+                    <ui:Button name="hub-menu-btn" text="#ui.hub.hub-menu-btn" class="cd-button cd-button--narrow" />
+                    <!-- Every key and mouse action (Tutorial/ControlsPanel); F1 opens it on any hub screen. -->
+                    <ui:Button name="hub-controls-btn" text="#ui.controls.open-f1" class="cd-button cd-button--narrow" />
+                </ui:VisualElement>
                 <ui:Label name="hub-feedback" text="" class="cd-feedback" />
                 <ui:VisualElement class="hub-purse">
                     <ui:VisualElement class="hub-purse__chip">
@@ -159,8 +163,8 @@
 
         <!-- PARTY SELECT (the campfire). The inventory's fixed frame (cd-inv-window, 1180x720):
              every region below exists in every state, so the dock-centred window never resizes
-             and hit-testing never desyncs. Seats across the top are the four places in the
-             marching party; the roster is everyone owned; the detail column is the hero the
+             and hit-testing never desyncs. The strip across the top states the XP share; the
+             roster is everyone owned, the leader marked; the detail column is the hero the
              cursor chose; the right column is how the run's XP is divided. Every control is a
              Button, so the hub's shared keyboard cursor drives the whole screen. -->
         <ui:VisualElement name="party-view" class="cd-window cd-window--flush cd-inv-window cd-dock-center cd-hidden">
@@ -171,11 +175,9 @@
                 <ui:Button name="party-close" text="#ui.common.back" class="cd-inv-close" />
             </ui:VisualElement>
 
+            <!-- The four seat tiles that stood here showed the lineup a second time (playtest 4 finding 53):
+                 the roster below is the one place, in a fixed order, with the leader marked. -->
             <ui:VisualElement class="cd-inv-heroes cd-camp-seats">
-                <ui:Button name="party-seat-0" class="cd-camp-seat" />
-                <ui:Button name="party-seat-1" class="cd-camp-seat" />
-                <ui:Button name="party-seat-2" class="cd-camp-seat" />
-                <ui:Button name="party-seat-3" class="cd-camp-seat" />
                 <ui:VisualElement class="cd-inv-heroes__summary" picking-mode="Ignore">
                     <ui:Label name="party-share" text="" class="cd-inv-heroes__summary-line cd-inv-heroes__summary-name" />
                     <ui:Label text="#ui.hub.a-wider-party-is-safer" class="cd-inv-heroes__summary-line" />
@@ -226,6 +228,17 @@
             </ui:VisualElement>
 
             <ui:Label text="#ui.common.arrows-move-enter-choose-esc" class="cd-inv-hint" />
+
+            <!-- The potion picker (playtest 4 finding 50): a belt slot opens it. One row per potion type
+                 known, plus Empty, built by PartySelectUI; a type already in another slot swaps. Over the
+                 whole frame, which is disabled beneath it so the shared cursor walks only these rows. -->
+            <ui:VisualElement name="party-belt-picker" class="cd-camp-picker cd-hidden">
+                <ui:VisualElement class="cd-camp-picker__panel">
+                    <ui:Label name="party-belt-picker-title" text="" class="cd-inv-col__title" />
+                    <ui:VisualElement name="party-belt-picker-list" class="cd-camp-picker__list" />
+                    <ui:Button name="party-belt-picker-cancel" text="#ui.common.back" class="cd-inv-tab cd-camp-mode" />
+                </ui:VisualElement>
+            </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- FORGE -->
@@ -360,6 +373,9 @@
 
             <ui:VisualElement class="cd-inv-body">
                 <ui:VisualElement class="cd-inv-col cd-inv-col--left">
+                    <!-- The Equipment tab's "All equipment" toggle, above the slots' header so it does not
+                         read as one more slot (playtest 4 finding 61). Filled by InventoryHubUI. -->
+                    <ui:VisualElement name="inv-left-filter" class="cd-inv-filterbar cd-hidden" />
                     <ui:Label name="inv-left-title" text="" class="cd-inv-col__title" />
                     <ui:VisualElement name="inv-left" class="cd-inv-col__content" />
                 </ui:VisualElement>
@@ -475,6 +491,18 @@
              Never picks - the screens under it stay exactly as clickable as the tutorial says. -->
         <ui:VisualElement name="tutorial-banner" class="cd-tutorial-banner cd-hidden" picking-mode="Ignore">
             <ui:Label name="tutorial-text" text="" class="cd-tutorial-banner__text" picking-mode="Ignore" />
+        </ui:VisualElement>
+
+        <!-- The Controls screen (F1 or hub-controls-btn): over every screen, even the banner, while it is
+             open (ControlsPanel brings it to the front). A full-screen scrim with a fixed-size window
+             centred by flex, not translate, so its hit-testing never drifts. -->
+        <ui:VisualElement name="controls-overlay" class="cd-controls-overlay cd-hidden">
+            <ui:VisualElement class="cd-window cd-window--flush cd-window--controls">
+                <ui:Label text="#ui.controls.title" class="cd-title" />
+                <ui:ScrollView name="controls-list" class="cd-list cd-controls-list" mode="Vertical" horizontal-scroller-visibility="Hidden" />
+                <ui:Label text="#ui.controls.hint" class="cd-info-label cd-hint" />
+                <ui:Button name="controls-back" text="#ui.common.back" class="cd-button cd-button--wide" />
+            </ui:VisualElement>
         </ui:VisualElement>
 
     </ui:VisualElement>

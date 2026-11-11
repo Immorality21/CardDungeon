@@ -82,7 +82,18 @@ behind a roof, a banner past a wall — while UI Toolkit's hit-testing stays stu
 
 `HubView` renders them as three layers: backdrop, then a **sprite layer** on draw rects, then the
 **buttons** on hit rects. A button with art behind it goes transparent and drops its glyph — the
-sprite is doing the identifying. `HubContentTests.NoTwoLots_HitBoxesOverlap` polices the hit boxes
+sprite is doing the identifying.
+
+**Hover and click follow the sprite's shape** *(playtest 4 finding 47, 2026-11-10)*. Each lot is a
+`HubView.LotButton` whose `ContainsPoint` tests the sprite's alpha (`SpriteAlphaMask`, pure, one texel of
+slack) over where the art paints (`FitInside` of the draw rect), so a transparent corner is not the
+building and an overlapping building in front wins. The highlight is a one-texel **ring around the
+sprite** (`hub-lot__outline`, a runtime white texture tinted purple on hover, gold under the cursor and
+for the tutorial) - no box is drawn on a shaped lot. The ring child also widens the button's bounding
+box over the art, which is what lets picking ask about points outside the hit rect. **The building
+textures are imported with Read/Write on** (`bld_*.png` without frame numbers, `lot_foundation.png`);
+a texture without it logs one warning and that lot falls back to its rectangle. The hit rect still
+places the caption, the tutorial pointer and the keyboard cursor's centre. `HubContentTests.NoTwoLots_HitBoxesOverlap` polices the hit boxes
 and says nothing about the art, which is free to overlap as much as it likes.
 
 **A lot's name and badge hang below it, never on it** (`.hub-lot__caption`, 2026-09-28). Inside the
@@ -365,6 +376,22 @@ for up/down so a plain column wraps), Tab steps, Enter/Space presses, Escape bac
   only while its `PanelEventHandler` is the EventSystem's *selected* GameObject; clicking a UITK
   element selects it as a side effect, and clicking the background clears it again. See gotcha 15 in
   `docs/GAMEPLAY_VALIDATION.md`.
+- **UI Toolkit never moves focus on its own here** *(2026-11-10, playtest 4 findings 12, 45, 46, 60)*.
+  `PanelKeyboard.HoldFocus(_root)` ignores the focus change of every arrow's `NavigationMoveEvent` and
+  of clicks on non-focusable buttons (`StopPropagation` does not stop it in Unity 6), and `Update` runs
+  `PanelKeyboard.KeepFocusIn(KeyboardOwner())`: the root of the grid / Storehouse / tavern / Hall of
+  Knowledge / story map while one is up (they listen on their own root), else the document root. A new
+  screen with its own cursor must be added to `KeyboardOwner`, or after one stray click it hears nothing.
+- **F1 opens the Controls screen on any hub screen**, as does the town bar's *Controls (F1)* button
+  (playtest 4 finding 58). `Tutorial/ControlsPanel` listens on the document root in the trickle-down
+  phase, so while it is open it takes every key before any screen's handler, and no screen here
+  branches on it; its overlay (`controls-overlay`, last in Hub.uxml) takes the mouse. The list itself is
+  `Tutorial/ControlsList` - **a new binding anywhere in the game needs a line there**.
+- **Page Up / Page Down scroll the shown detail column** (`.cd-inv-detail__body`) on every screen,
+  handled on the root (`PageDetail`) since no screen's cursor uses them (playtest 4 finding 65).
+- **The tutorial answers a refused input** (finding 40): Escape on a guided screen, an arrow in a
+  locked town, or another node / hero / Back on the guided grid puts "Not yet." in front of the banner
+  line for `TutorialOps.NudgeSeconds` (`NudgeTutorial`; the grid also names the node in its feedback).
 - **A service covers the town, it does not hide it** *(2026-09-30)*. The lot panel and every service
   call `CoverTown()`: `hub-view` stays shown but **disabled** under `hub-scrim`, so the painted town
   (and the Build sprite swap) stays on screen while the shared cursor — which only walks *enabled*
@@ -372,6 +399,10 @@ for up/down so a plain column wraps), Tab steps, Enter/Space presses, Escape bac
   with a backdrop of their own (story map, level entry, run complete) call `HideTown()`. Anything that
   asks "is the town the screen?" must use **`IsTownActive()`**, not `IsShown(_hubView)` —
   `NavigatesCurrentView` and the tutorial's `CurrentTutorialScreen` both do.
+- **A click on the scrim closes the window on it** *(playtest 4 finding 4)*: `OnScrimClicked` presses
+  the shown view's own Back button (`ScrimCloseButton`), the same path as Escape, so `CanClose` and the
+  tutorial's refusals hold (a shut way out nudges "Not yet."). Ignored while the Storehouse's or the
+  grid's confirm dialog is up. A new service on the scrim needs a line in `ScrimCloseButton`.
 - **Every panel switch calls `ResetKeyboardNavigation()`**: the cursor pointed at a button on the
   screen that just went away, and focus may have been taken by a panel that focuses its own subtree.
 - The highlight class is `cd-nav--selected`, defined **last** in `CardDungeon.uss` on purpose: every
@@ -395,14 +426,27 @@ the close path — it raises `OnClosed`, and `HubManager` never calls it directl
   the first open one) — it used to remember the last node, so Enter could reopen on a locked run. **Every visible run is named under its node** (2026-09-28,
   playtest finding 11) through `SphereGridView.NodeInfo.Caption`, which is **opt-in**: only
   `CampaignPresenter` sets it, so sphere grid nodes stay caption-free. `NodeCaptionTests` pins both
-  halves — change one and the other will tell you.
+  halves — change one and the other will tell you. **Keys (playtest 4 finding 48):** the arrows move the
+  node cursor and the view follows it; **WASD pans and + / - (keypad too) zoom** (`MapViewKeys`, pure;
+  `SphereGridView.PanBy` / `ZoomByAtCentre`). Page Up/Down stay the hub's detail scroll. The detail
+  column says **"Clearing it: X joins the party"** for a run's `JoinsOnClear` hero not yet owned
+  (`CampaignOps.HeroJoiningOnClear`, finding 22).
 - **PartySelectUI** (the campfire) — which owned heroes actually march out. Writes
   `PartySaveData.SelectedHeroKeys` through `HeroRoster.SetSelectedKeys`; `DungeonManager.FieldedHeroes()`
-  reads it. **On the inventory frame since 2026-09-30** (`cd-inv-window` + `cd-camp-*`): four seat
-  tiles (seat 1 leads), the roster, a detail column and the XP split (`CampfireOps`, the lot's ladder).
-  A roster row or seat only **selects**; March out / Stay behind / **Lead the party** live in the
+  reads it. **On the inventory frame since 2026-09-30** (`cd-inv-window` + `cd-camp-*`): the XP-share
+  strip, the roster, a detail column and the XP split (`CampfireOps`, the lot's ladder).
+  A roster row only **selects**; March out / Stay behind / **Lead the party** live in the
   detail column with a `party-reason` line saying why a dimmed one is dimmed — so a stray click never
-  benches anyone. Every control is a `Button`, so the shared navigator drives it (it is *not* one of
+  benches anyone. **Since playtest 4 (2026-11-10, findings 49, 52-54)** the four seat tiles are gone (they
+  showed the lineup a second time, with a tooltip that only repeated the class): the roster is the one
+  place, in the roster's own order, **never re-sorted** - marching, benching or leading never moves a
+  row under the cursor - with a gold **Leader** badge (`cd-camp-row__lead-badge`) on seat 1. *Lead the
+  party* on a benched hero brings them along in front when a seat is free (`CampfireLeadOps`, pure;
+  refused while the run locks the lineup). Seat order beyond the leader is no longer shown.
+  **A belt slot opens a potion picker** (`party-belt-picker`, finding 50) instead of cycling: every
+  known type plus Empty, a type in another slot marked and swapped (`PotionBeltOps.Assign`). The rest of
+  the frame is disabled under it, and `HubManager.CancelButtonForCurrentView` presses
+  `PartySelectUI.CancelButton`, so Escape closes the picker first. Every control is a `Button`, so the shared navigator drives it (it is *not* one of
   the screens with its own cursor). Minimum one hero; the cap is `MetaProgressManager.GetPartyCap()`
   (four; the slot purchase is gone). The screen states the XP share as the standing cost of width.
   Reachable from the campfire and from the run-progress screen next to *Enter Dungeon*;
@@ -418,10 +462,10 @@ the close path — it raises `OnClosed`, and `HubManager` never calls it directl
   (`.hub-entry`): run name + "Level N of M", a pip per floor (`BuildLevelPips`), the fielded party as
   portrait tiles with HP (`BuildPartyTiles`), and Enter Dungeon / Change Party / Back in that order (Change Party hidden once the run is
   underway).
-- **MerchantUI** — the Gold sink (gear, and the potion belt: slots, recipes, and each type's capacity and potency, for gold plus materials - `PotionBeltSO`). The campfire's **Potion belt** section (`party-belt-0..3`, two per row) picks the type per slot; a press cycles it, and it locks with the lineup once a run starts. See the Progression guide.
+- **MerchantUI** — the Gold sink (gear, and the potion belt: slots, recipes, and each type's capacity and potency, for gold plus materials - `PotionBeltSO`). The campfire's **Potion belt** section (`party-belt-0..3`, two per row) picks the type per slot; a press opens the potion picker, and it locks with the lineup once a run starts. See the Progression guide.
   **On the inventory frame since 2026-09-30**: Buy / Sell / Potion Belt tabs, a hero strip choosing
   who gear is compared against, and a detail column reusing the inventory's grants block
-  (`InventoryHubUI.AddItemLines`, `StatCell`, `SetIcon`, `ApplyRarity` are `internal static` for this).
+  (`InventoryHubUI.AddItemLines`, `StatCell`, `DeltaCell`, `SetIcon`, `ApplyRarity` are `internal static` for this).
   Same row-selects / detail-acts split as the campfire, driven by the shared navigator.
 - **MagicForgeUI** (`Cards/UI`) — the **Forge** (no longer "Ability Forge", 2026-10-29). Three tabs:
   **Craft** (opens first) - the known recipes, each input as have/need, the result's stats from the
@@ -438,8 +482,10 @@ the close path — it raises `OnClosed`, and `HubManager` never calls it directl
   band with the tabs, a portrait hero strip (muted, never hidden, on the party-wide tabs), three
   px-wide columns and a per-state hint line. Equipment is **FF-style**: the cursor walks the hero's
   slots, the middle column lists what fits the slot under it — the bag *and* what other heroes wear
-  (equipping takes it off them) — and Enter moves into that list, where the detail column shows every
-  stat now → after. Esc backs out one layer. Stats are **base + bought grid nodes + gear**
+  (equipping takes it off them) — and Enter moves into that list, where the detail column shows
+  **only what the item changes** ("STR +3", "HP −6"; see *Stat changes* below). **All equipment** is a
+  pill-shaped filter toggle in its own bar (`inv-left-filter`) above the "Equipped" header, not a slot
+  row (playtest 4 finding 61); it is still the slot cursor's first stop. Esc backs out one layer. Stats are **base + bought grid nodes + gear**
   (`HeroStatCalculator`); the old screen and the campfire used `HeroSO.BaseStats` and understated
   every hero who had spent XP. Abilities are described through `HeroSnapshotUnit`, so the numbers
   are the hero's own. Item wording (slot names, bonus lines, rarity classes, the swap maths) is
@@ -455,6 +501,19 @@ the close path — it raises `OnClosed`, and `HubManager` never calls it directl
   2026-09-30 (portrait strip with banked XP, frontier framing via `SphereGridView.FrameNodes`, a
   detail column with a `grid-reason` line). Keeps its own cursor (it pans content the shared
   navigator cannot see).
+
+## Stat changes: only the change *(owner, 2026-11-10)*
+
+Wherever the hub compares stats - the sphere grid's stat-node detail, the Storehouse's "Stats if
+equipped" and its candidate-row chips, the Merchant's "If X wore it" - it shows **only the change**,
+signed and coloured: "Strength +3" green, "HP −6" red, unchanged stats left out ("No change to stats"
+when nothing moves). Playtest 4 findings 41-43, 65: "Strength 10 13" read as two unexplained numbers.
+The one formatter is the pure `UnitStats/StatDelta` (`Format`, `FormatPercent`, `ClassFor`, `Changes`,
+`Biggest`; `StatDeltaTests`), drawn through `InventoryHubUI.DeltaCell`; the colours are
+`.cd-delta--better` / `.cd-delta--worse` in `CardDungeon.uss`. A stat's hover is `StatCatalog.Explain`
+(what it does), never just its name. Plain stat lists (no comparison) still show values. Not converted:
+the Merchant's belt upgrade lines ("2 → 3 slots") and the Forge's next-level preview, which are
+upgrade ladders rather than stat comparisons.
 
 ## The tutorial
 
@@ -495,6 +554,12 @@ and a page like the Hall of Knowledge, its own Up/Down cursor, Enter presses the
 - **A collected quest sits out** until `QuestOps.CooldownCollections` (3) other quests have been collected
   (`QuestSaveData.Cooldowns`, counted on `Completed`): the bot found the quests that complete themselves
   (kill anything, take the stairs) coming straight back. A slot nothing can fill stays empty.
+- **Only doable quests reach the board** (playtest 4 finding 14): a kill quest whose `Target` is a boss
+  (or a boss's add) of some campaign run is drawn only while one of those runs can still be played - a
+  cleared `Repeatable` run for a `RevisitOnly` quest, else a `Repeatable` run or one not yet cleared
+  (`QuestOps.IsDoable`, fed every campaign run by `QuestRewards.CampaignRuns`). One already up that can
+  no longer be done leaves the board with its progress, unless it is ready to collect. Enemies the rooms
+  spawn, kinds and "anything" are not checked.
 - **XP is the small part of a payout** (owner, 2026-11-02): the first draft paid 1,140 XP a hero over one
   bot game, near the ~1,400 the whole campaign pays from kills. Gold and items carry the value now.
 - **The pool (2026-11-02, rewards a first draft):**
@@ -504,7 +569,7 @@ and a page like the Hall of Knowledge, its own Up/Down cursor, Enter presses the
   | Rattling in the Catacombs | 5 Skeletons | Bone Scepter recipe, 50 gold, 20 XP | Sealed Archive |
   | The Dead Do Not Rest | 15 undead | 1 Void Shard, 100 gold, 40 XP | Sealed Archive |
   | Pest Control | 10 beasts | 3 Ember Iron, 80 gold, 30 XP | Sealed Archive |
-  | The Warden Wakes Again | the Abyssal Warden, on a revisit | 2 Void Shards, 150 gold, 40 XP | the Threshold |
+  | The Warden Wakes Again | the Abyssal Warden (Blood Stair or Drowned Chapel; was revisit-only, undoable) | 2 Void Shards, 150 gold, 40 XP | the Threshold |
   | The Mirefather's Due | the Mirefather | 2 Mire Hide, 150 gold, 40 XP | Catacombs |
   | Brimstone Work | 8 demons | 1 Cinder Glass, 120 gold, 40 XP | Drowned March |
   | Learning the Hard Way | 3 wipes | 150 gold, 20 XP | - |

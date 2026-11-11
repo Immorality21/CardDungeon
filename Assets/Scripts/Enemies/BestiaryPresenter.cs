@@ -388,6 +388,84 @@ namespace Assets.Scripts.Enemies
             return lines;
         }
 
+        /// <summary>
+        /// One line on how to learn what is still "???" about this enemy (playtest 4 finding 34),
+        /// naming only the ways that would still teach something, by the rules the combat path records
+        /// knowledge with (<c>CombatManager.Bestiary</c>): a hit of an element reveals how it takes
+        /// that element, its swing reveals its element, watching it cast names the spell, the first
+        /// kill shows its immunities, and a drop seen names that drop. Null once nothing is left.
+        /// </summary>
+        public static string LearnMoreLine(EnemySO definition, BestiaryEntry known)
+        {
+            if (definition == null)
+            {
+                return null;
+            }
+
+            var ways = new List<string>();
+            bool elementsLeft = false;
+            foreach (var type in DisplayedTypes)
+            {
+                if (!BestiaryOps.KnowsDamageType(known, type))
+                {
+                    elementsLeft = true;
+                    break;
+                }
+            }
+            if (elementsLeft)
+            {
+                ways.Add(Loc.Get("bestiary.learn.elements"));
+            }
+            if (known == null || !known.AttackTypeKnown)
+            {
+                ways.Add(Loc.Get("bestiary.learn.attack"));
+            }
+
+            bool spellsLeft = false;
+            if (definition.Spells != null)
+            {
+                foreach (var entry in definition.Spells)
+                {
+                    if (entry != null && entry.Magic != null && !BestiaryOps.KnowsSpell(known, entry.Magic.Key))
+                    {
+                        spellsLeft = true;
+                        break;
+                    }
+                }
+            }
+            if (spellsLeft)
+            {
+                ways.Add(Loc.Get("bestiary.learn.abilities"));
+            }
+
+            bool lootLeft = false;
+            if (definition.LootTable != null)
+            {
+                foreach (var drop in definition.LootTable)
+                {
+                    if (drop != null && drop.Item != null && !BestiaryOps.KnowsLoot(known, drop.Item.Key))
+                    {
+                        lootLeft = true;
+                        break;
+                    }
+                }
+            }
+            if (known == null || known.Kills <= 0)
+            {
+                ways.Add(Loc.Get("bestiary.learn.defeat"));
+            }
+            else if (lootLeft)
+            {
+                ways.Add(Loc.Get("bestiary.learn.drops"));
+            }
+
+            if (ways.Count == 0)
+            {
+                return null;
+            }
+            return Loc.Format("bestiary.learn.line", ("ways", string.Join(Loc.Get("bestiary.learn.separator"), ways)));
+        }
+
         /// <summary>A status effect's name as the player meets it on the HP bar and in combat text.</summary>
         public static string StatusLabel(Cards.BuffType type)
         {

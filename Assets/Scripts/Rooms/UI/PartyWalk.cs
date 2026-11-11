@@ -8,7 +8,8 @@ namespace Assets.Scripts.Rooms
     /// <summary>
     /// Walks the party a tile at a time with the arrows or WASD, the way an SNES Final Fantasy hero
     /// walks a dungeon (owner, 2026-10-30). Holding a key keeps walking; when two are held the one
-    /// pressed last wins, so turning a corner does not need the first key let go.
+    /// pressed last wins, so turning a corner does not need the first key let go. A tap made while a
+    /// step is still drawn waits its turn (<see cref="WalkInput"/>, up to three).
     ///
     /// <para>Where a step may go is <see cref="TileWalkOps"/>. A step through a door is the same walk
     /// a click on that door takes (<c>RoomActionUI.OnDoorSelected</c>): the party is placed, the room
@@ -50,7 +51,7 @@ namespace Assets.Scripts.Rooms
         };
 
         private readonly Action<Door> _enterDoor;
-        private readonly List<Vector2Int> _held = new List<Vector2Int>();
+        private readonly WalkInput _input = new WalkInput();
         private readonly List<RoomDoorway> _doorways = new List<RoomDoorway>();
         private readonly List<bool> _open = new List<bool>();
         private readonly Queue<Vector2Int> _path = new Queue<Vector2Int>();
@@ -63,6 +64,14 @@ namespace Assets.Scripts.Rooms
         private float _doorWait;
         private float _sinceStep;
         private Door _throughDoor;
+        private bool _keyStep;
+        private bool _stepByKey;
+
+        /// <summary>A step the walking keys took has landed on this tile (not a click's path, not a door).</summary>
+        public event Action<Vector2Int> KeyStepEnded;
+
+        /// <summary>A walking key pushed the party from the first tile toward the second and the step was refused.</summary>
+        public event Action<Vector2Int, Vector2Int> KeyBumped;
 
         /// <param name="enterDoor">Walks through a door: what a click on it does.</param>
         public PartyWalk(Action<Door> enterDoor)
@@ -76,8 +85,24 @@ namespace Assets.Scripts.Rooms
         /// <summary>Whether a queued walk (a click) still has steps to take.</summary>
         public bool HasPath => _path.Count > 0;
 
-        /// <summary>Whether a direction key is down: the player has taken over from any click.</summary>
-        public bool KeyHeld => _held.Count > 0;
+        /// <summary>Whether a direction key is down or a tap is queued: the player has taken over from any click.</summary>
+        public bool KeyHeld => _input.AnyActive;
+
+        /// <summary>
+        /// Ignores every walking key now down until it is let go: for a key that has just done
+        /// something else, like the arrow that fled a fight (playtest 4 finding 33).
+        /// </summary>
+        public void HoldUntilReleased()
+        {
+            foreach (var key in Keys)
+            {
+                if (Input.GetKey(key.Arrow) || Input.GetKey(key.Letter))
+                {
+                    _input.Latch(key.Direction);
+                }
+            }
+            _input.ClearQueue();
+        }
 
         /// <summary>Queues steps to take one after another, in place of any already queued.</summary>
         public void Follow(IEnumerable<Vector2Int> steps)
@@ -119,12 +144,21 @@ namespace Assets.Scripts.Rooms
             if (!canWalk || party == null || room == null)
             {
                 _path.Clear();
+                _input.ClearQueue();
                 return false;
             }
-            if (_held.Count > 0)
+            if (_input.TryNext(out var direction))
             {
                 _path.Clear();
-                return TryStep(party, room, _held[_held.Count - 1]);
+                _keyStep = true;
+                try
+                {
+                    return TryStep(party, room, direction);
+                }
+                finally
+                {
+                    _keyStep = false;
+                }
             }
             if (_path.Count == 0)
             {
@@ -175,6 +209,7 @@ namespace Assets.Scripts.Rooms
             {
                 case WalkStepKind.Move:
                     Begin(party, new Vector3(step.To.x, step.To.y, -1f), 1f, null);
+                    _stepByKey = _keyStep;
                     return true;
                 case WalkStepKind.Door:
                     var door = doors[step.DoorIndex];
@@ -185,8 +220,13 @@ namespace Assets.Scripts.Rooms
                     Begin(party, target, tiles, door);
                     // The party waits for the door: a step is too short to see one open during it.
                     _doorWait = door.Swing(direction);
+                    _stepByKey = false;
                     return true;
                 default:
+                    if (_keyStep)
+                    {
+                        KeyBumped?.Invoke(from, from + direction);
+                    }
                     return false;
             }
         }
@@ -200,8 +240,10 @@ namespace Assets.Scripts.Rooms
             }
             _party = null;
             _throughDoor = null;
+            _stepByKey = false;
             _doorWait = 0f;
             _path.Clear();
+            _input.ClearQueue();
         }
 
         private void Begin(Party party, Vector3 target, float tiles, Door throughDoor)
@@ -233,28 +275,30 @@ namespace Assets.Scripts.Rooms
             }
 
             var door = _throughDoor;
+            var landed = Vector2Int.RoundToInt(_to);
+            bool byKey = _stepByKey;
             _party = null;
             _throughDoor = null;
+            _stepByKey = false;
             if (door != null)
             {
                 _enterDoor(door);
+            }
+            else if (byKey)
+            {
+                KeyStepEnded?.Invoke(landed);
             }
         }
 
         private void ReadKeys()
         {
+            // A tap during a step is queued rather than lost when it is let go before the step ends
+            // (playtest 4 finding 57); WalkInput holds the rules.
             foreach (var key in Keys)
             {
                 bool down = Input.GetKey(key.Arrow) || Input.GetKey(key.Letter);
-                int at = _held.IndexOf(key.Direction);
-                if (down && at < 0)
-                {
-                    _held.Add(key.Direction);
-                }
-                else if (!down && at >= 0)
-                {
-                    _held.RemoveAt(at);
-                }
+                bool pressed = Input.GetKeyDown(key.Arrow) || Input.GetKeyDown(key.Letter);
+                _input.Read(key.Direction, down, pressed, IsStepping);
             }
         }
     }

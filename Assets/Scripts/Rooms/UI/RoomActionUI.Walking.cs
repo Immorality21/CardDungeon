@@ -20,6 +20,9 @@ namespace Assets.Scripts.Rooms
     /// <summary>The room's screen, by job: walking the floor, from the keyboard and by clicks.</summary>
     public partial class RoomActionUI
     {
+        /// <summary>What using the thing at hand would do (<see cref="UseAt"/>).</summary>
+        private enum RoomUse { None, GoBack, Event, SideRoom, Search, Rest, Stairs }
+
         // ============================================================
         //  WALKING THE DUNGEON FROM THE KEYBOARD
         // ============================================================
@@ -106,6 +109,7 @@ namespace Assets.Scripts.Rooms
 
             TickRoomClick();
             TickWalk();
+            TickUsableGlow();
 
             // Fight/Flee is a question, so it carries its cursor from the moment it appears - the
             // command menu already does, and Enter should not need an arrow press to wake it up.
@@ -150,12 +154,17 @@ namespace Assets.Scripts.Rooms
 
             if (IsShown(_combatBar))
             {
-                return Loc.Get("room.keys.combat-bar");
+                // A boss room refuses Flee, so its hint must not offer it.
+                return _canFlee ? Loc.Get("room.keys.combat-bar") : Loc.Get("room.keys.combat-bar-no-flee");
             }
 
             if (DoorNavActive())
             {
-                return Loc.Get("room.keys.doors");
+                // Name what Enter would use right now, or leave Enter out (playtest 4 finding 36).
+                string use = UseLabel(UseAtHand());
+                return use != null
+                    ? Loc.Format("room.keys.doors-use", ("use", use))
+                    : Loc.Get("room.keys.doors");
             }
 
             return null;
@@ -221,40 +230,136 @@ namespace Assets.Scripts.Rooms
         /// </summary>
         public bool UseFacing()
         {
-            var party = GameManager.HasInstance ? GameManager.Instance.Party : null;
-            if (party == null || _currentRoom == null || _currentRoom.Enemies.Any(e => e != null && e.IsAlive))
-            {
-                return false;
-            }
+            return Use(UseAtHand());
+        }
 
-            var facing = party.Tile + party.Facing;
-            if (IsAtHand(_currentRoom.ReturnMarker, facing, party.Tile))
+        /// <summary>What Enter would use: the thing the party faces or stands on.</summary>
+        private RoomUse UseAtHand()
+        {
+            var party = GameManager.HasInstance ? GameManager.Instance.Party : null;
+            return party != null ? UseAt(party.Tile + party.Facing, party.Tile) : RoomUse.None;
+        }
+
+        /// <summary>
+        /// The one rule for what is usable at a tile, shared by Enter, the walking hint, stepping onto
+        /// the stairs or a refuge, and the glow on usable objects, so none of them can disagree. In this
+        /// order: the way back out of a side room, the event's object, a cache or refuge, the stairs.
+        /// </summary>
+        private RoomUse UseAt(Vector2Int facing, Vector2Int standing)
+        {
+            if (_currentRoom == null || _currentRoom.Enemies.Any(e => e != null && e.IsAlive))
             {
-                LeaveSideRoom();
-                return true;
+                return RoomUse.None;
             }
-            if (IsAtHand(_currentRoom.EventMarker, facing, party.Tile) && TryUseEvent())
+            if (IsAtHand(_currentRoom.ReturnMarker, facing, standing))
             {
-                return true;
+                return RoomUse.GoBack;
             }
-            if (IsAtHand(_currentRoom.KindMarker, facing, party.Tile) && _currentRoom.HasPendingPayload)
+            if (IsAtHand(_currentRoom.EventMarker, facing, standing))
             {
-                if (_currentRoom.Kind == RoomKind.Treasure)
+                if (PendingEvent() != null)
                 {
+                    return RoomUse.Event;
+                }
+                if (UsableSideRoom() != null)
+                {
+                    return RoomUse.SideRoom;
+                }
+            }
+            if (IsAtHand(_currentRoom.KindMarker, facing, standing) && _currentRoom.HasPendingPayload)
+            {
+                return _currentRoom.Kind == RoomKind.Treasure ? RoomUse.Search : RoomUse.Rest;
+            }
+            if (_currentRoom.IsExit && IsAtHand(_currentRoom.ExitMarker, facing, standing))
+            {
+                return RoomUse.Stairs;
+            }
+            return RoomUse.None;
+        }
+
+        private bool Use(RoomUse use)
+        {
+            switch (use)
+            {
+                case RoomUse.GoBack:
+                    LeaveSideRoom();
+                    return true;
+                case RoomUse.Event:
+                case RoomUse.SideRoom:
+                    return TryUseEvent();
+                case RoomUse.Search:
                     OnSearch();
-                }
-                else
-                {
+                    return true;
+                case RoomUse.Rest:
                     OnRest();
-                }
-                return true;
+                    return true;
+                case RoomUse.Stairs:
+                    OnDescend();
+                    return true;
+                default:
+                    return false;
             }
-            if (_currentRoom.IsExit && IsAtHand(_currentRoom.ExitMarker, facing, party.Tile))
+        }
+
+        /// <summary>The words after "Enter:" in the walking hint, or null when nothing is at hand.</summary>
+        private string UseLabel(RoomUse use)
+        {
+            switch (use)
             {
-                OnDescend();
-                return true;
+                case RoomUse.GoBack:
+                    return Loc.Get("room.use.go-back");
+                case RoomUse.Event:
+                    var roomEvent = PendingEvent();
+                    return roomEvent != null && !string.IsNullOrEmpty(roomEvent.Title)
+                        ? Loc.Format("room.use.event", ("event", roomEvent.Title))
+                        : Loc.Get("room.use.look");
+                case RoomUse.SideRoom:
+                    return Loc.Get("room.use.go-in");
+                case RoomUse.Search:
+                    return Loc.Get("room.use.search");
+                case RoomUse.Rest:
+                    return Loc.Get("room.use.rest");
+                case RoomUse.Stairs:
+                    return Loc.Get("room.use.stairs");
+                default:
+                    return null;
             }
-            return false;
+        }
+
+        /// <summary>
+        /// Stepping onto (or into) the stairs or a refuge opens its prompt at once (playtest 4 findings
+        /// 37 and 64). Only for a step the keys took, and only once per step: a declined prompt does
+        /// not come back while the party stands there or keeps pushing the key - Enter still opens it.
+        /// A click already uses what it walks to, so a click's walk is left alone.
+        /// </summary>
+        private void OnKeyStepEnded(Vector2Int tile)
+        {
+            _bumpedTile = null;
+            PromptOnStep(tile);
+        }
+
+        private void OnKeyBumped(Vector2Int from, Vector2Int tile)
+        {
+            if (_bumpedTile == tile && _bumpedFrom == from)
+            {
+                return;
+            }
+            _bumpedTile = tile;
+            _bumpedFrom = from;
+            PromptOnStep(tile);
+        }
+
+        private void PromptOnStep(Vector2Int tile)
+        {
+            if (!DoorNavActive() || _walkUseTile != null)
+            {
+                return;
+            }
+            var use = UseAt(tile, tile);
+            if (use == RoomUse.Stairs || use == RoomUse.Rest)
+            {
+                Use(use);
+            }
         }
 
         private static bool IsAtHand(Component marker, Vector2Int facing, Vector2Int standing)
@@ -275,7 +380,7 @@ namespace Assets.Scripts.Rooms
         {
             if (_walk == null)
             {
-                _walk = new PartyWalk(OnDoorSelected);
+                CreateWalk();
             }
             var party = GameManager.HasInstance ? GameManager.Instance.Party : null;
             _walk.Tick(party, _currentRoom, DoorNavActive(), Time.deltaTime);
@@ -288,10 +393,120 @@ namespace Assets.Scripts.Rooms
         {
             if (_walk == null)
             {
-                _walk = new PartyWalk(OnDoorSelected);
+                CreateWalk();
             }
             var party = GameManager.HasInstance ? GameManager.Instance.Party : null;
             return DoorNavActive() && _walk.TryStep(party, _currentRoom, direction);
+        }
+
+        // ============================================================
+        //  WHAT CAN BE USED STANDS OUT
+        // ============================================================
+
+        // A soft halo behind each object in the room that Enter would use now, so it reads apart
+        // from the biome's decoration (playtest 4 finding 10, the Warren Tunnels). Keyed by the
+        // object's renderer; the halo is a child copy of its sprite, so the object itself is never
+        // tinted and its spent sprite needs no undo.
+        private readonly Dictionary<SpriteRenderer, SpriteRenderer> _glows = new Dictionary<SpriteRenderer, SpriteRenderer>();
+        private readonly List<SpriteRenderer> _glowMarkers = new List<SpriteRenderer>();
+        private readonly List<SpriteRenderer> _staleGlows = new List<SpriteRenderer>();
+
+        private const float GlowScale = 1.22f;
+        private const float GlowPulseSpeed = 2.6f;
+        private const float GlowAlphaLow = 0.18f;
+        private const float GlowAlphaHigh = 0.5f;
+        private static readonly Color GlowColor = new Color(1f, 0.88f, 0.45f);
+
+        /// <summary>
+        /// Lights the usable, unused objects of the party's room and puts out every other halo. Usable
+        /// is <see cref="UseAt"/> on the object's own tile, the rule Enter follows, so a guarded room,
+        /// a spent chest or a resolved event shows nothing.
+        /// </summary>
+        private void TickUsableGlow()
+        {
+            _glowMarkers.Clear();
+            if (_currentRoom != null && !(CombatStage.HasInstance && CombatStage.Instance.IsRaised))
+            {
+                AddGlowMarker(_currentRoom.ReturnMarker);
+                AddGlowMarker(_currentRoom.EventMarker);
+                AddGlowMarker(_currentRoom.KindMarker);
+                AddGlowMarker(_currentRoom.ExitMarker != null ? _currentRoom.ExitMarker.GetComponent<SpriteRenderer>() : null);
+            }
+
+            float t = 0.5f + 0.5f * Mathf.Sin(Time.time * GlowPulseSpeed);
+            foreach (var marker in _glowMarkers)
+            {
+                var tile = Vector2Int.RoundToInt(marker.transform.position);
+                bool usable = marker.enabled && UseAt(tile, tile) != RoomUse.None;
+                var glow = usable ? GlowFor(marker) : (_glows.TryGetValue(marker, out var existing) ? existing : null);
+                if (glow == null)
+                {
+                    continue;
+                }
+                if (glow.gameObject.activeSelf != usable)
+                {
+                    glow.gameObject.SetActive(usable);
+                }
+                if (usable)
+                {
+                    glow.sprite = marker.sprite;
+                    glow.flipX = marker.flipX;
+                    glow.color = new Color(GlowColor.r, GlowColor.g, GlowColor.b, Mathf.Lerp(GlowAlphaLow, GlowAlphaHigh, t));
+                }
+            }
+
+            // Halos of other rooms (or of objects gone) go out.
+            _staleGlows.Clear();
+            foreach (var pair in _glows)
+            {
+                if (pair.Key == null || pair.Value == null)
+                {
+                    _staleGlows.Add(pair.Key);
+                    continue;
+                }
+                if (!_glowMarkers.Contains(pair.Key) && pair.Value.gameObject.activeSelf)
+                {
+                    pair.Value.gameObject.SetActive(false);
+                }
+            }
+            foreach (var key in _staleGlows)
+            {
+                _glows.Remove(key);
+            }
+        }
+
+        private void AddGlowMarker(SpriteRenderer marker)
+        {
+            if (marker != null && marker.sprite != null)
+            {
+                _glowMarkers.Add(marker);
+            }
+        }
+
+        private SpriteRenderer GlowFor(SpriteRenderer marker)
+        {
+            if (_glows.TryGetValue(marker, out var glow) && glow != null)
+            {
+                return glow;
+            }
+            var obj = new GameObject("UsableGlow");
+            obj.transform.SetParent(marker.transform, false);
+            obj.transform.localScale = Vector3.one * GlowScale;
+            // Behind the object, so only the rim of the larger copy shows: an outline, not a wash.
+            obj.transform.localPosition = new Vector3(0f, 0f, 0.01f);
+            glow = obj.AddComponent<SpriteRenderer>();
+            glow.sortingLayerID = marker.sortingLayerID;
+            glow.sortingOrder = marker.sortingOrder - 1;
+            obj.SetActive(false);
+            _glows[marker] = glow;
+            return glow;
+        }
+
+        private void CreateWalk()
+        {
+            _walk = new PartyWalk(OnDoorSelected);
+            _walk.KeyStepEnded += OnKeyStepEnded;
+            _walk.KeyBumped += OnKeyBumped;
         }
 
         private static bool IsShown(VisualElement element)

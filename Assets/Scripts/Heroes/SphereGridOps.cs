@@ -77,6 +77,28 @@ namespace Assets.Scripts.Heroes
             return node != null && node.UnlockedByDefault && !string.IsNullOrEmpty(node.Key);
         }
 
+        /// <summary>
+        /// Whether a hero joins with part of their grid already learned: a free <b>stat</b> node, which
+        /// only the late heroes' built trunks have (Heroes/CLAUDE.md). Free abilities and the Mage's
+        /// free slot are everyone's starting kit and do not count. Said where a hero joins (playtest 4
+        /// findings 22 and 24).
+        /// </summary>
+        public static bool JoinsWithGridStarted(SphereGridSO grid)
+        {
+            if (grid == null || grid.Nodes == null)
+            {
+                return false;
+            }
+            foreach (var node in grid.Nodes)
+            {
+                if (IsDefaultUnlocked(node) && (node.Kind == SphereNodeKind.Stat || node.Kind == SphereNodeKind.Resistance))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         /// <summary>Keys of every <see cref="SphereGridNode.UnlockedByDefault"/> node, in grid
         /// order.</summary>
         public static List<string> DefaultUnlockedKeys(SphereGridSO grid)

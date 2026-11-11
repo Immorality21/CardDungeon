@@ -39,8 +39,8 @@ namespace Assets.Scripts.Rooms
             if (roomEvent == null)
             {
                 // What the event opened: its object is the way in now.
-                var spec = DungeonManager.Instance.ResolvedOutcomeOf(_currentRoom)?.SideRoom;
-                if (spec == null || !spec.IsSet || spec.Mandatory)
+                var spec = UsableSideRoom();
+                if (spec == null)
                 {
                     return false;
                 }
@@ -50,6 +50,17 @@ namespace Assets.Scripts.Rooms
 
             ShowRoomEvent(roomEvent);
             return true;
+        }
+
+        /// <summary>The side room a resolved event opened and the player may walk into, or null.</summary>
+        private Events.SideRoomSpec UsableSideRoom()
+        {
+            if (_currentRoom == null || !DungeonManager.HasInstance)
+            {
+                return null;
+            }
+            var spec = DungeonManager.Instance.ResolvedOutcomeOf(_currentRoom)?.SideRoom;
+            return spec == null || !spec.IsSet || spec.Mandatory ? null : spec;
         }
 
         /// <summary>Takes the party to <paramref name="host"/>'s side room, remembering where it stood.</summary>
@@ -638,6 +649,11 @@ namespace Assets.Scripts.Rooms
             }
 
             string blurb = string.IsNullOrEmpty(captive.Blurb) ? "" : captive.Blurb + "\n\n";
+            // A late hero arrives with their trunk built (playtest 4 finding 24).
+            if (Heroes.SphereGridOps.JoinsWithGridStarted(captive.SphereGrid))
+            {
+                blurb += Loc.Get("room.joined.grid-started") + "\n\n";
+            }
             ShowDetail(Loc.Format("room.captive.title", ("hero", captive.DisplayName)),
                 Loc.Format("room.captive.message", ("hero", captive.DisplayName), ("blurb", blurb)));
             return true;
@@ -775,33 +791,62 @@ namespace Assets.Scripts.Rooms
 
             var party = GameManager.Instance.Party;
             int missing = 0;
+            int restores = 0;
             if (party != null)
             {
                 foreach (var hero in party.Heroes)
                 {
-                    if (hero != null && hero.Stats != null)
+                    // Only the living: a rest does not raise the fallen (ApplyRest skips them), so their
+                    // empty bar is not health this refuge can give back.
+                    if (hero != null && hero.Stats != null && hero.IsAlive)
                     {
-                        missing += Mathf.Max(0, hero.GetEffectiveMaxHealth() - hero.Stats.Health);
+                        int heroMissing = Mathf.Max(0, hero.GetEffectiveMaxHealth() - hero.Stats.Health);
+                        missing += heroMissing;
+                        // What ApplyRest would heal, from the same rule (playtest 4 finding 19).
+                        restores += Mathf.Min(heroMissing, RestHealFor(hero));
                     }
                 }
             }
 
-
             string state = missing > 0
-                ? Loc.Format("room.refuge.state.hurt", ("missing", missing))
+                ? Loc.Format("room.refuge.state.hurt", ("missing", missing), ("heal", restores))
                 : Loc.Get("room.refuge.state.whole");
 
+            // The share as it really is: a revisit's Fear can scale hero healing.
+            float share = RoomKindRewards.RestHealFraction * Mathf.Max(0f, RunFear.Current.HeroHealingMultiplier);
             ShowConfirm(Loc.Get("room.refuge.title"),
                 Loc.Format("room.refuge.prompt", ("state", state),
-                    ("percent", Mathf.RoundToInt(RoomKindRewards.RestHealFraction * 100f))),
+                    ("percent", Mathf.RoundToInt(share * 100f))),
                 Loc.Get("room.refuge.confirm"),
                 ApplyRest);
         }
 
+        /// <summary>
+        /// The health a rest gives <paramref name="hero"/> before the bar's cap: the refuge's share of
+        /// their maximum, scaled by the run's Fear. The prompt and <see cref="ApplyRest"/> both read
+        /// it, so what the prompt promises cannot drift from what resting does.
+        /// </summary>
+        private static int RestHealFor(Heroes.Hero hero)
+        {
+            return RunFear.Current.ScaleHeroHealing(RoomKindRewards.RestHealAmount(hero.GetEffectiveMaxHealth()));
+        }
+
         private void ApplyRest()
         {
+            // A refuge pays once. Were this to run twice, the second pass would heal nobody - the first
+            // fills every bar the playtest reported - and its "already at full health" lines would
+            // replace the first pass's result, which reads as the refuge refusing (one fit for
+            // playtest 4 finding 3; no route to a second call was found). OnRest's gate, checked again.
+            if (_currentRoom == null || !_currentRoom.HasPendingPayload || _currentRoom.Kind != RoomKind.Rest)
+            {
+                Debug.LogWarning("[Refuge] Rest confirmed again after the refuge was spent; ignored.");
+                return;
+            }
+
             var party = GameManager.Instance.Party;
             var lines = new List<string>();
+            int totalHealed = 0;
+            var before = new List<string>();
 
             if (party != null)
             {
@@ -813,13 +858,22 @@ namespace Assets.Scripts.Rooms
                     }
 
                     int max = hero.GetEffectiveMaxHealth();
-                    int healed = HealthOps.Heal(hero,
-                        RunFear.Current.ScaleHeroHealing(RoomKindRewards.RestHealAmount(max)),
+                    before.Add($"{hero.DisplayName} {hero.Stats.Health}/{max}");
+                    int healed = HealthOps.Heal(hero, RestHealFor(hero),
                         new HealthSource(null, HealthCause.Rest), null).Healed;
+                    totalHealed += healed;
                     lines.Add(healed > 0
                         ? Loc.Format("room.refuge.healed", ("hero", hero.DisplayName), ("amount", healed))
                         : Loc.Format("room.refuge.already-whole", ("hero", hero.DisplayName)));
                 }
+            }
+
+            // Playtest 4 finding 3 was seen once and not reproduced: a rest that heals nobody leaves
+            // the numbers it read in the log, so the next one can be told apart from a real full party.
+            if (totalHealed == 0)
+            {
+                Debug.LogWarning($"[Refuge] Rest healed nobody: {string.Join(", ", before)} "
+                    + $"(fear healing x{RunFear.Current.HeroHealingMultiplier}).");
             }
 
             // A refuge is the only in-run refill of a spell charge. Draw used to be that refill -

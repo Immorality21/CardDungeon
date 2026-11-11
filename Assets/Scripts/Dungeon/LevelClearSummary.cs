@@ -23,6 +23,10 @@ namespace Assets.Scripts.Dungeon
             public Sprite Icon;
             /// <summary>The item, for its rarity colour. Null on a hero line.</summary>
             public ItemSO Item;
+            /// <summary>On a hero line: who they are, for a hero the player has not met (a run's clear). Else null.</summary>
+            public string Blurb;
+            /// <summary>On a hero line: they join with part of their grid learned (<c>SphereGridOps.JoinsWithGridStarted</c>).</summary>
+            public bool GridStarted;
 
             public Line(string label, int amount, Sprite icon = null, ItemSO item = null)
             {
@@ -30,6 +34,8 @@ namespace Assets.Scripts.Dungeon
                 Amount = amount;
                 Icon = icon;
                 Item = item;
+                Blurb = null;
+                GridStarted = false;
             }
         }
 

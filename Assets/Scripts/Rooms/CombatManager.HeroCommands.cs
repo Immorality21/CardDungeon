@@ -61,7 +61,29 @@ namespace Assets.Scripts.Rooms
             }
             // Free, and from an empty slot too (owner, 2026-10-31): Focus is the price, and every point of
             // it already cost a charge to build, so the Ultra was dry when it was finally ready.
+            // Said over the Mage when there was a charge it could have cost (playtest 4 finding 17).
+            if (SlotHasCharge(caster, slotIndex) && caster.Transform != null)
+            {
+                ShowFloatingLabel(caster.Transform.position + new Vector3(0f, 0.4f, 0f), Loc.Get("combat.float.charge-kept"),
+                    new Color(0.55f, 0.75f, 1f), 0.14f);
+            }
             SpendCharge(caster, slotIndex, free: true);
+        }
+
+        /// <summary>Whether <paramref name="caster"/>'s slot <paramref name="slotIndex"/> holds a charge a
+        /// cast would spend (an unlimited form ability never does).</summary>
+        private static bool SlotHasCharge(ICombatUnit caster, int slotIndex)
+        {
+            if (!(caster is Hero hero) || !DungeonManager.HasInstance || DungeonManager.Instance.MagicState == null)
+            {
+                return false;
+            }
+            var slots = DungeonManager.Instance.MagicState.GetSlots(hero.HeroKey);
+            if (slots == null || slotIndex < 0 || slotIndex >= slots.Count || slots[slotIndex] == null)
+            {
+                return false;
+            }
+            return !slots[slotIndex].Unlimited && slots[slotIndex].Charges > 0;
         }
 
         private static bool AddFreeCast(ICombatUnit unit)

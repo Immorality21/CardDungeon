@@ -113,6 +113,10 @@ namespace Assets.Scripts.Rooms
                 rewardsScroll.scrollOffset = Vector2.zero;
             }
             SetShown(_victoryWindow, true);
+            // The fight usually ends on a hero's pick in the selection picker, the other document,
+            // which let go of the keyboard without handing it back: Enter and Space reached nothing
+            // and only a click closed the window (playtest 4 finding 59).
+            FocusRoot();
         }
 
         // ============================================================
@@ -199,9 +203,26 @@ namespace Assets.Scripts.Rooms
                 var row = new VisualElement();
                 row.AddToClassList("cd-lc-joined__row");
                 row.Add(Portrait(hero.Icon, "cd-lc-joined__portrait"));
+                var body = new VisualElement();
+                body.AddToClassList("cd-lc-joined__body");
                 var text = new Label(Loc.Format("room.level-clear.joined", ("hero", hero.Label)));
                 text.AddToClassList("cd-lc-joined__text");
-                row.Add(text);
+                body.Add(text);
+                // A run's clear brings someone the player has never met: say who (playtest 4 finding
+                // 22), the way a freed captive's notice does.
+                if (!string.IsNullOrEmpty(hero.Blurb))
+                {
+                    var blurb = new Label(hero.Blurb);
+                    blurb.AddToClassList("cd-lc-joined__blurb");
+                    body.Add(blurb);
+                }
+                if (hero.GridStarted)
+                {
+                    var note = new Label(Loc.Get("room.joined.grid-started"));
+                    note.AddToClassList("cd-lc-joined__note");
+                    body.Add(note);
+                }
+                row.Add(body);
                 _levelJoined?.Add(row);
             }
 

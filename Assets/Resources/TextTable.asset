@@ -3238,10 +3238,10 @@ MonoBehaviour:
     Values:
     - The Warden Wakes Again
     Reviewed: 0
-    Note: tavern quest name: kill the Abyssal Warden on a revisit
+    Note: 'tavern quest name: kill the Abyssal Warden again, where it still guards a level (the Blood Stair, the Drowned Chapel). The Threshold cannot be replayed (playtest 4 finding 14)'
   - Key: quest.warden-revisit.description
     Values:
-    - 'Word is the Warden stirs whenever someone walks its halls twice. Go back, harder, and put it down for good.'
+    - 'Word is the Warden would not stay down. It has been seen again, deeper in. Find it and put it down for good.'
     Reviewed: 0
     Note: tavern quest flavour line
   - Key: quest.hard-way.name
@@ -3843,10 +3843,15 @@ MonoBehaviour:
     Note: 'Hints window, before any hint was seen'
   - Key: tutorial.revisit-hall-on-grid.text
     Values:
-    - The Paladin has XP to spend too. Spend it on either hero, or go back when you
-      are ready.
+    - The Paladin earned XP too, and it is the Paladin's own. Spend it on the Paladin's
+      grid, or go back when you are ready.
     Reviewed: 0
-    Note: 
+    Note: 'Banner over the grid on the return to the hall. Each hero banks their own XP and spends it on their own grid only (playtest 4 finding 62: "either hero" read as shared XP)'
+  - Key: tutorial.nudge
+    Values:
+    - 'Not yet. {line}'
+    Reviewed: 0
+    Note: 'Tutorial banner for a few seconds after the tutorial refused a key or click (Escape on a guided screen, an arrow in a locked town); {line} is the step''s own banner line'
   - Key: node.mage-multicast.name
     Values:
     - MultiCast
@@ -4588,11 +4593,6 @@ MonoBehaviour:
   - Key: ui.room.fight-btn
     Values:
     - Fight
-    Reviewed: 0
-    Note: 
-  - Key: ui.room.flee-btn
-    Values:
-    - Flee
     Reviewed: 0
     Note: 
   - Key: ui.room.level-clear-continue
@@ -5529,21 +5529,6 @@ MonoBehaviour:
     - enemies {percent} to every stat
     Reviewed: 0
     Note: Revisit summary part; {percent} = signed percent like +50%
-  - Key: dungeon.revisit.summary.health
-    Values:
-    - '{percent} more health'
-    Reviewed: 0
-    Note: Revisit summary part; {percent} = signed percent
-  - Key: dungeon.revisit.summary.damage
-    Values:
-    - '{percent} more damage'
-    Reviewed: 0
-    Note: Revisit summary part; {percent} = signed percent
-  - Key: dungeon.revisit.summary.speed
-    Values:
-    - '{percent} more speed'
-    Reviewed: 0
-    Note: Revisit summary part; {percent} = signed percent
   - Key: dungeon.revisit.summary.extra-foes.one
     Values:
     - +{count} foe per fight
@@ -5828,9 +5813,11 @@ MonoBehaviour:
       a blank line)
   - Key: room.refuge.state.hurt
     Values:
-    - The party is missing {missing} health in total.
+    - The party is missing {missing} health in total; resting would restore {heal}
+      of it.
     Reviewed: 0
-    Note: Refuge prompt, party state; {missing} = total missing health
+    Note: Refuge prompt, party state; {missing} = total missing health, {heal} =
+      what resting would heal now (same rule as the rest itself)
   - Key: room.refuge.state.whole
     Values:
     - Nobody is hurt. Resting now would waste it.
@@ -6023,14 +6010,68 @@ MonoBehaviour:
     Note: Pause menu note once leaving is armed
   - Key: room.keys.combat-bar
     Values:
-    - "\u2190 \u2192 choose \xB7 Enter confirm \xB7 step back out to flee"
+    - "Enter fight \xB7 step back out to flee"
     Reviewed: 0
-    Note: Keyboard hint while the Fight/Flee bar is up
+    Note: Keyboard hint while the Fight bar is up (Flee is stepping back out, by arrow or click)
+  - Key: room.keys.combat-bar-no-flee
+    Values:
+    - Enter fight
+    Reviewed: 0
+    Note: Keyboard hint on the Fight bar where fleeing is refused (boss rooms, side rooms)
   - Key: room.keys.doors
     Values:
-    - "Arrows / WASD walk \xB7 Enter use \xB7 P potions"
+    - "Arrows / WASD walk \xB7 P potions"
     Reviewed: 0
-    Note: Keyboard hint while walking the floor
+    Note: Keyboard hint while walking the floor, with nothing at hand to use
+  - Key: room.keys.doors-use
+    Values:
+    - "Arrows / WASD walk \xB7 Enter: {use} \xB7 P potions"
+    Reviewed: 0
+    Note: Keyboard hint while walking the floor beside something usable; {use} =
+      a room.use.* phrase
+  - Key: room.use.rest
+    Values:
+    - rest
+    Reviewed: 0
+    Note: Walking hint after "Enter:", facing an unspent refuge
+  - Key: room.use.stairs
+    Values:
+    - take the stairs
+    Reviewed: 0
+    Note: Walking hint after "Enter:", facing the stairs of a cleared exit room
+  - Key: room.use.search
+    Values:
+    - search the chest
+    Reviewed: 0
+    Note: Walking hint after "Enter:", facing an unopened cache
+  - Key: room.use.event
+    Values:
+    - '{event}'
+    Reviewed: 0
+    Note: Walking hint after "Enter:", facing a room event's object; {event} = the
+      event's title
+  - Key: room.use.look
+    Values:
+    - look closer
+    Reviewed: 0
+    Note: Walking hint after "Enter:", facing a room event's object whose event has
+      no title
+  - Key: room.use.go-in
+    Values:
+    - go in
+    Reviewed: 0
+    Note: Walking hint after "Enter:", facing the way into a side room an event opened
+  - Key: room.use.go-back
+    Values:
+    - go back
+    Reviewed: 0
+    Note: Walking hint after "Enter:", in a side room, facing the way back out
+  - Key: room.joined.grid-started
+    Values:
+    - Joins with part of their grid already learned.
+    Reviewed: 0
+    Note: Under a hero who joins (captive notice, level-clear window) when their
+      sphere grid starts with free stat nodes (the late heroes' built trunk)
   - Key: room.party.hp
     Values:
     - '{current}/{max}'
@@ -7181,21 +7222,6 @@ MonoBehaviour:
   - Key: abilities.inspect.floor-health
     Values:
     - Floor's own health
-    Reviewed: 0
-    Note: Inspect page, revisit section line label
-  - Key: abilities.inspect.more-health
-    Values:
-    - More health
-    Reviewed: 0
-    Note: Inspect page, revisit section line label
-  - Key: abilities.inspect.more-damage
-    Values:
-    - More damage
-    Reviewed: 0
-    Note: Inspect page, revisit section line label
-  - Key: abilities.inspect.more-speed
-    Values:
-    - More speed
     Reviewed: 0
     Note: Inspect page, revisit section line label
   - Key: abilities.inspect.percent-more
@@ -8875,6 +8901,11 @@ MonoBehaviour:
     - Stats
     Reviewed: 0
     Note: detail section title
+  - Key: items.inv.no-stat-change
+    Values:
+    - No change to stats
+    Reviewed: 0
+    Note: 'Storehouse / Merchant comparison: the item changes no stat or resistance (only changes are listed)'
   - Key: items.inv.stack-sub
     Values:
     - "{rarity} \xB7 x{count}"
@@ -9514,12 +9545,12 @@ MonoBehaviour:
     Note: Summon node payload; {summon} summon name
   - Key: grid.payload.summon-health
     Values:
-    - '{summon}: +{amount}% health'
+    - '{summon} has more health: +{amount}% of the summoner''s'
     Reviewed: 0
     Note: grid node payload - a unit summon's power node (health as % of the summoner's)
   - Key: grid.payload.summon-power
     Values:
-    - '{summon}: +{amount} to its effect'
+    - '{summon} grows stronger (+{amount})'
     Reviewed: 0
     Note: Summon upgrade payload; {summon} name, {amount} power
   - Key: grid.payload.summon-duration.one
@@ -9703,9 +9734,9 @@ MonoBehaviour:
     Note: Sphere grid detail title for an ability slot node
   - Key: grid.upgrade-detail.power
     Values:
-    - '{ability} deals (or heals) {amount} more, before its stat bonus.'
+    - '{ability} gains {amount} base power, added before its stat bonus.'
     Reviewed: 0
-    Note: Sphere grid ability upgrade detail; {ability} name, {amount} power
+    Note: Sphere grid ability upgrade detail; {ability} name, {amount} power. Neutral on purpose, one line for damage and healing abilities alike (playtest 4 finding 28)
   - Key: grid.upgrade-detail.crit-chance
     Values:
     - '{ability} can land critical hits, with a {amount}% higher chance than the
@@ -9776,11 +9807,6 @@ MonoBehaviour:
     - Raises this hero's stats for good.
     Reviewed: 0
     Note: Sphere grid stat node detail
-  - Key: grid.detail.stat-change
-    Values:
-    - "{before} \u2192 {after}"
-    Reviewed: 0
-    Note: 'Sphere grid stat node: a stat''s value before and after buying'
   - Key: grid.feedback.awakened
     Values:
     - '{from} awakens into {to}.'
@@ -9806,6 +9832,11 @@ MonoBehaviour:
     - Cannot activate that node.
     Reviewed: 0
     Note: Sphere grid feedback
+  - Key: grid.feedback.guide-first
+    Values:
+    - 'Not yet: activate {node} first.'
+    Reviewed: 0
+    Note: Sphere grid feedback while the tutorial guides one node and the player tries another node, another hero or Back; {node} the guided node's name
   - Key: framework.popup.ok
     Values:
     - Ok
@@ -10006,11 +10037,6 @@ MonoBehaviour:
     - All equipment
     Reviewed: 0
     Note: inventory list title, All tab
-  - Key: items.inv.all.row-caption
-    Values:
-    - Every slot
-    Reviewed: 0
-    Note: caption under the All equipment row, first in the Storehouse slot column
   - Key: items.inv.all.count-note
     Values:
     - '{count} pieces of gear in the party. Enter to browse them all.'
@@ -10809,6 +10835,11 @@ MonoBehaviour:
     - '{meta}  does not stack'
     Reviewed: 0
     Note: 
+  - Key: abilities.menu.meta-free
+    Values:
+    - '{meta}  free'
+    Reviewed: 0
+    Note: 'MultiCast ability list: the cast costs no charge and works from an empty slot'
   - Key: enemy.fire-elemental.name
     Values:
     - Fire Elemental
@@ -12500,3 +12531,533 @@ MonoBehaviour:
     - Shielded
     Reviewed: 0
     Note: Floats over a boss that cannot be targeted while what it called still stands
+  - Key: room.command.detail.signature-cooldown
+    Values:
+    - 'Back {turns} turns after use'
+    Reviewed: 0
+    Note: 'Summon menu detail under a Signature; {turns} = its own turns until it can be used again (playtest 4 finding 6)'
+  - Key: room.command.detail.signature-once
+    Values:
+    - Once per summoning
+    Reviewed: 0
+    Note: Summon menu detail under a Signature that does not come back
+  - Key: room.command.detail.summon-attack
+    Values:
+    - A plain strike at one enemy
+    Reviewed: 0
+    Note: 'Summon menu detail for a summon''s plain Attack'
+  - Key: room.command.detail.dismiss
+    Values:
+    - Sends it home
+    Reviewed: 0
+    Note: Summon menu detail for Dismiss
+  - Key: grid.payload.summon-power.damage
+    Values:
+    - '{summon} hits {amount} harder'
+    Reviewed: 0
+    Note: 'Grid: a summon power node on a damaging special attack (playtest 4 finding 23)'
+  - Key: grid.payload.summon-power.heal
+    Values:
+    - '{summon} heals {amount} more'
+    Reviewed: 0
+    Note: 'Grid: a summon power node on a flat heal'
+  - Key: grid.payload.summon-power.heal-percent
+    Values:
+    - '{summon} heals {amount}% more of max health'
+    Reviewed: 0
+    Note: 'Grid: a summon power node on a percentage heal'
+  - Key: grid.payload.summon-power.revive
+    Values:
+    - '{summon} revives with {amount}% more health'
+    Reviewed: 0
+    Note: 'Grid: a summon power node on a revive'
+  - Key: grid.payload.summon-power.status-max-health
+    Values:
+    - '{summon}''s {status} grows by {amount}% of max health'
+    Reviewed: 0
+    Note: 'Grid: a summon power node on a barrier sized by max health; {status} = buff name'
+  - Key: grid.payload.summon-power.status-percent
+    Values:
+    - '{summon} adds {amount}% more of each target''s {status}'
+    Reviewed: 0
+    Note: 'Grid: a summon power node on a percentage stat buff (the Boar, the Lion); {status} = stat name'
+  - Key: grid.payload.summon-power.status
+    Values:
+    - '{summon}''s {status} grows by {amount}'
+    Reviewed: 0
+    Note: 'Grid: a summon power node on a flat buff or debuff'
+  - Key: abilities.inspect.status-turns
+    Values:
+    - '{turns} turns left'
+    Reviewed: 0
+    Note: 'Inspect: a status on the enemy and its remaining turns'
+  - Key: bestiary.learn.line
+    Values:
+    - 'To learn more: {ways}.'
+    Reviewed: 0
+    Note: 'Inspect footer: how to fill in what is still unknown; {ways} = the parts below (playtest 4 finding 34)'
+  - Key: bestiary.learn.separator
+    Values:
+    - '; '
+    Reviewed: 0
+    Note: Between the ways in bestiary.learn.line
+  - Key: bestiary.learn.elements
+    Values:
+    - hit it with each element
+    Reviewed: 0
+    Note: 'A way to learn more: resistances are learned by landing a hit of that element'
+  - Key: bestiary.learn.attack
+    Values:
+    - let it attack to see what it hits with
+    Reviewed: 0
+    Note: 'A way to learn more: the attack element is learned by being attacked'
+  - Key: bestiary.learn.abilities
+    Values:
+    - watch it use its abilities
+    Reviewed: 0
+    Note: 'A way to learn more: an ability is named once seen cast'
+  - Key: bestiary.learn.defeat
+    Values:
+    - defeat it to see its immunities and drops
+    Reviewed: 0
+    Note: 'A way to learn more: immunities show after the first kill, drops once seen'
+  - Key: bestiary.learn.drops
+    Values:
+    - defeat more to see the rest of its drops
+    Reviewed: 0
+    Note: 'A way to learn more: a drop is named once it has dropped'
+  - Key: dungeon.revisit.total
+    Values:
+    - 'enemy {changes}'
+    Reviewed: 0
+    Note: 'Revisit: what the Fear does to enemies in all, each condition multiplied on the base (playtest 4 finding 25); {changes} = the parts below'
+  - Key: dungeon.revisit.total.health
+    Values:
+    - 'health {percent}'
+    Reviewed: 0
+    Note: 'Revisit total: enemy health, base x condition'
+  - Key: dungeon.revisit.total.damage
+    Values:
+    - 'damage {percent}'
+    Reviewed: 0
+    Note: 'Revisit total: enemy damage, base x condition'
+  - Key: dungeon.revisit.total.speed
+    Values:
+    - 'speed {percent}'
+    Reviewed: 0
+    Note: 'Revisit total: enemy speed, base x condition'
+  - Key: dungeon.revisit.total.other
+    Values:
+    - 'other stats {percent}'
+    Reviewed: 0
+    Note: 'Revisit total: the stats no condition touches (the base)'
+  - Key: abilities.inspect.total-health
+    Values:
+    - Health in all
+    Reviewed: 0
+    Note: 'Inspect revisit section: the enemy health the Fear adds in all'
+  - Key: abilities.inspect.total-damage
+    Values:
+    - Damage in all
+    Reviewed: 0
+    Note: 'Inspect revisit section: the enemy damage the Fear adds in all'
+  - Key: abilities.inspect.total-speed
+    Values:
+    - Speed in all
+    Reviewed: 0
+    Note: 'Inspect revisit section: the enemy speed the Fear adds in all'
+  - Key: abilities.inspect.other-stats
+    Values:
+    - Other stats
+    Reviewed: 0
+    Note: 'Inspect revisit section: the base on the stats no condition touches'
+  - Key: ui.controls.open
+    Values:
+    - 'Controls'
+    Reviewed: 0
+    Note: 'Button that opens the Controls screen (pause menu, Options)'
+  - Key: ui.controls.open-f1
+    Values:
+    - 'Controls (F1)'
+    Reviewed: 0
+    Note: 'Town bar button that opens the Controls screen'
+  - Key: ui.controls.title
+    Values:
+    - 'Controls'
+    Reviewed: 0
+    Note: 'Controls screen title'
+  - Key: ui.controls.hint
+    Values:
+    - 'Up/Down or Page Up/Down scroll. Esc, Enter or F1 closes.'
+    Reviewed: 0
+    Note: 'Controls screen, under the list'
+  - Key: controls.group.dungeon
+    Values:
+    - 'In the dungeon'
+    Reviewed: 0
+    Note: 'Controls screen heading'
+  - Key: controls.group.combat
+    Values:
+    - 'In a fight'
+    Reviewed: 0
+    Note: 'Controls screen heading'
+  - Key: controls.group.town
+    Values:
+    - 'In town and in menus'
+    Reviewed: 0
+    Note: 'Controls screen heading'
+  - Key: controls.group.maps
+    Values:
+    - 'Sphere grid and story map'
+    Reviewed: 0
+    Note: 'Controls screen heading'
+  - Key: controls.dungeon.walk.keys
+    Values:
+    - 'Arrow keys or WASD'
+    Reviewed: 0
+    Note: 'Controls: keys'
+  - Key: controls.dungeon.walk.action
+    Values:
+    - 'Walk one tile. Hold to keep walking.'
+    Reviewed: 0
+    Note: 'Controls: action'
+  - Key: controls.dungeon.click-walk.keys
+    Values:
+    - 'Left click a floor or a room'
+    Reviewed: 0
+    Note: 'Controls: keys'
+  - Key: controls.dungeon.click-walk.action
+    Values:
+    - 'Walk there, when the way is safe'
+    Reviewed: 0
+    Note: 'Controls: action'
+  - Key: controls.dungeon.click-door.keys
+    Values:
+    - 'Left click a door'
+    Reviewed: 0
+    Note: 'Controls: keys'
+  - Key: controls.dungeon.click-door.action
+    Values:
+    - 'Walk to it and through it'
+    Reviewed: 0
+    Note: 'Controls: action'
+  - Key: controls.dungeon.use.keys
+    Values:
+    - 'Enter, Space or Z'
+    Reviewed: 0
+    Note: 'Controls: keys'
+  - Key: controls.dungeon.use.action
+    Values:
+    - 'Use what the party faces or stands on: a chest, a bonfire, the stairs, an event. Left click it to walk there and use it.'
+    Reviewed: 0
+    Note: 'Controls: action'
+  - Key: controls.dungeon.flee.keys
+    Values:
+    - 'Step back through the door you came in, or click that door or the room behind'
+    Reviewed: 0
+    Note: 'Controls: keys'
+  - Key: controls.dungeon.flee.action
+    Values:
+    - 'Flee before a fight starts. Not from a boss.'
+    Reviewed: 0
+    Note: 'Controls: action'
+  - Key: controls.dungeon.map.keys
+    Values:
+    - 'M'
+    Reviewed: 0
+    Note: 'Controls: keys'
+  - Key: controls.dungeon.map.action
+    Values:
+    - 'Floor map. Arrows or a click pick an explored room, Enter travels there.'
+    Reviewed: 0
+    Note: 'Controls: action'
+  - Key: controls.dungeon.potions.keys
+    Values:
+    - 'P'
+    Reviewed: 0
+    Note: 'Controls: keys'
+  - Key: controls.dungeon.potions.action
+    Values:
+    - 'Drink a potion while walking'
+    Reviewed: 0
+    Note: 'Controls: action'
+  - Key: controls.dungeon.pause.keys
+    Values:
+    - 'Esc or C'
+    Reviewed: 0
+    Note: 'Controls: keys'
+  - Key: controls.dungeon.pause.action
+    Values:
+    - 'Pause menu: map, potions, hints, controls, sound, quit'
+    Reviewed: 0
+    Note: 'Controls: action'
+  - Key: controls.combat.fight.keys
+    Values:
+    - 'Enter, Space or Z'
+    Reviewed: 0
+    Note: 'Controls: keys'
+  - Key: controls.combat.fight.action
+    Values:
+    - 'Fight, when enemies wait in the room'
+    Reviewed: 0
+    Note: 'Controls: action'
+  - Key: controls.combat.command.keys
+    Values:
+    - 'Arrow keys'
+    Reviewed: 0
+    Note: 'Controls: keys'
+  - Key: controls.combat.command.action
+    Values:
+    - 'Choose a command. Left and Right switch column.'
+    Reviewed: 0
+    Note: 'Controls: action'
+  - Key: controls.combat.list.keys
+    Values:
+    - 'Up and Down'
+    Reviewed: 0
+    Note: 'Controls: keys'
+  - Key: controls.combat.list.action
+    Values:
+    - 'Choose an ability, an item or a target'
+    Reviewed: 0
+    Note: 'Controls: action'
+  - Key: controls.combat.confirm.keys
+    Values:
+    - 'Enter, Space or Z'
+    Reviewed: 0
+    Note: 'Controls: keys'
+  - Key: controls.combat.confirm.action
+    Values:
+    - 'Confirm'
+    Reviewed: 0
+    Note: 'Controls: action'
+  - Key: controls.combat.back.keys
+    Values:
+    - 'Esc, Backspace or X'
+    Reviewed: 0
+    Note: 'Controls: keys'
+  - Key: controls.combat.back.action
+    Values:
+    - 'Back one step'
+    Reviewed: 0
+    Note: 'Controls: action'
+  - Key: controls.combat.click.keys
+    Values:
+    - 'Left click'
+    Reviewed: 0
+    Note: 'Controls: keys'
+  - Key: controls.combat.click.action
+    Values:
+    - 'Choose a command, an ability or a target'
+    Reviewed: 0
+    Note: 'Controls: action'
+  - Key: controls.combat.inspect.keys
+    Values:
+    - 'Up, Down, Page Up, Page Down'
+    Reviewed: 0
+    Note: 'Controls: keys'
+  - Key: controls.combat.inspect.action
+    Values:
+    - 'Scroll the Inspect page'
+    Reviewed: 0
+    Note: 'Controls: action'
+  - Key: controls.combat.pause.keys
+    Values:
+    - 'Esc or C'
+    Reviewed: 0
+    Note: 'Controls: keys'
+  - Key: controls.combat.pause.action
+    Values:
+    - 'Pause, on a hero''s turn'
+    Reviewed: 0
+    Note: 'Controls: action'
+  - Key: controls.combat.victory.keys
+    Values:
+    - 'Enter or Space'
+    Reviewed: 0
+    Note: 'Controls: keys'
+  - Key: controls.combat.victory.action
+    Values:
+    - 'Close the Victory screen'
+    Reviewed: 0
+    Note: 'Controls: action'
+  - Key: controls.town.cursor.keys
+    Values:
+    - 'Arrow keys'
+    Reviewed: 0
+    Note: 'Controls: keys'
+  - Key: controls.town.cursor.action
+    Values:
+    - 'Move the cursor'
+    Reviewed: 0
+    Note: 'Controls: action'
+  - Key: controls.town.tab.keys
+    Values:
+    - 'Tab, Shift+Tab'
+    Reviewed: 0
+    Note: 'Controls: keys'
+  - Key: controls.town.tab.action
+    Values:
+    - 'Next or previous button'
+    Reviewed: 0
+    Note: 'Controls: action'
+  - Key: controls.town.press.keys
+    Values:
+    - 'Enter, Space or Z'
+    Reviewed: 0
+    Note: 'Controls: keys'
+  - Key: controls.town.press.action
+    Values:
+    - 'Press what the cursor is on'
+    Reviewed: 0
+    Note: 'Controls: action'
+  - Key: controls.town.back.keys
+    Values:
+    - 'Esc, Backspace or X'
+    Reviewed: 0
+    Note: 'Controls: keys'
+  - Key: controls.town.back.action
+    Values:
+    - 'Back out of a screen'
+    Reviewed: 0
+    Note: 'Controls: action'
+  - Key: controls.town.click.keys
+    Values:
+    - 'Left click'
+    Reviewed: 0
+    Note: 'Controls: keys'
+  - Key: controls.town.click.action
+    Values:
+    - 'Open a building, press a button. A click beside a window closes it.'
+    Reviewed: 0
+    Note: 'Controls: action'
+  - Key: controls.town.page.keys
+    Values:
+    - 'Page Up, Page Down'
+    Reviewed: 0
+    Note: 'Controls: keys'
+  - Key: controls.town.page.action
+    Values:
+    - 'Scroll a long description'
+    Reviewed: 0
+    Note: 'Controls: action'
+  - Key: controls.town.heroes.keys
+    Values:
+    - 'Q, E'
+    Reviewed: 0
+    Note: 'Controls: keys'
+  - Key: controls.town.heroes.action
+    Values:
+    - 'Previous or next hero (sphere grid, Storehouse)'
+    Reviewed: 0
+    Note: 'Controls: action'
+  - Key: controls.town.tabs.keys
+    Values:
+    - 'Left, Right'
+    Reviewed: 0
+    Note: 'Controls: keys'
+  - Key: controls.town.tabs.action
+    Values:
+    - 'Switch tabs (Storehouse, Hall of Knowledge)'
+    Reviewed: 0
+    Note: 'Controls: action'
+  - Key: controls.town.controls.keys
+    Values:
+    - 'F1'
+    Reviewed: 0
+    Note: 'Controls: keys'
+  - Key: controls.town.controls.action
+    Values:
+    - 'This list, from any screen in town or on the title screen'
+    Reviewed: 0
+    Note: 'Controls: action'
+  - Key: controls.maps.move.keys
+    Values:
+    - 'Arrow keys'
+    Reviewed: 0
+    Note: 'Controls: keys'
+  - Key: controls.maps.move.action
+    Values:
+    - 'Move between nodes; the view follows'
+    Reviewed: 0
+    Note: 'Controls: action'
+  - Key: controls.maps.drag.keys
+    Values:
+    - 'Drag with the left or middle mouse button'
+    Reviewed: 0
+    Note: 'Controls: keys'
+  - Key: controls.maps.drag.action
+    Values:
+    - 'Pan the view'
+    Reviewed: 0
+    Note: 'Controls: action'
+  - Key: controls.maps.wheel.keys
+    Values:
+    - 'Mouse wheel'
+    Reviewed: 0
+    Note: 'Controls: keys'
+  - Key: controls.maps.wheel.action
+    Values:
+    - 'Zoom'
+    Reviewed: 0
+    Note: 'Controls: action'
+  - Key: controls.maps.pan.keys
+    Values:
+    - 'WASD'
+    Reviewed: 0
+    Note: 'Controls: keys'
+  - Key: controls.maps.pan.action
+    Values:
+    - 'Pan the story map'
+    Reviewed: 0
+    Note: 'Controls: action'
+  - Key: controls.maps.zoom.keys
+    Values:
+    - '+ and -'
+    Reviewed: 0
+    Note: 'Controls: keys'
+  - Key: controls.maps.zoom.action
+    Values:
+    - 'Zoom the story map'
+    Reviewed: 0
+    Note: 'Controls: action'
+  - Key: controls.maps.begin.keys
+    Values:
+    - 'Enter, Space or Z'
+    Reviewed: 0
+    Note: 'Controls: keys'
+  - Key: controls.maps.begin.action
+    Values:
+    - 'Buy the node, or begin the chosen level'
+    Reviewed: 0
+    Note: 'Controls: action'
+  - Key: controls.maps.revisit.keys
+    Values:
+    - 'Up and Down, Left and Right'
+    Reviewed: 0
+    Note: 'Controls: keys'
+  - Key: controls.maps.revisit.action
+    Values:
+    - 'Revisit conditions: choose one, lower or raise it'
+    Reviewed: 0
+    Note: 'Controls: action'
+  - Key: hub.camp.leader-badge
+    Values:
+    - 'Leader'
+    Reviewed: 0
+    Note: 'Campfire roster: the badge on the party leader''s row'
+  - Key: hub.camp.belt-pick-title
+    Values:
+    - 'Slot {slot}: which potion?'
+    Reviewed: 0
+    Note: 'Campfire potion picker title'
+  - Key: hub.camp.belt-pick-swap
+    Values:
+    - '{potion} (in slot {slot}, swaps)'
+    Reviewed: 0
+    Note: 'Campfire potion picker: a type already in another slot'
+  - Key: hub.campaign.clearing-joins
+    Values:
+    - 'Clearing it: {hero} joins the party'
+    Reviewed: 0
+    Note: 'Story map detail: the hero a run''s clear brings, while not yet owned'

@@ -524,6 +524,67 @@ namespace Assets.Scripts.Rooms
                 _commandRows[i].EnableInClassList("cd-cmd-row--selected", selected);
                 _commandCursors[i].text = selected ? "▸" : string.Empty;
             }
+            RenderCommandDetail();
+        }
+
+        // The summon menu's detail line (playtest 4 finding 6): what the highlighted action does, as
+        // the ability picker's footer says it. A label inside the hero bar, so it hides with it.
+        private Label _commandDesc;
+
+        private void RenderCommandDetail()
+        {
+            if (_commandDesc == null && _heroBar != null)
+            {
+                _commandDesc = _heroBar.Q<Label>("command-desc");
+            }
+            if (_commandDesc == null)
+            {
+                return;
+            }
+            string text = _selectedCommand >= 0 && _selectedCommand < _commands.Count
+                ? CommandDetail(_commands[_selectedCommand])
+                : null;
+            _commandDesc.text = text ?? string.Empty;
+            _commandDesc.EnableInClassList("cd-hidden", string.IsNullOrEmpty(text));
+        }
+
+        /// <summary>
+        /// What a summon's command does, in the picker's words: an ability's mechanics (its flavour
+        /// text when it has none), with a Signature's cooldown; Attack and Dismiss in one line each.
+        /// A hero's own menu shows nothing - every hero command opens a list that says it already.
+        /// </summary>
+        private string CommandDetail(CommandEntry entry)
+        {
+            if (!(_currentHeroTurn is SummonUnit summon))
+            {
+                return null;
+            }
+            switch (entry.Command)
+            {
+                case HeroCommand.SummonAbility:
+                    if (entry.Ability == null)
+                    {
+                        return null;
+                    }
+                    var tracker = CombatManager.Instance.BuffTracker;
+                    string text = AbilityDescriber.EffectLines(entry.Ability, summon, tracker).Count > 0
+                        ? AbilityDescriber.Full(entry.Ability, summon, tracker, 0, 0, withDescription: false)
+                        : entry.Ability.Description;
+                    if (summon.Summon != null && entry.Ability == summon.Summon.Signature)
+                    {
+                        string cooldown = summon.Summon.SignatureCooldown > 0
+                            ? Loc.Format("room.command.detail.signature-cooldown", ("turns", summon.Summon.SignatureCooldown))
+                            : Loc.Get("room.command.detail.signature-once");
+                        text = string.IsNullOrEmpty(text) ? cooldown : text + "\n" + cooldown;
+                    }
+                    return text;
+                case HeroCommand.Attack:
+                    return Loc.Get("room.command.detail.summon-attack");
+                case HeroCommand.Dismiss:
+                    return Loc.Get("room.command.detail.dismiss");
+                default:
+                    return null;
+            }
         }
 
         private void SetSelectedCommand(int index)
@@ -775,17 +836,18 @@ namespace Assets.Scripts.Rooms
 
             if (IsShown(_combatBar))
             {
-                // Stepping back through the door the party came in by is Flee; nothing walks further in.
-                if (IsShown(_fleeBtn) && _entryDoor != null
-                    && PartyWalk.DirectionOf(evt.keyCode) == _entryDoor.DirectionFrom(_currentRoom))
+                // Stepping back through the door the party came in by is Flee, in any direction;
+                // nothing walks further in. The bar holds only Fight, so no arrow is needed to browse
+                // it (playtest 4 finding 31: with a Flee button, Left/Right fought over the cursor).
+                var back = _entryDoor != null ? _entryDoor.DirectionFrom(_currentRoom) : Vector2Int.zero;
+                if (_canFlee && back != Vector2Int.zero && PartyWalk.DirectionOf(evt.keyCode) == back)
                 {
                     evt.StopPropagation();
                     OnFlee();
                     return;
                 }
 
-                // Arrows/Tab move along the bar, Enter presses. Flee is hidden in a boss room, so the
-                // cursor cannot reach a way out the fight does not offer.
+                // Enter presses Fight.
                 if (_combatNav != null && _combatNav.HandleKey(evt))
                 {
                     evt.StopPropagation();

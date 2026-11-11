@@ -390,5 +390,21 @@ namespace Tests.EditMode
             };
             Assert.IsNull(TutorialOps.ChallengeToWarnOf(false, states));
         }
+
+        // --- the "Not yet" nudge after a refused input (playtest 4 finding 40) ---
+
+        [Test]
+        public void NudgeShows_GuidedStepWithALine_UntilItRunsOut()
+        {
+            Assert.IsTrue(TutorialOps.NudgeShows(TutorialStep.EquipGear, TutorialCue.PickNode, 10f, 12.5f));
+            Assert.IsFalse(TutorialOps.NudgeShows(TutorialStep.EquipGear, TutorialCue.PickNode, 12.5f, 12.5f));
+        }
+
+        [Test]
+        public void NudgeShows_NoTutorialOrNoLine_NeverShows()
+        {
+            Assert.IsFalse(TutorialOps.NudgeShows(TutorialStep.None, TutorialCue.PickNode, 0f, 5f));
+            Assert.IsFalse(TutorialOps.NudgeShows(TutorialStep.SpendXp, TutorialCue.None, 0f, 5f));
+        }
     }
 }

@@ -41,8 +41,6 @@ namespace Assets.Scripts.Hub
     /// </summary>
     public class PartySelectUI
     {
-        private const int SeatCount = 4;
-
         private readonly VisualElement _root;
         private readonly PartyRosterSO _catalog;
         private readonly FileHandler _files = new FileHandler();
@@ -51,7 +49,6 @@ namespace Assets.Scripts.Hub
         private readonly Label _capLabel;
         private readonly Label _shareLabel;
         private readonly Label _feedbackLabel;
-        private readonly Button[] _seats = new Button[SeatCount];
         private readonly List<Button> _beltSlots = new List<Button>();
         private readonly Label _beltDesc;
         private readonly ScrollView _rosterList;
@@ -72,6 +69,13 @@ namespace Assets.Scripts.Hub
         private readonly Button _closeButton;
 
         private readonly Dictionary<string, Button> _rosterRows = new Dictionary<string, Button>();
+
+        // The potion picker a belt slot opens (playtest 4 finding 50), and the slot it fills.
+        private readonly VisualElement _beltPicker;
+        private readonly Label _beltPickerTitle;
+        private readonly VisualElement _beltPickerList;
+        private readonly Button _beltPickerCancel;
+        private int _pickingSlot = -1;
         private MagicLoadoutSaveData _loadout;
         private string _selectedKey;
 
@@ -123,14 +127,13 @@ namespace Assets.Scripts.Hub
                 _beltSlots.Add(slot);
             }
 
-            for (int i = 0; i < SeatCount; i++)
+            _beltPicker = root.Q<VisualElement>("party-belt-picker");
+            _beltPickerTitle = root.Q<Label>("party-belt-picker-title");
+            _beltPickerList = root.Q<VisualElement>("party-belt-picker-list");
+            _beltPickerCancel = root.Q<Button>("party-belt-picker-cancel");
+            if (_beltPickerCancel != null)
             {
-                _seats[i] = root.Q<Button>("party-seat-" + i);
-                int seat = i;
-                if (_seats[i] != null)
-                {
-                    _seats[i].clicked += () => OnSeatClicked(seat);
-                }
+                _beltPickerCancel.clicked += CloseBeltPicker;
             }
 
             if (_toggleButton != null)
@@ -174,6 +177,7 @@ namespace Assets.Scripts.Hub
             _loadout = _files.Load<MagicLoadoutSaveData>();
             _selectedKey = null;
             SetFeedback(string.Empty);
+            CloseBeltPicker();
             Refresh();
         }
 
@@ -183,6 +187,7 @@ namespace Assets.Scripts.Hub
             {
                 return;
             }
+            CloseBeltPicker();
             _root.style.display = DisplayStyle.None;
             OnClosed?.Invoke();
         }
@@ -234,59 +239,18 @@ namespace Assets.Scripts.Hub
                     ? Loc.Format("hub.camp.share-mode-one", ("count", size), ("mode", CampfireOps.Label(mode)))
                     : Loc.Format("hub.camp.share-mode", ("count", size), ("mode", CampfireOps.Label(mode))));
 
-            RefreshSeats(fieldedKeys);
             BuildRoster(owned, fieldedKeys);
             RefreshDetail(owned, fieldedKeys, cap);
             RefreshSplitControls(fieldedKeys);
             RefreshBelt();
         }
 
-        /// <summary>The four seats, leader first. An empty seat is a frame the cursor skips.</summary>
-        private void RefreshSeats(List<string> fieldedKeys)
-        {
-            for (int i = 0; i < SeatCount; i++)
-            {
-                var seat = _seats[i];
-                if (seat == null)
-                {
-                    continue;
-                }
-                seat.Clear();
-                seat.text = string.Empty;
-
-                var hero = i < fieldedKeys.Count && _catalog != null ? _catalog.Find(fieldedKeys[i]) : null;
-                bool empty = hero == null;
-                seat.EnableInClassList("cd-camp-seat--empty", empty);
-                seat.EnableInClassList(KeyboardNavigator.SkipClass, empty);
-                seat.EnableInClassList("cd-camp-seat--active", !empty && hero.SaveKey == _selectedKey);
-                seat.EnableInClassList("cd-camp-seat--lead", !empty && i == 0);
-                seat.pickingMode = empty ? PickingMode.Ignore : PickingMode.Position;
-                seat.tooltip = empty ? string.Empty : hero.DisplayName;
-
-                if (empty)
-                {
-                    seat.Add(MakeLabel(Loc.Get("hub.camp.empty-seat"), "cd-camp-seat__name"));
-                    continue;
-                }
-
-                var sprite = new VisualElement { pickingMode = PickingMode.Ignore };
-                sprite.AddToClassList("cd-camp-seat__sprite");
-                if (hero.Sprite != null)
-                {
-                    sprite.style.backgroundImage = new StyleBackground(hero.Sprite);
-                }
-                seat.Add(sprite);
-                seat.Add(MakeLabel(hero.DisplayName, "cd-camp-seat__name"));
-                if (i == 0)
-                {
-                    seat.Add(MakeLabel(Loc.Get("hub.camp.leads"), "cd-camp-seat__lead"));
-                }
-            }
-        }
-
         /// <summary>
-        /// Everyone owned, marching heroes first in seat order. A row only <i>selects</i>; what to do
-        /// with the hero is the detail column's, so a stray click never benches anybody.
+        /// Everyone owned, in the roster's own order - <b>never re-sorted by who marches or leads</b>, so
+        /// marching out, staying behind or taking the lead never moves a row under the cursor (playtest 4
+        /// finding 52). The leader carries a gold mark instead, and this list is the only place the
+        /// lineup is shown (finding 53: the seat tiles above repeated it). A row only <i>selects</i>;
+        /// what to do with the hero is the detail column's, so a stray click never benches anybody.
         /// </summary>
         private void BuildRoster(List<HeroSO> owned, List<string> fieldedKeys)
         {
@@ -297,31 +261,19 @@ namespace Assets.Scripts.Hub
             _rosterList.Clear();
             _rosterRows.Clear();
 
-            var ordered = new List<HeroSO>();
-            foreach (var key in fieldedKeys)
-            {
-                var hero = FindOwned(owned, key);
-                if (hero != null)
-                {
-                    ordered.Add(hero);
-                }
-            }
             foreach (var hero in owned)
             {
-                if (hero != null && !ordered.Contains(hero))
+                if (hero == null)
                 {
-                    ordered.Add(hero);
+                    continue;
                 }
-            }
-
-            foreach (var hero in ordered)
-            {
                 int seat = fieldedKeys.IndexOf(hero.SaveKey);
                 string key = hero.SaveKey;
                 var row = new Button(() => SelectHero(key)) { text = string.Empty };
                 row.AddToClassList("cd-inv-row");
                 row.AddToClassList("cd-camp-row");
                 row.AddToClassList(seat >= 0 ? "cd-camp-row--fielded" : "cd-camp-row--benched");
+                row.EnableInClassList("cd-camp-row--lead", seat == 0);
                 row.EnableInClassList("cd-inv-row--selected", key == _selectedKey);
 
                 var icon = new VisualElement { pickingMode = PickingMode.Ignore };
@@ -339,10 +291,15 @@ namespace Assets.Scripts.Hub
                 var top = new VisualElement { pickingMode = PickingMode.Ignore };
                 top.AddToClassList("cd-camp-row__top");
                 top.Add(MakeLabel(hero.DisplayName, "cd-inv-row__name"));
-                // The gold bar already says "marching"; the tag only names the leader and the benched.
-                if (seat <= 0)
+                // The gold bar already says "marching"; the tag names the benched, and the leader gets a
+                // gold badge rather than a place at the top of the list.
+                if (seat == 0)
                 {
-                    top.Add(MakeLabel(seat == 0 ? Loc.Get("hub.camp.leads") : Loc.Get("hub.camp.resting"), "cd-inv-row__meta"));
+                    top.Add(MakeLabel(Loc.Get("hub.camp.leader-badge"), "cd-camp-row__lead-badge"));
+                }
+                else if (seat < 0)
+                {
+                    top.Add(MakeLabel(Loc.Get("hub.camp.resting"), "cd-inv-row__meta"));
                 }
                 text.Add(top);
                 text.Add(MakeLabel(RoleLine(StatsOf(hero)), "cd-inv-row__caption"));
@@ -438,7 +395,10 @@ namespace Assets.Scripts.Hub
             if (_leadButton != null)
             {
                 _leadButton.text = seat == 0 ? Loc.Get("hub.camp.leads-the-party") : Loc.Get("hub.camp.lead-the-party");
-                _leadButton.SetEnabled(fielded && seat > 0);
+                // A hero staying behind can lead too: it brings them along, in front (playtest 4 finding 49).
+                var refusal = CampfireLeadOps.CanLead(fieldedKeys, hero.SaveKey, cap, _lockedReason != null);
+                _leadButton.SetEnabled(refusal == LeadRefusal.None);
+                // The march-out reason (full party, run underway) already covers a benched hero's lead.
             }
             SetText(_reasonLabel, reason);
             // The run's lock is a rule, not a mistake: neutral ink, not the error red a full party gets
@@ -609,11 +569,109 @@ namespace Assets.Scripts.Hub
             {
                 return;
             }
-            loadout[index] = PotionBeltOps.Cycle(belt, loadout, index, key => PotionBeltState.Unlocked(belt.Find(key)));
-            PotionBeltState.SetLoadout(loadout);
+            OpenBeltPicker(belt, loadout, index);
+        }
+
+        // --- The potion picker (playtest 4 finding 50) ---------------------------
+
+        /// <summary>Whether the potion picker is up over the screen.</summary>
+        public bool IsPickingPotion => _pickingSlot >= 0;
+
+        /// <summary>
+        /// The button Escape should press on this screen: the picker's Back while it is up, else the
+        /// screen's own. The hub presses it, so the keyboard closes one layer at a time.
+        /// </summary>
+        public Button CancelButton => IsPickingPotion && _beltPickerCancel != null
+            ? _beltPickerCancel
+            : _closeButton;
+
+        /// <summary>
+        /// A slot press opens a list of every potion type known plus Empty - a press used to cycle the
+        /// slot, and on an Empty slot whose types all sat in other slots it did nothing at all. A type in
+        /// another slot is marked and swaps places (<see cref="PotionBeltOps.Assign"/>). The rest of the
+        /// frame is disabled beneath it, so the hub's shared cursor walks only the picker's rows.
+        /// </summary>
+        private void OpenBeltPicker(PotionBeltSO belt, List<string> loadout, int index)
+        {
+            if (_beltPicker == null || _beltPickerList == null)
+            {
+                return;
+            }
+            _pickingSlot = index;
+            _beltPickerList.Clear();
+            SetText(_beltPickerTitle, Loc.Format("hub.camp.belt-pick-title", ("slot", index + 1)));
+
+            foreach (var type in belt.Types)
+            {
+                if (type == null || !PotionBeltState.Unlocked(type))
+                {
+                    continue;
+                }
+                int elsewhere = -1;
+                for (int other = 0; other < loadout.Count; other++)
+                {
+                    if (other != index && loadout[other] == type.Key)
+                    {
+                        elsewhere = other;
+                    }
+                }
+                string label = Loc.Format("hub.camp.belt-slot", ("potion", type.DisplayName), ("count", PotionBeltState.Capacity(type)));
+                if (elsewhere >= 0)
+                {
+                    label = Loc.Format("hub.camp.belt-pick-swap", ("potion", label), ("slot", elsewhere + 1));
+                }
+                AddPickerOption(label, type.Key, loadout[index] == type.Key,
+                    type.Potion != null ? ItemPresenter.ConsumableEffectLine(type.Potion) : string.Empty);
+            }
+            AddPickerOption(Loc.Get("hub.camp.belt-empty"), PotionBeltOps.Empty,
+                string.IsNullOrEmpty(loadout[index]), string.Empty);
+
+            foreach (var child in _root.Children())
+            {
+                if (child != _beltPicker)
+                {
+                    child.SetEnabled(false);
+                }
+            }
+            _beltPicker.RemoveFromClassList("cd-hidden");
+        }
+
+        private void AddPickerOption(string label, string key, bool chosen, string tooltip)
+        {
+            var button = new Button(() => PickPotion(key)) { text = label, focusable = false, tooltip = tooltip };
+            button.AddToClassList("cd-inv-tab");
+            button.AddToClassList("cd-camp-mode");
+            button.EnableInClassList("cd-camp-mode--chosen", chosen);
+            _beltPickerList.Add(button);
+        }
+
+        private void PickPotion(string key)
+        {
+            int index = _pickingSlot;
+            CloseBeltPicker();
+            var belt = PotionBeltSO.Load();
+            if (belt == null || index < 0)
+            {
+                return;
+            }
+            PotionBeltState.SetLoadout(PotionBeltOps.Assign(PotionBeltState.Loadout(belt), index, key));
             SetFeedback(string.Empty);
             RefreshBelt();
             BeltChanged?.Invoke();
+        }
+
+        private void CloseBeltPicker()
+        {
+            if (_beltPicker == null || _pickingSlot < 0)
+            {
+                return;
+            }
+            _pickingSlot = -1;
+            _beltPicker.AddToClassList("cd-hidden");
+            foreach (var child in _root.Children())
+            {
+                child.SetEnabled(true);
+            }
         }
 
         private void RefreshSplitControls(List<string> fieldedKeys)
@@ -681,17 +739,7 @@ namespace Assets.Scripts.Hub
             }
             int cap = Cap();
             var fieldedKeys = HeroRoster.GetSelectedKeys(_catalog, cap);
-            RefreshSeats(fieldedKeys);
             RefreshDetail(HeroRoster.GetOwnedHeroes(_catalog), fieldedKeys, cap);
-        }
-
-        private void OnSeatClicked(int seat)
-        {
-            var fieldedKeys = HeroRoster.GetSelectedKeys(_catalog, Cap());
-            if (seat < fieldedKeys.Count)
-            {
-                SelectHero(fieldedKeys[seat]);
-            }
         }
 
         private void OnToggleSelected()
@@ -734,20 +782,28 @@ namespace Assets.Scripts.Hub
             Refresh();
         }
 
-        /// <summary>Moves the chosen hero to seat 1. The leader walks in front and carries the
-        /// XP remainder, which used to be settable only by benching everyone ahead of them.</summary>
+        /// <summary>Puts the chosen hero in seat 1 - moved there if marching, brought along if not
+        /// (playtest 4 finding 49). The leader walks in front and carries the XP remainder. The list
+        /// does not move; the gold mark does (finding 52).</summary>
         private void OnLeadSelected()
         {
             int cap = Cap();
-            var keys = new List<string>(HeroRoster.GetSelectedKeys(_catalog, cap));
-            int index = keys.IndexOf(_selectedKey);
-            if (index <= 0)
+            var current = HeroRoster.GetSelectedKeys(_catalog, cap);
+            switch (CampfireLeadOps.CanLead(current, _selectedKey, cap, _lockedReason != null))
             {
-                return;
+                case LeadRefusal.LineupLocked:
+                    SetFeedback(_lockedReason);
+                    return;
+                case LeadRefusal.PartyFull:
+                    SetFeedback(Loc.Format("hub.camp.feedback.only-cap", ("cap", cap)));
+                    return;
+                case LeadRefusal.None:
+                    break;
+                default:
+                    return;
             }
 
-            keys.RemoveAt(index);
-            keys.Insert(0, _selectedKey);
+            var keys = CampfireLeadOps.WithLeader(current, _selectedKey, cap, _lockedReason != null);
             HeroRoster.SetSelectedKeys(_catalog, keys, cap);
             var hero = FindOwned(HeroRoster.GetOwnedHeroes(_catalog), _selectedKey);
             SetFeedback(hero != null ? Loc.Format("hub.camp.feedback.leads", ("hero", hero.DisplayName)) : Loc.Get("hub.camp.feedback.they-lead"));

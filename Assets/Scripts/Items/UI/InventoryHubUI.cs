@@ -29,7 +29,8 @@ namespace Assets.Scripts.Items.UI
     /// Enter moves into that list, where every item shows its effect on the hero's stats before it
     /// is put on. Enter equips and returns to the slots; Esc backs out a layer at a time.</para>
     ///
-    /// <para><b>All equipment</b> is the first row of the slot column and where the cursor starts
+    /// <para><b>All equipment</b> is a filter toggle above the slot column's header (playtest 4
+    /// finding 61: as its first row it read as a slot) and the cursor's first stop
     /// (owner, 2026-11-02 - it was a tab of its own): the same gear without the slot filter, every
     /// piece the party owns, bag and worn, in one list sorted by slot, so equipping does not mean
     /// cycling through every slot. Enter puts the piece on the selected hero (or takes it off, if
@@ -75,6 +76,8 @@ namespace Assets.Scripts.Items.UI
         private readonly Button _tabMaterials;
         private readonly Label _leftTitle;
         private readonly VisualElement _left;
+        // Above the slot column's header: the Equipment tab's "All equipment" toggle (finding 61).
+        private readonly VisualElement _leftFilter;
         private readonly Label _listTitle;
         private readonly ScrollView _list;
         private readonly Label _emptyLabel;
@@ -124,6 +127,7 @@ namespace Assets.Scripts.Items.UI
             _tabMaterials = root.Q<Button>("tab-materials");
             _leftTitle = root.Q<Label>("inv-left-title");
             _left = root.Q<VisualElement>("inv-left");
+            _leftFilter = root.Q<VisualElement>("inv-left-filter");
             _listTitle = root.Q<Label>("inv-list-title");
             _list = root.Q<ScrollView>("inventory-scroll");
             _emptyLabel = root.Q<Label>("inventory-empty");
@@ -422,6 +426,8 @@ namespace Assets.Scripts.Items.UI
         private void RefreshBody()
         {
             _left?.Clear();
+            _leftFilter?.Clear();
+            SetShown(_leftFilter, false);
             _list?.Clear();
             _slotEntries.Clear();
             _listEntries.Clear();
@@ -493,14 +499,26 @@ namespace Assets.Scripts.Items.UI
                 Preview = ShowAllDetail,
                 Confirm = () => EnterList(),
             };
-            all.Row = BuildRow(null, Loc.Get("items.inv.title.all-equipment"), Loc.Get("items.inv.all.row-caption"),
+            // A filter toggle above the "Equipped" header, not a row under it: as the first row of the
+            // slot column it read as one more slot (playtest 4 finding 61). Still the cursor's first
+            // stop, so Up from the Head slot reaches it and the arrows work as before.
+            all.Row = BuildRow(null, Loc.Get("items.inv.title.all-equipment"), null,
                 string.Empty, null, out all.Cursor);
+            all.Row.AddToClassList("cd-inv-row--filter");
             var allGlyph = new Label("≡") { pickingMode = PickingMode.Ignore };
             allGlyph.AddToClassList("cd-inv-row__glyph");
             all.Row.Q(className: "cd-inv-row__icon").Add(allGlyph);
             WireSlotRow(all, AllEquipmentIndex);
             _slotEntries.Add(all);
-            _left?.Add(all.Row);
+            if (_leftFilter != null)
+            {
+                _leftFilter.Add(all.Row);
+                SetShown(_leftFilter, true);
+            }
+            else
+            {
+                _left?.Add(all.Row);
+            }
 
             for (int i = 0; i < slots.Length; i++)
             {
@@ -745,15 +763,14 @@ namespace Assets.Scripts.Items.UI
             var meta = entry.Row.Q<Label>(className: "cd-inv-row__meta");
             var chips = new VisualElement { pickingMode = PickingMode.Ignore };
             chips.AddToClassList("cd-inv-row__chips");
-            foreach (var change in BiggestChanges(current, preview, 2))
+            foreach (var change in StatDelta.Biggest(current, preview, 2))
             {
-                string sign = change.Amount > 0 ? "+" : "\u2212";
-                var chip = new Label(Loc.Format("items.bonus.chip", ("value", $"{sign}{Mathf.Abs(change.Amount)}"), ("stat", StatCatalog.ShortName(change.Stat))))
+                var chip = new Label(Loc.Format("items.bonus.chip", ("value", StatDelta.Format(change.Amount)), ("stat", StatCatalog.ShortName(change.Stat))))
                 {
                     pickingMode = PickingMode.Ignore,
                 };
                 chip.AddToClassList("cd-inv-row__chip");
-                chip.AddToClassList(change.Amount > 0 ? "cd-inv-delta--up" : "cd-inv-delta--down");
+                chip.AddToClassList(StatDelta.ClassFor(change.Amount));
                 chips.Add(chip);
             }
             meta.parent.Insert(meta.parent.IndexOf(meta), chips);
@@ -1557,8 +1574,10 @@ namespace Assets.Scripts.Items.UI
         }
 
         /// <summary>
-        /// Every stat, now and - when an item is being considered - after, as a two-column grid of
-        /// short names. A one-per-row list ran past the bottom of the pane and hid Health.
+        /// The hero's stats as they stand, or - when an item is being considered - <b>only what it
+        /// changes</b>: "STR +3" / "HP \u22126", coloured better / worse through <see cref="StatDelta"/>
+        /// (owner, 2026-11-10, playtest 4 finding 43: "HP 44 50" was two unexplained numbers). A
+        /// grid of short names; a one-per-row list ran past the bottom of the pane and hid Health.
         /// </summary>
         private void AddStatSection(StatBlock current, StatBlock preview, string previewTitle = null)
         {
@@ -1567,18 +1586,25 @@ namespace Assets.Scripts.Items.UI
                 : Loc.Get("items.inv.section.stats")));
             var grid = new VisualElement();
             grid.AddToClassList("cd-inv-stats");
-            foreach (var stat in StatCatalog.Types)
+            if (preview != null)
             {
-                int now = current[stat];
-                bool changes = preview != null && preview[stat] != now;
-                int then = changes ? preview[stat] : now;
-
-                grid.Add(StatCell(StatCatalog.ShortName(stat),
-                    changes ? $"{now} \u2192 {then}" : now.ToString(),
-                    changes ? (then > now ? 1 : -1) : 0,
-                    StatCatalog.Explain(stat)));
+                foreach (var change in StatDelta.Changes(current, preview))
+                {
+                    grid.Add(DeltaCell(StatCatalog.ShortName(change.Stat), change.Amount, StatCatalog.Explain(change.Stat)));
+                }
             }
-            _detailBody?.Add(grid);
+            else
+            {
+                foreach (var stat in StatCatalog.Types)
+                {
+                    grid.Add(StatCell(StatCatalog.ShortName(stat), current[stat].ToString(), 0, StatCatalog.Explain(stat)));
+                }
+            }
+            bool statsChange = grid.childCount > 0;
+            if (statsChange)
+            {
+                _detailBody?.Add(grid);
+            }
 
             // Resistance only when there is any to speak of - an all-zero section is noise. Gear and
             // grid nodes only: a hero's innate resistances are authored on the dungeon's Hero
@@ -1605,35 +1631,44 @@ namespace Assets.Scripts.Items.UI
                     }
                 }
             }
-            if (types.Count == 0)
-            {
-                return;
-            }
-
-            // The same two-column grid as the stats, so the pane fits without scrolling.
-            _detailBody?.Add(BestiaryLineView.Section(Loc.Get("items.inv.section.resistances")));
+            // The same grid as the stats, so the pane fits without scrolling. While comparing, only
+            // the resistances that move, as a change in points.
             var resistGrid = new VisualElement();
             resistGrid.AddToClassList("cd-inv-stats");
             resistGrid.AddToClassList("cd-inv-stats--wide");
             foreach (var type in types)
             {
                 resistNow.TryGetValue(type, out float now);
+                string name = ItemPresenter.DamageTypeName(type);
+                string tooltip = Loc.Format("items.inv.resistance-tooltip", ("type", name));
+                if (preview == null)
+                {
+                    resistGrid.Add(StatCell(name, Percent(now), 0, tooltip));
+                    continue;
+                }
                 float then = now;
                 if (resistThen != null)
                 {
                     resistThen.TryGetValue(type, out then);
                 }
-                bool changes = !Mathf.Approximately(now, then);
-                string name = ItemPresenter.DamageTypeName(type);
-                resistGrid.Add(StatCell(name,
-                    changes ? $"{Percent(now)} → {Percent(then)}" : Percent(now),
-                    changes ? (then > now ? 1 : -1) : 0,
-                    Loc.Format("items.inv.resistance-tooltip", ("type", name))));
+                int points = StatDelta.RoundPoints(then - now);
+                if (points != 0)
+                {
+                    resistGrid.Add(DeltaCell(name, points, tooltip, percent: true));
+                }
             }
-            _detailBody?.Add(resistGrid);
+            if (resistGrid.childCount > 0)
+            {
+                _detailBody?.Add(BestiaryLineView.Section(Loc.Get("items.inv.section.resistances")));
+                _detailBody?.Add(resistGrid);
+            }
+            else if (preview != null && !statsChange)
+            {
+                AddNote(Loc.Get("items.inv.no-stat-change"));
+            }
         }
 
-        /// <summary>One cell of a stat grid; <paramref name="direction"/> is +1 up, -1 down, 0 unchanged.</summary>
+        /// <summary>One cell of a stat grid; <paramref name="direction"/> is +1 better, -1 worse, 0 plain.</summary>
         internal static VisualElement StatCell(string label, string value, int direction, string tooltip)
         {
             var cell = new VisualElement();
@@ -1644,12 +1679,23 @@ namespace Assets.Scripts.Items.UI
             cell.Add(labelElement);
             var valueElement = new Label(value);
             valueElement.AddToClassList("cd-inv-stat__value");
-            if (direction != 0)
+            string deltaClass = StatDelta.ClassFor(direction);
+            if (deltaClass != null)
             {
-                valueElement.AddToClassList(direction > 0 ? "cd-inv-delta--up" : "cd-inv-delta--down");
+                valueElement.AddToClassList(deltaClass);
             }
             cell.Add(valueElement);
             return cell;
+        }
+
+        /// <summary>
+        /// One changed stat as only its change - "STR +3", "Fire −5%" - coloured by
+        /// <see cref="StatDelta"/>. Every hub screen that compares stats uses this (playtest 4
+        /// findings 41-43, 65).
+        /// </summary>
+        internal static VisualElement DeltaCell(string label, int amount, string tooltip, bool percent = false)
+        {
+            return StatCell(label, percent ? StatDelta.FormatPercent(amount) : StatDelta.Format(amount), amount, tooltip);
         }
 
         /// <summary>
@@ -1741,32 +1787,6 @@ namespace Assets.Scripts.Items.UI
             var gear = InventoryManager.Instance.GetEquippedGear(hero.SaveKey);
             var baseStats = HeroStatCalculator.BaseStatsForNodes(hero, ActivatedNodesOf(hero));
             return new HeroSnapshotUnit(hero, HeroStatCalculator.WithGear(baseStats, gear), null, ActivatedNodesOf(hero));
-        }
-
-        private struct StatChange
-        {
-            public StatType Stat;
-            public int Amount;
-        }
-
-        /// <summary>The <paramref name="count"/> largest stat changes, biggest first.</summary>
-        private static List<StatChange> BiggestChanges(StatBlock before, StatBlock after, int count)
-        {
-            var changes = new List<StatChange>();
-            foreach (var stat in StatCatalog.Types)
-            {
-                int delta = after[stat] - before[stat];
-                if (delta != 0)
-                {
-                    changes.Add(new StatChange { Stat = stat, Amount = delta });
-                }
-            }
-            changes.Sort((a, b) => Mathf.Abs(b.Amount).CompareTo(Mathf.Abs(a.Amount)));
-            if (changes.Count > count)
-            {
-                changes.RemoveRange(count, changes.Count - count);
-            }
-            return changes;
         }
 
         /// <summary>The selected hero's activated grid nodes, straight off the party save.</summary>

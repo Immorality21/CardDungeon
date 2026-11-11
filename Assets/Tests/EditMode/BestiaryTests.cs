@@ -144,6 +144,40 @@ namespace Tests.EditMode
             return new Resistance { DamageType = type, Percent = percent };
         }
 
+        // ---- How to learn more (playtest 4 finding 34)
+
+        [Test]
+        public void LearnMoreLine_UnmetEnemy_NamesEveryWay()
+        {
+            string line = BestiaryPresenter.LearnMoreLine(MakeEnemy(), null);
+
+            Assert.IsNotNull(line);
+            StringAssert.Contains("element", line);
+            StringAssert.Contains("defeat", line);
+        }
+
+        [Test]
+        public void LearnMoreLine_EverythingObserved_IsNull()
+        {
+            var entry = new BestiaryEntry { EnemyKey = "TestEnemy", Kills = 1, AttackTypeKnown = true };
+            entry.ObservedDamageTypes.AddRange(BestiaryPresenter.DisplayedTypes);
+
+            Assert.IsNull(BestiaryPresenter.LearnMoreLine(MakeEnemy(), entry),
+                "An enemy with no spells or drops and every element seen has nothing left to learn.");
+        }
+
+        [Test]
+        public void LearnMoreLine_OnlyTheAttackUnknown_SaysOnlyThat()
+        {
+            var entry = new BestiaryEntry { EnemyKey = "TestEnemy", Kills = 2, AttackTypeKnown = false };
+            entry.ObservedDamageTypes.AddRange(BestiaryPresenter.DisplayedTypes);
+
+            string line = BestiaryPresenter.LearnMoreLine(MakeEnemy(), entry);
+
+            StringAssert.DoesNotContain("defeat", line);
+            StringAssert.DoesNotContain("element", line);
+        }
+
         [Test]
         public void ResistanceLine_Unobserved_ReadsUnknown()
         {

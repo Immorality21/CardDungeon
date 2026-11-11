@@ -16,7 +16,7 @@ MonoBehaviour:
   Kind: 0
   Target: {fileID: 11400000, guid: 770983482ac1400fa05bc9d41b51f956, type: 2}
   TargetTraits: 0
-  RevisitOnly: 1
+  RevisitOnly: 0
   Count: 1
   Icon: {fileID: 0}
   RequiredRunKeys:

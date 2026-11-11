@@ -84,7 +84,9 @@ namespace Assets.Scripts.Rooms
         private Button _eventDecline;
 
         private Button _fightBtn;
-        private Button _fleeBtn;
+        /// <summary>Whether this fight may be fled: by stepping back out, an arrow or a click on the room behind.
+        /// There is no Flee button since the owner's call on playtest 4 (2026-11-10).</summary>
+        private bool _canFlee;
         private Button _detailOk;
         private Button _detailCancel;
 
@@ -186,6 +188,10 @@ namespace Assets.Scripts.Rooms
         private Room _walkGoalRoom;
         private Vector2Int _walkGoalTile;
         private Vector2Int? _walkUseTile;
+        // The last tile a walking key pushed into, and from where: a declined prompt there does not
+        // come back until the party moves (UseAt / OnKeyBumped).
+        private Vector2Int? _bumpedTile;
+        private Vector2Int _bumpedFrom;
         private KeyboardNavigator _combatNav;
         private KeyboardNavigator _eventNav;
         private KeyboardNavigator _detailNav;
@@ -275,7 +281,6 @@ namespace Assets.Scripts.Rooms
             _eventBack = root.Q<Button>("event-back");
 
             _fightBtn = root.Q<Button>("fight-btn");
-            _fleeBtn = root.Q<Button>("flee-btn");
             _detailOk = root.Q<Button>("detail-ok");
             _detailCancel = root.Q<Button>("detail-cancel");
 
@@ -288,7 +293,6 @@ namespace Assets.Scripts.Rooms
             BindHints(root);
 
             _fightBtn.clicked += OnFight;
-            _fleeBtn.clicked += OnFlee;
             if (_eventBack != null)
             {
                 _eventBack.clicked += OnEventBack;
@@ -311,7 +315,7 @@ namespace Assets.Scripts.Rooms
             // Strip focusability from every focusable descendant so UI Toolkit's arrow-key
             // navigation has nowhere to move focus — keyboard focus stays on the root and our
             // cursor nav keeps receiving keys. (Buttons stay clickable + hotkey-driven.)
-            foreach (var focusable in new Focusable[] { _fightBtn, _fleeBtn, _detailOk, _detailCancel, _victoryContinue, _levelContinue, _levelNextLevel, _levelBody, _victoryRewards, _eventBack, _eventOptions })
+            foreach (var focusable in new Focusable[] { _fightBtn, _detailOk, _detailCancel, _victoryContinue, _levelContinue, _levelNextLevel, _levelBody, _victoryRewards, _eventBack, _eventOptions })
             {
                 if (focusable != null)
                 {
@@ -414,6 +418,9 @@ namespace Assets.Scripts.Rooms
             root.RegisterCallback<NavigationMoveEvent>(evt => { if (OwnsNavigationKeys()) { evt.StopPropagation(); } });
             root.RegisterCallback<NavigationSubmitEvent>(evt => { if (OwnsNavigationKeys()) { evt.StopPropagation(); } });
             root.RegisterCallback<NavigationCancelEvent>(evt => { if (OwnsNavigationKeys()) { evt.StopPropagation(); } });
+            // StopPropagation alone does not stop Unity 6's focus move after an arrow, and a click on a
+            // non-focusable button blurs the root; HoldFocus cancels both (playtest 4 findings 9, 35, 59).
+            PanelKeyboard.HoldFocus(root);
 
             HideAll();
             _refsReady = true;
@@ -460,11 +467,11 @@ namespace Assets.Scripts.Rooms
                 }
             }
 
-            // Boss rooms: announce the boss and remove Flee — the climax can't be skipped.
+            // Boss rooms: announce the boss and refuse Flee — the climax can't be skipped.
             var boss = room.Enemies.FirstOrDefault(e => e != null && e.IsAlive && e.IsBoss);
             bool isBossRoom = hasEnemy && boss != null;
             // A side room has no door to flee through.
-            SetShown(_fleeBtn, hasEnemy && !isBossRoom && !room.IsSideRoom);
+            _canFlee = hasEnemy && !isBossRoom && !room.IsSideRoom;
             SetShown(_bossBanner, isBossRoom);
             if (isBossRoom && _bossBannerName != null)
             {

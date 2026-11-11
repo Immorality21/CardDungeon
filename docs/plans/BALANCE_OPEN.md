@@ -83,6 +83,11 @@ Findings and the owner's calls live in the **Balance Strategy** artifact
    doubled. The ten new item icons and two new enemy sprites are placeholders. The Gilded Mote and
    Slag Hound mean the three deepest floors now field 5–6 bodies at once, which no one has seen in
    play.
+8. **The Paladin's heal falls behind as health grows** (playtest 4 finding 16). Holy Touch is a flat
+   heal (base 6 + Spirit) while hero bars climb towards 100 by the late runs, so it ends as a token
+   amount. **Owner's call, 2026-11-10: no rework; rely on its grid Power upgrades**, and check in the
+   balance pass whether those keep it worth a turn against the bars of each tier (if not, the dial is
+   the upgrade nodes' amounts, not a percentage heal).
 
 A published summary of the balance work (readable tables of the floor curve and the investment
 surface) lives at <https://claude.ai/code/artifact/52362b64-a4ff-48c3-bfe0-86606c48a1a3>.

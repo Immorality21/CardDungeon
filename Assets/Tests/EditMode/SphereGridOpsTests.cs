@@ -45,6 +45,33 @@ namespace Tests.EditMode
                 Node("island", 5));
         }
 
+        // --- joining with the grid started ------------------------------------
+
+        [Test]
+        public void JoinsWithGridStarted_FreeStatNode_True()
+        {
+            var trunk = Node("trunk", 0);
+            trunk.UnlockedByDefault = true;
+            trunk.Kind = SphereNodeKind.Stat;
+
+            Assert.IsTrue(SphereGridOps.JoinsWithGridStarted(Grid("trunk", trunk, Node("a", 20))));
+        }
+
+        [Test]
+        public void JoinsWithGridStarted_OnlyFreeAbilitiesAndSlots_False()
+        {
+            // Everyone's starting kit: the root ability, a second ability, the Mage's free slot.
+            var ability = Node("sig", 0);
+            ability.UnlockedByDefault = true;
+            ability.Kind = SphereNodeKind.MagicKnown;
+            var slot = Node("slot", 0);
+            slot.UnlockedByDefault = true;
+            slot.Kind = SphereNodeKind.MagicSlot;
+
+            Assert.IsFalse(SphereGridOps.JoinsWithGridStarted(Grid("sig", ability, slot, Node("a", 20))));
+            Assert.IsFalse(SphereGridOps.JoinsWithGridStarted(null));
+        }
+
         // --- adjacency -------------------------------------------------------
 
         [Test]

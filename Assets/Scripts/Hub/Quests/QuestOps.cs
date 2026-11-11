@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Assets.Scripts.Combat;
+using Assets.Scripts.Dungeon;
+using Assets.Scripts.Enemies;
 
 namespace Assets.Scripts.Hub.Quests
 {
@@ -85,12 +87,14 @@ namespace Assets.Scripts.Hub.Quests
         }
 
         /// <summary>
-        /// Drops keys the catalog no longer has and fills every empty slot with a random unlocked quest
-        /// not already on the board. Returns whether the board changed. <paramref name="pick"/> takes a
-        /// count and returns an index below it.
+        /// Drops keys the catalog no longer has, and quests that can no longer be done (see
+        /// <see cref="IsDoable"/>; one ready to collect stays), and fills every empty slot with a random
+        /// unlocked, doable quest not already on the board. Returns whether the board changed.
+        /// <paramref name="pick"/> takes a count and returns an index below it. <paramref name="runs"/> is
+        /// every run of the campaign; null skips the doability check.
         /// </summary>
         public static bool FillBoard(QuestSaveData save, IList<QuestSO> pool, ICollection<string> completedRuns,
-            Func<int, int> pick)
+            Func<int, int> pick, IList<RunDefinitionSO> runs = null)
         {
             if (save == null || pool == null)
             {
@@ -98,9 +102,10 @@ namespace Assets.Scripts.Hub.Quests
             }
             int before = save.Board.Count;
             bool changed = save.Board.RemoveAll(k => FindInPool(pool, k) == null) > 0;
+            changed |= DropUndoable(save, pool, completedRuns, runs);
             while (save.Board.Count < BoardSize)
             {
-                var candidates = Drawable(save, pool, completedRuns, null);
+                var candidates = Drawable(save, pool, completedRuns, null, runs);
                 if (candidates.Count == 0)
                 {
                     break;
@@ -115,13 +120,13 @@ namespace Assets.Scripts.Hub.Quests
         /// False, and nothing changes, when it is taken or nothing else can be drawn.
         /// </summary>
         public static bool Reroll(QuestSaveData save, IList<QuestSO> pool, ICollection<string> completedRuns,
-            QuestSO quest, Func<int, int> pick)
+            QuestSO quest, Func<int, int> pick, IList<RunDefinitionSO> runs = null)
         {
             if (!IsOnBoard(save, quest) || StateOf(save, quest) != QuestState.Offered)
             {
                 return false;
             }
-            var candidates = Drawable(save, pool, completedRuns, quest);
+            var candidates = Drawable(save, pool, completedRuns, quest, runs);
             if (candidates.Count == 0)
             {
                 return false;
@@ -131,10 +136,55 @@ namespace Assets.Scripts.Hub.Quests
         }
 
         /// <summary>Whether a reroll would find anything to swap in.</summary>
-        public static bool CanReroll(QuestSaveData save, IList<QuestSO> pool, ICollection<string> completedRuns, QuestSO quest)
+        public static bool CanReroll(QuestSaveData save, IList<QuestSO> pool, ICollection<string> completedRuns, QuestSO quest,
+            IList<RunDefinitionSO> runs = null)
         {
             return IsOnBoard(save, quest) && StateOf(save, quest) == QuestState.Offered
-                && Drawable(save, pool, completedRuns, quest).Count > 0;
+                && Drawable(save, pool, completedRuns, quest, runs).Count > 0;
+        }
+
+        /// <summary>
+        /// Whether the player can still do <paramref name="quest"/> (playtest 4 finding 14: the board
+        /// asked for the Abyssal Warden on a revisit, and no run it guards can be revisited). Only a kill
+        /// quest whose <see cref="QuestSO.Target"/> is a boss - the boss, or one of its adds, of some
+        /// run's floor - is checked: it is doable while one of those runs can still be played, which is
+        /// a cleared <c>Repeatable</c> run for a <see cref="QuestSO.RevisitOnly"/> quest, and otherwise a
+        /// <c>Repeatable</c> run or one not yet cleared. Any other quest (a kind, any enemy, an enemy the
+        /// rooms spawn) is doable. Null <paramref name="runs"/> checks nothing.
+        /// </summary>
+        public static bool IsDoable(QuestSO quest, IList<RunDefinitionSO> runs, ICollection<string> completedRuns)
+        {
+            if (quest == null)
+            {
+                return false;
+            }
+            if (quest.Kind != QuestKind.KillCount || quest.Target == null || runs == null)
+            {
+                return true;
+            }
+
+            bool guardsAny = false;
+            foreach (var run in runs)
+            {
+                if (run == null || !GuardsRun(run, quest.Target))
+                {
+                    continue;
+                }
+                guardsAny = true;
+                bool cleared = completedRuns != null && completedRuns.Contains(CampaignOps.RunKeyOf(run));
+                if (quest.RevisitOnly)
+                {
+                    if (cleared && run.Repeatable)
+                    {
+                        return true;
+                    }
+                }
+                else if (run.Repeatable || !cleared)
+                {
+                    return true;
+                }
+            }
+            return !guardsAny;
         }
 
         /// <summary>Takes a quest on the board. Only what happens after this counts.</summary>
@@ -223,21 +273,86 @@ namespace Assets.Scripts.Hub.Quests
             return changed;
         }
 
-        /// <summary>Unlocked quests not on the board and not cooling down (nor <paramref name="leaving"/>,
-        /// which is never drawn back).</summary>
+        /// <summary>Unlocked, doable quests not on the board and not cooling down (nor
+        /// <paramref name="leaving"/>, which is never drawn back).</summary>
         private static List<QuestSO> Drawable(QuestSaveData save, IList<QuestSO> pool, ICollection<string> completedRuns,
-            QuestSO leaving)
+            QuestSO leaving, IList<RunDefinitionSO> runs)
         {
             var result = new List<QuestSO>();
             foreach (var quest in pool)
             {
                 if (quest != null && !string.IsNullOrEmpty(quest.Key) && quest != leaving
-                    && !save.Board.Contains(quest.Key) && !OnCooldown(save, quest) && quest.Unlocked(completedRuns))
+                    && !save.Board.Contains(quest.Key) && !OnCooldown(save, quest) && quest.Unlocked(completedRuns)
+                    && IsDoable(quest, runs, completedRuns))
                 {
                     result.Add(quest);
                 }
             }
             return result;
+        }
+
+        /// <summary>
+        /// Takes quests off the board that can no longer be done, taken or not, with their progress (it
+        /// could never finish). One ready to collect stays: the reward is earned.
+        /// </summary>
+        private static bool DropUndoable(QuestSaveData save, IList<QuestSO> pool, ICollection<string> completedRuns,
+            IList<RunDefinitionSO> runs)
+        {
+            if (runs == null)
+            {
+                return false;
+            }
+            bool changed = false;
+            for (int i = save.Board.Count - 1; i >= 0; i--)
+            {
+                var quest = FindInPool(pool, save.Board[i]);
+                if (quest == null || StateOf(save, quest) == QuestState.Ready || IsDoable(quest, runs, completedRuns))
+                {
+                    continue;
+                }
+                var progress = Find(save, quest);
+                if (progress != null)
+                {
+                    save.Quests.Remove(progress);
+                }
+                save.Board.RemoveAt(i);
+                changed = true;
+            }
+            return changed;
+        }
+
+        /// <summary>Whether <paramref name="enemy"/> stands in a boss room of <paramref name="run"/>:
+        /// the boss of one of its floors, or one of the boss's adds.</summary>
+        private static bool GuardsRun(RunDefinitionSO run, EnemySO enemy)
+        {
+            if (run.Levels == null)
+            {
+                return false;
+            }
+            foreach (var level in run.Levels)
+            {
+                if (level == null || level.BossEnemy == null)
+                {
+                    continue;
+                }
+                if (SameEnemy(level.BossEnemy, enemy))
+                {
+                    return true;
+                }
+                foreach (var add in level.EnumerateBossAdds())
+                {
+                    if (SameEnemy(add, enemy))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        private static bool SameEnemy(EnemySO a, EnemySO b)
+        {
+            return a == b || (a != null && b != null && !string.IsNullOrEmpty(a.SaveKey) && a.SaveKey == b.SaveKey);
         }
 
         private static QuestSO FindInPool(IList<QuestSO> pool, string key)

@@ -241,6 +241,24 @@ namespace Tests.EditMode
         }
 
         [Test]
+        public void Build_PercentOfMaxHealth_ReadsTheBarItLandsOn()
+        {
+            // Playtest 4 finding 27: event damage and heals are a share of max health now.
+            var party = Party(Hero("A", health: 60));
+
+            var hurt = Outcome();
+            hurt.Effects.Add(new SpellEffect { EffectType = SpellEffectType.Damage, Power = 10, PowerMode = PowerMode.PercentOfMaxHealth });
+            var mend = Outcome();
+            mend.Effects.Add(new SpellEffect { EffectType = SpellEffectType.Heal, Power = 25, PowerMode = PowerMode.PercentOfMaxHealth });
+
+            Assert.AreEqual(6f,
+                RoomEventModel.Build(GuaranteedEvent("Trap", 100f, hurt), party, party.BestStats, 0).Engaged.ExpectedSustainCost, 0.001f,
+                "10% of a 60 bar is 6, then the defense curve (none here).");
+            Assert.AreEqual(-15f,
+                RoomEventModel.Build(GuaranteedEvent("Font", 100f, mend), party, party.BestStats, 0).Engaged.ExpectedSustainCost, 0.001f);
+        }
+
+        [Test]
         public void Build_LosingAConsumable_CostsThePotionsWorthOfSustain()
         {
             // A potion is worth exactly its restore amount out of the pool attrition divides by,

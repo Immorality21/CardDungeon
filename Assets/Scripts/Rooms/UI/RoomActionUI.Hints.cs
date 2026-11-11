@@ -67,7 +67,16 @@ namespace Assets.Scripts.Rooms
             {
                 _pauseHints.clicked += () => OpenHints(fromPause: true);
             }
+
+            // The Controls screen opens over the pause menu, which stays up beneath it: pause already
+            // stops the walking and the room's keys, and the panel takes every key while it is open
+            // (Tutorial/ControlsPanel), so nothing else here has to know about it. No F1: walking
+            // polls the arrows, and pause is what makes the room hold still.
+            _controls = ControlsPanel.Attach(root, openWithF1: false);
+            _controls?.AddOpener(root.Q<Button>("pause-controls"));
         }
+
+        private ControlsPanel _controls;
 
         /// <summary>
         /// Says <paramref name="cue"/>'s line if this save has never seen it, and writes it down. Safe to

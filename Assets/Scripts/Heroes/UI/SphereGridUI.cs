@@ -55,7 +55,7 @@ namespace Assets.Scripts.Heroes.UI
         private bool _isShown;
 
         // The tutorial's guide: while set, this is the only hero and the only node the screen will
-        // act on, and it cannot be backed out of. See SetGuide.
+        // buy, and it cannot be backed out of. Other nodes can still be looked at. See SetGuide.
         private HeroSO _guideHero;
         private string _guideNodeKey;
 
@@ -75,6 +75,12 @@ namespace Assets.Scripts.Heroes.UI
 
         /// <summary>Raised whenever the selected node or hero changes.</summary>
         public event Action SelectionChanged;
+
+        /// <summary>
+        /// Raised when the tutorial's guide refused something the player tried (another node bought,
+        /// another hero, Back). The screen says why in its feedback line; the hub repeats its banner.
+        /// </summary>
+        public event Action GuideRefused;
 
         /// <summary>Whether the tutorial is walking the player to one node.</summary>
         public bool IsGuiding => _guideHero != null && !string.IsNullOrEmpty(_guideNodeKey);
@@ -182,9 +188,11 @@ namespace Assets.Scripts.Heroes.UI
 
         public void Hide()
         {
-            // The guided step cannot be walked away from - Escape lands here too.
+            // The guided step cannot be walked away from - Escape lands here too. Said, not swallowed
+            // (playtest 4 finding 40).
             if (IsGuiding)
             {
+                RefuseForGuide();
                 return;
             }
             CloseLearn();
@@ -321,8 +329,13 @@ namespace Assets.Scripts.Heroes.UI
 
         private void SelectHero(HeroSO hero)
         {
-            if (hero == null || hero == _selectedHero || (IsGuiding && hero != _guideHero))
+            if (hero == null || hero == _selectedHero)
             {
+                return;
+            }
+            if (IsGuiding && hero != _guideHero)
+            {
+                RefuseForGuide();
                 return;
             }
 
@@ -632,7 +645,7 @@ namespace Assets.Scripts.Heroes.UI
             }
         }
 
-        /// <summary>For a stat node, each stat it raises as "HP 26 → 36" on this hero.</summary>
+        /// <summary>For a stat node, each stat it changes as "HP +10" on this hero.</summary>
         private void AddChanges(SphereGridNode node, List<string> activated, bool isActive)
         {
             if (_detailBody == null || node.Kind != SphereNodeKind.Stat || node.Gains == null || _selectedHero == null)
@@ -651,10 +664,13 @@ namespace Assets.Scripts.Heroes.UI
             var before = HeroStatCalculator.WithGear(HeroStatCalculator.BaseStatsForNodes(_selectedHero, without), gear);
             var after = HeroStatCalculator.WithGear(HeroStatCalculator.BaseStatsForNodes(_selectedHero, with), gear);
 
+            // Only the change, "Strength +3", coloured by StatDelta - "Strength 10 13" was two numbers
+            // with no context, and the hover said only "Strength" (playtest 4 findings 41, 42). The
+            // hover now says what the stat does.
             foreach (var entry in node.Gains.NonZero())
             {
-                var cell = Items.UI.InventoryHubUI.StatCell(StatCatalog.DisplayName(entry.Type),
-                    Loc.Format("grid.detail.stat-change", ("before", before[entry.Type]), ("after", after[entry.Type])), 1, StatCatalog.DisplayName(entry.Type));
+                var cell = Items.UI.InventoryHubUI.DeltaCell(StatCatalog.DisplayName(entry.Type),
+                    after[entry.Type] - before[entry.Type], StatCatalog.Explain(entry.Type));
                 cell.style.width = new Length(100f, LengthUnit.Percent);
                 _detailBody.Add(cell);
             }
@@ -821,10 +837,8 @@ namespace Assets.Scripts.Heroes.UI
 
         private void OnNodeClicked(string key)
         {
-            if (IsGuiding && key != _guideNodeKey)
-            {
-                return;
-            }
+            // Any node can be selected and read while guided - only buying is held to the guided one
+            // (OnActivate). The lock on looking made the keys seem dead (playtest 4 finding 40).
             _selectedNodeKey = key;
             SetFeedback(string.Empty);
             Refresh();
@@ -836,8 +850,13 @@ namespace Assets.Scripts.Heroes.UI
         {
             var node = SphereGridOps.FindNode(
                 _selectedHero != null ? _selectedHero.SphereGrid : null, _selectedNodeKey);
-            if (node == null || (IsGuiding && node.Key != _guideNodeKey))
+            if (node == null)
             {
+                return;
+            }
+            if (IsGuiding && node.Key != _guideNodeKey)
+            {
+                RefuseForGuide();
                 return;
             }
 
@@ -1073,8 +1092,11 @@ namespace Assets.Scripts.Heroes.UI
                 return;
             }
 
-            // While guided there is one node worth moving to, so any arrow goes there.
-            var key = IsGuiding ? _guideNodeKey : _view.NodeInDirection(_selectedNodeKey, direction);
+            // While guided the first arrow lands on the node to buy; after that the grid walks as usual,
+            // so the player can look around (only buying is held to the guided node).
+            var key = IsGuiding && string.IsNullOrEmpty(_selectedNodeKey)
+                ? _guideNodeKey
+                : _view.NodeInDirection(_selectedNodeKey, direction);
             if (string.IsNullOrEmpty(key))
             {
                 return;
@@ -1082,6 +1104,19 @@ namespace Assets.Scripts.Heroes.UI
 
             OnNodeClicked(key);
             _view.EnsureNodeVisible(key);
+        }
+
+        /// <summary>
+        /// The guide refused an input: the feedback line names the node to buy first, and the hub is
+        /// told so its banner can say "Not yet".
+        /// </summary>
+        private void RefuseForGuide()
+        {
+            var node = SphereGridOps.FindNode(_guideHero != null ? _guideHero.SphereGrid : null, _guideNodeKey);
+            SetFeedback(node != null
+                ? Loc.Format("grid.feedback.guide-first", ("node", SphereGridPresenter.NodeName(node)))
+                : string.Empty);
+            GuideRefused?.Invoke();
         }
 
         private void SetFeedback(string message)

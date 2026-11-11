@@ -58,8 +58,8 @@ MonoBehaviour:
       WeightModifierRate: 0
       Effects:
       - EffectType: 0
-        Power: 8
-        PowerMode: 0
+        Power: 10
+        PowerMode: 2
         ScalingStat: 0
         DamageType: 1
         BuffType: 0

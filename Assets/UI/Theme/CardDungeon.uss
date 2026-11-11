@@ -477,6 +477,35 @@
     width: 50%;
 }
 
+/* The hero bar lets its summon detail stand above it (playtest 4 finding 6); the list clips its own
+   long labels instead of the window doing it. */
+#hero-bar.cd-command-window {
+    overflow: visible;
+}
+
+#hero-bar .cd-command-list {
+    overflow: hidden;
+}
+
+/* What a summon's highlighted action does: a small parchment window sitting on top of the menu. */
+.cd-sel-desc.cd-command-desc {
+    position: absolute;
+    left: -8px;
+    right: -8px;
+    bottom: 100%;
+    margin: 0 0 10px 0;
+    padding: 8px 12px;
+    border-top-width: 0;
+    color: var(--cd-text-dark);
+    background-color: var(--cd-parchment);
+    background-image: url("project://database/Assets/UI/Frames/window_frame.png");
+    -unity-slice-left: 6;
+    -unity-slice-right: 6;
+    -unity-slice-top: 6;
+    -unity-slice-bottom: 6;
+    -unity-slice-scale: 3px;
+}
+
 .cd-cmd-row {
     flex-direction: row;
     align-items: center;
@@ -1383,6 +1412,59 @@
     width: 340px;
 }
 
+/* The slot column holds the All row plus seven slots. At 56px + 3px a row the eighth (Necklace)
+   fell below the column's clipped bottom edge, so an amulet had no visible slot (playtest 4
+   finding 1). 48px + 2px fits all eight with room to spare. */
+.cd-inv-col--left .cd-inv-row {
+    height: 48px;
+    margin-bottom: 2px;
+}
+
+/* "All equipment" is a filter, not a slot (playtest 4 finding 61): a short pill in its own bar
+   above the "Equipped" header, outlined rather than filled, with a bare glyph instead of an item
+   tile. 36px + the bar's margin is less than the 50px row it replaced, so all seven slots fit. */
+.cd-inv-filterbar {
+    flex-shrink: 0;
+    margin-bottom: 10px;
+}
+
+.cd-inv-col--left .cd-inv-row.cd-inv-row--filter {
+    height: 36px;
+    margin-bottom: 0;
+    padding: 0 14px 0 4px;
+    border-radius: 18px;
+    border-color: rgba(255, 217, 102, 0.55);
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.cd-inv-col--left .cd-inv-row.cd-inv-row--filter:hover {
+    background-color: rgba(71, 34, 110, 0.7);
+    border-color: var(--cd-gold);
+}
+
+.cd-inv-col--left .cd-inv-row.cd-inv-row--filter.cd-inv-row--selected {
+    background-color: rgb(102, 48, 158);
+    border-color: var(--cd-gold);
+}
+
+.cd-inv-col--left .cd-inv-row.cd-inv-row--filter.cd-inv-row--held {
+    background-color: rgba(102, 48, 158, 0.4);
+    border-color: var(--cd-gold);
+}
+
+.cd-inv-row--filter .cd-inv-row__icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 6px;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+}
+
+.cd-inv-row--filter .cd-inv-row__name {
+    font-size: 17px;
+    color: var(--cd-gold);
+}
+
 .cd-inv-col--list {
     width: 360px;
     margin: 0 14px;
@@ -1831,6 +1913,22 @@
     color: rgb(255, 130, 120);
 }
 
+/* A stat change shown as only the change - "STR +3", "HP -6" (StatDelta, playtest 4 findings
+   41-43, 65): better is green, worse is red. Every hub comparison uses these: the sphere grid's
+   node detail, the Storehouse's "Stats if equipped" and its candidate rows, the Merchant. The
+   doubled selectors beat .cd-inv-stat__value's plain colour at equal specificity. */
+.cd-delta--better,
+.cd-inv-stat__value.cd-delta--better {
+    color: rgb(125, 220, 110);
+    opacity: 1;
+}
+
+.cd-delta--worse,
+.cd-inv-stat__value.cd-delta--worse {
+    color: rgb(255, 120, 110);
+    opacity: 1;
+}
+
 /* The party-wide tabs' summary in the left column. */
 .cd-inv-summary__head {
     font-size: 20px;
@@ -1880,83 +1978,6 @@
     -unity-font-style: bold;
     color: var(--cd-gold);
     margin-right: 16px;
-}
-
-/* A seat: the inventory's hero card as a Button. Seat 0 leads. */
-.cd-camp-seat {
-    width: 124px;
-    height: 96px;
-    margin: 0 12px 0 0;
-    padding: 4px 4px 6px 4px;
-    align-items: center;
-    justify-content: flex-end;
-    background-color: rgba(35, 18, 58, 0.6);
-    border-width: 2px;
-    border-color: rgba(91, 42, 145, 0.7);
-    border-radius: 8px;
-}
-
-.cd-camp-seat:hover {
-    background-color: rgb(71, 34, 110);
-    border-color: rgb(156, 82, 210);
-}
-
-.cd-camp-seat--active,
-.cd-camp-seat--active:hover {
-    background-color: rgb(67, 30, 108);
-    border-color: var(--cd-accent);
-}
-
-/* An empty seat: a frame and nothing in it (UITK has no dashed border). */
-.cd-camp-seat--empty,
-.cd-camp-seat--empty:hover {
-    background-color: rgba(0, 0, 0, 0.18);
-    border-color: rgba(205, 110, 255, 0.16);
-    justify-content: center;
-}
-
-.cd-camp-seat__sprite {
-    width: 64px;
-    height: 64px;
-    -unity-background-scale-mode: scale-to-fit;
-}
-
-.cd-camp-seat__name {
-    font-size: 16px;
-    -unity-font-style: bold;
-    color: var(--cd-text-light);
-    -unity-text-align: middle-center;
-    padding: 0;
-    margin: 0;
-}
-
-.cd-camp-seat--active .cd-camp-seat__name {
-    color: var(--cd-gold);
-}
-
-.cd-camp-seat--empty .cd-camp-seat__name {
-    -unity-font-style: italic;
-    opacity: 0.45;
-}
-
-/* The leader's mark: a tab sitting on the seat's top border, clear of the portrait. */
-.cd-camp-seat__lead {
-    position: absolute;
-    top: -12px;
-    align-self: center;
-    font-size: 14px;
-    -unity-font-style: bold;
-    color: var(--cd-gold);
-    background-color: rgb(67, 30, 108);
-    border-width: 1px;
-    border-color: var(--cd-gold);
-    border-radius: 5px;
-    padding: 0 6px;
-    margin: 0;
-}
-
-.cd-camp-seat--lead {
-    border-color: var(--cd-gold);
 }
 
 .cd-camp-col--roster {
@@ -2622,6 +2643,28 @@
     flex-shrink: 1;
 }
 
+/* Who a newcomer is, and that they arrive with part of their grid (playtest 4 findings 22, 24). */
+.cd-lc-joined__body {
+    flex-direction: column;
+    flex-shrink: 1;
+    flex-grow: 1;
+}
+
+.cd-lc-joined__blurb {
+    font-size: 15px;
+    color: var(--cd-text-light);
+    white-space: normal;
+    margin-top: 2px;
+}
+
+.cd-lc-joined__note {
+    font-size: 14px;
+    -unity-font-style: italic;
+    color: var(--cd-parchment);
+    white-space: normal;
+    margin-top: 2px;
+}
+
 .cd-lc-tallies {
     flex-direction: row;
     margin-top: 8px;
@@ -3203,6 +3246,14 @@
 .cd-scan-window .cd-scan__body {
     max-height: none;
     flex-shrink: 1;
+}
+
+/* Inspect: how to learn what is still "???" (playtest 4 finding 34). */
+.cd-sel-desc.cd-scan__learn {
+    flex-shrink: 0;
+    margin: 0 12px 6px 12px;
+    font-size: 14px;
+    -unity-font-style: italic;
 }
 
 .cd-scan__cols {
@@ -4732,6 +4783,13 @@
     margin: 0;
 }
 
+/* For a few seconds after the tutorial refused a key or click ("Not yet. ...", HubManager.NudgeTutorial):
+   the rim goes light so the eye is drawn back to the line (playtest 4 finding 40). */
+.cd-tutorial-banner--nudge {
+    border-color: rgb(255, 246, 205);
+    background-color: rgba(60, 40, 8, 0.96);
+}
+
 .cd-tutorial-target {
     border-width: 4px;
     border-color: var(--cd-gold);
@@ -4809,6 +4867,196 @@
     border-width: 1px;
     border-color: var(--cd-gold);
     border-radius: 3px;
+}
+
+/* ============================================================
+   Playtest 4, 2026-11-10: the Controls screen, the campfire's
+   leader mark and potion picker, the town's shape outlines.
+   Kept above the keyboard cursor section, which stays last.
+   ============================================================ */
+
+/* The Controls screen (Tutorial/ControlsPanel): a scrim over the whole document, the window centred
+   by flex, never by translate, and one fixed size, so its hit-testing cannot drift. */
+.cd-controls-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(6, 3, 14, 0.6);
+}
+
+.cd-window--controls {
+    width: 820px;
+    height: 86%;
+    max-height: 86%;
+    margin-bottom: 0;
+}
+
+.cd-window--controls > * {
+    flex-shrink: 0;
+}
+
+.cd-window--controls > .cd-controls-list {
+    flex-shrink: 1;
+    flex-grow: 1;
+    margin-bottom: 8px;
+}
+
+.cd-controls-head {
+    margin-top: 10px;
+}
+
+.cd-controls-row {
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 4px 2px;
+    border-bottom-width: 1px;
+    border-color: rgba(214, 168, 64, 0.2);
+}
+
+.cd-controls-keys {
+    width: 290px;
+    flex-shrink: 0;
+    font-size: 16px;
+    -unity-font-style: bold;
+    color: var(--cd-gold);
+    white-space: normal;
+    padding: 0 10px 0 0;
+}
+
+.cd-controls-action {
+    flex-grow: 1;
+    flex-shrink: 1;
+    font-size: 16px;
+    color: var(--cd-text-light);
+    white-space: normal;
+    padding: 0;
+}
+
+/* The pause menu's Hints and Controls side by side (the menu is near the screen's height). */
+.cd-pause-pair {
+    flex-direction: row;
+    flex-shrink: 0;
+}
+
+.cd-pause-pair {
+    margin-left: -3px;
+    margin-right: -3px;
+}
+
+/* 3px each side: the pair's 6px gap without :last-child, which UI Toolkit does not support. */
+.cd-pause-pair__button {
+    flex-grow: 1;
+    flex-basis: 0;
+    margin-left: 3px;
+    margin-right: 3px;
+}
+
+/* The town bar's Main Menu and Controls buttons, one group at the bar's left. */
+.hub-bar__buttons {
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.hub-bar__buttons > .cd-button {
+    margin-right: 8px;
+}
+
+/* The campfire leader: a gold badge on their row, the row itself stays where it is (finding 52). */
+.cd-camp-row__lead-badge {
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: var(--cd-gold);
+    background-color: rgb(67, 30, 108);
+    border-width: 1px;
+    border-color: var(--cd-gold);
+    border-radius: 5px;
+    padding: 0 6px;
+    margin: 0 0 0 6px;
+    flex-shrink: 0;
+}
+
+.cd-camp-row--lead,
+.cd-camp-row--lead:hover {
+    border-color: var(--cd-gold);
+}
+
+/* The campfire's potion picker (finding 50): over the whole frame, a narrow column of choices. */
+.cd-camp-picker {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(6, 3, 14, 0.55);
+}
+
+.cd-camp-picker__panel {
+    width: 360px;
+    padding: 14px 16px 8px 16px;
+    background-color: var(--cd-parchment);
+    border-width: 2px;
+    border-color: var(--cd-gold);
+    border-radius: 8px;
+}
+
+.cd-camp-picker__list {
+    flex-shrink: 0;
+    margin: 6px 0 8px 0;
+}
+
+/* The story map's "Clearing it: X joins" line. */
+.cm-floor--joins {
+    color: var(--cd-gold);
+    -unity-font-style: bold;
+    margin-top: 8px;
+}
+
+/* A lot that hit-tests by its sprite (HubView.LotButton): no box at all, ever - the ring around the
+   building is the highlight. The extra classes beat .hub-lot.hub-lot--art:hover / .cd-nav--selected
+   and the tutorial's box. */
+.hub-lot.hub-lot--art.hub-lot--shaped,
+.hub-lot.hub-lot--art.hub-lot--shaped:hover,
+.hub-lot.hub-lot--art.hub-lot--shaped.cd-nav--selected,
+.hub-lot.hub-lot--art.hub-lot--shaped.cd-nav--selected:hover,
+.hub-lot.hub-lot--art.hub-lot--shaped.cd-tutorial-target {
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+}
+
+/* The ring: a white one-texel outline texture, tinted per state. Hidden until hovered or chosen. */
+.hub-lot__outline {
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-background-image-tint-color: var(--cd-accent);
+    opacity: 0;
+}
+
+.hub-lot--shaped:hover .hub-lot__outline {
+    opacity: 1;
+}
+
+.hub-lot--shaped.cd-nav--selected .hub-lot__outline {
+    opacity: 1;
+    -unity-background-image-tint-color: var(--cd-gold);
+}
+
+.hub-lot--shaped.cd-tutorial-target .hub-lot__outline {
+    opacity: 1;
+    -unity-background-image-tint-color: var(--cd-gold);
+}
+
+.cd-tutorial--pulse .hub-lot--shaped.cd-tutorial-target .hub-lot__outline {
+    -unity-background-image-tint-color: rgb(255, 246, 205);
+}
+
+.hub-lot--shaped:disabled .hub-lot__outline {
+    opacity: 0;
 }
 
 /* ============================================================

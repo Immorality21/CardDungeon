@@ -143,5 +143,47 @@ namespace Assets.Scripts.Rooms
                 left + panel.xMax * width,
                 bottom + panel.yMax * height);
         }
+
+        // ------------------------------------------------------------ following the leader
+
+        /// <summary>
+        /// Moves <paramref name="focus"/> just far enough that <paramref name="leader"/> is within
+        /// <paramref name="deadZone"/> of it on each axis: a small step inside the zone moves nothing,
+        /// a walk drags the focus along behind it (playtest 4 findings 18 and 55).
+        /// </summary>
+        public static Vector2 FollowDeadZone(Vector2 focus, Vector2 leader, float deadZone)
+        {
+            float zone = Mathf.Max(0f, deadZone);
+            return new Vector2(Follow(focus.x, leader.x, zone), Follow(focus.y, leader.y, zone));
+        }
+
+        private static float Follow(float focus, float leader, float zone)
+        {
+            float d = leader - focus;
+            if (d > zone)
+            {
+                return leader - zone;
+            }
+            if (d < -zone)
+            {
+                return leader + zone;
+            }
+            return focus;
+        }
+
+        /// <summary>
+        /// Where the camera looks while walking: the followed point, a little ahead the way the leader
+        /// faces, moved clear of the panels that are up. What is kept clear is a box of
+        /// <paramref name="viewHalf"/> around that point - not the room - so the shift depends only on
+        /// the panels, never on which room the party is in: crossing a door moves the camera exactly
+        /// as far as the party walked (finding 55). Returns the point unchanged when no shift clears.
+        /// </summary>
+        public static Vector2 LeaderTarget(Vector2 focus, Vector2Int facing, float lookAhead, Vector2 viewHalf,
+            Vector2 cameraHalfExtents, IReadOnlyList<Rect> panels)
+        {
+            var point = focus + (Vector2)facing * lookAhead;
+            var box = new Rect(point - viewHalf, viewHalf * 2f);
+            return Nudge(box, point, cameraHalfExtents, panels);
+        }
     }
 }

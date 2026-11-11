@@ -141,6 +141,10 @@ namespace Assets.Scripts.Hub
         private VisualElement _tutorialBanner;
         private Label _tutorialText;
 
+        // Until when the banner says "Not yet" in front of its line: the tutorial just refused a key or
+        // a click, and says so instead of ignoring it (playtest 4 finding 40).
+        private float _tutorialNudgeUntil;
+
         // The story map's one challenge warning, for the visit it is shown on; empty otherwise.
         private string _challengeWarning = string.Empty;
 
@@ -274,6 +278,9 @@ namespace Assets.Scripts.Hub
 
             _roadButton = root.Q<Button>("road-btn");
             _menuButton = root.Q<Button>("hub-menu-btn");
+            // The Controls screen (playtest 4 finding 58): F1 on any hub screen, or the town bar's button.
+            // It takes the keyboard itself while open, so no screen here needs a branch for it.
+            Assets.Scripts.Tutorial.ControlsPanel.Attach(root, openWithF1: true)?.AddOpener(root.Q<Button>("hub-controls-btn"));
             _progressPartyButton = root.Q<Button>("progress-party-btn");
             _backButton = root.Q<Button>("back-btn");
             _enterButton = root.Q<Button>("enter-btn");
@@ -313,6 +320,8 @@ namespace Assets.Scripts.Hub
             _lotActionButton.clicked += OnLotAction;
             _lotEnterButton.clicked += OnLotEnter;
             _lotCloseButton.clicked += ShowTown;
+            // A click on the dimmed town around a window closes it, like its Back (playtest 4 finding 4).
+            _hubScrim?.RegisterCallback<ClickEvent>(OnScrimClicked);
 
             BuildTown();
 
@@ -333,19 +342,20 @@ namespace Assets.Scripts.Hub
                 _campaignMap.OnRunChosen += OnRunChosen;
             }
             _merchant.OnClosed += ShowTown;
-            _merchant.CanClose = () => _tutorialStep != TutorialStep.UpgradeBelt;
+            _merchant.CanClose = () => AllowsOrNudges(_tutorialStep != TutorialStep.UpgradeBelt);
             _merchant.BeltBought += OnBeltBought;
             _partySelect.OnClosed += OnPartyClosed;
-            _partySelect.CanClose = () => _tutorialStep != TutorialStep.EquipPotion;
+            _partySelect.CanClose = () => AllowsOrNudges(_tutorialStep != TutorialStep.EquipPotion);
             _partySelect.BeltChanged += RefreshTutorial;
             _sphereGrid.OnClosed += OnGridClosed;
             _sphereGrid.NodeActivated += OnGridNodeActivated;
             _sphereGrid.SelectionChanged += RefreshTutorial;
+            _sphereGrid.GuideRefused += NudgeTutorial;
             _forge.OnClosed += ShowTown;
             _bestiary.OnClosed += ShowTown;
             _tavern.OnClosed += ShowTown;
             _inventory.OnClosed += ShowTown;
-            _inventory.CanClose = () => TutorialOps.AllowsLeaving(_tutorialStep);
+            _inventory.CanClose = () => AllowsOrNudges(TutorialOps.AllowsLeaving(_tutorialStep));
             _inventory.Equipped += RefreshTutorial;
 
             SetUpKeyboardNavigation();
@@ -951,22 +961,97 @@ namespace Assets.Scripts.Hub
             _root.focusable = true;
             _root.RegisterCallback<KeyDownEvent>(OnMenuKeyDown);
 
-            // Swallow UI Toolkit's own focus navigation while our cursor owns the screen, or the first
-            // arrow key moves keyboard focus off the root and the second one never reaches us.
+            // UI Toolkit must never move focus on its own here: an arrow's navigation event or a click
+            // on a non-focusable button used to carry focus out from under the screen that owned the
+            // keys, which is why the grid, the Storehouse and the tavern heard only the first press
+            // (playtest 4 findings 12, 45, 46). StopPropagation alone no longer stops that in Unity 6.
+            PanelKeyboard.HoldFocus(_root);
             _root.RegisterCallback<NavigationMoveEvent>(evt => { if (NavigatesCurrentView()) { evt.StopPropagation(); } });
             _root.RegisterCallback<NavigationCancelEvent>(evt => { if (NavigatesCurrentView()) { evt.StopPropagation(); } });
         }
 
         private void OnMenuKeyDown(KeyDownEvent evt)
         {
+            // Page Up/Down read a long detail column on any screen, the ones with their own cursors
+            // too: they leave these keys alone, so they bubble up to here (playtest 4 finding 65).
+            if (PageDetail(KeyboardNavigator.PageDirection(evt.keyCode)))
+            {
+                evt.StopPropagation();
+                return;
+            }
             if (!NavigatesCurrentView())
             {
                 return;
             }
+            var before = _nav.Selected;
             if (_nav.HandleKey(evt))
             {
                 evt.StopPropagation();
             }
+            NudgeIfLockedTownIgnored(evt.keyCode, before);
+        }
+
+        /// <summary>The detail column the screen up is showing, paged one step. Returns whether it scrolled.</summary>
+        private bool PageDetail(int direction)
+        {
+            if (direction == 0)
+            {
+                return false;
+            }
+            bool moved = false;
+            KeyboardOwner().Query<ScrollView>(className: DetailBodyClass).ForEach(scroll =>
+            {
+                if (!moved && IsShownInHierarchy(scroll))
+                {
+                    moved = KeyboardNavigator.Page(scroll, direction);
+                }
+            });
+            return moved;
+        }
+
+        /// <summary>Every screen's text column (Hub.uxml): the merchant's, the forge's, the Storehouse's, ...</summary>
+        private const string DetailBodyClass = "cd-inv-detail__body";
+
+        private static bool IsShownInHierarchy(VisualElement element)
+        {
+            for (var e = element; e != null; e = e.hierarchy.parent)
+            {
+                if (e.resolvedStyle.display == DisplayStyle.None)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// The element that should hold keyboard focus right now: the root of a screen that keeps its
+        /// own cursor (they listen on their own root), else the document root, where the shared cursor
+        /// listens. <see cref="Update"/> hands focus back to it whenever it strays.
+        /// </summary>
+        private VisualElement KeyboardOwner()
+        {
+            if (IsShown(_gridView))
+            {
+                return _gridView;
+            }
+            if (IsShown(_inventoryView))
+            {
+                return _inventoryView;
+            }
+            if (IsShown(_tavernView))
+            {
+                return _tavernView;
+            }
+            if (IsShown(_bestiaryView))
+            {
+                return _bestiaryView;
+            }
+            if (IsShown(_campaignView))
+            {
+                return _campaignView;
+            }
+            return _root;
         }
 
         /// <summary>The views whose buttons the shared cursor drives - see <see cref="SetUpKeyboardNavigation"/>.</summary>
@@ -984,7 +1069,14 @@ namespace Assets.Scripts.Hub
         /// </summary>
         private void OnNavigatorCancelled()
         {
-            KeyboardNavigator.Press(CancelButtonForCurrentView());
+            var cancel = CancelButtonForCurrentView();
+            if ((cancel == null || !cancel.enabledInHierarchy) && !IsTownActive())
+            {
+                // A guided screen with its way out shut: say so rather than swallow the key.
+                NudgeTutorial();
+                return;
+            }
+            KeyboardNavigator.Press(cancel);
         }
 
         private Button CancelButtonForCurrentView()
@@ -1004,7 +1096,8 @@ namespace Assets.Scripts.Hub
             }
             if (IsShown(_partyView))
             {
-                return _root.Q<Button>("party-close");
+                // The potion picker first, then the campfire itself (playtest 4 finding 50).
+                return _partySelect != null ? _partySelect.CancelButton : _root.Q<Button>("party-close");
             }
             if (IsShown(_forgeView))
             {
@@ -1020,6 +1113,80 @@ namespace Assets.Scripts.Hub
             }
             // The town has nowhere to back out to. Leaving for the title screen is a deliberate
             // click, not something Escape should do by accident mid-run.
+            return null;
+        }
+
+        /// <summary>
+        /// A click on the scrim - the dimmed town around the lot panel or a service window - presses
+        /// that window's own Back button, exactly as Escape does (playtest 4 finding 4), so the panel's
+        /// <c>CanClose</c> and the tutorial's refusals apply unchanged: a guided screen whose way out
+        /// is shut answers "Not yet." instead. Only the views that sit on the scrim (<c>CoverTown</c>)
+        /// can be closed this way; the story map, level entry and run summary have no scrim.
+        /// </summary>
+        private void OnScrimClicked(ClickEvent evt)
+        {
+            if (evt.button != 0)
+            {
+                return;
+            }
+            // A confirm dialog over a window (the Storehouse's reassign, the grid's carry prompt) is
+            // answered inside it, never dismissed with the window behind it.
+            if (IsShown(_root.Q<VisualElement>("inv-confirm")) || IsShown(_root.Q<VisualElement>("grid-learn")))
+            {
+                return;
+            }
+            var close = ScrimCloseButton();
+            if (close == null)
+            {
+                return;
+            }
+            if (!TutorialOps.AllowsLeaving(_tutorialStep) || !close.enabledInHierarchy)
+            {
+                NudgeTutorial();
+                return;
+            }
+            KeyboardNavigator.Press(close);
+        }
+
+        /// <summary>The Back button of the window shown over the scrim, or null when none is.</summary>
+        private Button ScrimCloseButton()
+        {
+            if (!IsShown(_hubScrim))
+            {
+                return null;
+            }
+            if (IsShown(_lotView))
+            {
+                return _lotCloseButton;
+            }
+            if (IsShown(_merchantView))
+            {
+                return _root.Q<Button>("merchant-close");
+            }
+            if (IsShown(_partyView))
+            {
+                return _partySelect != null ? _partySelect.CancelButton : _root.Q<Button>("party-close");
+            }
+            if (IsShown(_forgeView))
+            {
+                return _root.Q<Button>("forge-close");
+            }
+            if (IsShown(_bestiaryView))
+            {
+                return _root.Q<Button>("bestiary-close");
+            }
+            if (IsShown(_tavernView))
+            {
+                return _root.Q<Button>("tavern-close");
+            }
+            if (IsShown(_inventoryView))
+            {
+                return _root.Q<Button>("inventory-close");
+            }
+            if (IsShown(_gridView))
+            {
+                return _root.Q<Button>("grid-close");
+            }
             return null;
         }
 
@@ -1052,6 +1219,10 @@ namespace Assets.Scripts.Hub
         private void Update()
         {
             PanelKeyboard.Claim();
+            if (_root != null)
+            {
+                PanelKeyboard.KeepFocusIn(KeyboardOwner());
+            }
             RefreshBackdrop();
             RefreshTutorialBanner();
             ArmCursorOnModalScreen();
@@ -1597,6 +1768,51 @@ namespace Assets.Scripts.Hub
         /// <summary>The tutorial banner's smaller form, for screens that leave little room above them.</summary>
         private const string TutorialCompactClass = "cd-tutorial-banner--compact";
 
+        /// <summary>The banner while it says "Not yet" (<see cref="NudgeTutorial"/>).</summary>
+        private const string TutorialNudgeClass = "cd-tutorial-banner--nudge";
+
+        /// <summary>
+        /// The tutorial just refused something the player tried - Escape on a screen it keeps open, an
+        /// arrow with nowhere it may go, another node on the guided grid. For a few seconds the banner
+        /// puts "Not yet" in front of its line, so the input is answered rather than silently eaten
+        /// (playtest 4 finding 40). Does nothing outside the tutorial.
+        /// </summary>
+        private void NudgeTutorial()
+        {
+            if (_tutorialStep == TutorialStep.None)
+            {
+                return;
+            }
+            _tutorialNudgeUntil = Time.unscaledTime + TutorialOps.NudgeSeconds;
+            RefreshTutorialBanner();
+        }
+
+        /// <summary><paramref name="allowed"/>, nudging the banner when it is false - for the guided screens' <c>CanClose</c>.</summary>
+        private bool AllowsOrNudges(bool allowed)
+        {
+            if (!allowed)
+            {
+                NudgeTutorial();
+            }
+            return allowed;
+        }
+
+        /// <summary>
+        /// In a town the tutorial has locked to one lot, an arrow that could not move the cursor (every
+        /// other lot is disabled) is answered with the nudge, not silence - the town after the first
+        /// level looked like its keyboard was broken (playtest 4 finding 60).
+        /// </summary>
+        private void NudgeIfLockedTownIgnored(KeyCode key, VisualElement selectedBefore)
+        {
+            bool arrow = key == KeyCode.UpArrow || key == KeyCode.DownArrow
+                || key == KeyCode.LeftArrow || key == KeyCode.RightArrow;
+            if (arrow && selectedBefore != null && _nav.Selected == selectedBefore
+                && IsTownActive() && TutorialOps.LocksTown(_tutorialStep))
+            {
+                NudgeTutorial();
+            }
+        }
+
         private string GuideKey()
         {
             return _tutorial != null ? _tutorial.GuideBuildingKey : null;
@@ -1838,6 +2054,15 @@ namespace Assets.Scripts.Hub
             if (string.IsNullOrEmpty(text) && screen == TutorialScreen.Town)
             {
                 text = RecipeNudge();
+            }
+            bool nudging = TutorialOps.NudgeShows(_tutorialStep, cue, Time.unscaledTime, _tutorialNudgeUntil);
+            if (nudging)
+            {
+                text = Loc.Format("tutorial.nudge", ("line", text));
+            }
+            if (_tutorialBanner.ClassListContains(TutorialNudgeClass) != nudging)
+            {
+                SetClass(_tutorialBanner, TutorialNudgeClass, nudging);
             }
             if (_tutorialText.text != text)
             {

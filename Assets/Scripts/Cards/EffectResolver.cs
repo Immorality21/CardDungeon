@@ -16,6 +16,10 @@ namespace Assets.Scripts.Cards
         private const string DodgeKey = "combat.float.dodge";
         private const string MissKey = "combat.float.miss";
         private const string EvadeKey = "combat.float.evade";
+
+        /// <summary>The pause after a missed or dodged blow, so a run of misses (a several-hit Ultra)
+        /// shows as separate attacks rather than words stacked in one moment.</summary>
+        public const float AvoidedDelay = 0.3f;
         private const float ComboDelay = 0.3f;
 
         private readonly EffectExecutorFactory _factory;
@@ -292,7 +296,9 @@ namespace Assets.Scripts.Cards
                         {
                             Target = target,
                             Text = Loc.Get(avoided),
-                            Color = DodgeColor
+                            Color = DodgeColor,
+                            Avoided = true,
+                            Delay = AvoidedDelay
                         });
                         continue;
                     }

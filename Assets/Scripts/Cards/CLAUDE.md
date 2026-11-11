@@ -371,7 +371,10 @@ Two consequences worth holding on to:
   their place and price: a unit summon's **+1 turn** node became **+health** (`SummonPower`, the size of its
   existing power node) and its **+1 charge** node **+25% damage** (`SummonDamage`); a special attack's
   **+1 charge** became a second power node (the Murder of Crows, with none, a second +1 turn). The grid
-  shows a unit summon's `SummonPower` as "+N% health" (`grid.payload.summon-health`). `SummonContentTests`
+  says what a `SummonPower` node grows in plain words (playtest 4 finding 23,
+  `SphereGridPresenter.SummonPowerLine`): a unit summon's health as a share of the summoner's
+  (`grid.payload.summon-health`), a special attack's first effect (or party effect) by kind - "Quake
+  hits 4 harder", "heals 10% more of max health" (`grid.payload.summon-power.*`). `SummonContentTests`
   guards all of it.
 - **Signatures recharge** *(owner, 2026-11-08)*: `SummonSO.SignatureCooldown` (default 3, 0 = once per
   summoning) - used on arrival it is back on the summon's 4th own turn. `SummonStay.TurnsUntilSignature`

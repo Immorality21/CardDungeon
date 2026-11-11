@@ -267,6 +267,20 @@ namespace Assets.Scripts.Tutorial
             return !GuidesBuilding(step) || step == TutorialStep.RevisitHall;
         }
 
+        /// <summary>How long the banner says "Not yet" after the tutorial refuses an input.</summary>
+        public const float NudgeSeconds = 2.5f;
+
+        /// <summary>
+        /// Whether the banner should say "Not yet" in front of its line at <paramref name="now"/>: a guided
+        /// step is running, it has a line on this screen to repeat, and a refusal was answered less than
+        /// <see cref="NudgeSeconds"/> ago (<paramref name="nudgeUntil"/>). The tutorial answers a refused
+        /// key or click this way rather than ignoring it (playtest 4 finding 40).
+        /// </summary>
+        public static bool NudgeShows(TutorialStep step, TutorialCue cue, float now, float nudgeUntil)
+        {
+            return step != TutorialStep.None && cue != TutorialCue.None && now < nudgeUntil;
+        }
+
         /// <summary>
         /// What the tutorial says on <paramref name="screen"/> at <paramref name="step"/>.
         /// <paramref name="guidedNodeSelected"/> splits the grid's line in two: first "click the

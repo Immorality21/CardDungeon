@@ -52,6 +52,9 @@ namespace ImmoralityGaming.Menu
         /// </summary>
         public bool HasSelection => _selected != null;
 
+        /// <summary>The button under the cursor, or null.</summary>
+        public VisualElement Selected => _selected;
+
         /// <summary>Optional: shows the selected button's tooltip as the cursor moves, so a keyboard
         /// player reads what a mouse player gets on hover.</summary>
         public HoverTips Tips { get; set; }
@@ -319,6 +322,56 @@ namespace ImmoralityGaming.Menu
                 }
             }
 
+            return true;
+        }
+
+        /// <summary>Share of the visible height one Page Up/Down moves, so a line stays in view across the jump.</summary>
+        public const float PageFraction = 0.85f;
+
+        /// <summary>
+        /// Which way Page Up / Page Down scroll: -1, +1, or 0 for any other key. A text column the
+        /// cursor never enters (a merchant item's description, playtest 4 finding 65) is read with these.
+        /// </summary>
+        public static int PageDirection(KeyCode key)
+        {
+            switch (key)
+            {
+                case KeyCode.PageUp:
+                    return -1;
+                case KeyCode.PageDown:
+                    return 1;
+                default:
+                    return 0;
+            }
+        }
+
+        /// <summary>
+        /// The vertical scroll offset after paging <paramref name="direction"/> (-1 up, +1 down) through
+        /// content <paramref name="contentHeight"/> tall in a viewport <paramref name="viewportHeight"/>
+        /// tall: <see cref="PageFraction"/> of the viewport, clamped to the content. Pure.
+        /// </summary>
+        public static float PageOffset(float current, float viewportHeight, float contentHeight, int direction)
+        {
+            float max = Mathf.Max(0f, contentHeight - viewportHeight);
+            float step = Mathf.Max(0f, viewportHeight) * PageFraction * Math.Sign(direction);
+            return Mathf.Clamp(current + step, 0f, max);
+        }
+
+        /// <summary>Pages <paramref name="scroll"/> one step; returns whether it moved.</summary>
+        public static bool Page(ScrollView scroll, int direction)
+        {
+            if (scroll == null || direction == 0)
+            {
+                return false;
+            }
+            var offset = scroll.scrollOffset;
+            float next = PageOffset(offset.y, scroll.contentViewport.layout.height,
+                scroll.contentContainer.layout.height, direction);
+            if (Mathf.Approximately(next, offset.y))
+            {
+                return false;
+            }
+            scroll.scrollOffset = new Vector2(offset.x, next);
             return true;
         }
 

@@ -191,7 +191,8 @@ namespace Assets.Scripts.Hub.UI
         {
             // focusable = false for the same reason every hub button is: the screen's shared cursor
             // drives selection, and UITK focus would fight it.
-            var button = new Button { name = "hub-lot-" + lot.Key, focusable = false };
+            var button = new LotButton { name = "hub-lot-" + lot.Key, focusable = false };
+            button.DrawRectLocal = new Rect(lot.DrawRect.position - lot.HitRect.position, lot.DrawRect.size);
             button.RemoveFromClassList("unity-button");
             button.AddToClassList("hub-lot");
             button.style.position = Position.Absolute;
@@ -235,7 +236,18 @@ namespace Assets.Scripts.Hub.UI
             pointer.AddToClassList("cd-hidden");
             button.Add(pointer);
 
+            // The highlight that follows the building's shape: a one-texel ring around the sprite,
+            // shown on hover and under the cursor (playtest 4 finding 47). Ignored by picking; it also
+            // widens the button's bounding box over the art, which is what lets ContainsPoint be
+            // asked about a point on the art outside the hit rect.
+            var outline = new VisualElement { name = "hub-lot-outline-" + lot.Key, pickingMode = PickingMode.Ignore };
+            outline.AddToClassList("hub-lot__outline");
+            outline.style.position = Position.Absolute;
+            button.Add(outline);
+            button.Outline = outline;
+
             ApplyArtMode(button, glyph, lot.Sprite != null);
+            ApplyShape(button, lot.Sprite);
 
             var captured = lot.Key;
             button.clicked += () => LotClicked?.Invoke(captured);
@@ -251,6 +263,156 @@ namespace Assets.Scripts.Hub.UI
             {
                 glyph.style.display = hasArt ? DisplayStyle.None : DisplayStyle.Flex;
             }
+        }
+
+        // --- shape-true hover and click (playtest 4 finding 47) ---------------------
+
+        /// <summary>
+        /// A lot's button that answers hover and clicks only over its building's solid pixels (with a
+        /// texel of slack), not over its whole rectangle. UI Toolkit asks <see cref="ContainsPoint"/>
+        /// while picking, front lot first, so where two buildings overlap the one drawn in front wins,
+        /// and a click through a transparent corner reaches the lot behind. With no readable sprite
+        /// (no art, or a texture imported without Read/Write) it falls back to the hit rectangle.
+        /// </summary>
+        public sealed class LotButton : Button
+        {
+            /// <summary>The lot's draw rect in this button's own space (DrawRect less HitRect's corner).</summary>
+            public Rect DrawRectLocal;
+
+            /// <summary>Where the sprite actually paints inside <see cref="DrawRectLocal"/> (scale-to-fit).</summary>
+            public Rect ShapeRect;
+
+            public SpriteAlphaMask Mask;
+            public VisualElement Outline;
+
+            public override bool ContainsPoint(Vector2 localPoint)
+            {
+                if (Mask == null || ShapeRect.width <= 0f || ShapeRect.height <= 0f)
+                {
+                    return base.ContainsPoint(localPoint);
+                }
+                var normalized = new Vector2(
+                    (localPoint.x - ShapeRect.x) / ShapeRect.width,
+                    (localPoint.y - ShapeRect.y) / ShapeRect.height);
+                return Mask.Hits(normalized);
+            }
+        }
+
+        private static readonly Dictionary<Sprite, SpriteAlphaMask> MaskCache = new Dictionary<Sprite, SpriteAlphaMask>();
+        private static readonly Dictionary<Sprite, Texture2D> OutlineCache = new Dictionary<Sprite, Texture2D>();
+        private static bool _warnedUnreadable;
+
+        /// <summary>Points the lot's hit test and outline at <paramref name="sprite"/>'s shape, or back
+        /// to its rectangle when there is no usable sprite.</summary>
+        private static void ApplyShape(LotButton button, Sprite sprite)
+        {
+            if (button == null)
+            {
+                return;
+            }
+            var mask = MaskFor(sprite);
+            button.Mask = mask;
+            button.EnableInClassList("hub-lot--shaped", mask != null);
+            if (mask == null)
+            {
+                button.ShapeRect = Rect.zero;
+                if (button.Outline != null)
+                {
+                    button.Outline.style.display = DisplayStyle.None;
+                }
+                return;
+            }
+
+            button.ShapeRect = SpriteAlphaMask.FitInside(button.DrawRectLocal, mask.Width, mask.Height);
+            if (button.Outline == null)
+            {
+                return;
+            }
+            // One texel larger on every side, the size the ring texture is.
+            float texel = button.ShapeRect.width / mask.Width;
+            var outline = button.Outline;
+            outline.style.display = DisplayStyle.Flex;
+            outline.style.left = button.ShapeRect.x - texel;
+            outline.style.top = button.ShapeRect.y - texel;
+            outline.style.width = button.ShapeRect.width + texel * 2f;
+            outline.style.height = button.ShapeRect.height + texel * 2f;
+            outline.style.backgroundImage = new StyleBackground(OutlineFor(sprite, mask));
+        }
+
+        private static SpriteAlphaMask MaskFor(Sprite sprite)
+        {
+            if (sprite == null || sprite.texture == null)
+            {
+                return null;
+            }
+            if (MaskCache.TryGetValue(sprite, out var cached))
+            {
+                return cached;
+            }
+
+            SpriteAlphaMask mask = null;
+            var texture = sprite.texture;
+            if (texture.isReadable)
+            {
+                try
+                {
+                    var rect = sprite.textureRect;
+                    int x = Mathf.RoundToInt(rect.x);
+                    int y = Mathf.RoundToInt(rect.y);
+                    int w = Mathf.RoundToInt(rect.width);
+                    int h = Mathf.RoundToInt(rect.height);
+                    var colors = texture.GetPixels(x, y, w, h);
+                    var pixels = new Color32[colors.Length];
+                    for (int i = 0; i < colors.Length; i++)
+                    {
+                        pixels[i] = colors[i];
+                    }
+                    mask = SpriteAlphaMask.FromPixelsBottomUp(pixels, w, h);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogWarning($"[HubView] Could not read '{sprite.name}' for its shape; it clicks by its rectangle. {e.Message}");
+                }
+            }
+            else if (!_warnedUnreadable)
+            {
+                _warnedUnreadable = true;
+                Debug.LogWarning($"[HubView] '{texture.name}' is not imported with Read/Write, so its lot hovers and clicks by its rectangle. Tick Read/Write on the building sprites (Assets/Sprites/Hub).");
+            }
+            MaskCache[sprite] = mask;
+            return mask;
+        }
+
+        /// <summary>The ring as a white, point-filtered texture; USS tints it per state.</summary>
+        private static Texture2D OutlineFor(Sprite sprite, SpriteAlphaMask mask)
+        {
+            if (OutlineCache.TryGetValue(sprite, out var cached) && cached != null)
+            {
+                return cached;
+            }
+            int w = mask.Width + 2;
+            int h = mask.Height + 2;
+            var ring = mask.OutlineTopDown();
+            var pixels = new Color32[w * h];
+            for (int y = 0; y < h; y++)
+            {
+                // Textures are bottom row first; the ring is top row first.
+                int target = (h - 1 - y) * w;
+                for (int x = 0; x < w; x++)
+                {
+                    pixels[target + x] = ring[y * w + x] ? new Color32(255, 255, 255, 255) : new Color32(0, 0, 0, 0);
+                }
+            }
+            var texture = new Texture2D(w, h, TextureFormat.RGBA32, false)
+            {
+                filterMode = FilterMode.Point,
+                wrapMode = TextureWrapMode.Clamp,
+                name = sprite.name + "_outline",
+            };
+            texture.SetPixels32(pixels);
+            texture.Apply(false, true);
+            OutlineCache[sprite] = texture;
+            return texture;
         }
 
         // --- ambience ---------------------------------------------------------------
@@ -323,6 +485,7 @@ namespace Assets.Scripts.Hub.UI
             if (_buttons.TryGetValue(key, out var button))
             {
                 ApplyArtMode(button, button.Q<Label>("hub-glyph-" + key), sprite != null);
+                ApplyShape(button as LotButton, sprite);
             }
 
             if (!phaseIn)

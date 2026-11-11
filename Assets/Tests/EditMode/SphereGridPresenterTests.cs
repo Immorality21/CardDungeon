@@ -223,5 +223,69 @@ namespace Tests.EditMode
             Assert.AreEqual("AGI", SphereGridPresenter.Glyph(mixed, false));
             Assert.AreEqual("S", SphereGridPresenter.Glyph(empty, false));
         }
+
+        // ---- Summon power nodes say what grows (playtest 4 finding 23)
+
+        private static Assets.Scripts.Cards.SummonSO Special(params Assets.Scripts.Cards.SpellEffect[] effects)
+        {
+            var summon = ScriptableObject.CreateInstance<Assets.Scripts.Cards.SummonSO>();
+            summon.Kind = Assets.Scripts.Cards.SummonKind.SpecialAttack;
+            summon.Effects = new List<Assets.Scripts.Cards.SpellEffect>(effects);
+            return summon;
+        }
+
+        [Test]
+        public void SummonPowerLine_DamageSummon_SaysItHitsHarder()
+        {
+            var summon = Special(new Assets.Scripts.Cards.SpellEffect { EffectType = Assets.Scripts.Cards.SpellEffectType.Damage, Power = 4 });
+
+            Assert.AreEqual("Quake hits 4 harder", SphereGridPresenter.SummonPowerLine("Quake", summon, 4));
+        }
+
+        [Test]
+        public void SummonPowerLine_PercentHeal_SaysPercentOfMaxHealth()
+        {
+            var summon = Special(new Assets.Scripts.Cards.SpellEffect
+            {
+                EffectType = Assets.Scripts.Cards.SpellEffectType.Heal, Power = 40, PowerMode = Assets.Scripts.Cards.PowerMode.PercentOfMaxHealth
+            });
+
+            Assert.AreEqual("Stag heals 10% more of max health", SphereGridPresenter.SummonPowerLine("Stag", summon, 10));
+        }
+
+        [Test]
+        public void SummonPowerLine_PartyEffectsGrow_ReadsThePartyHalf()
+        {
+            var summon = Special(new Assets.Scripts.Cards.SpellEffect { EffectType = Assets.Scripts.Cards.SpellEffectType.Damage, Power = 5 });
+            summon.PowerRaisesPartyEffects = true;
+            summon.PartyEffects = new List<Assets.Scripts.Cards.SpellEffect>
+            {
+                new Assets.Scripts.Cards.SpellEffect
+                {
+                    EffectType = Assets.Scripts.Cards.SpellEffectType.Buff, BuffType = Assets.Scripts.Cards.BuffType.Barrier,
+                    Power = 5, PowerMode = Assets.Scripts.Cards.PowerMode.PercentOfMaxHealth
+                }
+            };
+
+            string text = SphereGridPresenter.SummonPowerLine("Glacius", summon, 5);
+
+            StringAssert.Contains("5% of max health", text);
+            StringAssert.DoesNotContain("harder", text, "The claw does not grow; the barrier does.");
+        }
+
+        [Test]
+        public void SummonPowerLine_UnitSummon_SaysHealthAsShareOfTheSummoner()
+        {
+            var summon = ScriptableObject.CreateInstance<Assets.Scripts.Cards.SummonSO>();
+            summon.Kind = Assets.Scripts.Cards.SummonKind.ReplaceParty;
+
+            Assert.AreEqual("Golem has more health: +25% of the summoner's", SphereGridPresenter.SummonPowerLine("Golem", summon, 25));
+        }
+
+        [Test]
+        public void SummonPowerLine_NoDefinition_FallsBackToTheGenericLine()
+        {
+            StringAssert.Contains("+3", SphereGridPresenter.SummonPowerLine("Mystery", null, 3));
+        }
     }
 }

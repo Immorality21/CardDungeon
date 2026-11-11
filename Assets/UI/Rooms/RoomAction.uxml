@@ -21,13 +21,13 @@
             <ui:Label name="hud-explore" text="" class="cd-hud__explore" picking-mode="Ignore" />
         </ui:VisualElement>
 
-        <!-- Enemies present: start or flee -->
+        <!-- Enemies present: Fight. Flee is stepping back out (arrow or click on the room behind),
+             no button since playtest 4 (owner, 2026-11-10). -->
         <ui:VisualElement name="combat-bar" class="cd-bar cd-dock-bottom cd-hidden">
             <!-- Who is in the room, above the choice it asks for (2026-09-30): bestiary names, "???"
                  for an enemy never met, no stats. -->
             <ui:Label name="fight-foes" text="" class="cd-bar__foes" picking-mode="Ignore" />
             <ui:Button name="fight-btn" text="#ui.room.fight-btn" class="cd-cmd" />
-            <ui:Button name="flee-btn" text="#ui.room.flee-btn" class="cd-cmd" />
         </ui:VisualElement>
 
         <!-- Boss encounter banner (top-center): announces the climax fight while the player
@@ -72,6 +72,9 @@
         <ui:VisualElement name="hero-bar" class="cd-command-window cd-dock-band cd-hidden">
             <ui:Label name="hero-title" text="" class="cd-command-window__header" />
             <ui:VisualElement name="command-list" class="cd-command-list" />
+            <!-- A summon's menu only: what the highlighted action does (playtest 4 finding 6). Drawn
+                 above the window, so the two-column list keeps its room. RoomActionUI.RenderCommandDetail. -->
+            <ui:Label name="command-desc" text="" class="cd-sel-desc cd-command-desc cd-hidden" picking-mode="Ignore" />
         </ui:VisualElement>
 
         <!-- Behind every dialog (event, detail, map, pause): "the game is waiting for you" reads apart
@@ -220,7 +223,11 @@
             <ui:Button name="pause-resume" text="#ui.room.pause-resume" class="cd-button cd-button--wide" />
             <ui:Button name="pause-map" text="#ui.room.pause-map" class="cd-button cd-button--wide" />
             <ui:Button name="pause-potions" text="#ui.room.pause-potions" class="cd-button cd-button--wide" />
-            <ui:Button name="pause-hints" text="#ui.room.pause-hints" class="cd-button cd-button--wide" />
+            <!-- Hints and Controls share a row: the pause menu is already near the height of the screen. -->
+            <ui:VisualElement class="cd-pause-pair">
+                <ui:Button name="pause-hints" text="#ui.room.pause-hints" class="cd-button cd-pause-pair__button" />
+                <ui:Button name="pause-controls" text="#ui.controls.open" class="cd-button cd-pause-pair__button" />
+            </ui:VisualElement>
             <ui:Label text="#ui.room.audio" class="cd-section-head" />
             <!-- Each dial: a fixed label column, the nudge buttons either side of a 10-segment bar (one
                  segment per AudioOptions.Step, lit by AudioOptionsUI), the percentage after. Mute is a
@@ -296,6 +303,18 @@
 
         <!-- Keyboard hint. Shown only while the arrows actually mean "pick a door". -->
         <ui:Label name="nav-hint" text="#ui.room.nav-hint" class="cd-nav-hint cd-hidden" picking-mode="Ignore" />
+
+        <!-- The Controls screen (Tutorial/ControlsPanel, rows from ControlsList): opened from the pause
+             menu and drawn over it, so it is last. A full-screen scrim with a fixed-size window centred
+             by flex rather than translate, so its hit-testing never drifts. -->
+        <ui:VisualElement name="controls-overlay" class="cd-controls-overlay cd-hidden">
+            <ui:VisualElement class="cd-window cd-window--flush cd-window--controls">
+                <ui:Label text="#ui.controls.title" class="cd-title" />
+                <ui:ScrollView name="controls-list" class="cd-list cd-controls-list" mode="Vertical" horizontal-scroller-visibility="Hidden" />
+                <ui:Label text="#ui.controls.hint" class="cd-info-label cd-hint" />
+                <ui:Button name="controls-back" text="#ui.common.back" class="cd-button cd-button--wide" />
+            </ui:VisualElement>
+        </ui:VisualElement>
 
     </ui:VisualElement>
 </ui:UXML>

@@ -33,7 +33,7 @@ MonoBehaviour:
       Effects:
       - EffectType: 1
         Power: 25
-        PowerMode: 0
+        PowerMode: 2
         ScalingStat: 0
         DamageType: 0
         BuffType: 0

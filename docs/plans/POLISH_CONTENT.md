@@ -257,6 +257,25 @@ Touch points: `Assets/Scripts/UnitStats/StatCatalog.cs` (descriptions exist, unu
 `Assets/UI/MainMenu/MainMenu.uxml`, `Assets/Scripts/Cards/MagicTag.cs`,
 `Assets/Scripts/Combat/DamageType.cs`.
 
+### 16a. Where each monster is found *(playtest 4 finding 13, 2026-11-10: backlog)*
+
+The Hall of Knowledge's Monsters page should say **where an enemy lives**: the levels (runs) and
+floors it has been met on, or can be met on. The outside tester wanted it most for the tavern's kill
+quests ("5 Skeletons": where are they?). Keep it earned: list only places the party has seen it
+(a met-on record per bestiary entry, or the cleared runs whose spawn tables, boss slots and room events
+hold it), never a floor not yet reached. Touch points: `BestiaryEntry` (a list of run/level keys met
+on), `CombatManager.RecordEnemySeen`, `BestiaryPresenter`, `Enemies/UI/BestiaryUI`, and `TavernUI`,
+which could name the place beside a quest's target.
+
+### 16b. A party / status screen *(playtest 4 finding 44, 2026-11-10: backlog)*
+
+One screen showing each hero's stats, gear, abilities, summons and Ultras together, FF's Status
+menu. Today that is spread over the Storehouse (stats and gear), the grid (what was bought) and the
+campfire (who marches). The tester asked for it outright. Open: whether it is a hub screen, a pause-menu
+page in the dungeon (where the party's state matters most: health, charges, afflictions), or both on
+one view-controller. Reuse `HeroStatCalculator`, `ItemPresenter` and `AbilityDescriber` so the numbers
+match the other screens.
+
 ### 20. A tutorial — guide the player through the first hour *(added 2026-09-05)*
 
 > **The first loop shipped 2026-09-29** — New Game goes straight into floor 1, and home again the
@@ -367,6 +386,15 @@ reports it, rather than adding content ad hoc.
 
 Also thin and worth naming: **no run declares its own room-event pool**, so every biome draws on the
 same six.
+
+### 17a. Music leitmotifs *(playtest 4 finding 66, 2026-11-10: backlog)*
+
+Themes for **bosses, heroes and places**, reused across the score so a melody links them: a boss's
+motif under its floor's exploration loop before it is met, a hero's theme when they join and in their
+Ultra, a place's motif returning on a revisit. Today the bed is six licensed loops by track kind
+(`Assets/Scripts/Audio/CLAUDE.md`, *State of the content*), so this needs commissioned or generated
+music and finer `MusicTrack` keys (per boss, per biome) than Hub/Exploration/Combat/BossCombat. Content
+work, after the demo.
 
 ### 22. Localization follow-ups *(added 2026-10-30, done 2026-11-01)*
 

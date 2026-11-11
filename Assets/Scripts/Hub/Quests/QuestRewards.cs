@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Assets.Scripts.Dungeon;
 using Assets.Scripts.Events;
 using Assets.Scripts.Heroes;
 using Assets.Scripts.IO;
@@ -26,6 +27,36 @@ namespace Assets.Scripts.Hub.Quests
             return MetaProgressManager.Instance != null ? MetaProgressManager.Instance.GetCompletedRunKeys() : new List<string>();
         }
 
+        /// <summary>
+        /// Every run of the campaign (<c>Resources/Campaign.asset</c>), so the board only offers quests
+        /// that can still be done (<see cref="QuestOps.IsDoable"/>, playtest 4 finding 14). Null when there
+        /// is no campaign, which skips that check.
+        /// </summary>
+        public static List<RunDefinitionSO> CampaignRuns()
+        {
+            var campaign = UnityEngine.Resources.Load<CampaignSO>(CampaignSO.ResourcePath);
+            if (campaign == null || campaign.Nodes == null)
+            {
+                return null;
+            }
+            var runs = new List<RunDefinitionSO>();
+            foreach (var node in campaign.Nodes)
+            {
+                if (node != null && node.Run != null)
+                {
+                    runs.Add(node.Run);
+                }
+            }
+            return runs;
+        }
+
+        /// <summary>Whether <see cref="Reroll"/> would find a quest to swap in (gold aside).</summary>
+        public static bool CanReroll(QuestSO quest)
+        {
+            var save = new FileHandler().Load<QuestSaveData>();
+            return QuestOps.CanReroll(save, Pool(), CompletedRuns(), quest, CampaignRuns());
+        }
+
         private static int Pick(int count)
         {
             return UnityEngine.Random.Range(0, count);
@@ -36,7 +67,7 @@ namespace Assets.Scripts.Hub.Quests
         {
             var files = new FileHandler();
             var save = files.Load<QuestSaveData>();
-            if (QuestOps.FillBoard(save, Pool(), CompletedRuns(), Pick))
+            if (QuestOps.FillBoard(save, Pool(), CompletedRuns(), Pick, CampaignRuns()))
             {
                 files.Save(save);
             }
@@ -62,13 +93,13 @@ namespace Assets.Scripts.Hub.Quests
         {
             var files = new FileHandler();
             var save = files.Load<QuestSaveData>();
-            if (!QuestOps.CanReroll(save, Pool(), CompletedRuns(), quest)
+            if (!QuestOps.CanReroll(save, Pool(), CompletedRuns(), quest, CampaignRuns())
                 || MetaProgressManager.Instance == null
                 || !MetaProgressManager.Instance.TrySpendGold(QuestOps.RerollGold, EconomySource.Quest))
             {
                 return false;
             }
-            QuestOps.Reroll(save, Pool(), CompletedRuns(), quest, Pick);
+            QuestOps.Reroll(save, Pool(), CompletedRuns(), quest, Pick, CampaignRuns());
             files.Save(save);
             return true;
         }
@@ -83,7 +114,7 @@ namespace Assets.Scripts.Hub.Quests
             {
                 return false;
             }
-            QuestOps.FillBoard(save, Pool(), CompletedRuns(), Pick);
+            QuestOps.FillBoard(save, Pool(), CompletedRuns(), Pick, CampaignRuns());
             // Written first: a reward paid with the claim unsaved could be collected twice.
             files.Save(save);
 

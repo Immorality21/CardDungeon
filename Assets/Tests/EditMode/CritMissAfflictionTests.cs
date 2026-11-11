@@ -226,6 +226,29 @@ namespace Tests.EditMode
         }
 
         [Test]
+        public void BlindedCaster_Miss_IsMarkedAvoided_WithAPause()
+        {
+            // Playtest 4 finding 20: a miss is still an attack - the presenter flies it and waits.
+            _buffTracker.ApplyStatusEffect(_caster, BuffType.Blinded, 3);
+            DefenseRules.Roll = () => 0f;
+
+            var result = Cast(Ability("slash", false, Hit()));
+
+            var miss = result.Entries.Single(e => e.Text == "Miss");
+            Assert.IsTrue(miss.Avoided);
+            Assert.AreEqual(0, miss.Impact);
+            Assert.AreEqual(EffectResolver.AvoidedDelay, miss.Delay);
+        }
+
+        [Test]
+        public void Hit_IsNotMarkedAvoided()
+        {
+            var result = Cast(Ability("slash", false, Hit()));
+
+            Assert.IsFalse(result.Entries.Any(e => e.Avoided));
+        }
+
+        [Test]
         public void BlindedCaster_Magic_NeverMisses()
         {
             _buffTracker.ApplyStatusEffect(_caster, BuffType.Blinded, 3);

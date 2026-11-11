@@ -74,7 +74,11 @@ is the stat its *check* uses, and rarity or fortune should not quietly compete w
 | Which outcome? | `RoomEventOutcome` | `Weight`, `WeightModifierStat`, `WeightModifierRate` |
 
 **Not** stat-scaled: outcome **magnitude**. An outcome's `SpellEffect`s run with `flatPower`, so 4
-damage is 4 damage whoever triggered it - the numbers belong to the event, not the caster. Each effect
+damage is 4 damage whoever triggered it - the numbers belong to the event, not the caster.
+**Health damage and heals are `PowerMode.PercentOfMaxHealth`** since 2026-11-10 (playtest 4 finding
+27: a flat -3 meant nothing on a 100 bar): each percentage was set to about the old flat number against
+the party's bars on the floors listing the event, and damage still meets defense after it. Author new
+ones the same way; `RoomEventModel` reads the bar too. Each effect
 does still carry an unused `ScalingStat` if that ever needs revisiting.
 
 ## The model

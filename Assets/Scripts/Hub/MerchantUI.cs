@@ -513,17 +513,23 @@ namespace Assets.Scripts.Hub
                 "cd-inv-detail__note"));
 
             _detailBody.Add(BestiaryLineView.Section(Loc.Format("hub.merchant.if-wore", ("hero", hero.DisplayName))));
+            // Only what wearing it changes, coloured better / worse (playtest 4 finding 65) - the
+            // Storehouse's own cells, through the shared StatDelta formatter.
             var grid = new VisualElement();
             grid.AddToClassList("cd-inv-stats");
-            foreach (var stat in StatCatalog.Types)
+            foreach (var change in StatDelta.Changes(now, then))
             {
-                bool changes = then[stat] != now[stat];
-                grid.Add(InventoryHubUI.StatCell(StatCatalog.ShortName(stat),
-                    changes ? $"{now[stat]} → {then[stat]}" : now[stat].ToString(),
-                    changes ? (then[stat] > now[stat] ? 1 : -1) : 0,
-                    StatCatalog.DisplayName(stat)));
+                grid.Add(InventoryHubUI.DeltaCell(StatCatalog.ShortName(change.Stat), change.Amount,
+                    StatCatalog.Explain(change.Stat)));
             }
-            _detailBody.Add(grid);
+            if (grid.childCount > 0)
+            {
+                _detailBody.Add(grid);
+            }
+            else
+            {
+                _detailBody.Add(MakeLabel(Loc.Get("items.inv.no-stat-change"), "cd-inv-detail__note"));
+            }
         }
 
         /// <summary>

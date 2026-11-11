@@ -64,7 +64,10 @@ every enemy is tagged since 2026-10-07 (see the Enemies guide). **The undead are
   (`RollMiss`, then `RollDodge`), so they stack as `HitChance = (1 − miss)(1 − dodge)`. No base miss,
   no Accuracy stat, and magic never misses. Same three sites as the dodge: `CombatManager.ExecuteAttack`
   (a grey "Miss", "… and misses!"), `EffectResolver.HitFilter` (a missed target gets nothing from the
-  cast, like a dodged one) and `EncounterSimulator.ResolveAttack`. `DefenseRules` cannot see the buff
+  cast, like a dodged one) and `EncounterSimulator.ResolveAttack`. An avoided ability hit is an
+  `EffectEntry` with `Avoided` set and a short `Delay`: `EffectPresenter` still flies the arrow or
+  cuts the blade at it, so each missed hit of a several-hit Ultra reads as an attack (playtest 4
+  finding 20 - three misses used to show as one stacked word). `DefenseRules` cannot see the buff
   tracker (it lives in Cards), so callers pass `BlindedBuffHandler.IsBlinded(tracker, attacker)`.
 - **ICombatUnit** provides a `Resistances` list for per-unit elemental resistances.
 

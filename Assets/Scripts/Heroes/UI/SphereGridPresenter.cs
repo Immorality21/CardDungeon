@@ -352,12 +352,8 @@ namespace Assets.Scripts.Heroes.UI
             }
             if (node.Kind == SphereNodeKind.SummonPower)
             {
-                // A unit-building summon has no effect Power: the node adds health points (SummonOps.PercentFor).
                 var definition = Assets.Scripts.Cards.SummonCatalogSO.Resolve(node.GrantedSummonKey);
-                bool unit = definition != null && definition.Kind != Assets.Scripts.Cards.SummonKind.SpecialAttack;
-                return unit
-                    ? Loc.Format("grid.payload.summon-health", ("summon", summon), ("amount", node.SummonAmount))
-                    : Loc.Format("grid.payload.summon-power", ("summon", summon), ("amount", node.SummonAmount));
+                return SummonPowerLine(summon, definition, node.SummonAmount);
             }
             if (node.Kind == SphereNodeKind.SummonDuration)
             {
@@ -401,6 +397,55 @@ namespace Assets.Scripts.Heroes.UI
                 }
             }
             return parts.Count > 0 ? string.Join(" · ", parts) : Loc.Get("grid.payload.nothing");
+        }
+
+        /// <summary>
+        /// A <c>SummonPower</c> node in plain words: what grows, read off the effect the bonus lands on
+        /// (playtest 4 finding 23 - "+10 to its effect" said nothing). A unit-building summon grows its
+        /// health, as percentage points of the summoner's (<see cref="Cards.SummonOps.PercentFor"/>); a
+        /// special attack grows the first of its effects, or of its party effects when
+        /// <see cref="Cards.SummonSO.PowerRaisesPartyEffects"/> says so (<see cref="Cards.SummonOps.EffectsFor"/>).
+        /// </summary>
+        public static string SummonPowerLine(string summonName, Cards.SummonSO definition, int amount)
+        {
+            if (definition != null && definition.Kind != Cards.SummonKind.SpecialAttack)
+            {
+                return Loc.Format("grid.payload.summon-health", ("summon", summonName), ("amount", amount));
+            }
+            var source = definition == null ? null
+                : definition.PowerRaisesPartyEffects ? definition.PartyEffects : definition.Effects;
+            Cards.SpellEffect effect = null;
+            if (source != null)
+            {
+                effect = source.Find(e => e != null);
+            }
+            if (effect != null)
+            {
+                switch (effect.EffectType)
+                {
+                    case Cards.SpellEffectType.Damage:
+                        return Loc.Format("grid.payload.summon-power.damage", ("summon", summonName), ("amount", amount));
+                    case Cards.SpellEffectType.Heal:
+                        return effect.PowerMode == Cards.PowerMode.PercentOfMaxHealth
+                            ? Loc.Format("grid.payload.summon-power.heal-percent", ("summon", summonName), ("amount", amount))
+                            : Loc.Format("grid.payload.summon-power.heal", ("summon", summonName), ("amount", amount));
+                    case Cards.SpellEffectType.Revive:
+                        return Loc.Format("grid.payload.summon-power.revive", ("summon", summonName), ("amount", amount));
+                    case Cards.SpellEffectType.Buff:
+                    case Cards.SpellEffectType.Debuff:
+                        string status = Cards.Buffs.BuffNames.Of(effect.BuffType);
+                        if (effect.PowerMode == Cards.PowerMode.PercentOfMaxHealth)
+                        {
+                            return Loc.Format("grid.payload.summon-power.status-max-health", ("summon", summonName), ("status", status), ("amount", amount));
+                        }
+                        if (effect.PowerMode == Cards.PowerMode.PercentOfTargetStat)
+                        {
+                            return Loc.Format("grid.payload.summon-power.status-percent", ("summon", summonName), ("status", status), ("amount", amount));
+                        }
+                        return Loc.Format("grid.payload.summon-power.status", ("summon", summonName), ("status", status), ("amount", amount));
+                }
+            }
+            return Loc.Format("grid.payload.summon-power", ("summon", summonName), ("amount", amount));
         }
 
         /// <summary>What a node teaches, by the name the player knows it by. Nodes name assets by key

@@ -282,6 +282,8 @@ backlog.**
 
 ### Next up
 
+- **Playtest 4** (external playtester, played up to 2026-11-05) - 66 findings in `PLAYTEST_4.md`. Bugs fixed
+  2026-11-10, still to be confirmed with a real keyboard. The clarity, UX, balance and design items are next, to be decided with the owner.
 - **First-time hints** (owner, 2026-11-09) - ✅ **built the same day**: one line, once per save, the first time
   charges, a refuge, a summon, an Ultra, a replay or a full party matters, and a Hints list in the pause menu
   (`TUTORIAL.md`, "First-time hints"). Open: combos (named when they first fire, or left hidden?), and Hints in town.
@@ -384,7 +386,7 @@ backlog.**
 
 | § | | state |
 |---|---|---|
-| — | The seven open balance steps | decisions waiting on the user |
+| — | The open balance steps (8: the Paladin's heal vs growing bars, playtest 4 finding 16) | decisions waiting on the user |
 | **0** | Open balance findings | reported by the analyzer |
 | **0g** | Losability and the investment gates | framing; the frontier is the fix |
 | **3b** | The retry economy — death pays, deliberately | **decided** — do not relitigate |
@@ -402,6 +404,7 @@ backlog.**
 | **2** | Biomes and props on every floor | ✅ **built 2026-10-31**: five biomes on every level, foes a full tile, saves stamped, manual layouts converted, the old look retired |
 | **3** | Events you can see, per biome and level | ✅ **all five biomes built 2026-10-31** from the owner's workbook; Shrine dropped for now (owner). **playtested by the owner 2026-11-09**; open: the Choked Passage's WebGL crash (Later, small) |
 | **4-6, 8** | Authored shapes · hidden rooms · branching routes · Elites | later |
+| — | **Doors between every pair of rooms**, not plain corridors (playtest 4 finding 15) | backlog |
 | — | **No more room bar** (owner, 2026-10-31): every room action triggered by interacting with its object | ✅ **built 2026-10-31**; every object is kept within reach, since nothing else opens it now |
 | — | **More room events, per biome** (owner, 2026-10-31) | ✅ [Room Event Workbook](https://claude.ai/artifact/94jVJSDSqNPnwWWqUD9z6H) built, 31 events. Open: **more curses on the Drowned Chapel's floors** (owner): A Candle Under Water's fail is the only one, so the Drowned Font usually has nothing to wash; it heals as well for now |
 | — | **Biome lights** (owner, 2026-10-31): a light mood per biome, torches that glow | post-demo, very late |
@@ -417,8 +420,11 @@ backlog.**
 | **14** | The dungeon map, the party bar, and the pause menu | ✅ **complete** — 14b + 14c 2026-09-06, **14a (the map) 2026-09-08** |
 | **15** | Run summary and statistics | ✅ **first version 2026-10-07** — run history from `GameEvents`, on the death screen, run-complete panel and story map; open: a Records screen, per-hero numbers, the analyzer reading it |
 | **16** | A compendium — explain the systems | not started |
+| **16a** | **Where each monster is found**, in the Hall of Knowledge (helps tavern quests; playtest 4 finding 13) | backlog |
+| **16b** | **A party / status screen** (playtest 4 finding 44) | backlog |
 | **20** | **A tutorial — guide the player through the first hour** | **first loop shipped 2026-09-29** (New Game → floor 1 → build the Hall of Progression → first grid node → the road); learnings + todos in `docs/TUTORIAL.md` |
 | **17** | Content volume is the biggest single gap | not started |
+| **17a** | **Music leitmotifs** for bosses, heroes and places (playtest 4 finding 66) | backlog, after the demo |
 | **18** | Item and consumable depth | **healing repaired 2026-09-17** (§18b, `BALANCING.md` §5v); gear trade-offs, party-wide healing and *selling consumables at all* still open; **§18c the potion belt — overhaul or re-evaluate** (opened 2026-09-28); **set bonuses deferred** (owner unsure they make sense, 2026-10-07) — the 4-piece Shadowweave set is authored, no set logic (§18a-sets); **§18d gear restrictions** — equipment types on items + per-hero eligibilities, so a mage wears cloth and wands, not plate (opened 2026-10-29, owner; not started, four decisions open) |
 | **19** | Shipping surface | not started |
 | **22** | **Localization follow-ups** — after the 2026-10-30 text system | ✅ **done 2026-11-01** |

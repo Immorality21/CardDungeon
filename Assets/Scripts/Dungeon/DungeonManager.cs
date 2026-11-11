@@ -1088,8 +1088,19 @@ namespace Assets.Scripts.Dungeon
                 }
             }
 
+            // Dead ends first (playtest 4 finding 56): a one-door room with nothing in it is a walk
+            // for nothing.
+            var deadEnds = new List<int>();
+            foreach (int i in eligible)
+            {
+                if (IsDeadEnd(rooms[i]))
+                {
+                    deadEnds.Add(i);
+                }
+            }
+
             var plan = RoomKindPlanner.Plan(
-                eligible, treasureQuota, restQuota, count => Random.Range(0, count));
+                eligible, treasureQuota, restQuota, count => Random.Range(0, count), deadEnds);
 
             foreach (var entry in plan)
             {
@@ -1113,6 +1124,12 @@ namespace Assets.Scripts.Dungeon
                    && room.RoomSO != null
                    && room.RoomSO.Kind == RoomKind.Combat
                    && room.Kind == RoomKind.Combat;
+        }
+
+        /// <summary>A room with exactly one door: the end of a branch.</summary>
+        private static bool IsDeadEnd(Room room)
+        {
+            return room != null && room.Doors != null && room.Doors.Count == 1;
         }
 
         /// <summary>
@@ -1210,7 +1227,9 @@ namespace Assets.Scripts.Dungeon
             // event is already placed simply offers nothing.
             var placed = new List<Rooms.Events.RoomEventSO>();
 
-            foreach (var room in rooms)
+            // Dead ends roll first, so each event's one placement lands at the end of a branch when it
+            // can (playtest 4 finding 56).
+            foreach (var room in RoomKindPlanner.PreferredFirst(rooms, IsDeadEnd))
             {
                 if (!IsEventEligible(room, startRoom))
                 {
@@ -1473,7 +1492,10 @@ namespace Assets.Scripts.Dungeon
             }
 
             Party.MarkOwnedDeferred(heroSO);
-            _joinedThisLevel.Add(new LevelClearSummary.Line(heroSO.DisplayName, 0, heroSO.Sprite));
+            _joinedThisLevel.Add(new LevelClearSummary.Line(heroSO.DisplayName, 0, heroSO.Sprite)
+            {
+                GridStarted = SphereGridOps.JoinsWithGridStarted(heroSO.SphereGrid),
+            });
 
             // Give the newcomer their own magic slots, or they cannot cast anything this run - and
             // fill them from their loadout, since the run-start seeding already happened and a hero
@@ -1770,7 +1792,12 @@ namespace Assets.Scripts.Dungeon
             }
 
             Party.MarkOwnedDeferred(joiner);
-            _joinedThisLevel.Add(new LevelClearSummary.Line(joiner.DisplayName, 0, joiner.Sprite));
+            // Nobody has met this hero yet, so the window introduces them (playtest 4 finding 22).
+            _joinedThisLevel.Add(new LevelClearSummary.Line(joiner.DisplayName, 0, joiner.Sprite)
+            {
+                Blurb = joiner.Blurb,
+                GridStarted = SphereGridOps.JoinsWithGridStarted(joiner.SphereGrid),
+            });
             Debug.Log($"{joiner.DisplayName} joins for clearing {ActiveRun.DisplayName}.");
         }
 

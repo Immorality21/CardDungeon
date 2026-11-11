@@ -369,6 +369,11 @@ namespace Assets.Scripts.Rooms
         /// </summary>
         private void TickRoomClick()
         {
+            if (Input.GetMouseButtonDown(0) && IsShown(_combatBar) && !IsDialogUp())
+            {
+                TryClickFlee();
+                return;
+            }
             if (!Input.GetMouseButtonDown(0) || _currentRoom == null || !DoorNavActive())
             {
                 return;
@@ -409,6 +414,32 @@ namespace Assets.Scripts.Rooms
             {
                 FloatingTextHandler.Instance.CreateFloatingText(
                     new Vector3(world.x, world.y, -2f), Loc.Get("room.map.no-safe-way"), new Color(1f, 0.75f, 0.45f));
+            }
+        }
+
+        /// <summary>
+        /// On the Fight bar, a click in the room the party came from flees, like the arrow pointing back
+        /// out (there is no Flee button since playtest 4, owner 2026-11-10). A click on the entry door
+        /// itself flees through <c>OnEntryDoorFlee</c>.
+        /// </summary>
+        private void TryClickFlee()
+        {
+            var cam = Camera.main;
+            if (!_canFlee || _entryDoor == null || _currentRoom == null || cam == null || PointerOverUi(Input.mousePosition))
+            {
+                return;
+            }
+            Vector2 world = cam.ScreenToWorldPoint(Input.mousePosition);
+            var rooms = DungeonManager.HasInstance ? DungeonManager.Instance.CurrentRooms : null;
+            int target = DungeonMapOps.RoomAt(BuildMapInputs(rooms), world);
+            if (target < 0)
+            {
+                return;
+            }
+            var clicked = RoomByIndex(rooms, target);
+            if (clicked != null && clicked == _entryDoor.GetOtherRoom(_currentRoom))
+            {
+                OnFlee();
             }
         }
 

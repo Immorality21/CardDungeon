@@ -248,6 +248,9 @@ namespace Assets.Scripts.Rooms
                 SceneManager.LoadScene("HubScene");
             };
             SetShown(_detailWindow, true);
+            // Reclaim the keyboard from the selection picker, as the victory window does: without it
+            // Enter did not close this screen (playtest 4 finding 9).
+            FocusRoot();
         }
 
         /// <summary>
@@ -384,6 +387,11 @@ namespace Assets.Scripts.Rooms
 
             SetShown(_combatBar, false);
             UnsubscribeDoors();
+
+            // The key that fled - the arrow pointing back out - is still down when the party lands,
+            // and read as a walk it carried them a step or more past the doorway: Flee seemed to go
+            // twice as far (playtest 4 finding 33). It walks again once it has been let go.
+            _walk?.HoldUntilReleased();
 
             CombatManager.Instance.Flee(party, _entryDoor, _currentRoom);
         }

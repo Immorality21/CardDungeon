@@ -199,5 +199,35 @@ namespace Tests.EditMode
         {
             Assert.AreEqual(-1, DirectionalNav.PickOnSide(PlaytestDoors(), Vector2.zero, RoomHalf, new Vector2(0f, 1f), PartyBySideDoor));
         }
+
+        // --- Page Up / Page Down through a detail column (playtest 4 finding 65) ---
+
+        [Test]
+        public void PageDirection_PageKeys_MapToUpAndDown()
+        {
+            Assert.AreEqual(-1, KeyboardNavigator.PageDirection(KeyCode.PageUp));
+            Assert.AreEqual(1, KeyboardNavigator.PageDirection(KeyCode.PageDown));
+            Assert.AreEqual(0, KeyboardNavigator.PageDirection(KeyCode.DownArrow));
+        }
+
+        [Test]
+        public void PageOffset_Down_MovesMostOfAViewport()
+        {
+            float next = KeyboardNavigator.PageOffset(0f, 200f, 1000f, 1);
+            Assert.AreEqual(200f * KeyboardNavigator.PageFraction, next, 0.001f);
+        }
+
+        [Test]
+        public void PageOffset_PastTheEnd_ClampsToTheLastPage()
+        {
+            Assert.AreEqual(800f, KeyboardNavigator.PageOffset(750f, 200f, 1000f, 1), 0.001f);
+            Assert.AreEqual(0f, KeyboardNavigator.PageOffset(50f, 200f, 1000f, -1), 0.001f);
+        }
+
+        [Test]
+        public void PageOffset_ContentFitsTheViewport_StaysAtTop()
+        {
+            Assert.AreEqual(0f, KeyboardNavigator.PageOffset(0f, 300f, 120f, 1), 0.001f);
+        }
     }
 }

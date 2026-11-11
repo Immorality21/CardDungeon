@@ -606,13 +606,19 @@ namespace Assets.Scripts.Balance
 
             int maxHealth = hero.Effective[StatType.MaxHealth];
 
+            // A percentage outcome (playtest 4 finding 27: flat numbers went harmless as bars grew) reads
+            // the bar it lands on, the way SpellPower.Resolve does in play, then meets defense as before.
+            int power = effect.PowerMode == PowerMode.PercentOfMaxHealth
+                ? Mathf.Max(effect.Power > 0 ? 1 : 0, Mathf.FloorToInt(maxHealth * effect.Power / 100f))
+                : effect.Power;
+
             if (effect.EffectType == SpellEffectType.Heal)
             {
-                return -Mathf.Min(effect.Power, maxHealth);
+                return -Mathf.Min(power, maxHealth);
             }
 
             int damage = DamageCalculator.Calculate(
-                effect.Power,
+                power,
                 hero.Unit.GetEffectiveStat(DefenseRules.DefenseStatFor(effect.ScalingStat)),
                 effect.DamageType,
                 hero.Unit.Resistances);

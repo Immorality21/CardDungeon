@@ -149,6 +149,25 @@ namespace Assets.Scripts.Combat
             stats[StatType.Intelligence] = Scale(stats[StatType.Intelligence], EnemyDamageMultiplier);
         }
 
+        // ---- What the player is shown (playtest 4 finding 25): each condition multiplies on top of
+        // ---- the base, so +50% base and a "+30% health" condition is +95% health, not +80% or +30%.
+        // ---- These are the products ScaleEnemyStats applies, before its per-stat rounding.
+
+        /// <summary>An enemy's MaxHealth multiplier in all: the base times the health condition.</summary>
+        public float TotalEnemyHealthMultiplier => EnemyStatMultiplier * EnemyHealthMultiplier;
+
+        /// <summary>What an enemy hits with (Strength, Intelligence, spell base power) in all.</summary>
+        public float TotalEnemyDamageMultiplier => EnemyStatMultiplier * EnemyDamageMultiplier;
+
+        /// <summary>An enemy's Agility multiplier in all.</summary>
+        public float TotalEnemyAgilityMultiplier => EnemyStatMultiplier * EnemyAgilityMultiplier;
+
+        /// <summary>A whole-number "+95": how much a total multiplier adds, in percent.</summary>
+        public static int PercentAdded(float multiplier)
+        {
+            return Mathf.RoundToInt((multiplier - 1f) * 100f);
+        }
+
         /// <summary>The base power of an enemy's spells: the base, then the damage condition.</summary>
         public float EnemySpellPowerScale => EnemyStatMultiplier * EnemyDamageMultiplier;
 

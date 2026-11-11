@@ -110,6 +110,62 @@ namespace Tests.EditMode
             }
         }
 
+        [Test]
+        public void Plan_DeadEndsPreferred_TakeThePayloadsFirst()
+        {
+            // Playtest 4 finding 56: a room with one door that holds nothing is a walk for nothing.
+            var deadEnds = new List<int> { 3, 5 };
+            var plan = RoomKindPlanner.Plan(Rooms(6), 1, 1, First, deadEnds);
+
+            Assert.AreEqual(RoomKind.Treasure, plan[3]);
+            Assert.AreEqual(RoomKind.Rest, plan[5]);
+            Assert.AreEqual(2, plan.Count);
+        }
+
+        [Test]
+        public void Plan_MorePayloadsThanDeadEnds_FallsBackToTheOtherRooms()
+        {
+            var plan = RoomKindPlanner.Plan(Rooms(6), 2, 1, First, new List<int> { 4 });
+
+            Assert.AreEqual(RoomKind.Treasure, plan[4]);
+            Assert.AreEqual(3, plan.Count);
+            Assert.AreEqual(RoomKind.Treasure, plan[0]);
+            Assert.AreEqual(RoomKind.Rest, plan[1]);
+        }
+
+        [Test]
+        public void Plan_PreferredRoomThatIsNotEligible_IsIgnored()
+        {
+            var plan = RoomKindPlanner.Plan(new List<int> { 1, 2 }, 1, 0, First, new List<int> { 9 });
+
+            Assert.AreEqual(1, plan.Count);
+            Assert.IsTrue(plan.ContainsKey(1));
+        }
+
+        [Test]
+        public void Plan_RollsWithinTheDeadEnds_NotTheWholePool()
+        {
+            // The roll is asked for the dead-end count, so a random pick still lands on one of them.
+            var asked = new List<int>();
+            RoomKindPlanner.Plan(Rooms(8), 1, 0, count => { asked.Add(count); return count - 1; }, new List<int> { 2, 6 });
+
+            CollectionAssert.AreEqual(new[] { 2 }, asked);
+        }
+
+        [Test]
+        public void PreferredFirst_MovesPreferredToTheFront_KeepingOrder()
+        {
+            var order = RoomKindPlanner.PreferredFirst(new List<int> { 0, 1, 2, 3, 4, 5 }, i => i % 2 == 1);
+
+            CollectionAssert.AreEqual(new[] { 1, 3, 5, 0, 2, 4 }, order);
+        }
+
+        [Test]
+        public void PreferredFirst_NullInput_IsEmpty()
+        {
+            CollectionAssert.IsEmpty(RoomKindPlanner.PreferredFirst<int>(null, i => true));
+        }
+
         // ---------------------------------------------------------------- kind behaviour
 
         [Test]

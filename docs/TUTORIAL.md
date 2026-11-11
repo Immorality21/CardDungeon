@@ -31,7 +31,8 @@ Title: New Game ──▶ straight into The Threshold, floor 1 (Dungeon Entrance
           Lot panel: Build (Back disabled)  ──▶  Enter (Back still disabled)
                           ▼
           Sphere grid, zoomed in on the Warrior's one affordable node
-          (other nodes, other hero tabs, Back and Esc all inert)
+          (other nodes can be looked at but not bought; other hero tabs, Back and Esc
+           answer "Not yet" - playtest 4 finding 40)
                           │ click the node, then Activate
                           ▼
           Grid's Back is pointed at ──▶ Town unlocked, the road pointed at
@@ -128,6 +129,13 @@ this.
   keyboard cursor also skips) **and** a rules check in the click handler (`TutorialOps.AllowsLot`),
   because `KeyboardNavigator.Press` delivers a submit event straight to a button. Escape is gated in
   `CancelButtonForCurrentView` and in `SphereGridUI.Hide`.
+- **A refused input is answered, never swallowed** (playtest 4 finding 40, 2026-11-10). Escape on a
+  guided screen, a `CanClose` refusal, an arrow that cannot leave the one open lot, or another node /
+  hero / Back on the guided grid puts "Not yet." in front of the banner line for
+  `TutorialOps.NudgeSeconds` (`HubManager.NudgeTutorial`, text `tutorial.nudge`, class
+  `cd-tutorial-banner--nudge`); the grid's feedback line also names the node to buy
+  (`grid.feedback.guide-first`). The guided grid lets the cursor walk every node - only buying is held
+  to the guided one; the first arrow still lands on it.
 
 ---
 

@@ -143,11 +143,39 @@ namespace Tests.EditMode
 
             string hot = RevisitOps.Summary(RevisitOps.Resolve(rules, true,
                 Pick(("speed", 1), ("swarm", 1), ("no-heal", 2))));
-            StringAssert.Contains("+25% more speed", hot);
+            // The total on top of the base (playtest 4 finding 25): 1.5 x 1.25 = +88%, not the condition's +25%.
+            StringAssert.Contains("speed +88%", hot);
             StringAssert.Contains("+1 foe per fight", hot);
             StringAssert.Contains("no healing", hot);
 
             Assert.AreEqual(string.Empty, RevisitOps.Summary(RunFear.None));
+        }
+
+        [Test]
+        public void EnemyTotals_MultiplyEachConditionOnTheBase()
+        {
+            var rules = MakeRules();
+            rules.Modifiers[0].Effects[0].AmountPerRank = 30;
+
+            var fear = RevisitOps.Resolve(rules, true, Pick(("health", 1)));
+
+            Assert.AreEqual(1.95f, fear.TotalEnemyHealthMultiplier, 1e-4f, "+50% base x +30% health");
+            Assert.AreEqual(1.5f, fear.TotalEnemyDamageMultiplier, 1e-4f, "no damage condition: the base alone");
+            Assert.AreEqual(95, RunFear.PercentAdded(fear.TotalEnemyHealthMultiplier));
+            Assert.AreEqual(195, fear.ScaleEnemyMaxHealth(100) * 3 / 2,
+                "the total is what ScaleEnemyStats applies: base 1.5 then the condition 1.3");
+            string line = RevisitOps.EnemyTotals(fear);
+            StringAssert.Contains("health +95%", line);
+            StringAssert.Contains("+50%", line, "the stats no condition touches still show the base");
+        }
+
+        [Test]
+        public void EnemyTotals_NoCondition_IsTheBaseOnEveryStat()
+        {
+            var fear = RevisitOps.Resolve(MakeRules(), true, null);
+
+            Assert.AreEqual("enemies +50% to every stat", RevisitOps.EnemyTotals(fear));
+            Assert.AreEqual(string.Empty, RevisitOps.EnemyTotals(RunFear.None));
         }
 
         // --- Picker edits -----------------------------------------------------------------

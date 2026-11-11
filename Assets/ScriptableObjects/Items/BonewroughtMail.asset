@@ -14,20 +14,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Items.ItemSO
   Key: BonewroughtMail
   Icon: {fileID: 21300000, guid: 3477a44ea9d7dd44db2d0f52fa296b98, type: 3}
-  Rarity: 1
-  ItemLevel: 3
+  Rarity: 2
+  ItemLevel: 4
   FindChanceScale: 0
   Category: 0
   SlotType: 3
   Bonuses:
+  - StatType: 1
+    BonusType: 0
+    Value: 2
   - StatType: 2
     BonusType: 0
     Value: 4
   - StatType: 7
     BonusType: 0
-    Value: 12
+    Value: 14
   Resistances:
-  - DamageType: 2
+  - DamageType: 5
     Percent: 20
   Triggers: []
   Milestones: []

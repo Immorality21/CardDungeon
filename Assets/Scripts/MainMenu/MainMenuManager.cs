@@ -35,6 +35,7 @@ public class MainMenuManager : MonoBehaviour
 
     private AudioOptionsUI _options;
     private KeyboardNavigator _nav;
+    private Assets.Scripts.Tutorial.ControlsPanel _controls;
 
     // Whether the button reads New Game. Decided once, on arrival, from the same file check that
     // chose the word - so the tutorial starts exactly when the player was told it would.
@@ -84,6 +85,11 @@ public class MainMenuManager : MonoBehaviour
 
         SetUpKeyboardNavigation();
 
+        // Every key and mouse action (playtest 4 finding 58): Options' Controls button, or F1. The
+        // panel takes the keyboard itself while it is open, before the cursor below hears a key.
+        _controls = Assets.Scripts.Tutorial.ControlsPanel.Attach(_root, openWithF1: true);
+        _controls?.AddOpener(_root.Q<Button>("options-controls"));
+
         // The same bed the hub plays. Requesting the track already playing is a no-op, so walking
         // into town does not restart it.
         MusicPlayer.Play(MusicTrack.Hub);
@@ -107,8 +113,10 @@ public class MainMenuManager : MonoBehaviour
             }
         });
 
-        // Swallow UI Toolkit's own focus navigation, or the first arrow moves focus off the root and
-        // the second never arrives.
+        // UI Toolkit must not move focus on its own (an arrow's navigation event, a click on a
+        // non-focusable button): StopPropagation alone no longer stops it in Unity 6. See
+        // PanelKeyboard.HoldFocus (playtest 4 findings 12, 45, 46).
+        PanelKeyboard.HoldFocus(_root);
         _root.RegisterCallback<NavigationMoveEvent>(evt => evt.StopPropagation());
         _root.RegisterCallback<NavigationCancelEvent>(evt => evt.StopPropagation());
     }
@@ -128,6 +136,7 @@ public class MainMenuManager : MonoBehaviour
     private void Update()
     {
         PanelKeyboard.Claim();
+        PanelKeyboard.KeepFocusIn(_root);
         // A cursor from the first frame (2026-09-30), so the title has a focal point and Enter works
         // before any arrow. Every frame because the layout is stale on the frame a view is shown;
         // SelectFirst does nothing once something is selected.

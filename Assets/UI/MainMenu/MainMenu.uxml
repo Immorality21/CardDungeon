@@ -93,7 +93,20 @@
                 <ui:Label text="#ui.menu.combat-speed" class="cd-option-label" />
                 <ui:Button name="options-speed" text="" class="cd-button cd-option-toggle" />
             </ui:VisualElement>
+            <!-- Every key and mouse action (Tutorial/ControlsPanel). F1 opens it from the title too. -->
+            <ui:Button name="options-controls" text="#ui.controls.open" class="cd-button cd-button--narrow" />
             <ui:Button name="options-close" text="#ui.common.back" class="cd-button cd-button--narrow" />
+        </ui:VisualElement>
+
+        <!-- The Controls screen, last so it paints over everything: a full-screen scrim with a
+             fixed-size window centred by flex, not translate, so its hit-testing never drifts. -->
+        <ui:VisualElement name="controls-overlay" class="cd-controls-overlay cd-hidden">
+            <ui:VisualElement class="cd-window cd-window--flush cd-window--controls">
+                <ui:Label text="#ui.controls.title" class="cd-title" />
+                <ui:ScrollView name="controls-list" class="cd-list cd-controls-list" mode="Vertical" horizontal-scroller-visibility="Hidden" />
+                <ui:Label text="#ui.controls.hint" class="cd-info-label cd-hint" />
+                <ui:Button name="controls-back" text="#ui.common.back" class="cd-button cd-button--wide" />
+            </ui:VisualElement>
         </ui:VisualElement>
 
     </ui:VisualElement>

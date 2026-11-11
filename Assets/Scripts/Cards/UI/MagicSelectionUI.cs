@@ -75,6 +75,7 @@ namespace Assets.Scripts.Cards.UI
         private VisualElement _inspectLeft;
         private VisualElement _inspectRight;
         private Button _inspectClose;
+        private Label _inspectLearn;
         private bool _refsReady;
 
         private ICombatUnit _currentHero;
@@ -182,6 +183,8 @@ namespace Assets.Scripts.Cards.UI
             _root.RegisterCallback<NavigationMoveEvent>(OnNavMove);
             _root.RegisterCallback<NavigationSubmitEvent>(OnNavSubmit);
             _root.RegisterCallback<NavigationCancelEvent>(OnNavCancel);
+            // See PanelKeyboard.HoldFocus: arrows and clicks otherwise move focus off the picker (playtest 4 finding 35).
+            global::ImmoralityGaming.Menu.PanelKeyboard.HoldFocus(root);
 
             _listPanel = root.Q<VisualElement>("magic-list-panel");
             _targetPanel = root.Q<VisualElement>("target-panel");
@@ -203,6 +206,7 @@ namespace Assets.Scripts.Cards.UI
             _inspectLeft = root.Q<VisualElement>("inspect-col-left");
             _inspectRight = root.Q<VisualElement>("inspect-col-right");
             _inspectClose = root.Q<Button>("inspect-close");
+            _inspectLearn = root.Q<Label>("inspect-learn");
             if (_inspectBody != null)
             {
                 _inspectBody.focusable = false;
@@ -341,6 +345,13 @@ namespace Assets.Scripts.Cards.UI
                 if (_multiCast && !UltraOps.Repeats(slot.Magic))
                 {
                     meta = Loc.Format("abilities.menu.meta-no-stack", ("meta", meta));
+                }
+                else if (_multiCast)
+                {
+                    // A MultiCast costs no charge and casts from an empty slot too (owner, 2026-10-31):
+                    // say so beside the count, or "0/2" on a castable row reads as a bug (playtest 4
+                    // finding 7).
+                    meta = Loc.Format("abilities.menu.meta-free", ("meta", meta));
                 }
 
                 int captured = i;
@@ -900,6 +911,14 @@ namespace Assets.Scripts.Cards.UI
             drops.Add(BestiaryLineView.Row(BestiaryPresenter.LootSummary(definition, known)));
             _inspectRight.Add(drops);
 
+            // How to fill in the "???" (playtest 4 finding 34): one line under the page, never scrolled away.
+            if (_inspectLearn != null)
+            {
+                string learn = BestiaryPresenter.LearnMoreLine(definition, known);
+                _inspectLearn.text = learn ?? string.Empty;
+                _inspectLearn.EnableInClassList("cd-hidden", string.IsNullOrEmpty(learn));
+            }
+
             HidePanel(_listPanel);
             HidePanel(_targetPanel);
             ShowPanel(_inspectPanel);
@@ -933,19 +952,20 @@ namespace Assets.Scripts.Cards.UI
             }
 
             int floorHealth = LevelEnemyTuning.StatsFor(enemy.Definition, enemy.Tuning, includeFear: false)[StatType.MaxHealth];
-            lines.Add(new BestiaryLine(Loc.Get("abilities.inspect.every-stat"), Percent(fear.EnemyStatMultiplier), BestiaryTone.Bad));
+            // Totals, each condition multiplied on top of the base (playtest 4 finding 25): a "+30%
+            // health" condition on a +50% revisit is +95% health, which is what the bar shows.
+            bool conditions = fear.EnemyHealthMultiplier > 1.001f || fear.EnemyDamageMultiplier > 1.001f || fear.EnemyAgilityMultiplier > 1.001f;
             lines.Add(new BestiaryLine(Loc.Get("abilities.inspect.floor-health"), floorHealth.ToString(), BestiaryTone.Neutral));
-            if (fear.EnemyHealthMultiplier > 1.001f)
+            lines.Add(new BestiaryLine(Loc.Get("abilities.inspect.total-health"), Percent(fear.TotalEnemyHealthMultiplier), BestiaryTone.Bad));
+            if (conditions)
             {
-                lines.Add(new BestiaryLine(Loc.Get("abilities.inspect.more-health"), Percent(fear.EnemyHealthMultiplier), BestiaryTone.Bad));
+                lines.Add(new BestiaryLine(Loc.Get("abilities.inspect.total-damage"), Percent(fear.TotalEnemyDamageMultiplier), BestiaryTone.Bad));
+                lines.Add(new BestiaryLine(Loc.Get("abilities.inspect.total-speed"), Percent(fear.TotalEnemyAgilityMultiplier), BestiaryTone.Bad));
+                lines.Add(new BestiaryLine(Loc.Get("abilities.inspect.other-stats"), Percent(fear.EnemyStatMultiplier), BestiaryTone.Bad));
             }
-            if (fear.EnemyDamageMultiplier > 1.001f)
+            else
             {
-                lines.Add(new BestiaryLine(Loc.Get("abilities.inspect.more-damage"), Percent(fear.EnemyDamageMultiplier), BestiaryTone.Bad));
-            }
-            if (fear.EnemyAgilityMultiplier > 1.001f)
-            {
-                lines.Add(new BestiaryLine(Loc.Get("abilities.inspect.more-speed"), Percent(fear.EnemyAgilityMultiplier), BestiaryTone.Bad));
+                lines.Add(new BestiaryLine(Loc.Get("abilities.inspect.every-stat"), Percent(fear.EnemyStatMultiplier), BestiaryTone.Bad));
             }
             return lines;
         }
@@ -997,8 +1017,14 @@ namespace Assets.Scripts.Cards.UI
                 foreach (var statusEffect in tracker.GetActiveStatusEffects(enemy))
                 {
                     // A status effect on an *enemy* is something the party put there, so it reads as
-                    // in the player's favour.
-                    lines.Add(new BestiaryLine(statusEffect.ToString(), Loc.Get("abilities.inspect.status-active"), BestiaryTone.Good));
+                    // in the player's favour. Named as the HP bar names it, with the turns it has left
+                    // (playtest 4 finding 34: it printed the enum's name).
+                    var status = tracker.GetStatus(enemy, statusEffect);
+                    int turns = status != null ? status.TurnsRemaining : 0;
+                    string value = turns > 0 && turns < 999
+                        ? Loc.Format("abilities.inspect.status-turns", ("turns", turns))
+                        : Loc.Get("abilities.inspect.status-active");
+                    lines.Add(new BestiaryLine(BestiaryPresenter.StatusLabel(statusEffect), value, BestiaryTone.Good));
                 }
             }
 
@@ -1426,13 +1452,48 @@ namespace Assets.Scripts.Cards.UI
 
         private void MoveNav(int delta)
         {
-            int stops = NavStops;
-            if (stops == 0)
+            if (NavStops == 0)
             {
                 return;
             }
-            _navSelected = (_navSelected + delta + stops) % stops;
+            _navSelected = NavStep(_navSelected, delta, _navRows.Count, VisibleBack() != null);
             RenderNavCursor();
+            // A long list (five enemies) scrolls to keep the cursor in view.
+            if (_navSelected >= 0 && _navSelected < _navRows.Count)
+            {
+                var row = _navRows[_navSelected];
+                row.GetFirstAncestorOfType<ScrollView>()?.ScrollTo(row);
+            }
+        }
+
+        /// <summary>
+        /// Where one arrow press moves the cursor over <paramref name="rows"/> rows and, when
+        /// <paramref name="hasBack"/>, a Back button at index <paramref name="rows"/>. Back is reached
+        /// going <i>down</i> past the last row, and Up from the first row wraps straight to the last
+        /// row rather than stopping on Back first (playtest 4 finding 26: the bottom enemy took two
+        /// presses, through Back, from the top of the list). From Back, Up is the last row and Down
+        /// the first.
+        /// </summary>
+        public static int NavStep(int selected, int delta, int rows, bool hasBack)
+        {
+            if (rows <= 0)
+            {
+                return hasBack ? 0 : -1;
+            }
+            if (hasBack && selected == rows)
+            {
+                return delta > 0 ? 0 : rows - 1;
+            }
+            int next = selected + delta;
+            if (next >= rows)
+            {
+                return hasBack ? rows : 0;
+            }
+            if (next < 0)
+            {
+                return rows - 1;
+            }
+            return next;
         }
 
         private void ConfirmNav()
@@ -1476,6 +1537,14 @@ namespace Assets.Scripts.Cards.UI
             {
                 switch (evt.keyCode)
                 {
+                    // The page can run past its window: the arrows scroll it (playtest 4 finding 35).
+                    case KeyCode.UpArrow:
+                    case KeyCode.DownArrow:
+                    case KeyCode.PageUp:
+                    case KeyCode.PageDown:
+                        ScrollInspect(evt.keyCode);
+                        evt.StopPropagation();
+                        break;
                     case KeyCode.Return:
                     case KeyCode.KeypadEnter:
                     case KeyCode.Z:
@@ -1514,6 +1583,26 @@ namespace Assets.Scripts.Cards.UI
                     evt.StopPropagation();
                     break;
             }
+        }
+
+        private const float InspectScrollStep = 40f;
+
+        /// <summary>Scrolls the Inspect page a line (arrows) or a window (Page Up/Down), clamped to its
+        /// content, so pressing past either end does nothing.</summary>
+        private void ScrollInspect(KeyCode key)
+        {
+            if (_inspectBody == null)
+            {
+                return;
+            }
+            float page = Mathf.Max(InspectScrollStep, _inspectBody.contentViewport.layout.height - InspectScrollStep);
+            float step = key == KeyCode.UpArrow ? -InspectScrollStep
+                : key == KeyCode.DownArrow ? InspectScrollStep
+                : key == KeyCode.PageUp ? -page
+                : page;
+            float max = Mathf.Max(0f, _inspectBody.contentContainer.layout.height - _inspectBody.contentViewport.layout.height);
+            float y = Mathf.Clamp(_inspectBody.scrollOffset.y + step, 0f, max);
+            _inspectBody.scrollOffset = new Vector2(_inspectBody.scrollOffset.x, y);
         }
 
         // While a picker is open, swallow UI Toolkit's built-in navigation so it can't move
