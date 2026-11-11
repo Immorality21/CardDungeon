@@ -161,7 +161,7 @@ Unity. Seen in the sandbox: the Fight bar with no Flee button and the hint (a bo
 **For the owner to review (drafts and choices):**
 - **Campfire:** the four seat tiles are gone, and only the roster list stays (it includes benched heroes), so the order of seats 2-4 is no longer shown anywhere. Clicking any belt slot opens a potion picker (pick, swap, or Empty).
 - **Camera:** only the area around the leader is kept clear of panels, so a big room's far edge can sit under the HUD. Tuning constants live in `GameManager` (dead zone 0.5, look-ahead 1.5).
-- **Room events:** 15 events moved to % of max health. The typical-health figures are estimates. **The Event Workbook needs syncing:**
+- **Room events:** 15 events moved to % of max health. The typical-health figures are estimates. **Synced to the Event Workbook 2026-11-11** (a dated line in each event's notes; the workbook's own texts carry no numbers):
 
   | event | floors (est. avg max HP) | old flat | new % |
   |---|---|---|---|
