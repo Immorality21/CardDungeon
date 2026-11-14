@@ -42,6 +42,11 @@ namespace Assets.Scripts.Items
 
         [Header("Equipment (Category == Equipment)")]
         public SlotType SlotType;
+
+        [Tooltip("The heroes who can wear this, or empty for anyone. A class weapon (the Mage's staff) " +
+                 "names its one hero. InventoryManager.Equip refuses anyone else, and the Storehouse shows " +
+                 "the item as \"Mage only\" to the rest.")]
+        public List<Heroes.HeroSO> UsableBy = new List<Heroes.HeroSO>();
         public List<ItemBonus> Bonuses = new List<ItemBonus>();
 
         [Tooltip("Elemental resistance this item grants while equipped. Resistances sum across gear, " +
@@ -53,6 +58,11 @@ namespace Assets.Scripts.Items
                  "happens to the wearer, the effects resolve with the wearer as their source. Simulated " +
                  "by the balance model exactly as they fire in play.")]
         public List<Combat.Triggers.TriggeredEffect> Triggers = new List<Combat.Triggers.TriggeredEffect>();
+
+        [Tooltip("Afflictions this item guards its wearer against (Poison, Blind, Silence...). 100 is " +
+                 "immunity; less cuts the chance the affliction lands by that share. Wards from several " +
+                 "pieces add up to at most 100. Only harmful statuses count (StatusWards.IsAffliction).")]
+        public List<Cards.StatusWard> StatusWards = new List<Cards.StatusWard>();
 
         [Tooltip("Thresholds on what this item has counted while worn (kills, boss kills, victories) and " +
                  "the bonuses reaching them adds - \"after 50 kills, +3 Strength\". Each copy counts for " +
@@ -67,6 +77,52 @@ namespace Assets.Scripts.Items
                  "left out of the balance model's gold-bought gear. A recipe must make it - " +
                  "CraftingContentTests fails on one nothing makes.")]
         public bool CraftOnly;
+
+        [Tooltip("Only ever found where a drop table or an event names it (the Mother Ooze's Antivenom " +
+                 "Charm): never in the Merchant's stock or a cache's find, and left out of the balance " +
+                 "model's gold-bought gear, like CraftOnly. CraftingContentTests fails on one nothing drops.")]
+        public bool DropOnly;
+
+        /// <summary>Whether anyone may wear it: no hero named in <see cref="UsableBy"/>.</summary>
+        public bool UsableByAnyone
+        {
+            get
+            {
+                if (UsableBy == null)
+                {
+                    return true;
+                }
+                foreach (var hero in UsableBy)
+                {
+                    if (hero != null)
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+
+        /// <summary>Whether the hero with this save key may wear it (<see cref="UsableBy"/>).</summary>
+        public bool CanBeWornBy(string heroKey)
+        {
+            if (UsableByAnyone)
+            {
+                return true;
+            }
+            foreach (var hero in UsableBy)
+            {
+                if (hero != null && hero.SaveKey == heroKey)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>Gear that only comes from one place - the Forge (<see cref="CraftOnly"/>) or a named
+        /// drop (<see cref="DropOnly"/>) - and so is never sold or found at random.</summary>
+        public bool IsExclusive => CraftOnly || DropOnly;
 
         [Header("Recipe (Category == Recipe)")]
         [Tooltip("What the Forge makes from this recipe.")]

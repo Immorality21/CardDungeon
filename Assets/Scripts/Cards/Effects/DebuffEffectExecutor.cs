@@ -77,7 +77,7 @@ namespace Assets.Scripts.Cards.Effects
                 // that already landed (Slash's bleed, Sunder's Endurance cut) passes quietly - the
                 // damage number is the news, and the missing icon says the rest. A cast that was
                 // only the debuff says so, or it reads as having done nothing.
-                if (!AfflictionRules.Lands(effect.ApplyChance))
+                if (!AfflictionRules.Lands(effect.ApplyChance, target, effect.BuffType))
                 {
                     if (!WasStruck(result, target))
                     {

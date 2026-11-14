@@ -524,6 +524,9 @@ namespace Assets.Scripts.Balance
 
             /// <summary>An Attack of its own, in place of the summon's (a horror's).</summary>
             public MagicSO Attack;
+
+            /// <summary>Its moves by key, to the turn each was last used (<see cref="SummonMovePolicy"/>).</summary>
+            public Dictionary<string, int> MoveTurns = new Dictionary<string, int>();
         }
 
         /// <summary>
@@ -577,7 +580,8 @@ namespace Assets.Scripts.Balance
         private static void TakeAllyTurn(SimAlly ally, List<SimUnit> enemies, CombatBuffTracker buffTracker, EffectResolver resolver,
             List<SimUnit> side, MagicTagTracker tagTracker = null, ComboDetector comboDetector = null)
         {
-            TakeReplacementTurn(new SimReplacement { Unit = ally.Unit, Stay = ally.Stay, Attack = ally.Attack }, enemies, buffTracker, resolver, side,
+            TakeReplacementTurn(new SimReplacement { Unit = ally.Unit, Stay = ally.Stay, Attack = ally.Attack, MoveTurns = ally.MoveTurns },
+                enemies, buffTracker, resolver, side,
                 tagTracker, comboDetector);
         }
 
@@ -643,9 +647,12 @@ namespace Assets.Scripts.Balance
         }
 
         /// <summary>
-        /// The summon's deterministic play (decided 2026-09-28): its Signature on its first action,
-        /// then Attack the weakest enemy. Never an action, never Dismiss. Silence closes the
-        /// Signature and leaves Attack, as it does in the live menu.
+        /// The summon's deterministic play: its Signature whenever it is ready (it recharges,
+        /// <see cref="SummonStay.TurnsUntilSignature"/>), else one of its moves by
+        /// <see cref="SummonMovePolicy"/> - the bot's rule, so the two play the same summon - else Attack
+        /// the weakest enemy. Never Dismiss. Silence closes the Signature and the moves and leaves Attack,
+        /// as it does in the live menu. (Until 2026-11-13 it never played a move, so the moves every unit
+        /// summon gained on 2026-11-08 were priced at nothing.)
         /// </summary>
         private static void TakeReplacementTurn(
             SimReplacement replacement, List<SimUnit> enemies, CombatBuffTracker buffTracker, EffectResolver resolver,
@@ -669,6 +676,28 @@ namespace Assets.Scripts.Balance
                 {
                     replacement.Stay.MarkSignatureUsed();
                     resolver.Execute(new SpellcastAction { Magic = signature, Caster = unit, Targets = targets }, buffTracker,
+                        tagTracker, comboDetector);
+                    return;
+                }
+            }
+
+            float share = unit.Stats.MaxHealth > 0 ? (float)unit.Stats.Health / unit.Stats.MaxHealth : 1f;
+            int living = 0;
+            foreach (var enemy in enemies)
+            {
+                if (enemy.IsAlive)
+                {
+                    living++;
+                }
+            }
+            var move = SummonMovePolicy.Pick(replacement.Stay.Summon, silenced, share, living, replacement.Stay.TurnsTaken,
+                replacement.MoveTurns);
+            if (move != null)
+            {
+                var moveTargets = ResolveTargets(move, unit, side, enemies);
+                if (moveTargets.Count > 0)
+                {
+                    resolver.Execute(new SpellcastAction { Magic = move, Caster = unit, Targets = moveTargets }, buffTracker,
                         tagTracker, comboDetector);
                     return;
                 }

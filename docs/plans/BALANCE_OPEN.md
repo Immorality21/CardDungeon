@@ -88,6 +88,26 @@ Findings and the owner's calls live in the **Balance Strategy** artifact
    amount. **Owner's call, 2026-11-10: no rework; rely on its grid Power upgrades**, and check in the
    balance pass whether those keep it worth a turn against the bars of each tier (if not, the dial is
    the upgrade nodes' amounts, not a percentage heal).
+   **2026-11-13: the upgrades are in.** There was only one (`paladin-c-3`, +2), so a committed healer's
+   Holy Touch fell from about 40% of a typical bar early (6 + 8 Spirit = 14 against ~35) to about 25% late
+   (6 + 2 + ~18 Spirit = ~26 against ~100). Two more Power nodes on the healing branch (c):
+   `paladin-c-touch-2` (+4, 155 XP, off `paladin-c-4`) and `paladin-c-touch-3` (+6, 350 XP, off
+   `paladin-c-7`), so the full branch adds +12: about 38 against ~100 late, back near 40%. The bar figures
+   are the same estimates as the room-event table in `PLAYTEST_4.md`. Suite green (1,907).
+   **Measured the same day against the model's real bars** (each finale's straight-line party, closed form;
+   "healer build" = the Paladin beelining to `paladin-c-touch-3` at the same XP): the heal stays at
+   **31-47% of the party's average bar at every finale**, lowest at the Counting Room and the Hollow Vault
+   (31%), 36-40% on the last finales (bar 83, heal 30-33). The estimates above were high: late bars are
+   ~83, not ~100, and the model's per-hero XP (1,750 at the end) reaches `paladin-c-touch-3` only on the last
+   finales. So Holy Touch keeps its worth without a rework. A player who revisits has more XP than the model
+   and heals for more. Open: whether a Spirit build out-heals what the floors deal (needs the floor sim with a
+   Paladin-healer party).
+9. **The late bosses are capped by the 6x ceiling** (owner, 2026-11-13: on the roadmap). The first boss pass
+   (2026-10-31, `BALANCING.md` §5aq) made all 11 bosses harder; the late ones now sit near `MaxBossToTrashRatio`
+   (a boss room may be at most 6x its floor's average trash room), so a harder late boss also needs its floor's
+   trash raised, or the ceiling questioned for finales. The Altar of the Last Initiate barely answers to its boss
+   (its danger is in the room, not the boss). Tune each boss by its own numbers (`EnemyTuning.Overrides`), try
+   Agility and `BossAdds` before health and strength (§5an), and leave percentages to the Fear levels.
 
 A published summary of the balance work (readable tables of the floor curve and the investment
 surface) lives at <https://claude.ai/code/artifact/52362b64-a4ff-48c3-bfe0-86606c48a1a3>.
@@ -246,7 +266,10 @@ Touch points: `Assets/Scripts/Progression/MetaProgressManager.cs`, `Assets/Scrip
 ### 0b. Elemental layer — follow-ups
 
 The defence half shipped 2026-08-25 and the discovery-gated reveal 2026-08-29 (Inspect + Bestiary).
-`docs/ELEMENTAL_PLAN.md` holds the decisions taken while building. What is left:
+The plan file (`ELEMENTAL_PLAN.md`) was retired 2026-11-14, every phase but the last two analyzer checks built;
+its decisions live in the Magic guide (`PowerMode`, `HealthCost`, resistance buffs, absorption) and the Enemies guide
+(the bestiary), and git history keeps the file. **Standing decision:** resistances stay hidden until observed, and
+the reveal is discovery-gated only (no static display of an enemy's resistances). What is left:
 
 - **No Shadow or Holy defence exists**, so `Mirefather`'s Shadow damage is unmitigable by accident
   rather than by design — the cloaks cover Fire/Ice/Lightning only. Either a Shadow cloak, or a

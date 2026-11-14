@@ -78,6 +78,9 @@ The systems layer is deeper than the *verbs* sitting on it. §9 shipped; §10 is
   target out entirely, and the combo still has to be set up). Mind Rot and every stat cut stay 100%.
   The **Hex Weaver** blinds the party (Blinding Hex, an enemy-only copy of Smoke Bomb, cast weight 0.5); the Floating Eye was tried first
   and withdrawn, because The Threshold's one-hero opening floor cannot get any softer (`BALANCING.md` §5af).
+  **Status resistances: ✅ built 2026-11-14** as gear wards (`ItemSO.StatusWards`, 100 = immune, less cuts
+  the chance; Cards guide, "Status wards on gear"), with five pieces tied to single enemies. Open: other
+  sources (grid nodes, buffs), and whether the balance model should price a ward. The original note:
   **Next: status resistances** *(owner, 2026-10-09)* - "items grant immunity" is the common form. The
   hook exists: `StatusImmunity.IsImmune` is the one check, and today only `Enemy` and `SimUnit` answer
   it (`IStatusImmune`, from `EnemySO.StatusImmunities`). A hero answering from equipped gear (an

@@ -166,7 +166,10 @@ The guided steps teach the town. **The rules that break RPG habits** were taught
   (cue values, in the order seen), written by `MetaProgressManager.MarkHintSeen`. The three older lines said once
   (first death, challenge warning, replay hint) are recorded there too, so the log holds them.
 - **In the dungeon** the line is a notice under the top banners (`hint-notice`, `RoomActionUI.ShowHintOnce`):
-  9 seconds, never takes the keyboard or blocks a choice, two at once take turns. **In town** it is the tutorial
+  9 seconds, never takes the keyboard or blocks a choice, two at once take turns. A line belongs to where it was
+  raised (2026-11-13, owner saw the refuge line hang on through the bot's fights): one from the walk goes when a
+  fight starts, one from a fight when it ends (`TickHintContext`); the 9 seconds are real time, so at a raised
+  combat speed it used to outlast whole fights. **In town** it is the tutorial
   banner (`HubManager.HintRevisitOnce`, `TownHint`), for that visit, below the guided steps' own lines.
 - **The pause menu's Hints** (`hints-window`, `RoomActionUI.OpenHints`) lists every line seen, oldest first;
   Back / Escape return to pause. The town has no Escape menu, so it is only reachable in the dungeon for now.

@@ -1505,6 +1505,11 @@
     margin: 24px 12px 0 12px;
 }
 
+/* A class item the selected hero cannot wear (ItemSO.UsableBy): still listed, dimmed. */
+.cd-inv-row--unusable {
+    opacity: 0.55;
+}
+
 /* One row: icon tile, a name with a caption under it, and a right-hand note. */
 .cd-inv-row {
     flex-direction: row;
@@ -1583,6 +1588,11 @@
     font-size: 16px;
     color: var(--cd-text-light);
     opacity: 0.6;
+    /* Cut, never spilled: a long "Main Hand · Worn by Mage · vs Simple Sword" drew over the stat
+       chips beside it (2026-11-13). The detail column says the whole of it. */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /* Two stacked labels in a 56px row: UITK's default label padding pushed them into the row's

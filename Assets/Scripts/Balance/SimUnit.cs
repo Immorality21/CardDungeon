@@ -118,7 +118,7 @@ namespace Assets.Scripts.Balance
     /// <c>GetEffectiveStat(MaxHealth)</c>. It did not always, which is why this note exists: the
     /// model was right and the game was short by exactly the gear bonus.
     /// </summary>
-    public class SimUnit : ICombatUnit, IStatusImmune, ITriggerSource, IHasTraits, Heroes.IAbilityUpgrades, IHasMomentum, IHasFocus, IOutgoingDamage, ISummonedBody
+    public class SimUnit : ICombatUnit, IStatusImmune, IStatusResistant, ITriggerSource, IHasTraits, Heroes.IAbilityUpgrades, IHasMomentum, IHasFocus, IOutgoingDamage, ISummonedBody
     {
         /// <summary>What a hero's worn sets add to their ability damage - set by <c>PartyBaseline</c>,
         /// as <c>Hero.OutgoingDamage</c> reads it in the game.</summary>
@@ -142,8 +142,20 @@ namespace Assets.Scripts.Balance
         /// <summary>Mirrors <c>Enemy.IsImmuneTo</c> off the same definition, so the model refuses what the game refuses.</summary>
         public bool IsImmuneTo(BuffType type)
         {
+            if (StatusResistance(type) >= StatusWards.Immune)
+            {
+                return true;
+            }
             return Definition != null
                 && StatusImmunity.DefinitionImmune(Definition.StatusImmunities, Definition.Traits, type);
+        }
+
+        /// <summary>A hero's gear wards (set by <c>PartyBaseline</c>), as <c>Hero.StatusResistance</c> reads them.</summary>
+        public Dictionary<BuffType, int> GearWards = new Dictionary<BuffType, int>();
+
+        public int StatusResistance(BuffType type)
+        {
+            return GearWards != null && GearWards.TryGetValue(type, out int ward) ? ward : 0;
         }
 
         public string DisplayName { get; set; }
@@ -259,6 +271,7 @@ namespace Assets.Scripts.Balance
                 Tuning = Tuning,
                 Behavior = Behavior,
                 Triggers = new List<CarriedTrigger>(Triggers),
+                GearWards = new Dictionary<BuffType, int>(GearWards),
                 OutgoingDamage = OutgoingDamage,
                 Momentum = Momentum,
                 Focus = Focus,

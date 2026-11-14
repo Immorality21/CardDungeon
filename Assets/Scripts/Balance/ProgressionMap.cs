@@ -482,9 +482,8 @@ namespace Assets.Scripts.Balance
         }
 
         /// <summary>
-        /// Every damage type the hero side has some way of resisting. Gear resistance is immediate; magic
-        /// resistance buffs are counted too, but note <c>ResistanceBuffHandler.Apply</c> is still a no-op
-        /// (see docs/ELEMENTAL_PLAN.md), so those are potential rather than live.
+        /// Every damage type the hero side has some way of resisting: gear resistance and magic resistance
+        /// buffs (live since 2026-08-25, <c>CombatBuffTracker.ApplyResistance</c>).
         /// </summary>
         private static List<DamageType> CollectDefendableTypes(IList<MagicSO> catalog, IList<ItemSO> items)
         {

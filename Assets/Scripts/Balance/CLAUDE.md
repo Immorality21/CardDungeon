@@ -128,8 +128,8 @@ genuinely cheaper sometimes). Two consequences before reading a finding off it:
   side can resist at all, from gear (`ItemSO.Resistances`) or a resistance buff. The difference,
   `UndefendableIncoming`, is elemental threat the player has no answer to.
 
-Note that resistance-buff magic counts toward `DefendableTypes` as *potential*: `ResistanceBuffHandler.Apply`
-is still a no-op, so those buffs do nothing in play yet. See `docs/ELEMENTAL_PLAN.md`.
+Resistance-buff magic counts toward `DefendableTypes` too; those buffs are live since 2026-08-25
+(`CombatBuffTracker.ApplyResistance`, see the Magic guide).
 
 Runs are ordered by `RunDefinitionSO.SequenceIndex`. Runs are **not chained in game yet**
 (`MainMenuManager` points at a single run); that field exists so the analysis has an intended order, and
@@ -481,7 +481,7 @@ being a threat.
   is *conditional*: a Fire ward is a purchase on Emberfall and a waste on the Mire. Pass no mix and
   resistance prices at nothing, which is the honest answer when the opponent is unknown.
 - **`BalanceAnalyzer.MeasureFrontiers(input)`** is the public entry point for a tuning pass — curves
-  closed-form, finales simulated, no findings. **~630s** for the whole campaign (2026-11-01, 12 finales, with
+  closed-form, finales simulated, no findings. **~2,575 s on 2026-11-13** (was ~630 s on 2026-11-01; slower since summons stay and play their moves, `BALANCING.md` §5be) for the whole campaign (12 finales, with
   the summon sweeps), so run it on its own, never in one command with the test suite.
 
 `EvaluateFrontiers` turns the result into findings against `TierInvestmentBudgets` (indexed by

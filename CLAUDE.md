@@ -11,7 +11,7 @@ Card Dungeon is a 2D procedural dungeon generation game built with **Unity 6 (60
 ## Roadmap
 
 **`docs/NEXT_STEPS.md` is the index** — live threads, the **decisions that must not be relitigated**,
-a one-line pointer to every backlog item, and the shipped ledger. Read it before starting new feature
+and a one-line pointer to every backlog item (what has shipped is in `docs/archive/SHIPPED.md`). Read it before starting new feature
 work, then open only the plan file your work touches:
 
 | plan | holds |
@@ -30,7 +30,7 @@ work, then open only the plan file your work touches:
 Don't read the whole backlog to answer one question — the index says which file to open. The
 **do-not-relitigate** list lives in the index and applies to every plan.
 
-Tuning and balance work has its own accumulated-learnings file, **`docs/BALANCING.md`** — the arithmetic that couples the levers, the workflow that measures instead of guessing, and the ceilings already found. Read it before a balance pass and add to it after one.
+Tuning and balance work has its own accumulated-learnings file, **`docs/BALANCING.md`** — the arithmetic that couples the levers, the workflow that measures instead of guessing, and the ceilings already found. Read it before a balance pass. After one, add the dated pass to `docs/archive/BALANCING_HISTORY.md` (the next §5 number) and update `BALANCING.md`'s "What is true now" if it changed.
 
 ## Build & Run
 
@@ -97,8 +97,8 @@ Detailed docs live in a `CLAUDE.md` inside each subsystem folder and load automa
 - **Title screen** (Continue / Options, and why it reads no save) → `Assets/Scripts/MainMenu/CLAUDE.md`
 - **Persistence / save files** → `Assets/Scripts/IO/CLAUDE.md`
 - **Balance analysis** (difficulty targets, danger index, attrition, the **investment frontier** — what each campaign tier demands and how many ways it can be paid, over party width, sphere-grid XP and gear — the sphere-grid magic/combo supply chain, the analyzer window) → `Assets/Scripts/Balance/CLAUDE.md`
-- **Balancing playbook** (how the levers interact, the measure-don't-guess workflow, what past tuning passes learned) → `docs/BALANCING.md` — read this *before* changing a `Difficulty`, a hero bar or a spawn table, and record what a pass learned there afterwards
-- **Elemental layer roadmap** (resistance buffs, defensive magic, the discovery-gated reveal) → `docs/ELEMENTAL_PLAN.md`
+- **Balancing playbook** (how the levers interact, the measure-don't-guess workflow, what past tuning passes learned) → `docs/BALANCING.md` — read this *before* changing a `Difficulty`, a hero bar or a spawn table; the dated passes (every "§5x") are in `docs/archive/BALANCING_HISTORY.md`, where a new pass is recorded
+- **Elemental layer** (resistance buffs, absorption, defensive magic) → the Magic guide; what is still open → `docs/plans/BALANCE_OPEN.md` §0b
 - **Runtime/visual validation via the Unity MCP** (drive the running game, capture screenshots) → `docs/GAMEPLAY_VALIDATION.md`
 - **The tutorial** (what is guided, the promises floor 1 must keep, learnings, todos) → `docs/TUTORIAL.md`
 - **Sandbox — quick-test a party against an encounter** (`Tools ▸ Sandbox`: chosen heroes with XP/grid unlocks/abilities, a floor, up to five enemies next door, against a throwaway save folder; `SandboxLauncher.Launch` from a script or the MCP) → `docs/SANDBOX.md` — use it instead of hand-spawning enemies when validating heroes, abilities, enemies or formations

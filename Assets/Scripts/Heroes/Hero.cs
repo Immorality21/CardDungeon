@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.Heroes
 {
-    public class Hero : MonoBehaviour, ICombatUnit, ITriggerSource, IFlinches, IAbilityUpgrades, IHasMomentum, IHasFocus, IOutgoingDamage
+    public class Hero : MonoBehaviour, ICombatUnit, ITriggerSource, IFlinches, IAbilityUpgrades, IHasMomentum, IHasFocus, IOutgoingDamage, Cards.IStatusImmune, Cards.IStatusResistant
     {
         public HeroSO HeroSO;
         public Stats Stats;
@@ -206,6 +206,20 @@ namespace Assets.Scripts.Heroes
         {
             return TriggerSources.FromItems(
                 InventoryManager.HasInstance ? InventoryManager.Instance.GetEquippedItems(HeroKey) : null);
+        }
+
+        /// <summary>The ward this hero's gear gives against an affliction, 0 to 100 (<see cref="ItemSO.StatusWards"/>).</summary>
+        public int StatusResistance(Cards.BuffType type)
+        {
+            return InventoryManager.HasInstance
+                ? InventoryOperations.StatusWard(InventoryManager.Instance.GetEquippedItems(HeroKey), type)
+                : 0;
+        }
+
+        /// <summary>A full ward is immunity, so every path that asks <see cref="Cards.StatusImmunity"/> refuses it.</summary>
+        public bool IsImmuneTo(Cards.BuffType type)
+        {
+            return StatusResistance(type) >= Cards.StatusWards.Immune;
         }
 
         /// <summary>What this hero's worn sets add to their ability damage (<see cref="ItemSets"/>).</summary>

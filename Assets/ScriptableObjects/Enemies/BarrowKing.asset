@@ -62,6 +62,10 @@ MonoBehaviour:
     Chance: 1
     MinQuantity: 1
     MaxQuantity: 2
+  - Item: {fileID: 11400000, guid: 51056af62ea0d18468f44db89c0857b6, type: 2}
+    Chance: 0.3
+    MinQuantity: 1
+    MaxQuantity: 1
   SalvageTable: []
   Triggers:
   - LabelKey: enemy.barrow-king.reaction-1.label

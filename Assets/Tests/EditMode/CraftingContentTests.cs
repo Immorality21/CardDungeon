@@ -170,6 +170,62 @@ namespace Tests.EditMode
             CollectionAssert.IsEmpty(orphans, "Craft-only item(s) no recipe makes: " + string.Join(", ", orphans));
         }
 
+        /// <summary>
+        /// A drop-only item nothing names can never be obtained: an enemy's loot or salvage, a room
+        /// event's loot, or a quest's reward must hand it over. And one item is never both kinds.
+        /// </summary>
+        [Test]
+        public void EveryDropOnlyItem_IsDroppedBySomething()
+        {
+            var named = new HashSet<ItemSO>();
+            foreach (var enemy in LoadAll<EnemySO>())
+            {
+                foreach (var table in new[] { enemy.LootTable, enemy.SalvageTable })
+                {
+                    if (table != null)
+                    {
+                        named.UnionWith(table.Where(d => d != null && d.Item != null).Select(d => d.Item));
+                    }
+                }
+            }
+            foreach (var roomEvent in LoadAll<Assets.Scripts.Rooms.Events.RoomEventSO>())
+            {
+                foreach (var option in roomEvent.Options)
+                {
+                    foreach (var outcome in option.Success.Concat(option.Failure))
+                    {
+                        if (outcome?.LootTable != null)
+                        {
+                            named.UnionWith(outcome.LootTable.Where(i => i != null));
+                        }
+                        if (outcome?.SideRoom?.ChestLoot != null)
+                        {
+                            named.UnionWith(outcome.SideRoom.ChestLoot.Where(i => i != null));
+                        }
+                    }
+                }
+            }
+            foreach (var quest in LoadAll<Assets.Scripts.Hub.Quests.QuestSO>())
+            {
+                if (quest.RewardItem != null)
+                {
+                    named.Add(quest.RewardItem);
+                }
+            }
+            foreach (var run in LoadAll<RunDefinitionSO>())
+            {
+                foreach (var floor in run.Levels.Where(f => f?.BossDrops != null))
+                {
+                    named.UnionWith(floor.BossDrops.Where(d => d != null && d.Item != null).Select(d => d.Item));
+                }
+            }
+
+            var orphans = AllItems().Where(i => i.DropOnly && !named.Contains(i)).Select(i => i.name).ToList();
+            CollectionAssert.IsEmpty(orphans, "Drop-only item(s) nothing drops: " + string.Join(", ", orphans));
+            var both = AllItems().Where(i => i.DropOnly && i.CraftOnly).Select(i => i.name).ToList();
+            CollectionAssert.IsEmpty(both, "Item(s) both craft-only and drop-only: " + string.Join(", ", both));
+        }
+
         /// <summary>The hub resolves keys through the Resources catalog, so both halves of a craft must be in it.</summary>
         [Test]
         public void EveryRecipeAndResult_IsInTheResourcesItemCatalog()

@@ -24,6 +24,7 @@ MonoBehaviour:
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 0}
     BossAdds: []
+    BossDrops: []
     EnemyTuning:
       Difficulty: 10.5
       StatScales:
@@ -42,6 +43,7 @@ MonoBehaviour:
     BossAdds:
     - Enemy: {fileID: 11400000, guid: 04bc3cd3328fee344b87f24b45b373e1, type: 2}
       Count: 2
+    BossDrops: []
     EnemyTuning:
       Difficulty: 4.4
       StatScales:

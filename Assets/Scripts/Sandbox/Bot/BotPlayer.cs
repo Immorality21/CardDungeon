@@ -194,6 +194,7 @@ namespace Assets.Scripts.Sandbox.Bot
                 _game.Finished = _passedOver.Count > 0
                     ? "gave up on " + string.Join(", ", _passedOver)
                     : "every listed run done";
+                RecordClassItems();
                 _gameOver = true;
                 _inHub = false;
                 yield break;
@@ -213,6 +214,7 @@ namespace Assets.Scripts.Sandbox.Bot
             {
                 _run = null;
                 _game.Finished = "model run played";
+                RecordClassItems();
                 _gameOver = true;
                 _inHub = false;
                 _report.Write(_settings.ReportName);
@@ -637,6 +639,23 @@ namespace Assets.Scripts.Sandbox.Bot
                    + $"combat {CombatManager.Instance.InCombat}, canWalk {_ui.CanWalk}, walking {_ui.IsWalking}, "
                    + $"rooms {DungeonManager.Instance.CurrentRooms.Count(r => r != null && r.IsExplored)}"
                    + $"/{DungeonManager.Instance.CurrentRooms.Count}";
+        }
+
+        private void RecordClassItems()
+        {
+            if (!Items.InventoryManager.HasInstance)
+            {
+                return;
+            }
+            var inventory = Items.InventoryManager.Instance;
+            foreach (var entry in inventory.GetItems())
+            {
+                var item = inventory.GetItemSO(entry.ItemKey);
+                if (item != null && !item.UsableByAnyone && !_game.ClassItems.Contains(item.Key))
+                {
+                    _game.ClassItems.Add(item.Key);
+                }
+            }
         }
 
         private void GiveUp(string reason)

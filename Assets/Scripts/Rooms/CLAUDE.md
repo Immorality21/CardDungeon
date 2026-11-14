@@ -26,9 +26,11 @@
      (`Room.WallRows` / `FootprintHeight`): layout, overlap checks and vertical doors use the footprint,
      side-by-side doors still need the *floors* to overlap, and a north door is an archway in the face.
      A side door is `BiomeSO.DoorSide`, seen edge-on, painted by **both** rooms and offset half a tile onto
-     the wall, so it shows whole once either side is seen; a south door is only shade on the tile in front
+     the wall, so it shows whole once either side is seen; a south door is shade on the tile in front
      of it (`ShadeSouth`), and side doors get the same (`ShadeEast/West`). The door in a north archway is
-     `DoorArch`, in the lower room's tilemap. `Door.Swing` opens a door the way the party walks and it stays
+     `DoorArch`, painted by **both** rooms too (playtest 4 finding 15, 2026-11-13): the lower room in its
+     archway, the upper room as that archway tile plus door one cell past its south edge, so every way
+     through shows a door before the room beyond is seen. `Door.Swing` opens a door the way the party walks and it stays
      open; `PartyWalk` waits for the swing. A door's tiles live on `Door.AddPlace`, **one set per room**,
      because each room's side-door tiles are offset from its own cell. Open doors are not saved.
      The floor itself (`RoomSO.Width x Height`, `GetCenter`, `ClaimSpot`) is unchanged. Props draw on

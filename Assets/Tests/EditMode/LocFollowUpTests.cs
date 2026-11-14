@@ -65,5 +65,23 @@ namespace Tests.EditMode
 
             StringAssert.Contains("NoSuchAbility", SphereGridPresenter.DescribePayload(node));
         }
+
+        /// <summary>No em dash anywhere on screen (owner, 2026-11-13): a colon, a comma or brackets instead.</summary>
+        [Test]
+        public void TextTable_NoEntry_UsesAnEmDash()
+        {
+            var table = UnityEngine.Resources.Load<ImmoralityGaming.Localization.TextTableSO>(
+                ImmoralityGaming.Localization.TextTableSO.ResourcePath);
+            Assert.IsNotNull(table);
+            var offenders = new System.Collections.Generic.List<string>();
+            foreach (var entry in table.Entries)
+            {
+                if (entry != null && entry.Values != null && entry.Values.Exists(v => v != null && v.Contains("—")))
+                {
+                    offenders.Add(entry.Key);
+                }
+            }
+            Assert.IsEmpty(offenders, "Em dashes in: " + string.Join(", ", offenders));
+        }
     }
 }

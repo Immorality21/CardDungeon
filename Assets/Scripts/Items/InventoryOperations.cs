@@ -432,6 +432,34 @@ namespace Assets.Scripts.Items
             return result;
         }
 
+        /// <summary>The summed ward a set of equipped items gives against one affliction, 0 to 100
+        /// (<see cref="Cards.StatusWard"/>). Pure, so the balance model folds it in like resistances.</summary>
+        public static int StatusWard(IEnumerable<ItemSO> equippedItems, Cards.BuffType type)
+        {
+            return Cards.StatusWards.Total(WardListsOf(equippedItems), type);
+        }
+
+        /// <summary>Every affliction a set of equipped items wards against, with its summed share.</summary>
+        public static Dictionary<Cards.BuffType, int> StatusWardsOf(IEnumerable<ItemSO> equippedItems)
+        {
+            return Cards.StatusWards.Summed(WardListsOf(equippedItems));
+        }
+
+        private static IEnumerable<List<Cards.StatusWard>> WardListsOf(IEnumerable<ItemSO> equippedItems)
+        {
+            if (equippedItems == null)
+            {
+                yield break;
+            }
+            foreach (var so in equippedItems)
+            {
+                if (so != null)
+                {
+                    yield return so.StatusWards;
+                }
+            }
+        }
+
         /// <summary>
         /// Sums the elemental resistance granted by a set of equipped items, one entry per damage type.
         /// Kept pure and beside <see cref="ComputeBonuses"/> so the balance model can fold gear into a

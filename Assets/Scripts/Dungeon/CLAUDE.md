@@ -20,6 +20,19 @@
 
 ### The runs
 
+**Each hero's class weapon is a rare boss drop** (2026-11-14; the owner: "not guaranteed, rare, or boss
+only"). `RunLevelEntry.BossDrops` is a per-floor list rolled only when *that floor's* `BossEnemy` falls
+(`CombatManager.RollFloorBossDrops`, shown in the fight's loot), because one boss guards several floors and
+an `EnemySO` loot table would drop it everywhere. It skips an item the party already owns, and a class
+item no owned hero can wear (the saved roster plus whoever is in the fight). **10% each, on repeatable
+levels only** (`ClassItemTests`): a boss kill ends its level, so a drop on a level that cannot be replayed
+would be one roll ever. Each sits on the first replayable boss near where its hero joins: Warbrand
+(Warrior), Sumpfang (Rogue) and the Vault-Gold Sickle (Cultist, the same Gilded Hoarder that guards the
+Hollow Vault) off the Counting Room; Dawnhammer (Paladin) and the Ashwood Staff (Mage) off the Broken
+Orrery; the Reedstring Bow (Ranger) and Tidebell Sceptre (Cleric) off the Mire Throne; the Clockwork
+Spanner (Tinkerer) and Initiate's Athame (Warlock, the same Cinder Tyrant as his Altar) off Emberfall.
+All `DropOnly` main-hand weapons with `ItemSO.UsableBy` set to their one hero.
+
 | Run | Key | Levels | Repeatable | Opens after | Boss |
 |---|---|---|---|---|---|
 | Dungeon Entrance | `ThresholdEntrance` | 1 | no | — | — (the **Paladin** is its captive) |

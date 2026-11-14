@@ -240,6 +240,43 @@ namespace Assets.Scripts.Items
             return lines;
         }
 
+        /// <summary>The heroes who may wear it, by name ("Mage", "Warrior, Paladin"), or null for anyone.</summary>
+        public static string UsableByNames(ItemSO item)
+        {
+            if (item == null || item.UsableByAnyone)
+            {
+                return null;
+            }
+            var names = new List<string>();
+            foreach (var hero in item.UsableBy)
+            {
+                if (hero != null && !names.Contains(hero.DisplayName))
+                {
+                    names.Add(hero.DisplayName);
+                }
+            }
+            return string.Join(Loc.Get("items.usable-by.separator"), names);
+        }
+
+        /// <summary>One chip per affliction the item wards against: "Immune to Poison", "Resists Blind 50%".</summary>
+        public static List<string> StatusWardLines(ItemSO item)
+        {
+            var lines = new List<string>();
+            if (item == null || item.StatusWards == null)
+            {
+                return lines;
+            }
+
+            foreach (var pair in Cards.StatusWards.Summed(new[] { item.StatusWards }))
+            {
+                string status = Cards.Buffs.BuffNames.Of(pair.Key);
+                lines.Add(pair.Value >= Cards.StatusWards.Immune
+                    ? Loc.Format("items.ward.immune", ("status", status))
+                    : Loc.Format("items.ward.partial", ("status", status), ("value", pair.Value)));
+            }
+            return lines;
+        }
+
         /// <summary>
         /// What a consumable does, as one sentence. <paramref name="maxHealth"/> is optional: with
         /// it, a healing item says what it restores for that hero rather than its formula.

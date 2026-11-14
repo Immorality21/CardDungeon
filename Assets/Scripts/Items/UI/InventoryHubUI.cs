@@ -716,6 +716,27 @@ namespace Assets.Scripts.Items.UI
             var current = StatsWith(CurrentGear());
 
             var entry = new Entry { Gear = gear };
+            // A class item another hero cannot wear: listed, so the party's gear is all on one page,
+            // but dimmed, saying whose it is, and Enter does nothing.
+            if (!wornBySelected && !so.CanBeWornBy(_selectedHeroKey))
+            {
+                string only = Loc.Format("items.inv.usable-by.only", ("heroes", ItemPresenter.UsableByNames(so)));
+                entry.Gear = CurrentGear();
+                entry.Preview = () => ShowItemDetail(so, null,
+                    Loc.Format("items.inv.usable-by.note", ("heroes", ItemPresenter.UsableByNames(so))), item);
+                entry.Confirm = null;
+                string lockedCaption = wornBy != null
+                    ? Loc.Format("items.inv.usable-by.only-worn", ("heroes", ItemPresenter.UsableByNames(so)), ("hero", wornBy))
+                    : only;
+                if (showSlot)
+                {
+                    lockedCaption = Loc.Format("items.inv.all.slot-caption", ("slot", ItemPresenter.SlotLabel(so.SlotType)), ("caption", lockedCaption));
+                }
+                entry.Row = BuildRow(so.Icon, so.DisplayName, lockedCaption, string.Empty, so, out entry.Cursor);
+                entry.Row.AddToClassList("cd-inv-row--unusable");
+                AddListEntry(entry);
+                return;
+            }
             if (wornBySelected)
             {
                 var slot = so.SlotType;
@@ -1408,6 +1429,8 @@ namespace Assets.Scripts.Items.UI
         /// An item to put on (or the slot to empty): its description and bonuses, then every stat
         /// as it is now against what it would be.
         /// </summary>
+        /// <param name="preview">The hero's stats with the item on, or null for no stat section (a class
+        /// item this hero cannot wear: "no change" would read as a weak item, not a locked one).</param>
         private void ShowItemDetail(ItemSO item, StatBlock preview, string note, ItemSaveData entry = null,
             bool removing = false)
         {
@@ -1423,6 +1446,10 @@ namespace Assets.Scripts.Items.UI
             if (!string.IsNullOrEmpty(note))
             {
                 AddNote(note);
+            }
+            if (preview == null)
+            {
+                return;
             }
             AddStatSection(StatsWith(CurrentGear()), preview, removing ? Loc.Get("items.inv.section.stats-without") : Loc.Get("items.inv.section.stats-if-equipped"));
         }
@@ -1524,6 +1551,11 @@ namespace Assets.Scripts.Items.UI
         internal static void AddItemLines(VisualElement body, ItemSO item, ItemSaveData entry = null)
         {
             AddGrants(body, item);
+            string usableBy = ItemPresenter.UsableByNames(item);
+            if (usableBy != null)
+            {
+                AddLines(body, Loc.Get("items.inv.section.usable-by"), new List<string> { usableBy });
+            }
             AddLines(body, Loc.Get("items.inv.section.reacts"), ItemPresenter.ReactionLines(item));
             AddLines(body, item.Set != null ? Loc.Format("items.inv.section.named-set", ("set", item.Set.DisplayName)) : Loc.Get("items.inv.section.set"), ItemPresenter.SetLines(item));
             AddLines(body, Loc.Get("items.inv.section.grows"), ItemPresenter.MilestoneLines(item, entry));
@@ -1557,6 +1589,7 @@ namespace Assets.Scripts.Items.UI
             // resistances below the bottom of a pane that does not scroll.
             var chips = ItemPresenter.BonusChips(item);
             chips.AddRange(ItemPresenter.ResistanceLines(item));
+            chips.AddRange(ItemPresenter.StatusWardLines(item));
             if (chips.Count == 0)
             {
                 return;

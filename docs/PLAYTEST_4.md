@@ -133,7 +133,7 @@ text; clicks still work (campfire belt, tabs, scrollbars).
 | 6, 23 | A description for each summon action; summon upgrade texts say what grows instead of "+x to its effect". |
 | 10 | Interactive objects stand out from decoration (glow/outline). |
 | 58 (+ all hints) | **A Controls screen** listing every key and mouse action, easy to reach in the dungeon and in town, instead of one-off hints. |
-| 11, 50, 51 | Not now. |
+| 11, 50, 51 | Not now. **2026-11-13:** 11 works as intended (weaknesses are found by hitting, as the Inspect page shows); 50 and 51 go to the potion belt revisit, `POLISH_CONTENT.md` §18c. |
 | 4 | Click outside a hub window closes it. |
 | 48 | Story map: keyboard pan and zoom. |
 | 47 | Town buildings highlight and click by their sprite's shape. |
@@ -142,15 +142,15 @@ text; clicks still work (campfire belt, tabs, scrollbars).
 | 18, 55 | Camera follows the leader smoothly, no jump at a room change. |
 | 37, 64 | Stepping onto stairs or a bonfire opens its prompt at once (resting stays a choice). |
 | 27 | Room events' health damage/heals become % of max health, at about today's value where each is tuned. |
-| 16 | Paladin heal: rely on its grid upgrades; check in the balance pass. |
+| 16 | Paladin heal: rely on its grid upgrades; check in the balance pass. **2026-11-13:** there was only one (+2); two more Holy Touch Power nodes added (+4, +6), `BALANCE_OPEN.md` step 8. |
 | 2 | No guaranteed refuge; scarcity stays. |
 | 56 | Dead ends should usually hold something: the room-kind planner prefers them for caches, events, refuges. |
 | 25 | Show the combined Fear total (e.g. "enemy health +80%") rather than only the modifier's number. |
 | 34 | Inspect stays and always shows what the party can see plus what the bestiary knows. |
 | 30 | Ignore. |
-| 13, 15, 44, 66 | Backlog: monster locations in the Hall of Knowledge, doors everywhere, a status screen, leitmotifs. |
-| 38 | Flavour text on decorations: not taken. |
-| 5 | Summons: answered by the 2026-11-08 change (once per level, until it falls); the Paladin's summon is judged in that playtest. |
+| 13, 15, 44, 66 | Backlog: monster locations in the Hall of Knowledge, doors everywhere, a status screen, leitmotifs. **15 built 2026-11-13**: the way south from a room shows its archway door before the room below is seen (`DUNGEON_ROOMS.md`). |
+| 38 | Flavour text on decorations: not taken; irrelevant for now (2026-11-13). |
+| 5 | Summons: answered by the 2026-11-08 change (once per level, until it falls); the Paladin's summon is judged in that playtest. **2026-11-13:** the owner expects this settles it. |
 
 ## Decisions built, 2026-11-11
 
@@ -185,6 +185,12 @@ Unity. Seen in the sandbox: the Fight bar with no Flee button and the hint (a bo
 - **Town hitboxes:** Read/Write switched on for the 8 building textures in `Assets/Sprites/Hub`.
 - **Controls:** F1 in town and on the title screen, a button in the town bar and title Options, and a button beside Hints in the pause menu (no F1 in the dungeon, where walking reads the keys directly).
 - **Dead ends:** caches and refuges are placed in dead ends first, and events try dead ends first. Placement changes per seed, so a floor saved mid-way before this change may resume with things moved.
+
+**Seen on screen 2026-11-13** (a copy of the owner's save, scripted presses, so not the keyboard path): campfire roster,
+Leader tag and belt picker work, but an empty band sits above the three columns where the seat tiles were. Storehouse
+stat chips drew over the row captions in the All list: fixed (captions cut with "…"), though the cut often hides "Worn by
+X". Merchant: the "If X wore it" changes sit below the detail column's fold. Sphere grid: "Health +6" in green. Controls
+screen reads well. Em dashes removed from all 19 UI texts (owner: none on screen), guarded by `LocFollowUpTests`.
 
 ## Grouping
 

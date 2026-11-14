@@ -1,4 +1,5 @@
 using System;
+using Assets.Scripts.Combat;
 using UnityEngine;
 
 namespace Assets.Scripts.Cards
@@ -13,9 +14,9 @@ namespace Assets.Scripts.Cards
     /// <para><b>Every debuff, not only statuses</b> (owner, 2026-10-09): a Silence, a Blind, a Burn
     /// or a Poison that always lands makes a fight predictable, and a solved one. The chance is
     /// authored per effect (<see cref="SpellEffect.ApplyChance"/>) and per enemy action
-    /// (<c>EnemyActionEntry.ApplyChance</c>), rolled once per target. Nothing on the target resists
-    /// it yet - a flat chance keeps it readable, and a stat that shrugs debuffs off would be added
-    /// here, in one place, if play asks for one.</para>
+    /// (<c>EnemyActionEntry.ApplyChance</c>), rolled once per target. A hero's worn
+    /// <see cref="StatusWard"/>s cut a status's chance (<see cref="ChanceAgainst"/>, 2026-11-14); stat
+    /// cuts are never warded.</para>
     ///
     /// <para>Immunity is a separate, earlier question (<see cref="StatusImmunity"/>): an immune unit is
     /// never rolled for.</para>
@@ -45,6 +46,29 @@ namespace Assets.Scripts.Cards
                 return true;
             }
             return percent > 0 && Roll() < Chance(percent);
+        }
+
+        /// <summary>
+        /// The chance a debuff authored at <paramref name="percent"/> lands on this target, after its
+        /// partial guard (<see cref="StatusImmunity.Resistance"/>): a 75% poison on a hero with a 50%
+        /// ward is 37.5%. Immunity is asked before this, by the callers.
+        /// </summary>
+        public static float ChanceAgainst(int percent, ICombatUnit target, BuffType type)
+        {
+            float chance = percent >= Certain ? 1f : Chance(percent);
+            int resist = StatusImmunity.Resistance(target, type);
+            return chance * (1f - resist / 100f);
+        }
+
+        /// <summary>Rolls <see cref="ChanceAgainst"/>: the target's ward cuts even a certain debuff.</summary>
+        public static bool Lands(int percent, ICombatUnit target, BuffType type)
+        {
+            if (StatusImmunity.Resistance(target, type) <= 0)
+            {
+                return Lands(percent);
+            }
+            float chance = ChanceAgainst(percent, target, type);
+            return chance > 0f && Roll() < chance;
         }
     }
 }

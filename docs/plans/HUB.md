@@ -316,8 +316,11 @@ gold went up: Voidforged Blade 450, Flaming Short Sword 200, Hexsilk Gloves 200,
 (`HubManager.RecipeNudge`, `RecipeNudgeDone`). It does not say where recipes come from: that stays the
 Hall's hint to come. The texts are agent drafts, not reviewed.
 
-**Next, from the same notes:** that hint (where a rare recipe drops), unlocked by **upgrading the
-Hall**, which is a level granting *information*, so it fits the phase-6 rule. And **quests** become a
+**That hint, ✅ built 2026-11-14:** Hall level 2 (200 gold) makes an unfound recipe's row say where it
+turns up: enemy drops, floor clears, room events and quest rewards, never naming an enemy not yet met or
+a level not yet reached (`Enemies/RecipeHintOps`, the Hub guide). The texts are agent drafts. *(The
+original note:* that hint (where a rare recipe drops), unlocked by **upgrading the
+Hall**, which is a level granting *information*, so it fits the phase-6 rule.*)* And **quests** become a
 third recipe source.
 
 #### What phase 1 actually landed (2026-09-05) — and the two things it settled

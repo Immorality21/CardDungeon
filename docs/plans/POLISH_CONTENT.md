@@ -394,7 +394,15 @@ motif under its floor's exploration loop before it is met, a hero's theme when t
 Ultra, a place's motif returning on a revisit. Today the bed is six licensed loops by track kind
 (`Assets/Scripts/Audio/CLAUDE.md`, *State of the content*), so this needs commissioned or generated
 music and finer `MusicTrack` keys (per boss, per biome) than Hub/Exploration/Combat/BossCombat. Content
-work, after the demo.
+work, **after the demo** (owner, 2026-11-13).
+
+**How to source it (looked into 2026-11-13):** PixelLab's MCP makes music (`create_music`,
+`make_music_loop` for loop points), and `create_music`'s `restyle_song_id` replays a song's melody in a new
+style, which is a leitmotif workflow: one theme per boss or hero, restyled per mood. It needs **PixelLab
+Tier 2** ($24/month, +$12 over the current Tier 1; also adds sound effects and 3,000 more generations a
+month); the try was refused on Tier 1, nothing charged. Output is MP3: convert to OGG for
+`Assets/Audio/Music/`. Alternative: Suno Pro (about $10/month, commercial rights; its free tier is
+non-commercial, fine for trying motifs). No free option is safe for a sold game.
 
 ### 22. Localization follow-ups *(added 2026-10-30, done 2026-11-01)*
 
@@ -550,6 +558,12 @@ awkward in three ways, and the owner wants it looked at as a whole rather than p
   sink, §3/§3b) to "a fixed per-run allowance, saved like charges".
 
 Decide what the belt *is* before touching the numbers.
+
+- **What the outside tester could not tell** (playtest 4 findings 50 and 51, folded here by the owner
+  2026-11-13): nothing says what the belt is, nothing shows that potions can be swapped between slots
+  (it works), and nothing says the belt is the **whole party's**; only the Merchant greying out every hero
+  hints at it. (The "Empty" slot that did nothing is fixed: since 2026-11-11 any campfire belt slot
+  opens a potion picker.) Explaining the belt belongs in this revisit, once the belt's design is decided.
 
 **18d. Gear restrictions — who may wear what** *(opened 2026-10-29, owner)*. Today any hero can equip
 any item: `SlotType` is the only gate, so the Mage can wear Steel Plate and swing a Tower Shield. The

@@ -15,6 +15,9 @@ namespace Assets.Scripts.Balance
 
         /// <summary>Its own Attack when it has one (a horror's, picked by its hero's highest stat).</summary>
         public MagicSO Attack;
+
+        /// <summary>Its moves by key, to the turn each was last used (<c>SummonMovePolicy</c>).</summary>
+        public Dictionary<string, int> MoveTurns = new Dictionary<string, int>();
     }
 
     /// <summary>

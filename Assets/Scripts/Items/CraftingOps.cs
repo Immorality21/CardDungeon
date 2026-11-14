@@ -268,7 +268,8 @@ namespace Assets.Scripts.Items
             if (usedBase != null && !string.IsNullOrEmpty(usedBase.EquippedSlot)
                 && result.Category == ItemCategory.Equipment
                 && recipe.CraftBase.Category == ItemCategory.Equipment
-                && result.SlotType == recipe.CraftBase.SlotType)
+                && result.SlotType == recipe.CraftBase.SlotType
+                && result.CanBeWornBy(usedBase.EquippedHeroKey))
             {
                 made.EquippedSlot = usedBase.EquippedSlot;
                 made.EquippedHeroKey = usedBase.EquippedHeroKey;

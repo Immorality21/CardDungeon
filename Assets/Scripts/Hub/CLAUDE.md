@@ -191,6 +191,10 @@ Three properties make it safe, and they are the template for the next lot:
   a capped combo reads *"raise the Forge to go further"* rather than showing a dead button, and
   the lot panel carries the promise beside the price.
 
+**The Hall of Knowledge has a second level** (2026-11-14, the owner's plan from 2026-10-29): `MaxLevel 2`,
+`GoldPerUpgrade` 200, and level 2 grants **information**: an unfound recipe's "???" row says where it
+turns up (`Enemies/RecipeHintOps`, see the Recipes tab below). Level 1 keeps what the Hall always did.
+
 **Two pieces of shared machinery landed with it**, and every later lot inherits them:
 
 - **`BuildingOps.UpgradeCost`** — the authored `GoldPerUpgrade` buys the *first* rung, and each one
@@ -478,7 +482,12 @@ the close path — it raises `OnClosed`, and `HubManager` never calls it directl
 - **InventoryHubUI** (`Items/UI`) — the between-runs bag: Equipment / All / Abilities / Consumables /
   Materials. **All** (2026-10-30) is every piece of equipment the party owns, bag and worn, with no slot
   filter (sorted by slot, rarity, name); Enter equips it on the selected hero through the same path and
-  reassign confirmation as the Equipment list, or takes it off if that hero wears it. Equipment is managed *only* here. **Redesigned 2026-09-28** into one fixed frame: a header
+  reassign confirmation as the Equipment list, or takes it off if that hero wears it. **Class items**
+  (2026-11-14, `ItemSO.UsableBy`): a piece another hero cannot wear is still listed, dimmed
+  (`cd-inv-row--unusable`), captioned "Mage only", with no stat chips, a "Usable by" section and note
+  in the detail and no stat preview, and Enter does nothing. `InventoryManager.Equip` refuses it
+  anyway, so the bot, the sandbox and crafting (a result the base's wearer cannot use goes to the
+  bags) all obey one rule. Equipment is managed *only* here. **Redesigned 2026-09-28** into one fixed frame: a header
   band with the tabs, a portrait hero strip (muted, never hidden, on the party-wide tabs), three
   px-wide columns and a per-state hint line. Equipment is **FF-style**: the cursor walks the hero's
   slots, the middle column lists what fits the slot under it — the bag *and* what other heroes wear
@@ -495,8 +504,14 @@ the close path — it raises `OnClosed`, and `HubManager` never calls it directl
   to switch. **Monsters**: on the inventory frame since 2026-09-30, met enemies as rows, the unmet as
   compact unselectable rows at the bottom, a portrait page in two columns. **Recipes**: every recipe
   in its tree (`Items/RecipeTreeOps`), indented under what it is made from; an unfound recipe is a
-  **selectable** "???" row in place, the slot for a later hint (`docs/plans/HUB.md` §7 phase 7). Keeps
-  its own Up/Down cursor.
+  **selectable** "???" row in place. **At Hall level 2 that row says where the recipe is found**
+  (2026-11-14, `RecipeHintOps.HintLevel`): enemy drops (and salvage), floor clears, room events (a
+  floor's `EventRecipes`, an outcome's loot or side-room chest) and quest rewards, worded through what
+  the player knows: an unmet enemy is "a foe not yet met", a level the story map does not show as open,
+  in progress or cleared "a level not yet reached" with its floor by number (`RecipeHintOps.IsReached`,
+  with the real roster, so a hero-gated secret level stays unnamed while the map hides it). One line per enemy naming at most two levels, at most four lines.
+  Below level 2 the row keeps the old "found on monsters and on cleared floors" line. Keeps its own
+  Up/Down cursor.
 - **SphereGridUI** (`Heroes/UI`) — the one place XP is ever spent. On the inventory frame since
   2026-09-30 (portrait strip with banked XP, frontier framing via `SphereGridView.FrameNodes`, a
   detail column with a `grid-reason` line). Keeps its own cursor (it pans content the shared

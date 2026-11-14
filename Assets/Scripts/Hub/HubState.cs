@@ -36,12 +36,9 @@ namespace Assets.Scripts.Hub
         /// What level the building behind <paramref name="service"/> is at: 0 when it is not built,
         /// 1 when it has just been placed, higher once upgraded.
         ///
-        /// <para><b>Nothing calls this yet, deliberately.</b> The build/upgrade machinery is
-        /// finished and tested, but <i>what a level grants</i> is an open design decision — see
-        /// <c>docs/plans/HUB.md</c> §7 phase 6. This is the seam a screen uses when that is
-        /// settled: the merchant would size its stock off it, the forge its discount, and so on.
-        /// Until then every lot is authored <c>MaxLevel 1</c>, so no level is on sale that buys
-        /// nothing.</para>
+        /// <para>The seam a screen reads its own building's level through (phase 6, a level grants
+        /// access, capacity or information): the Forge's combo ceiling, the campfire's XP-split modes,
+        /// the Hall of Knowledge's recipe hint at level 2.</para>
         ///
         /// <para>Returns 1 when there is no hub asset at all, so a scene without one degrades to
         /// the old fixed behaviour rather than to a screen offering nothing.</para>

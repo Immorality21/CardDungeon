@@ -77,7 +77,8 @@ buildings. The odds used are the true chance, which can be better than the playe
 - **Summons** (2026-11-09, `BotCombat.TrySummon` / `ActAsSummon`): a hero calls its first usable summon in a
   boss fight, or when the party is down to half its health; a summon is once per level, so that is when it is
   worth it. A revive is called only with someone fallen. The summoned unit uses its Signature whenever it is
-  ready; a move that mends or shields it at 45% health or under; a move that does no damage (a buff, a debuff)
+  ready, else the move `SummonMovePolicy.Pick` chooses - the same rule the balance simulator plays since
+  2026-11-13: a move that mends or shields it at 45% health or under; a move that does no damage (a buff, a debuff)
   it has not used in its last 3 turns; a damaging move (the one that hits everyone when there are several
   enemies); else its Attack. It never dismisses. Fights report `SummonsUsed`, `SummonTurns`,
   `SummonSignatures` and `SummonMoves`, and the summary prints them.
@@ -90,6 +91,11 @@ buildings. The odds used are the true chance, which can be better than the playe
   checks the payout against the quest (item count, gold, XP on every owned hero), takes everything on the
   board and rerolls only revisit quests, since it never revisits. Each town visit reports `QuestsCollected`,
   `QuestMismatches`, the board and a `QuestLog` line per accept, reroll and collect.
+
+- **Class items** (2026-11-14): each game records the class items (`ItemSO.UsableBy`) the party owns when it ends
+  (`BotGame.ClassItems`), the only place the rare floor boss drops (`RunLevelEntry.BossDrops`) show; the console is
+  silent during a batch. A model run with a full-grid party (every `SphereGridSO` node key) replays one boss fast:
+  30 Counting Room clears took about 6 minutes and dropped 9 weapons from 90 rolls at 10%.
 
 **Not played yet:** the heroes' own non-damaging abilities (buffs, debuffs, shields), combo upgrades,
 the potion belt, swapping abilities by hand, revisits (it retries a run it wiped on, but never replays one it cleared). Expect it to play a little worse than a

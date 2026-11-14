@@ -332,7 +332,7 @@ namespace Assets.Scripts.Hub
             _partySelect = new PartySelectUI(_partyView, _partyRoster);
             _sphereGrid = new SphereGridUI(_gridView, _partyRoster);
             _forge = new MagicForgeUI(_forgeView);
-            _bestiary = new BestiaryUI(_bestiaryView);
+            _bestiary = new BestiaryUI(_bestiaryView, _partyRoster);
             _tavern = new TavernUI(_tavernView, _partyRoster);
             _inventory = new InventoryHubUI(_inventoryView, _partyRoster);
 

@@ -159,40 +159,17 @@ namespace Assets.Scripts.Sandbox.Bot
                 return;
             }
 
-            var moves = !silenced && definition != null && !definition.RotateActions && definition.Actions != null
-                ? definition.Actions.Where(a => a != null && a.Effects != null).ToList()
-                : new List<MagicSO>();
             if (!fight.MoveTurns.TryGetValue(summon, out var lastUsed))
             {
                 lastUsed = new Dictionary<string, int>();
                 fight.MoveTurns[summon] = lastUsed;
             }
             int turn = summon.Stay != null ? summon.Stay.TurnsTaken : 0;
-
             float share = summon.Stats.MaxHealth > 0 ? (float)summon.Stats.Health / summon.Stats.MaxHealth : 1f;
-            MagicSO pick = null;
-            if (share <= HealThreshold)
-            {
-                pick = moves.FirstOrDefault(m => m.Effects.Any(e => e != null
-                    && (e.EffectType == SpellEffectType.Heal || e.EffectType == SpellEffectType.Drain
-                        || (e.EffectType == SpellEffectType.Buff && e.BuffType == BuffType.Barrier))));
-            }
-            if (pick == null)
-            {
-                pick = moves.FirstOrDefault(m => !m.Effects.Any(e => e != null
-                        && (e.EffectType == SpellEffectType.Damage || e.EffectType == SpellEffectType.Heal))
-                    && (!lastUsed.TryGetValue(m.Key, out int last) || turn - last >= 3));
-            }
-            if (pick == null)
-            {
-                var damaging = moves.Where(m => m.Effects.Any(e => e != null && e.EffectType == SpellEffectType.Damage)).ToList();
-                pick = enemies.Count > 1
-                    ? damaging.FirstOrDefault(m => m.TargetType == MagicTargetType.AllEnemies) ?? damaging.FirstOrDefault()
-                    : damaging.FirstOrDefault();
-            }
+            // The rule the balance simulator plays too.
+            var pick = SummonMovePolicy.Pick(definition, silenced, share, enemies.Count, turn, lastUsed);
             if (pick != null)
             {
-                lastUsed[pick.Key] = turn;
                 fight.SummonMoves++;
                 combat.SubmitSummonAbility(pick, SummonTargets(pick, summon, weakest, enemies));
                 return;

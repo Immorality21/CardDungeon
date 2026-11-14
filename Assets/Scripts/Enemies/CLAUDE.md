@@ -339,12 +339,15 @@ Every `EnemySO` now has its **own** sprite. They did not: `AbyssalWarden`/`Stone
 
 ## The bestiary — what the player has learned (`BestiaryPresenter`, `UI/`)
 
-Resistances are **hidden until observed**, by design (see `docs/ELEMENTAL_PLAN.md`). This is the
+Resistances are **hidden until observed**, by design (a standing decision, `docs/plans/BALANCE_OPEN.md` §0b). This is the
 machinery that makes that playable rather than a memory test.
 
 > **On screen the hub page is the Hall of Knowledge** since 2026-10-29: `BestiaryUI` gained a Recipes
 > tab beside the monsters (see the Hub guide). Everything below is the Monsters tab and the combat
-> Inspect page; the code keeps the Bestiary name.
+> Inspect page; the code keeps the Bestiary name. **`RecipeHintOps`** (pure, 2026-11-14) answers the
+> Recipes tab's "where is this found" at Hall level 2: `Find` reads drop tables, every floor's recipe
+> table and events and the quest pool over the campaign's runs, `Lines` words it through the Bestiary
+> and the campaign so nothing unmet is named. `RecipeHintOpsTests`.
 
 - **The record** lives in `MetaProgressSaveData.Bestiary` — a `List<BestiaryEntry>` keyed by
   `EnemySO.SaveKey` — and the pure `BestiaryOps` holds its rules. See the Progression guide for the

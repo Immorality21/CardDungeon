@@ -819,7 +819,7 @@ namespace Assets.Scripts.Hub
         {
             var catalog = UnityEngine.Resources.Load<ItemCatalogSO>(ItemCatalogSO.ResourcePath);
             var pool = catalog != null
-                ? catalog.Items.Where(i => i != null && i.Category == ItemCategory.Equipment && !i.CraftOnly && !string.IsNullOrEmpty(i.Key)).ToList()
+                ? catalog.Items.Where(i => i != null && i.Category == ItemCategory.Equipment && !i.IsExclusive && !string.IsNullOrEmpty(i.Key)).ToList()
                 : new List<ItemSO>();
 
             var picked = new List<string>();

@@ -109,6 +109,9 @@ namespace Assets.Scripts.Sandbox.Bot
         public float RealSeconds;
         public List<BotRun> Runs = new List<BotRun>();
         public List<BotHubVisit> Hub = new List<BotHubVisit>();
+        /// <summary>The class items (<c>ItemSO.UsableBy</c>) the party owned when the game ended - the
+        /// rare boss drops (<c>RunLevelEntry.BossDrops</c>), which the fight report does not list.</summary>
+        public List<string> ClassItems = new List<string>();
     }
 
     /// <summary>A batch. Rewritten after every attempt, so a batch that dies keeps what it had.</summary>

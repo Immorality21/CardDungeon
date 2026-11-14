@@ -71,8 +71,8 @@ namespace Assets.Scripts.Rooms
             {
                 // Gear only. Materials are rolled by TreasureMaterials below; consumables are never
                 // found - potions come from the belt alone (owner, playtest 3 finding 5).
-                // Craft-only gear comes out of the Forge and nowhere else.
-                if (item == null || item.Category != ItemCategory.Equipment || item.CraftOnly)
+                // Craft-only gear comes out of the Forge and nowhere else, drop-only gear off its drop.
+                if (item == null || item.Category != ItemCategory.Equipment || item.IsExclusive)
                 {
                     continue;
                 }

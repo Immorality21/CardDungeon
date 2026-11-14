@@ -7301,7 +7301,7 @@ MonoBehaviour:
     Note: Forge combo upgrade button at the Forge's ceiling
   - Key: abilities.forge.upgrade
     Values:
-    - "Upgrade to Lv {level} \u2014 {cost} essence"
+    - "Upgrade to Lv {level} ({cost} essence)"
     Reviewed: 0
     Note: Forge combo upgrade button
   - Key: abilities.forge.triggered-by
@@ -7326,7 +7326,7 @@ MonoBehaviour:
     Note: Forge recipe detail subtitle for equipment
   - Key: abilities.forge.craft-gold
     Values:
-    - "Forge \u2014 {gold} gold"
+    - "Forge ({gold} gold)"
     Reviewed: 0
     Note: Forge craft button with a gold price
   - Key: abilities.forge.craft
@@ -7377,7 +7377,7 @@ MonoBehaviour:
     Note: 'Forge: why craft is dimmed'
   - Key: abilities.forge.reason-gold
     Values:
-    - "Need {need} gold \u2014 you have {have}."
+    - "Need {need} gold, you have {have}."
     Reviewed: 0
     Note: 'Forge: why craft is dimmed'
   - Key: abilities.forge.ability-sub
@@ -7397,7 +7397,7 @@ MonoBehaviour:
     Note: 'Forge: why combo upgrade is dimmed'
   - Key: abilities.forge.reason-essence
     Values:
-    - "Need {need} essence \u2014 you have {have}."
+    - "Need {need} essence, you have {have}."
     Reviewed: 0
     Note: 'Forge: why combo upgrade is dimmed'
   - Key: abilities.forge.upgraded
@@ -7896,12 +7896,12 @@ MonoBehaviour:
     Note: why a lot is locked; runs = run names joined with hub.list.and
   - Key: hub.lot.feedback.no-materials
     Values:
-    - "Not enough materials \u2014 needs {price}."
+    - "Not enough materials: needs {price}."
     Reviewed: 0
     Note: "lot feedback; price = hub.lot.cost-part entries joined by ' \xB7 '"
   - Key: hub.lot.feedback.no-gold
     Values:
-    - "Not enough gold \u2014 needs {cost}."
+    - "Not enough gold: needs {cost}."
     Reviewed: 0
     Note: lot feedback; cost = upgrade gold
   - Key: hub.lot.feedback.materials-missing
@@ -8422,7 +8422,7 @@ MonoBehaviour:
     Note: merchant hero strip summary
   - Key: hub.merchant.restock
     Values:
-    - "Restock wares \u2014 {cost} gold"
+    - "Restock wares ({cost} gold)"
     Reviewed: 0
     Note: merchant restock button; cost = gold
   - Key: hub.merchant.tab.wares
@@ -8487,17 +8487,17 @@ MonoBehaviour:
     Note: belt offer row name; potion = belt potion name
   - Key: hub.merchant.buy
     Values:
-    - "Buy \u2014 {price} gold"
+    - "Buy ({price} gold)"
     Reviewed: 0
     Note: merchant action button; price = gold
   - Key: hub.merchant.need-gold
     Values:
-    - "Need {price} gold \u2014 you have {gold}."
+    - "Need {price} gold, you have {gold}."
     Reviewed: 0
     Note: merchant reason; price = cost, gold = owned
   - Key: hub.merchant.sell
     Values:
-    - "Sell \u2014 {price} gold"
+    - "Sell ({price} gold)"
     Reviewed: 0
     Note: merchant action button; price = gold
   - Key: hub.merchant.wears-now
@@ -9249,7 +9249,7 @@ MonoBehaviour:
     Note: Recipes tab row caption
   - Key: bestiary.recipe.made-from
     Values:
-    - Made from a {item}.
+    - 'Made from: {item}.'
     Reviewed: 0
     Note: Recipes tab, unfound recipe page; {item} base item name
   - Key: bestiary.recipe.where-found
@@ -9433,7 +9433,7 @@ MonoBehaviour:
       name'
   - Key: grid.cost.default-unlock
     Values:
-    - "Known from the start \u2014 costs nothing"
+    - "Known from the start, costs nothing"
     Reviewed: 0
     Note: Sphere grid cost line for a node every hero starts with
   - Key: grid.cost.activated
@@ -9520,12 +9520,12 @@ MonoBehaviour:
     Note: Ability slot node payload
   - Key: grid.payload.learns
     Values:
-    - "Learns {ability} \u2014 {charges} charges per level"
+    - "Learns {ability}: {charges} charges per level"
     Reviewed: 0
     Note: Known-ability node payload; {ability} ability name, {charges} per-run charges
   - Key: grid.payload.awakens
     Values:
-    - "Awakens {from} into {to} \u2014 same slot, same charges"
+    - "Awakens {from} into {to}: same slot, same charges"
     Reviewed: 0
     Note: Awakening node payload; {from}/{to} ability names
   - Key: grid.payload.ability-upgrade
@@ -9535,12 +9535,12 @@ MonoBehaviour:
     Note: Ability upgrade node payload; {ability} name, {upgrade} e.g. "+2 power"
   - Key: grid.payload.ultra
     Values:
-    - "Learns the Ultra {ultra} \u2014 used once the Ultra gauge is full"
+    - "Learns the Ultra {ultra}: used once the Ultra gauge is full"
     Reviewed: 0
     Note: Ultra node payload; {ultra} Ultra name
   - Key: grid.payload.summon
     Values:
-    - "Learns the summon {summon} \u2014 always carried, cast with Summon"
+    - "Learns the summon {summon}: always carried, cast with Summon"
     Reviewed: 0
     Note: Summon node payload; {summon} summon name
   - Key: grid.payload.summon-health
@@ -9711,13 +9711,13 @@ MonoBehaviour:
     Note: 'Sphere grid: why Activate is dimmed (not reachable)'
   - Key: grid.reason.xp
     Values:
-    - "Need {cost} XP \u2014 you have {have}."
+    - "Need {cost} XP, you have {have}."
     Reviewed: 0
     Note: 'Sphere grid: why Activate is dimmed; {cost} node XP price, {have} hero''s
       bank'
   - Key: grid.reason.essence
     Values:
-    - "Need {cost} Essence \u2014 {purse} in the purse. Revisits pay Essence."
+    - "Need {cost} Essence, {purse} in the purse. Revisits pay Essence."
     Reviewed: 0
     Note: 'Sphere grid: why Activate is dimmed; {cost} Essence price, {purse} Essence
       owned'
@@ -9819,12 +9819,12 @@ MonoBehaviour:
     Note: Sphere grid feedback after buying a node; {node} node name
   - Key: grid.feedback.no-essence
     Values:
-    - "Not enough Essence \u2014 needs {cost}. Revisits pay Essence."
+    - "Not enough Essence: needs {cost}. Revisits pay Essence."
     Reviewed: 0
     Note: Sphere grid feedback; {cost} Essence price
   - Key: grid.feedback.no-materials
     Values:
-    - "Not enough materials \u2014 needs {materials}."
+    - "Not enough materials: needs {materials}."
     Reviewed: 0
     Note: Sphere grid feedback; {materials} material cost line
   - Key: grid.feedback.cannot-activate
@@ -13061,3 +13061,288 @@ MonoBehaviour:
     - 'Clearing it: {hero} joins the party'
     Reviewed: 0
     Note: 'Story map detail: the hero a run''s clear brings, while not yet owned'
+  - Key: items.ward.immune
+    Values:
+    - 'Immune to {status}'
+    Reviewed: 0
+    Note: 'Item chip: full status ward; status = status name (Poison)'
+  - Key: items.ward.partial
+    Values:
+    - 'Resists {status} {value}%'
+    Reviewed: 0
+    Note: 'Item chip: partial status ward; value = percent the chance is cut by'
+  - Key: bestiary.recipe.section.hint
+    Values:
+    - 'Where it is found'
+    Reviewed: 0
+    Note: 'Hall of Knowledge, unfound recipe: section over the hint lines (Hall level 2)'
+  - Key: bestiary.recipe.hint.dropped-by
+    Values:
+    - 'Dropped by {enemy}'
+    Reviewed: 0
+    Note: 'Hint line: an enemy no floor spawns; enemy = name or the unknown-foe text'
+  - Key: bestiary.recipe.hint.dropped-by-in
+    Values:
+    - 'Dropped by {enemy}, in {level}'
+    Reviewed: 0
+    Note: 'Hint line; level = the run (player: level) name, or unknown-level'
+  - Key: bestiary.recipe.hint.floor-clear
+    Values:
+    - 'Clearing {floor} of {level}'
+    Reviewed: 0
+    Note: 'Hint line: a floor''s clear pays it'
+  - Key: bestiary.recipe.hint.room-event
+    Values:
+    - 'A room event on {floor} of {level}'
+    Reviewed: 0
+    Note: 'Hint line: a room event pays it'
+  - Key: bestiary.recipe.hint.unknown-foe
+    Values:
+    - 'a foe not yet met'
+    Reviewed: 0
+    Note: 'Hint: an enemy with no Bestiary entry'
+  - Key: bestiary.recipe.hint.unknown-level
+    Values:
+    - 'a level not yet reached'
+    Reviewed: 0
+    Note: 'Hint: a run that is not open yet'
+  - Key: bestiary.recipe.hint.floor-number
+    Values:
+    - 'floor {number}'
+    Reviewed: 0
+    Note: 'Hint: a floor named by its number, when its level is not reached'
+  - Key: bestiary.recipe.hint.a-floor
+    Values:
+    - 'a floor'
+    Reviewed: 0
+    Note: 'Hint: a floor with no name'
+  - Key: bestiary.recipe.hint.elsewhere
+    Values:
+    - '...and elsewhere'
+    Reviewed: 0
+    Note: 'Hint: last line when there are more sources than shown'
+  - Key: bestiary.recipe.hint.none
+    Values:
+    - 'Nobody has written down where this one turns up.'
+    Reviewed: 0
+    Note: 'Hint: a recipe with no authored source'
+  - Key: building.bestiary.level-1.grant
+    Values:
+    - 'Keeps the Bestiary and the recipe trees.'
+    Reviewed: 0
+    Note: 'Hall of Knowledge level 1 grant'
+  - Key: building.bestiary.level-2.grant
+    Values:
+    - 'Says where an unfound recipe turns up.'
+    Reviewed: 0
+    Note: 'Hall of Knowledge level 2 grant'
+  - Key: item.antivenom-charm.name
+    Values:
+    - 'Antivenom Charm'
+    Reviewed: 0
+    Note: 
+  - Key: item.antivenom-charm.description
+    Values:
+    - 'A vial of the Mother Ooze''s own bile, sealed in glass. Poison finds nothing new in you.'
+    Reviewed: 0
+    Note: 
+  - Key: item.weavers-veil.name
+    Values:
+    - 'Weaver''s Veil'
+    Reviewed: 0
+    Note: 
+  - Key: item.weavers-veil.description
+    Values:
+    - 'A Hex Weaver''s hood. The stitched eyes see through the curses it was made to throw.'
+    Reviewed: 0
+    Note: 
+  - Key: item.cantors-torc.name
+    Values:
+    - 'Cantor''s Torc'
+    Reviewed: 0
+    Note: 
+  - Key: item.cantors-torc.description
+    Values:
+    - 'The bell rings the next word of a spell when the throat cannot.'
+    Reviewed: 0
+    Note: 
+  - Key: item.tourniquet-gauntlets.name
+    Values:
+    - 'Tourniquet Gauntlets'
+    Reviewed: 0
+    Note: 
+  - Key: item.tourniquet-gauntlets.description
+    Values:
+    - 'The Jailor''s straps, buckled tight. Whatever cuts you, nothing runs.'
+    Reviewed: 0
+    Note: 
+  - Key: item.grave-salt-greaves.name
+    Values:
+    - 'Grave-Salt Greaves'
+    Reviewed: 0
+    Note: 
+  - Key: item.grave-salt-greaves.description
+    Values:
+    - 'Bone-white boots packed with grave salt. The Lich''s chill does not take.'
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-cantors-torc.name
+    Values:
+    - 'Recipe - Cantor''s Torc'
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-cantors-torc.description
+    Values:
+    - 'A hymn sheet with the notes drawn as a pattern for bronze.'
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-tourniquet-gauntlets.name
+    Values:
+    - 'Recipe - Tourniquet Gauntlets'
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-tourniquet-gauntlets.description
+    Values:
+    - 'A jailor''s ledger. The last page is how to bind a wound that will not close.'
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-grave-salt-greaves.name
+    Values:
+    - 'Recipe - Grave-Salt Greaves'
+    Reviewed: 0
+    Note: 
+  - Key: item.recipe-grave-salt-greaves.description
+    Values:
+    - 'Burial rites, with a cobbler''s notes in the margin.'
+    Reviewed: 0
+    Note: 
+  - Key: bestiary.recipe.hint.separator
+    Values:
+    - ', '
+    Reviewed: 0
+    Note: 'Hint: between two level names'
+  - Key: bestiary.recipe.hint.levels-more
+    Values:
+    - '{levels} and more'
+    Reviewed: 0
+    Note: 'Hint: an enemy found in more than two levels; levels = the first two'
+  - Key: bestiary.recipe.hint.quest
+    Values:
+    - A request on the Tavern's board
+    Reviewed: 0
+    Note: 'Hint: a quest rewards it'
+  - Key: items.usable-by.separator
+    Values:
+    - ', '
+    Reviewed: 0
+    Note: 'Between hero names in a usable-by line'
+  - Key: items.inv.section.usable-by
+    Values:
+    - 'Usable by'
+    Reviewed: 0
+    Note: 'Item detail: section over the heroes who may wear a class item'
+  - Key: items.inv.usable-by.only
+    Values:
+    - '{heroes} only'
+    Reviewed: 0
+    Note: 'Storehouse row caption: a class item the selected hero cannot wear'
+  - Key: items.inv.usable-by.only-worn
+    Values:
+    - '{heroes} only · worn by {hero}'
+    Reviewed: 0
+    Note: 'Storehouse row caption: a class item worn by its hero, seen from another hero'
+  - Key: items.inv.usable-by.note
+    Values:
+    - 'Only for {heroes}. Nobody else can wear it.'
+    Reviewed: 0
+    Note: 'Storehouse detail note on a class item the selected hero cannot wear'
+  - Key: item.warbrand.name
+    Values:
+    - 'Warbrand'
+    Reviewed: 0
+    Note: 
+  - Key: item.warbrand.description
+    Values:
+    - 'A soldier''s longsword, the red rag still knotted at the guard. It has seen worse places than this.'
+    Reviewed: 0
+    Note: 
+  - Key: item.dawnhammer.name
+    Values:
+    - 'Dawnhammer'
+    Reviewed: 0
+    Note: 
+  - Key: item.dawnhammer.description
+    Values:
+    - 'The sunburst on its head is worn smooth by prayers said before the swing.'
+    Reviewed: 0
+    Note: 
+  - Key: item.ashwood-staff.name
+    Values:
+    - 'Ashwood Staff'
+    Reviewed: 0
+    Note: 
+  - Key: item.ashwood-staff.description
+    Values:
+    - 'Cut from a shelf of the burnt Archive. The ember at its tip never quite went out.'
+    Reviewed: 0
+    Note: 
+  - Key: item.sumpfang.name
+    Values:
+    - 'Sumpfang'
+    Reviewed: 0
+    Note: 
+  - Key: item.sumpfang.description
+    Values:
+    - 'Fished out of the Mother Pool. The blade still weeps something green.'
+    Reviewed: 0
+    Note: 
+  - Key: item.reedstring-bow.name
+    Values:
+    - 'Reedstring Bow'
+    Reviewed: 0
+    Note: 
+  - Key: item.reedstring-bow.description
+    Values:
+    - 'Marsh wood strung with braided reed. It sings low before it looses.'
+    Reviewed: 0
+    Note: 
+  - Key: item.clockwork-spanner.name
+    Values:
+    - 'Clockwork Spanner'
+    Reviewed: 0
+    Note: 
+  - Key: item.clockwork-spanner.description
+    Values:
+    - 'Half wrench, half engine. It tightens bolts and loosens skulls with the same turn.'
+    Reviewed: 0
+    Note: 
+  - Key: item.tidebell-sceptre.name
+    Values:
+    - 'Tidebell Sceptre'
+    Reviewed: 0
+    Note: 
+  - Key: item.tidebell-sceptre.description
+    Values:
+    - 'The drowned choir''s bell, set on silver. It rings on its own when someone is hurt.'
+    Reviewed: 0
+    Note: 
+  - Key: item.initiates-athame.name
+    Values:
+    - 'Initiate''s Athame'
+    Reviewed: 0
+    Note: 
+  - Key: item.initiates-athame.description
+    Values:
+    - 'The last initiate''s knife. It asks for a little blood with every word.'
+    Reviewed: 0
+    Note: 
+  - Key: item.vault-gold-sickle.name
+    Values:
+    - 'Vault-Gold Sickle'
+    Reviewed: 0
+    Note: 
+  - Key: item.vault-gold-sickle.description
+    Values:
+    - 'Reaped from the Hoarder''s treasure. The runes promise a harvest nobody wants.'
+    Reviewed: 0
+    Note: 

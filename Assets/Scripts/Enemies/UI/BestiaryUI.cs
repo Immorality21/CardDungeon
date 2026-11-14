@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Assets.Scripts.Dungeon;
 using Assets.Scripts.Items;
 using Assets.Scripts.Items.UI;
 using Assets.Scripts.Progression;
@@ -64,9 +65,13 @@ namespace Assets.Scripts.Enemies.UI
 
         public event Action OnClosed;
 
-        public BestiaryUI(VisualElement root)
+        // Who the player owns, so the recipe hint reads a hero-gated secret level the way the map does.
+        private readonly Heroes.PartyRosterSO _roster;
+
+        public BestiaryUI(VisualElement root, Heroes.PartyRosterSO roster = null)
         {
             _root = root;
+            _roster = roster;
             _progress = root.Q<Label>("bestiary-progress");
             _list = root.Q<ScrollView>("bestiary-list");
             _detail = root.Q<ScrollView>("bestiary-detail");
@@ -503,7 +508,7 @@ namespace Assets.Scripts.Enemies.UI
                 {
                     _detail.Add(DetailLine(Loc.Format("bestiary.recipe.made-from", ("item", NameOf(node.Recipe.CraftBase))), "cd-inv-detail__line"));
                 }
-                _detail.Add(DetailLine(Loc.Get("bestiary.recipe.where-found"), "cd-inv-detail__note"));
+                AddHint(node.Recipe);
                 AddLeadsTo(node);
                 return;
             }
@@ -542,6 +547,52 @@ namespace Assets.Scripts.Enemies.UI
 
             AddLeadsTo(node);
             InventoryHubUI.AddItemLines(_detail, item);
+        }
+
+        /// <summary>
+        /// Where an unfound recipe comes from, once the Hall is upgraded (<see cref="RecipeHintOps"/>);
+        /// before that, the line that says it is out there somewhere and that the Hall could learn more.
+        /// </summary>
+        private void AddHint(ItemSO recipe)
+        {
+            if (Hub.HubState.LevelOf(Hub.HubService.Bestiary) < RecipeHintOps.HintLevel)
+            {
+                _detail.Add(DetailLine(Loc.Get("bestiary.recipe.where-found"), "cd-inv-detail__note"));
+                return;
+            }
+
+            var campaign = UnityEngine.Resources.Load<CampaignSO>(CampaignSO.ResourcePath);
+            var runs = new List<RunDefinitionSO>();
+            if (campaign != null && campaign.Nodes != null)
+            {
+                foreach (var entry in campaign.Nodes)
+                {
+                    if (entry != null && entry.Run != null)
+                    {
+                        runs.Add(entry.Run);
+                    }
+                }
+            }
+            // A level is "reached" when the story map would show it as open, in progress or cleared -
+            // resolved with the real roster, so a hero-gated secret level stays unnamed while the map
+            // still hides it (review 2026-11-14).
+            var completed = MetaProgressManager.Instance.GetCompletedRunKeys();
+            var owned = _roster != null ? Heroes.HeroRoster.GetOwnedKeys(_roster) : null;
+            var lines = RecipeHintOps.Lines(
+                RecipeHintOps.Find(recipe, runs, _catalog, Hub.Quests.QuestRewards.Pool()),
+                enemy => enemy != null && MetaProgressManager.Instance.GetBestiaryEntry(enemy.SaveKey) != null,
+                run => RecipeHintOps.IsReached(campaign != null ? campaign.FindNode(run) : null, completed, owned));
+
+            _detail.Add(BestiaryLineView.Section(Loc.Get("bestiary.recipe.section.hint")));
+            if (lines.Count == 0)
+            {
+                _detail.Add(DetailLine(Loc.Get("bestiary.recipe.hint.none"), "cd-inv-detail__note"));
+                return;
+            }
+            foreach (var line in lines)
+            {
+                _detail.Add(DetailLine(line, "cd-inv-detail__line"));
+            }
         }
 
         /// <summary>What this row's item can become, unknown recipes as "???".</summary>

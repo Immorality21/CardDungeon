@@ -24,6 +24,7 @@ MonoBehaviour:
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 0}
     BossAdds: []
+    BossDrops: []
     EnemyTuning:
       Difficulty: 2.25
       StatScales: []
@@ -42,6 +43,19 @@ MonoBehaviour:
       Count: 1
     - Enemy: {fileID: 11400000, guid: 2ad323473fd341edb4cff1ccae486514, type: 2}
       Count: 3
+    BossDrops:
+    - Item: {fileID: 11400000, guid: ba7801d1947060041bbd623d72f6b79a, type: 2}
+      Chance: 0.1
+      MinQuantity: 1
+      MaxQuantity: 1
+    - Item: {fileID: 11400000, guid: ca3cb184c62a3f443ab919b285f24731, type: 2}
+      Chance: 0.1
+      MinQuantity: 1
+      MaxQuantity: 1
+    - Item: {fileID: 11400000, guid: 8f48928d75ce984498529186ca862116, type: 2}
+      Chance: 0.1
+      MinQuantity: 1
+      MaxQuantity: 1
     EnemyTuning:
       Difficulty: 2
       StatScales: []

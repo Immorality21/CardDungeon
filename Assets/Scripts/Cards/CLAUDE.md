@@ -250,6 +250,26 @@ a unit is** *(2026-10-11)*: a `UnitTraits.Bloodless` enemy never bleeds (`Status
 folded into `DefinitionImmune`, which `Enemy` and `SimUnit` both call), and `ImmunityLines` lists it
 like an authored one.
 
+**Status wards on gear** *(2026-11-14, the owner's "items grant immunity")*. `ItemSO.StatusWards` is a
+list of `StatusWard { Status, Percent }`: **100 is immunity, less cuts the chance** the affliction
+lands by that share (a 75% poison against a 50% ward lands 37.5%, and a ward cuts even a certain
+debuff). Wards from several pieces add up to at most 100 (`StatusWards.Total`, read through
+`InventoryOperations.StatusWard`). **Only afflictions can be warded** (`StatusWards.IsAffliction`:
+Frozen, Slow, Burning, Poisoned, Bleeding, Silenced, Blinded, Leeched, Confused, Marked, DeathMarked):
+a ward on Haste would only refuse a friend's help. `Hero` answers `IStatusResistant` from its equipped
+gear and `IStatusImmune` at a full ward, so immunity stays the one earlier check; the partial ward is
+rolled in **`AfflictionRules.Lands(percent, target, type)`**, which `DebuffEffectExecutor` calls, and so does `LevelAfflictionTracker.SeedCombat` for a room event's level curse (a full ward is refused by the tracker either way; the event's report line still announces the curse). Stat
+cuts and an enemy's Debuff *action* (a stat cut) are never warded. The balance model mirrors it:
+`PartyBaseline` fills `SimUnit.GearWards`, but gear with wards is drop- or craft-only today, so no
+reference party wears any yet. Shown as chips on the item ("Immune to Poison", "Resists Blind 50%",
+`ItemPresenter.StatusWardLines`). The first five pieces, each tied to one enemy: the **Antivenom
+Charm** (Poison, the Mother Ooze 25%) and **Weaver's Veil** (Blind and Silence 50%, the Hex Weaver 4%)
+drop as they are (`ItemSO.DropOnly`: never sold, never in a cache); the **Cantor's Torc** (Silence, the
+Barrow King's recipe 30%), **Tourniquet Gauntlets** (Bleed, the Dark Jailor's recipe 15%) and
+**Grave-Salt Greaves** (Slow, Freeze 50%, the Lich's recipe 25%) are crafted. `StatusWardTests`,
+`CraftingContentTests.EveryDropOnlyItem_IsDroppedBySomething`; `Sandbox/WardKit.asset` puts a Warrior
+in the Charm and the Veil against two Hex Weavers.
+
 **Silence gates casting and nothing else.** A silenced hero's Magic command is disabled
 (`RoomActionUI.BuildCommandMenu`), a silenced enemy's `CastMagic` actions become ineligible
 (`EnemyActionPlanner.HasSomewhereToLand`, so an all-cast enemy falls through to its default rather than
@@ -382,8 +402,11 @@ Two consequences worth holding on to:
   re-casts on the same clock. **Every unit summon also got one more move** (Claude's drafts, approved by the
   owner): Golem Boulder Toss, Seraph Wings of Mercy, Archon Dawnward, Exatrix Dread Howl, Dark Twin Smoke
   Step, Ifrit Flame Mantle + a Claw attack, Succubus Life Kiss, Grey Fang Pack Howl, Watcher Unmake,
-  Writhing Spawn Feed (`Summons/Abilities/`, icons borrowed from related abilities). **The simulator never
-  plays a summon's `Actions`** (Signature, then Attack), so it under-prices these moves.
+  Writhing Spawn Feed (`Summons/Abilities/`, icons borrowed from related abilities). **Which move a unit
+  summon uses is one pure rule, `SummonMovePolicy.Pick`** (2026-11-13), played by the bot and the balance
+  simulator alike: Signature when ready, else a mend at 45% health or under, a buff/debuff not used in its
+  last 3 turns, a damaging move (the all-enemies one against several), else Attack. Until then the simulator
+  played Signature and Attack only and priced the moves at nothing.
 - **`SummonSO`** (`SO/Summon`): key, name, creature `Sprite` + optional `AnimationFrames`, `Kind`
   (`SpecialAttack`, `ReplaceParty` and **`JoinParty`**, all built), `TargetType`,
   `Effects` (ordinary `SpellEffect`s), `BaseCharges` and `Facing` — art is drawn facing right (the

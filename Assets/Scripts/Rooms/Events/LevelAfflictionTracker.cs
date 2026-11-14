@@ -126,6 +126,14 @@ namespace Assets.Scripts.Rooms.Events
                     continue;
                 }
 
+                // A hero's partial gear ward gets its roll here too (a full ward is refused by the
+                // tracker's immunity check either way). Stat changes are never warded.
+                if (Cards.StatusWards.IsAffliction(entry.Buff)
+                    && !Cards.AfflictionRules.Lands(Cards.AfflictionRules.Certain, unit, entry.Buff))
+                {
+                    continue;
+                }
+
                 handler.Apply(unit, entry.Amount, CombatDuration, buffTracker);
             }
         }

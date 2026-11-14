@@ -107,7 +107,7 @@ namespace Tests.EditMode
 
             a.UnlockedByDefault = true;
             a.XpCost = 0;
-            Assert.AreEqual("Known from the start — costs nothing",
+            Assert.AreEqual("Known from the start, costs nothing",
                 SphereGridPresenter.DescribeCost(a, true),
                 "A node that was never for sale must not read as a purchase.");
         }

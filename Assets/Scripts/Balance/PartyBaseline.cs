@@ -316,6 +316,8 @@ namespace Assets.Scripts.Balance
                     Triggers = new List<Combat.Triggers.CarriedTrigger>(Combat.Triggers.TriggerSources.FromItems(gear)),
                     // ...and what a worn set adds to ability damage (Shadowweave).
                     OutgoingDamage = ItemSets.OutgoingFor(gear),
+                    // ...and the afflictions the gear wards against.
+                    GearWards = InventoryOperations.StatusWardsOf(gear),
                     // ...and the hero's own signature passive, built the same way the game builds it.
                     Momentum = definition != null ? definition.Momentum : null,
                     Focus = definition != null ? definition.Focus : null

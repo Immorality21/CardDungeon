@@ -52,6 +52,12 @@ namespace Assets.Scripts.Dungeon
                  "when BossEnemy is null.")]
         public List<BossAddEntry> BossAdds = new List<BossAddEntry>();
 
+        [Tooltip("Rare gear this level's boss can drop on top of its own loot table, rolled only when " +
+                 "BossEnemy falls on THIS floor and skipped while the party owns a copy: the class weapon " +
+                 "of a hero met here or just before (the Mage's staff off the Broken Orrery's Sentinel). " +
+                 "Per floor rather than on the EnemySO, because one boss guards several floors.")]
+        public List<Items.LootDrop> BossDrops = new List<Items.LootDrop>();
+
         [Tooltip("What this level does to the enemies it spawns. An EnemySO is a template - the " +
                  "same enemy appears across the whole campaign against wildly different parties - so " +
                  "its numbers belong to the level, not the asset. Difficulty 1 with no overrides " +

@@ -400,6 +400,7 @@ namespace Assets.Scripts.Sandbox.Bot
                 {
                     var item = inventory.GetItemSO(entry.ItemKey);
                     if (item != null && string.IsNullOrEmpty(entry.EquippedHeroKey)
+                        && item.CanBeWornBy(hero.SaveKey)
                         && Score(item) > WornScore(item.SlotType, hero))
                     {
                         inventory.Equip(entry, item.SlotType, hero.SaveKey);

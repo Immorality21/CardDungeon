@@ -617,6 +617,13 @@ namespace Assets.Scripts.Items
                 return;
             }
 
+            // A class item (ItemSO.UsableBy) goes on its own heroes and nobody else - the one check
+            // every equip path passes through: the Storehouse, the bot, the sandbox.
+            if (!so.CanBeWornBy(heroKey))
+            {
+                return;
+            }
+
             // Unequip existing item in that slot for this hero
             Unequip(slot, heroKey);
 

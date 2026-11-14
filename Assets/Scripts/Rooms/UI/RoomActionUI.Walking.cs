@@ -82,6 +82,7 @@ namespace Assets.Scripts.Rooms
             // another document, drawn under this one, and fills the band's left window itself, so the
             // band steps aside for it.
             bool stageUp = CombatStage.HasInstance && CombatStage.Instance.IsRaised;
+            TickHintContext(stageUp);
             bool bandUp = stageUp && (_magicSelection == null || !_magicSelection.IsPickerOpen);
             if (IsShown(_combatBand) != bandUp)
             {

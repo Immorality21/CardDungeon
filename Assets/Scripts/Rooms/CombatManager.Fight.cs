@@ -778,6 +778,16 @@ namespace Assets.Scripts.Rooms
                 RecordLootObserved(enemy, award.Item);
             }
 
+            // The floor's own boss drop (RunLevelEntry.BossDrops): a class weapon, rare, only off this
+            // floor's boss and only while the party owns no copy. Not recorded on the enemy's Bestiary
+            // page - the boss carries it on this floor alone.
+            foreach (var award in RollFloorBossDrops(enemy))
+            {
+                InventoryManager.Instance.AddItem(award, EconomySource.Kill);
+                Debug.Log($"Boss drop: {award.Item.DisplayName} ({award.Item.Key})");
+                _combatLoot.Add(award);
+            }
+
             RecordEnemyKilled(enemy);
             GameEvents.Publish(new EnemyDefeated
             {
@@ -792,6 +802,65 @@ namespace Assets.Scripts.Rooms
             // Removed from combat immediately; the object lingers only for its pop/fade.
             CombatAudio.Play(CombatSound.EnemyDeath);
             CombatFeedback.Instance.KillWithEffect(enemy.gameObject);
+        }
+
+        /// <summary>
+        /// What this floor's boss drops on top of its loot table, or nothing for anyone else. A class
+        /// item drops only while nobody owns a copy and someone the player owns can wear it, so the
+        /// Cultist's sickle does not turn up before the Cultist does.
+        /// </summary>
+        private List<LootAward> RollFloorBossDrops(Enemy enemy)
+        {
+            var awards = new List<LootAward>();
+            if (enemy == null || !enemy.IsBoss || enemy.IsSummoned || !DungeonManager.HasInstance)
+            {
+                return awards;
+            }
+            var floor = DungeonManager.Instance.CurrentLevelEntry;
+            if (floor == null || floor.BossEnemy == null || floor.BossEnemy != enemy.Definition
+                || floor.BossDrops == null || floor.BossDrops.Count == 0)
+            {
+                return awards;
+            }
+
+            var owned = InventoryManager.Instance.GetItems();
+            var heroes = OwnedHeroKeys();
+            var missing = floor.BossDrops
+                .Where(d => d != null && d.Item != null && !owned.Any(i => i.ItemKey == d.Item.Key)
+                    && (d.Item.UsableByAnyone || heroes.Any(d.Item.CanBeWornBy)))
+                .ToList();
+            foreach (var award in LootRoller.Roll(missing, DungeonManager.RunLevelIndex, () => UnityEngine.Random.Range(0f, 1f),
+                         DungeonManager.LootCampaignStep))
+            {
+                if (!award.IsEmpty && !RunFear.Current.Withholds(award.Item))
+                {
+                    awards.Add(award);
+                }
+            }
+            return awards;
+        }
+
+        /// <summary>The heroes the player owns: the saved roster (read only - this is mid-fight) plus
+        /// whoever is in this fight, so a hero rescued earlier on the floor already counts.</summary>
+        private List<string> OwnedHeroKeys()
+        {
+            var keys = new List<string>();
+            var save = new IO.FileHandler().Load<PartySaveData>();
+            if (save?.OwnedHeroKeys != null)
+            {
+                keys.AddRange(save.OwnedHeroKeys);
+            }
+            if (_currentParty != null)
+            {
+                foreach (var hero in _currentParty.Heroes)
+                {
+                    if (hero != null && !keys.Contains(hero.HeroKey))
+                    {
+                        keys.Add(hero.HeroKey);
+                    }
+                }
+            }
+            return keys;
         }
 
         /// <summary>A fallen hero was revived: back on the stage, back on the clock (acting in turn, not at once).</summary>

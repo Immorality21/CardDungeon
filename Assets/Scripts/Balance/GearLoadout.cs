@@ -167,6 +167,10 @@ namespace Assets.Scripts.Balance
 
                     foreach (var item in equipment)
                     {
+                        if (!item.CanBeWornBy(hero.SaveKey))
+                        {
+                            continue;
+                        }
                         int price = ShopPricing.BuyPrice(item);
                         if (price <= 0 || price > remaining)
                         {
@@ -297,7 +301,7 @@ namespace Assets.Scripts.Balance
 
             foreach (var item in catalog)
             {
-                if (item != null && item.Category == ItemCategory.Equipment && !item.CraftOnly && !equipment.Contains(item))
+                if (item != null && item.Category == ItemCategory.Equipment && !item.IsExclusive && !equipment.Contains(item))
                 {
                     equipment.Add(item);
                 }

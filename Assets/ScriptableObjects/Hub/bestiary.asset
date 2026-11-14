@@ -48,10 +48,12 @@ MonoBehaviour:
     EmbersPerSecond: 0
     SmokePerSecond: 0.6
   PlacedByDefault: 0
-  MaxLevel: 1
+  MaxLevel: 2
   PlacementCost:
   - Material: {fileID: 11400000, guid: c0de5211aa060000000000000000ab06, type: 2}
     Amount: 4
-  GoldPerUpgrade: 0
-  LevelGrantKeys: []
+  GoldPerUpgrade: 200
+  LevelGrantKeys:
+  - building.bestiary.level-1.grant
+  - building.bestiary.level-2.grant
   RequiredRunKeys: []

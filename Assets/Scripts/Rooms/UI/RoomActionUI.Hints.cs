@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Scripts.Combat;
 using Assets.Scripts.Dungeon;
 using Assets.Scripts.Progression;
 using Assets.Scripts.Tutorial;
@@ -110,6 +111,7 @@ namespace Assets.Scripts.Rooms
             }
             _hintNoticeText.text = _hintQueue.Dequeue();
             SetShown(_hintNotice, true);
+            _hintShownInFight = StageRaised;
             int shown = ++_hintNoticeShown;
             _hintNotice.schedule.Execute(() =>
             {
@@ -118,6 +120,26 @@ namespace Assets.Scripts.Rooms
                     ShowNextHint();
                 }
             }).StartingIn(HintNoticeMs);
+        }
+
+        // Whether the hint on screen was raised during a fight (the battle stage up) or on the walk.
+        private bool _hintShownInFight;
+
+        private static bool StageRaised => CombatStage.HasInstance && CombatStage.Instance.IsRaised;
+
+        /// <summary>
+        /// A hint belongs to where it was raised: one from the walk (a refuge) goes when a fight starts,
+        /// one from a fight (charges, a summon) goes when the fight ends, and the next queued line takes
+        /// its turn. Its timer is real time, so at a raised combat speed (or the bot's 15x) the walk's line
+        /// used to hang on through whole fights. Every line stays in the pause menu's Hints list.
+        /// </summary>
+        private void TickHintContext(bool stageUp)
+        {
+            if (_hintNotice != null && IsShown(_hintNotice) && stageUp != _hintShownInFight)
+            {
+                _hintNoticeShown++;
+                ShowNextHint();
+            }
         }
 
         /// <summary>

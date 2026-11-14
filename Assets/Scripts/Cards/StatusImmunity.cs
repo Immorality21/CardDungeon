@@ -14,6 +14,16 @@ namespace Assets.Scripts.Cards
     }
 
     /// <summary>
+    /// A unit with a partial guard against some afflictions - a hero's worn <see cref="StatusWard"/>s.
+    /// 0 to 100; <see cref="AfflictionRules.Lands(int, ICombatUnit, BuffType)"/> cuts the chance by it.
+    /// A unit at 100 also answers <see cref="IStatusImmune"/>, so immunity stays the one earlier check.
+    /// </summary>
+    public interface IStatusResistant
+    {
+        int StatusResistance(BuffType type);
+    }
+
+    /// <summary>
     /// The one immunity check. <see cref="CombatBuffTracker"/> consults it before recording a status or
     /// an over-time effect, so every path that lands one — casts, summons, items, the simulator — is
     /// covered by a single line; the effect executors consult it only to say "Immune" on screen.
@@ -27,6 +37,12 @@ namespace Assets.Scripts.Cards
         public static bool IsImmune(ICombatUnit unit, BuffType type)
         {
             return IsStatus(type) && unit is IStatusImmune immune && immune.IsImmuneTo(type);
+        }
+
+        /// <summary>The unit's partial guard against <paramref name="type"/>, 0 to 100 (0 for most units).</summary>
+        public static int Resistance(ICombatUnit unit, BuffType type)
+        {
+            return unit is IStatusResistant resistant ? UnityEngine.Mathf.Clamp(resistant.StatusResistance(type), 0, StatusWards.Immune) : 0;
         }
 
         /// <summary>

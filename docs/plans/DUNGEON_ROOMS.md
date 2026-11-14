@@ -347,6 +347,12 @@ campfires are placed even with no sprite.
   and north archways `DoorArch` (phase 7), so this is mostly *where* a door is drawn: every connection
   gets a door sprite, including the ones now shown as an open archway or corridor. Check with the
   hidden-room and branching-route phases, which may want an undrawn way through on purpose.
+  **Built 2026-11-13:** rooms touch, so there were no corridors; the gap was the way *south*. A vertical
+  door hung only in the lower room's archway, so from the room above it was a shaded gap until the room
+  below was seen. The upper room now paints that archway tile and door too, one cell past its south edge
+  (`RoomTilePainter.PaintDoors`), like a side door painted by both rooms; `Door.Swing` animates both
+  copies. No new art. Seen in the sandbox (RoomSpike, seed 21): the door shows below an explored room
+  and swings open on a walk south. A hidden room (phase 5) will have to skip this paint for its door.
 
 ## Open questions
 

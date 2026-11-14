@@ -28,6 +28,7 @@ MonoBehaviour:
       Count: 1
     - Enemy: {fileID: 11400000, guid: 2ad323473fd341edb4cff1ccae486514, type: 2}
       Count: 2
+    BossDrops: []
     EnemyTuning:
       Difficulty: 4.25
       StatScales:

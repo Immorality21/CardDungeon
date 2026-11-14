@@ -94,7 +94,7 @@ namespace Assets.Scripts.Rooms
                 }
             }
 
-            PaintDoors(gridObj, room);
+            PaintDoors(gridObj, ground, room);
 
             if (props.Count > 0)
             {
@@ -120,10 +120,12 @@ namespace Assets.Scripts.Rooms
         ///
         /// <para>A side door is seen edge-on. Both rooms paint it, offset half a tile onto the wall
         /// between them, and the two land on the same spot, so it hides with the rooms and still shows
-        /// whole once either side has been seen. A vertical door hangs in the lower room's archway, so
-        /// only that room paints it; from the north all that shows is the shade.</para>
+        /// whole once either side has been seen. A vertical door hangs in the lower room's archway, and
+        /// the upper room paints that archway and its door too, one cell past its south edge, so every
+        /// way through shows a door from either side (playtest 4 finding 15). Before that, the way
+        /// south from an explored room was a bare gap until the room below was seen.</para>
         /// </summary>
-        private void PaintDoors(GameObject grid, Room room)
+        private void PaintDoors(GameObject grid, Tilemap ground, Room room)
         {
             if (room.Doors.Count == 0)
             {
@@ -147,8 +149,9 @@ namespace Assets.Scripts.Rooms
                 }
 
                 bool side = direction.x != 0 && _biome.DoorSide != null;
-                bool arch = direction == Vector2Int.up && _biome.DoorArch != null;
-                if (!side && !arch)
+                bool archAbove = direction == Vector2Int.up && _biome.DoorArch != null;
+                bool archBelow = direction == Vector2Int.down && _biome.DoorArch != null;
+                if (!side && !archAbove && !archBelow)
                 {
                     continue;
                 }
@@ -169,7 +172,18 @@ namespace Assets.Scripts.Rooms
                 }
                 else
                 {
-                    door.AddPlace(frames, (Vector3Int)(tile + Vector2Int.up), TileFor(_biome.DoorArch),
+                    // The archway is the lower room's wall cell: one up from its door tile, or one
+                    // down from the upper room's.
+                    var archCell = tile + (archAbove ? Vector2Int.up : Vector2Int.down);
+                    if (archBelow)
+                    {
+                        var archway = SpriteFor(new RoomTileCell { Cell = archCell, Piece = RoomTilePiece.Archway });
+                        if (archway != null)
+                        {
+                            ground.SetTile((Vector3Int)archCell, TileFor(archway));
+                        }
+                    }
+                    door.AddPlace(frames, (Vector3Int)archCell, TileFor(_biome.DoorArch),
                         new Dictionary<Vector2Int, IReadOnlyList<TileBase>>
                         {
                             { Vector2Int.up, PlacedTiles(_biome.DoorArchOpeningNorth, 0, false) },
