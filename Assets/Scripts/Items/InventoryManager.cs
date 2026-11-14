@@ -750,6 +750,15 @@ namespace Assets.Scripts.Items
                     Enum.TryParse<SlotType>(item.EquippedSlot, out var slot))
                 {
                     var heroKey = item.EquippedHeroKey ?? "";
+                    // Worn by a hero who may not wear it (ItemSO.UsableBy, a rule added after it was
+                    // equipped - the Mage's old sword): back to the bags rather than kept on.
+                    var so = GetItemSO(item.ItemKey);
+                    if (so != null && !string.IsNullOrEmpty(heroKey) && !so.CanBeWornBy(heroKey))
+                    {
+                        item.EquippedSlot = null;
+                        item.EquippedHeroKey = null;
+                        continue;
+                    }
                     if (!_equipped.ContainsKey(heroKey))
                     {
                         _equipped[heroKey] = new Dictionary<SlotType, ItemSaveData>();

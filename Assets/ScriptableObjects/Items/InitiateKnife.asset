@@ -19,6 +19,11 @@ MonoBehaviour:
   FindChanceScale: 0
   Category: 0
   SlotType: 0
+  UsableBy:
+  - {fileID: 11400000, guid: 09b6a3424e4546719cda1391729e96cc, type: 2}
+  - {fileID: 11400000, guid: 77ccb730251741f08e684dabd9144b76, type: 2}
+  - {fileID: 11400000, guid: 77ae12aafb9d437f8cc8149bd1cccb2b, type: 2}
+  - {fileID: 11400000, guid: d930ce0ffd89cf4408229b730a560cdf, type: 2}
   Bonuses:
   - StatType: 1
     BonusType: 0
@@ -33,6 +38,7 @@ MonoBehaviour:
     FilterDamageType: 0
     DamageType: 0
     IgnoreOverTime: 0
+    HealthBelow: 0
     Target: 0
     Effects:
     - EffectType: 1
@@ -49,9 +55,11 @@ MonoBehaviour:
       BonusVsStatus: 0
       BonusPerDebuff: 0
       DrainToParty: 0
+  StatusWards: []
   Milestones: []
   Set: {fileID: 0}
   CraftOnly: 0
+  DropOnly: 0
   CraftResult: {fileID: 0}
   CraftBase: {fileID: 0}
   CraftMaterials: []

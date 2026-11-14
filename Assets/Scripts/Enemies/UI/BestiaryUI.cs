@@ -432,6 +432,44 @@ namespace Assets.Scripts.Enemies.UI
 
             // One row, the same as the combat Inspect page: the names seen, then how many are left.
             _detail.Add(BestiaryLineView.Row(BestiaryPresenter.LootSummary(definition, known)));
+
+            // Where it lives (backlog 16a): the levels reached by name with their floors, the rest counted.
+            var campaign = LoadCampaign();
+            BestiaryLineView.AddSection(_detail, Loc.Get("bestiary.section.found-in"),
+                EnemyHabitatOps.Lines(definition, EnemyHabitatOps.Find(definition, CampaignRuns(campaign)), RunReached(campaign)));
+        }
+
+        private static CampaignSO LoadCampaign()
+        {
+            return UnityEngine.Resources.Load<CampaignSO>(CampaignSO.ResourcePath);
+        }
+
+        private static List<RunDefinitionSO> CampaignRuns(CampaignSO campaign)
+        {
+            var runs = new List<RunDefinitionSO>();
+            if (campaign != null && campaign.Nodes != null)
+            {
+                foreach (var entry in campaign.Nodes)
+                {
+                    if (entry != null && entry.Run != null)
+                    {
+                        runs.Add(entry.Run);
+                    }
+                }
+            }
+            return runs;
+        }
+
+        /// <summary>
+        /// A level is "reached" when the story map would show it as open, in progress or cleared -
+        /// resolved with the real roster, so a hero-gated secret level stays unnamed while the map still
+        /// hides it (review 2026-11-14). Shared by the recipe hint and the monster page.
+        /// </summary>
+        private Func<RunDefinitionSO, bool> RunReached(CampaignSO campaign)
+        {
+            var completed = MetaProgressManager.Instance.GetCompletedRunKeys();
+            var owned = _roster != null ? Heroes.HeroRoster.GetOwnedKeys(_roster) : null;
+            return run => RecipeHintOps.IsReached(campaign != null ? campaign.FindNode(run) : null, completed, owned);
         }
         // ============================================================
         //  RECIPES
@@ -561,27 +599,11 @@ namespace Assets.Scripts.Enemies.UI
                 return;
             }
 
-            var campaign = UnityEngine.Resources.Load<CampaignSO>(CampaignSO.ResourcePath);
-            var runs = new List<RunDefinitionSO>();
-            if (campaign != null && campaign.Nodes != null)
-            {
-                foreach (var entry in campaign.Nodes)
-                {
-                    if (entry != null && entry.Run != null)
-                    {
-                        runs.Add(entry.Run);
-                    }
-                }
-            }
-            // A level is "reached" when the story map would show it as open, in progress or cleared -
-            // resolved with the real roster, so a hero-gated secret level stays unnamed while the map
-            // still hides it (review 2026-11-14).
-            var completed = MetaProgressManager.Instance.GetCompletedRunKeys();
-            var owned = _roster != null ? Heroes.HeroRoster.GetOwnedKeys(_roster) : null;
+            var campaign = LoadCampaign();
             var lines = RecipeHintOps.Lines(
-                RecipeHintOps.Find(recipe, runs, _catalog, Hub.Quests.QuestRewards.Pool()),
+                RecipeHintOps.Find(recipe, CampaignRuns(campaign), _catalog, Hub.Quests.QuestRewards.Pool()),
                 enemy => enemy != null && MetaProgressManager.Instance.GetBestiaryEntry(enemy.SaveKey) != null,
-                run => RecipeHintOps.IsReached(campaign != null ? campaign.FindNode(run) : null, completed, owned));
+                RunReached(campaign));
 
             _detail.Add(BestiaryLineView.Section(Loc.Get("bestiary.recipe.section.hint")));
             if (lines.Count == 0)

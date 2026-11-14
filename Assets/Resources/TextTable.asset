@@ -13346,3 +13346,108 @@ MonoBehaviour:
     - 'Reaped from the Hoarder''s treasure. The runes promise a harvest nobody wants.'
     Reviewed: 0
     Note: 
+  - Key: item.hunters-shortbow.name
+    Values:
+    - 'Hunter''s Shortbow'
+    Reviewed: 0
+    Note: 
+  - Key: item.hunters-shortbow.description
+    Values:
+    - 'A short bow for rabbits and worse. Light enough to loose on the run.'
+    Reviewed: 0
+    Note: 
+  - Key: item.yew-longbow.name
+    Values:
+    - 'Yew Longbow'
+    Reviewed: 0
+    Note: 
+  - Key: item.yew-longbow.description
+    Values:
+    - 'Taller than its archer. The arrow arrives before the sound does.'
+    Reviewed: 0
+    Note: 
+  - Key: item.ironwood-crossbow.name
+    Values:
+    - 'Ironwood Crossbow'
+    Reviewed: 0
+    Note: 
+  - Key: item.ironwood-crossbow.description
+    Values:
+    - 'Black wood and iron, wound tight. It takes a long breath to crank, and none to let go.'
+    Reviewed: 0
+    Note: 
+  - Key: bestiary.section.found-in
+    Values:
+    - 'Found in'
+    Reviewed: 0
+    Note: 'Hall monster page: section listing the levels and floors the enemy appears on'
+  - Key: bestiary.habitat.boss-floor
+    Values:
+    - '{floor} (boss)'
+    Reviewed: 0
+    Note: 'Found in: a floor where this enemy is the boss'
+  - Key: bestiary.habitat.separator
+    Values:
+    - ', '
+    Reviewed: 0
+    Note: 'Found in: between floor names'
+  - Key: bestiary.habitat.unreached-one
+    Values:
+    - 'And a level not yet reached'
+    Reviewed: 0
+    Note: 'Found in: one level the story map does not show yet'
+  - Key: bestiary.habitat.unreached-many
+    Values:
+    - 'And {count} levels not yet reached'
+    Reviewed: 0
+    Note: 'Found in: several levels the story map does not show yet'
+  - Key: item.cutpurse-knife.name
+    Values:
+    - 'Cutpurse Knife'
+    Reviewed: 0
+    Note: 
+  - Key: item.cutpurse-knife.description
+    Values:
+    - 'Made for purse strings. Throats are only a little tougher.'
+    Reviewed: 0
+    Note: 
+  - Key: item.twinfang-dirk.name
+    Values:
+    - 'Twinfang Dirk'
+    Reviewed: 0
+    Note: 
+  - Key: item.twinfang-dirk.description
+    Values:
+    - 'Two points on one blade. Whichever misses, the other does not.'
+    Reviewed: 0
+    Note: 
+  - Key: item.nightglass-stiletto.name
+    Values:
+    - 'Nightglass Stiletto'
+    Reviewed: 0
+    Note: 
+  - Key: item.nightglass-stiletto.description
+    Values:
+    - 'A needle of black glass. It goes in between the plates and leaves no mark on the way.'
+    Reviewed: 0
+    Note: 
+  - Key: items.inv.section.status-wards
+    Values:
+    - 'Status wards'
+    Reviewed: 0
+    Note: 'Storehouse stat panel: section summing the gear''s status wards'
+  - Key: items.inv.ward-immune
+    Values:
+    - 'Immune'
+    Reviewed: 0
+    Note: 'Storehouse stat panel: a status warded fully'
+  - Key: items.inv.ward-percent
+    Values:
+    - '{value}%'
+    Reviewed: 0
+    Note: 'Storehouse stat panel: a partial ward; value = percent the chance is cut by'
+  - Key: items.inv.ward-tooltip
+    Values:
+    - 'How much less often {status} takes hold on this hero, from their gear. 100% is immunity.'
+    Reviewed: 0
+    Note: 'Tooltip on a status ward cell'

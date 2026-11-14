@@ -3,9 +3,13 @@
 What has shipped, newest first, moved out of `docs/NEXT_STEPS.md` on 2026-11-14 so the index stays short. Add a
 line here when something ships; the reasoning lives in the plan files, `docs/BALANCING.md` and the subsystem guides.
 
+- **"Found in" on the Hall's monster page, bows and daggers** (2026-11-14) — the Enemies and Hub guides. Each monster
+  lists the levels and floors it is met on (unreached levels counted, not named). Three Ranger-only bows and three
+  Rogue-only daggers in the shop; the Ranger left the swords.
 - **Class items and a weapon for every hero** (2026-11-14) — the Dungeon and Hub guides. `ItemSO.UsableBy` limits
   gear to named heroes (`InventoryManager.Equip` enforces it; the Storehouse shows "Mage only"); each hero's class
-  weapon is a rare (10%) boss drop on a replayable level near where they join (`RunLevelEntry.BossDrops`). Icons by PixelLab; stats and
+  weapon is a rare (10%) boss drop on a replayable level near where they join (`RunLevelEntry.BossDrops`). Every
+  weapon names who can use it (swords, cleaver, knife, staves; the Hub guide). Icons by PixelLab; stats and
   texts are agent drafts.
 - **Status wards and the Hall's recipe hint** (2026-11-14) — the Cards and Hub guides, `plans/COMBAT_DEPTH.md` §9,
   `plans/HUB.md` §7. Gear can make a hero immune to an affliction or cut its chance (`ItemSO.StatusWards`); five pieces,

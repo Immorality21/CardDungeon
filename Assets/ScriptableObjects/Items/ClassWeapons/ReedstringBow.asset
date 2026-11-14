@@ -24,10 +24,10 @@ MonoBehaviour:
   Bonuses:
   - StatType: 3
     BonusType: 0
-    Value: 7
+    Value: 8
   - StatType: 6
     BonusType: 0
-    Value: 1
+    Value: 2
   Resistances: []
   Triggers: []
   StatusWards: []

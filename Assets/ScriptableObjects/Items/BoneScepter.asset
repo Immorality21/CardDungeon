@@ -19,6 +19,12 @@ MonoBehaviour:
   FindChanceScale: 1
   Category: 0
   SlotType: 0
+  UsableBy:
+  - {fileID: 11400000, guid: 33f087f09ace9034fa5978269cb9e4f6, type: 2}
+  - {fileID: 11400000, guid: 417d412fa1fe407cb763056439898d1d, type: 2}
+  - {fileID: 11400000, guid: 77ae12aafb9d437f8cc8149bd1cccb2b, type: 2}
+  - {fileID: 11400000, guid: d930ce0ffd89cf4408229b730a560cdf, type: 2}
+  - {fileID: 11400000, guid: 8572c8c8edc04a8ea398ee885ba38e88, type: 2}
   Bonuses:
   - StatType: 4
     BonusType: 0
@@ -28,9 +34,11 @@ MonoBehaviour:
     Value: 5
   Resistances: []
   Triggers: []
+  StatusWards: []
   Milestones: []
   Set: {fileID: 0}
   CraftOnly: 1
+  DropOnly: 0
   CraftResult: {fileID: 0}
   CraftBase: {fileID: 0}
   CraftMaterials: []

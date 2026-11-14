@@ -487,7 +487,17 @@ the close path — it raises `OnClosed`, and `HubManager` never calls it directl
   (`cd-inv-row--unusable`), captioned "Mage only", with no stat chips, a "Usable by" section and note
   in the detail and no stat preview, and Enter does nothing. `InventoryManager.Equip` refuses it
   anyway, so the bot, the sandbox and crafting (a result the base's wearer cannot use goes to the
-  bags) all obey one rule. Equipment is managed *only* here. **Redesigned 2026-09-28** into one fixed frame: a header
+  bags) all obey one rule. **Every weapon names who can use it** (owner, 2026-11-14: "a mage cannot use a
+  sword, a warrior no magic wand"): swords for the Warrior, Paladin and Rogue (she has no Agility weapon
+  but her class drop); **bows for the Ranger alone** (owner, same day: Hunter's Shortbow L1, Yew Longbow L3,
+  Ironwood Crossbow L4, sold and found like any gear, and the Reedstring Bow, raised to AGI +8 LCK +2 so the
+  class drop stays above the shop); **daggers for the Rogue alone** (Cutpurse Knife L1, Twinfang Dirk L3,
+  Nightglass Stiletto L4, and Sumpfang raised to AGI +7 LCK +3), beside the swords she keeps; the Slag Cleaver for the Warrior and Paladin; the Initiate Knife for
+  the Rogue, Ranger, Warlock and Cultist; staves and sceptres for the Mage, Cleric, Warlock, Cultist and
+  Tinkerer; each class weapon for its one hero. `ClassItemTests` fails on a weapon open to everyone and on a
+  hero with no weapon outside their rare drop. Gear a save has on someone who may no longer wear it goes
+  back to the bags when the inventory loads (`InventoryManager.RebuildEquippedCache`). Shields and armour
+  are still open to all. Equipment is managed *only* here. **Redesigned 2026-09-28** into one fixed frame: a header
   band with the tabs, a portrait hero strip (muted, never hidden, on the party-wide tabs), three
   px-wide columns and a per-state hint line. Equipment is **FF-style**: the cursor walks the hero's
   slots, the middle column lists what fits the slot under it — the bag *and* what other heroes wear

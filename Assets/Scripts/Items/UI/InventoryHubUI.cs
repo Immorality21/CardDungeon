@@ -1695,10 +1695,70 @@ namespace Assets.Scripts.Items.UI
                 _detailBody?.Add(BestiaryLineView.Section(Loc.Get("items.inv.section.resistances")));
                 _detailBody?.Add(resistGrid);
             }
-            else if (preview != null && !statsChange)
+
+            // Status wards (ItemSO.StatusWards) summed over the gear, like the resistances above: only
+            // when there are any, and while comparing only the ones that move.
+            var wardNow = InventoryOperations.StatusWardsOf(GearPiece.ItemsOf(CurrentGear()));
+            Dictionary<BuffType, int> wardThen = resistThen != null
+                ? InventoryOperations.StatusWardsOf(GearPiece.ItemsOf(PreviewGear()))
+                : null;
+            var wardGrid = BuildWardGrid(wardNow, wardThen, preview != null);
+            if (wardGrid.childCount > 0)
+            {
+                _detailBody?.Add(BestiaryLineView.Section(Loc.Get("items.inv.section.status-wards")));
+                _detailBody?.Add(wardGrid);
+            }
+
+            if (preview != null && !statsChange && resistGrid.childCount == 0 && wardGrid.childCount == 0)
             {
                 AddNote(Loc.Get("items.inv.no-stat-change"));
             }
+        }
+
+        /// <summary>The ward cells: "Poison Immune", "Blind 50%"; or, comparing, "Blind +50%".</summary>
+        private static VisualElement BuildWardGrid(Dictionary<BuffType, int> now, Dictionary<BuffType, int> then, bool comparing)
+        {
+            var grid = new VisualElement();
+            grid.AddToClassList("cd-inv-stats");
+            grid.AddToClassList("cd-inv-stats--wide");
+            var types = new List<BuffType>(now.Keys);
+            if (then != null)
+            {
+                foreach (var type in then.Keys)
+                {
+                    if (!types.Contains(type))
+                    {
+                        types.Add(type);
+                    }
+                }
+            }
+            types.Sort();
+            foreach (var type in types)
+            {
+                now.TryGetValue(type, out int before);
+                string name = Cards.Buffs.BuffNames.Of(type);
+                string tooltip = Loc.Format("items.inv.ward-tooltip", ("status", name));
+                if (!comparing)
+                {
+                    grid.Add(StatCell(name, WardValue(before), 0, tooltip));
+                    continue;
+                }
+                int after = before;
+                if (then != null)
+                {
+                    then.TryGetValue(type, out after);
+                }
+                if (after != before)
+                {
+                    grid.Add(DeltaCell(name, after - before, tooltip, percent: true));
+                }
+            }
+            return grid;
+        }
+
+        private static string WardValue(int percent)
+        {
+            return percent >= StatusWards.Immune ? Loc.Get("items.inv.ward-immune") : Loc.Format("items.inv.ward-percent", ("value", percent));
         }
 
         /// <summary>One cell of a stat grid; <paramref name="direction"/> is +1 better, -1 worse, 0 plain.</summary>

@@ -283,7 +283,8 @@ backlog.**
 ### Next up
 
 - **Class items** (owner, 2026-11-14) - ✅ **built the same day**: `ItemSO.UsableBy`, and a class weapon per hero as a rare
-  (10%) boss drop on a replayable level near where they join (Dungeon guide). Open: the owner's review of the stats and names, and whether more class gear (armour) follows.
+  (10%) boss drop on a replayable level near where they join (Dungeon guide); every weapon names who can use it
+  (Hub guide). Open: shields and armour are still open to all. Open: the owner's review of the stats and names, and whether more class gear (armour) follows.
 - **Playtest 4** (external playtester, played up to 2026-11-05) - 66 findings in `PLAYTEST_4.md`. Bugs fixed
   2026-11-10, still to be confirmed with a real keyboard. The owner's decisions were built 2026-11-11 (drafts
   awaiting review, listed in the file), doors everywhere and Holy Touch's grid upgrades 2026-11-13.
@@ -425,7 +426,7 @@ backlog.**
 | **14** | The dungeon map, the party bar, and the pause menu | ✅ **complete** — 14b + 14c 2026-09-06, **14a (the map) 2026-09-08** |
 | **15** | Run summary and statistics | ✅ **first version 2026-10-07** — run history from `GameEvents`, on the death screen, run-complete panel and story map; open: a Records screen, per-hero numbers, the analyzer reading it |
 | **16** | A compendium — explain the systems | not started |
-| **16a** | **Where each monster is found**, in the Hall of Knowledge (helps tavern quests; playtest 4 finding 13) | backlog |
+| **16a** | **Where each monster is found**, in the Hall of Knowledge (helps tavern quests; playtest 4 finding 13) | ✅ **built 2026-11-14**: a "Found in" section on the monster page (Enemies guide) |
 | **16b** | **A party / status screen** (playtest 4 finding 44) | backlog |
 | **20** | **A tutorial — guide the player through the first hour** | **first loop shipped 2026-09-29** (New Game → floor 1 → build the Hall of Progression → first grid node → the road); learnings + todos in `docs/TUTORIAL.md` |
 | **17** | Content volume is the biggest single gap | not started |

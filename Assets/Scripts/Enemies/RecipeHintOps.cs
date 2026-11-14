@@ -350,8 +350,15 @@ namespace Assets.Scripts.Enemies
             return false;
         }
 
-        private static bool FloorHasEnemy(RunLevelEntry floor, EnemySO enemy)
+        /// <summary>Whether this floor can put the enemy in front of the party: its rooms' spawn tables
+        /// (or a hand-laid layout's), its boss and the boss's adds, and what its room events wake or
+        /// guard (when the floor allows events). Shared with <see cref="EnemyHabitatOps"/>.</summary>
+        public static bool FloorHasEnemy(RunLevelEntry floor, EnemySO enemy)
         {
+            if (floor == null || enemy == null)
+            {
+                return false;
+            }
             if (floor.BossEnemy == enemy)
             {
                 return true;
@@ -393,6 +400,46 @@ namespace Assets.Scripts.Enemies
                 if (room != null && SpawnsHave(room.EnemySpawnTable, enemy))
                 {
                     return true;
+                }
+            }
+            return floor.AllowRoomEvents && EventsSpawn(floor.LevelTemplate, enemy);
+        }
+
+        /// <summary>Whether a room event listed on this floor wakes the enemy or sets it in a side room.</summary>
+        private static bool EventsSpawn(LevelDefinitionSO template, EnemySO enemy)
+        {
+            if (template?.RoomEvents == null)
+            {
+                return false;
+            }
+            foreach (var listed in template.RoomEvents)
+            {
+                if (listed?.Event?.Options == null)
+                {
+                    continue;
+                }
+                foreach (var option in listed.Event.Options)
+                {
+                    foreach (var pool in new[] { option?.Success, option?.Failure })
+                    {
+                        if (pool == null)
+                        {
+                            continue;
+                        }
+                        foreach (var outcome in pool)
+                        {
+                            if (outcome == null)
+                            {
+                                continue;
+                            }
+                            if ((outcome.AwakenedEnemies != null && outcome.AwakenedEnemies.Contains(enemy))
+                                || (outcome.SideRoom?.Guards != null && outcome.SideRoom.Guards.Contains(enemy))
+                                || (outcome.SideRoom?.Enemies != null && outcome.SideRoom.Enemies.Contains(enemy)))
+                            {
+                                return true;
+                            }
+                        }
+                    }
                 }
             }
             return false;

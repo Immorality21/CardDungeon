@@ -89,6 +89,28 @@ namespace Tests.EditMode
             Assert.IsTrue(string.IsNullOrEmpty(made.EquippedHeroKey), "The Warrior cannot hold the Mage's staff.");
         }
 
+        /// <summary>Every weapon says who can use it (owner, 2026-11-14: a Mage cannot use a sword, a
+        /// Warrior no wand), so a new weapon cannot ship open to everyone by accident.</summary>
+        [Test]
+        public void EveryWeapon_NamesWhoCanUseIt()
+        {
+            var open = LoadAll<ItemSO>()
+                .Where(i => i.Category == ItemCategory.Equipment && i.SlotType == SlotType.MainHand && i.UsableByAnyone)
+                .Select(i => i.name).ToList();
+            CollectionAssert.IsEmpty(open, "Weapon(s) usable by anyone: " + string.Join(", ", open));
+        }
+
+        /// <summary>Every hero can get some weapon from the shop or a find, not only their rare class drop.</summary>
+        [Test]
+        public void EveryHero_HasAWeaponThatIsNotExclusive()
+        {
+            var weapons = LoadAll<ItemSO>()
+                .Where(i => i.Category == ItemCategory.Equipment && i.SlotType == SlotType.MainHand && !i.IsExclusive)
+                .ToList();
+            var missing = LoadAll<HeroSO>().Where(h => !weapons.Any(w => w.CanBeWornBy(h.SaveKey))).Select(h => h.SaveKey).ToList();
+            CollectionAssert.IsEmpty(missing, "Hero(es) with no shop or found weapon: " + string.Join(", ", missing));
+        }
+
         private static List<RunLevelEntry> AllFloors()
         {
             return LoadAll<RunDefinitionSO>().SelectMany(r => r.Levels).Where(f => f != null).ToList();

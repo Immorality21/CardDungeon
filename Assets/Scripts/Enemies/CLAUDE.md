@@ -347,7 +347,11 @@ machinery that makes that playable rather than a memory test.
 > Inspect page; the code keeps the Bestiary name. **`RecipeHintOps`** (pure, 2026-11-14) answers the
 > Recipes tab's "where is this found" at Hall level 2: `Find` reads drop tables, every floor's recipe
 > table and events and the quest pool over the campaign's runs, `Lines` words it through the Bestiary
-> and the campaign so nothing unmet is named. `RecipeHintOpsTests`.
+> and the campaign so nothing unmet is named. `RecipeHintOpsTests`. **"Found in"** (2026-11-14, backlog 16a,
+> playtest 4 finding 13): the monster page ends with the levels the enemy is met in, each with its floors
+> and its boss floor marked, through `EnemyHabitatOps` over `RecipeHintOps.FloorHasEnemy` (spawn tables,
+> boss and adds, and what a floor's room events wake or guard). A level the story map does not show yet is
+> counted ("And 3 levels not yet reached"), never named. `EnemyHabitatOpsTests`.
 
 - **The record** lives in `MetaProgressSaveData.Bestiary` — a `List<BestiaryEntry>` keyed by
   `EnemySO.SaveKey` — and the pure `BestiaryOps` holds its rules. See the Progression guide for the

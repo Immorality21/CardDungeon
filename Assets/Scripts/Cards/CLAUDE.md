@@ -262,7 +262,7 @@ rolled in **`AfflictionRules.Lands(percent, target, type)`**, which `DebuffEffec
 cuts and an enemy's Debuff *action* (a stat cut) are never warded. The balance model mirrors it:
 `PartyBaseline` fills `SimUnit.GearWards`, but gear with wards is drop- or craft-only today, so no
 reference party wears any yet. Shown as chips on the item ("Immune to Poison", "Resists Blind 50%",
-`ItemPresenter.StatusWardLines`). The first five pieces, each tied to one enemy: the **Antivenom
+`ItemPresenter.StatusWardLines`), and summed per hero in the Storehouse stat panel under "Status wards" ("Poison Immune", "Blind 50%"), with the change a piece would make while previewing it (`InventoryHubUI.BuildWardGrid`). The first five pieces, each tied to one enemy: the **Antivenom
 Charm** (Poison, the Mother Ooze 25%) and **Weaver's Veil** (Blind and Silence 50%, the Hex Weaver 4%)
 drop as they are (`ItemSO.DropOnly`: never sold, never in a cache); the **Cantor's Torc** (Silence, the
 Barrow King's recipe 30%), **Tourniquet Gauntlets** (Bleed, the Dark Jailor's recipe 15%) and
