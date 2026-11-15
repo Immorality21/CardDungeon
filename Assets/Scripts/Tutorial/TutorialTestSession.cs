@@ -42,6 +42,8 @@ namespace Assets.Scripts.Tutorial
                 System.IO.Directory.Delete(Directory, true);
             }
             System.IO.Directory.CreateDirectory(Directory);
+            // A wiped folder has lost its SaveInfo.json; check its format again on first use.
+            Assets.Scripts.IO.SaveFormat.Forget(Directory);
             // Audio only, so the test plays at the volume the player set.
             var audio = $"{FileHandler.DefaultDirectory}/Audio.json";
             if (File.Exists(audio))

@@ -13451,3 +13451,83 @@ MonoBehaviour:
     - 'How much less often {status} takes hold on this hero, from their gear. 100% is immunity.'
     Reviewed: 0
     Note: 'Tooltip on a status ward cell'
+  - Key: ui.menu.interface-size
+    Values:
+    - 'Interface size'
+    Reviewed: 0
+    Note: 'Options row label: how big the interface is drawn'
+  - Key: menu.options.interface-size-value
+    Values:
+    - '{size}%'
+    Reviewed: 0
+    Note: 'Options interface-size button; {size} = 100, 115, 130 or 150'
+  - Key: ui.menu.save-data
+    Values:
+    - 'Save data'
+    Reviewed: 0
+    Note: 'Options row label: export / import the save'
+  - Key: ui.menu.save-export
+    Values:
+    - 'Export'
+    Reviewed: 0
+    Note: 'Options save-data button: download the whole save as one file'
+  - Key: ui.menu.save-import
+    Values:
+    - 'Import'
+    Reviewed: 0
+    Note: 'Options save-data button: load a save file, replacing the current save'
+  - Key: ui.menu.save-replace
+    Values:
+    - 'Replace'
+    Reviewed: 0
+    Note: 'Confirms an import that replaces the current save'
+  - Key: ui.menu.save-cancel
+    Values:
+    - 'Cancel'
+    Reviewed: 0
+    Note: 'Cancels a save import'
+  - Key: menu.options.save-nothing
+    Values:
+    - 'There is no save to export yet.'
+    Reviewed: 0
+    Note: 'Export pressed on an empty save'
+  - Key: menu.options.save-exported
+    Values:
+    - 'Save exported. Look in your downloads.'
+    Reviewed: 0
+    Note: 'After an export in the browser'
+  - Key: menu.options.save-exported-to
+    Values:
+    - 'Save exported to {path}'
+    Reviewed: 0
+    Note: 'After an export on desktop; {path} = the file written'
+  - Key: menu.options.save-import-missing
+    Values:
+    - 'No save to import. Put the file here: {path}'
+    Reviewed: 0
+    Note: 'Desktop import with no file; {path} = where it is looked for'
+  - Key: menu.options.save-import-confirm
+    Values:
+    - 'Replace your current save with this one ({count} files)? This cannot be undone.'
+    Reviewed: 0
+    Note: 'Import confirmation; {count} = files in the imported save'
+  - Key: menu.options.save-import-too-new
+    Values:
+    - 'This save comes from a newer version of the game.'
+    Reviewed: 0
+    Note: 'Import refused: written by a newer build'
+  - Key: menu.options.save-import-empty
+    Values:
+    - 'This save file is empty.'
+    Reviewed: 0
+    Note: 'Import refused: no game files inside'
+  - Key: menu.options.save-import-invalid
+    Values:
+    - 'This is not an Immoral Dungeon save file.'
+    Reviewed: 0
+    Note: 'Import refused: not a save bundle'
+  - Key: menu.options.save-imported
+    Values:
+    - 'Save imported. Restarting...'
+    Reviewed: 0
+    Note: 'Import done, the game restarts'

@@ -26,6 +26,7 @@ namespace Assets.Scripts.MainMenu
         private readonly VisualElement _sfxBar;
         private readonly Button _muteButton;
         private readonly Button _speedButton;
+        private readonly Button _sizeButton;
         private readonly Label _note;
         private readonly Button _closeButton;
 
@@ -42,6 +43,7 @@ namespace Assets.Scripts.MainMenu
             _sfxBar = root.Q<VisualElement>("sfx-bar");
             _muteButton = root.Q<Button>("options-mute");
             _speedButton = root.Q<Button>("options-speed");
+            _sizeButton = root.Q<Button>("options-ui-size");
             _note = root.Q<Label>("options-note");
             _closeButton = root.Q<Button>("options-close");
 
@@ -68,6 +70,16 @@ namespace Assets.Scripts.MainMenu
                 {
                     bool inCombat = Rooms.CombatManager.HasInstance && Rooms.CombatManager.Instance.InCombat;
                     Combat.CombatSpeed.Cycle(inCombat);
+                    CombatAudio.Play(CombatSound.CursorMove);
+                    Refresh();
+                };
+            }
+            if (_sizeButton != null)
+            {
+                // Interface size (2026-11-15): 100 -> 115 -> 130 -> 150%, redrawn at once.
+                _sizeButton.clicked += () =>
+                {
+                    InterfaceScale.Cycle();
                     CombatAudio.Play(CombatSound.CursorMove);
                     Refresh();
                 };
@@ -129,6 +141,10 @@ namespace Assets.Scripts.MainMenu
             if (_speedButton != null)
             {
                 _speedButton.text = Combat.CombatSpeed.Label(Combat.CombatSpeed.Current);
+            }
+            if (_sizeButton != null)
+            {
+                _sizeButton.text = InterfaceScale.Label(InterfaceScale.Current);
             }
             SetText(_note, muted
                 ? Loc.Get("menu.options.note-muted")

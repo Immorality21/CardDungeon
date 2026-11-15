@@ -27,6 +27,8 @@ namespace Assets.Scripts.Sandbox.Bot
                 System.IO.Directory.Delete(Directory, true);
             }
             System.IO.Directory.CreateDirectory(Directory);
+            // A wiped folder has lost its SaveInfo.json; check its format again on first use.
+            Assets.Scripts.IO.SaveFormat.Forget(Directory);
         }
 
         /// <summary>The batch is over: stop play, which also hands the save folder back.</summary>

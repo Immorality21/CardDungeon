@@ -48,6 +48,13 @@ namespace Assets.Scripts.Audio
             }
         }
 
+        /// <summary>Drops the cached settings so the next read comes off disk (after a save import).</summary>
+        public static void Invalidate()
+        {
+            _data = null;
+            _files = null;
+        }
+
         public static bool Muted
         {
             get { return Data.Muted; }

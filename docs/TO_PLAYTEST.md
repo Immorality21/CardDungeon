@@ -5,6 +5,16 @@ but **not yet tried by a human with a real mouse and keyboard**. Delete an item 
 played (owner, 2026-11-02: no ticking off); anything that turns out wrong becomes a backlog item in `NEXT_STEPS.md`.
 Most of it came out of playtest 3 (2026-10-26 to 2026-10-28).
 
+## Phone playtest: saves, export/import, interface size (2026-11-15)
+
+Only the editor has seen these; the WebGL build and a real phone have not.
+
+- [ ] **The save survives a new build on itch** - play a bit in the browser, let CI push a new build, reload: the save is still there. (The first build with this change starts empty once: older saves sat in a folder named after the old URL.)
+- [ ] **The save survives closing the tab** right after a fight or a level clear.
+- [ ] **Export / Import** (title > Options > Save data) on a phone: Export downloads a file, Import opens the file picker, Replace restarts the game with that save. Also PC -> phone and back.
+- [ ] **Interface size** - a phone starts at 130%. Readable? Buttons easy to hit? Try 150%. Dense screens (inventory, sphere grid, forge) shrink to fit the screen; are any of them too small to use?
+- [ ] **The web page** - fills the screen, no zoom or scrolling, "turn your phone sideways" in portrait.
+
 ## Summons: once per level, until they fall (2026-11-08)
 
 - [ ] **Once per level** - every summon one use per level; the old +1 charge / +1 turn nodes are now power, damage and health nodes. Does a summon feel worth saving for the right fight?

@@ -22,8 +22,11 @@
 
         <!-- OPTIONS (audio). Stepped buttons rather than sliders so the keyboard cursor, which
              navigates buttons, can reach every control. -->
-        <ui:VisualElement name="options-view" class="cd-window cd-window--flush cd-dock-center cd-hidden">
+        <ui:VisualElement name="options-view" class="cd-window cd-window--flush cd-window--options cd-dock-center cd-hidden">
             <ui:Label text="#ui.menu.options" class="cd-title" />
+            <!-- The settings scroll when they do not fit: at a large Interface size on a phone the
+                 window is taller than the screen. The title and the buttons below stay put. -->
+            <ui:ScrollView name="options-scroll" class="cd-options-scroll" mode="Vertical" horizontal-scroller-visibility="Hidden">
 
             <ui:Label text="#ui.menu.audio" class="cd-section-head" />
             <!-- Each dial: a fixed label column, the nudge buttons either side of a 10-segment bar (one
@@ -93,6 +96,26 @@
                 <ui:Label text="#ui.menu.combat-speed" class="cd-option-label" />
                 <ui:Button name="options-speed" text="" class="cd-button cd-option-toggle" />
             </ui:VisualElement>
+            <!-- Interface size (MainMenu/InterfaceScale): 100/115/130/150%, larger by default on a phone. -->
+            <ui:VisualElement class="cd-option-row">
+                <ui:Label text="#ui.menu.interface-size" class="cd-option-label" />
+                <ui:Button name="options-ui-size" text="" class="cd-button cd-option-toggle" />
+            </ui:VisualElement>
+
+            <!-- Save data (MainMenu/SaveDataOptionsUI): the whole save as one file, out and back in.
+                 Import asks first (Replace / Cancel), then restarts the game. -->
+            <ui:VisualElement class="cd-option-row">
+                <ui:Label text="#ui.menu.save-data" class="cd-option-label" />
+                <ui:Button name="save-export" text="#ui.menu.save-export" class="cd-button cd-option-toggle" />
+                <ui:Button name="save-import" text="#ui.menu.save-import" class="cd-button cd-option-toggle cd-option-toggle--gap" />
+                <!-- While an import waits for a yes, these take the two buttons' place, so the row
+                     keeps its height and the window does not move under the finger. -->
+                <ui:Button name="save-confirm-yes" text="#ui.menu.save-replace" class="cd-button cd-option-toggle cd-hidden" />
+                <ui:Button name="save-confirm-no" text="#ui.menu.save-cancel" class="cd-button cd-option-toggle cd-option-toggle--gap cd-hidden" />
+            </ui:VisualElement>
+            </ui:ScrollView>
+            <!-- Outside the scroll, so the answer to Export / Import is in view whatever the scroll. -->
+            <ui:Label name="save-status" text="" class="cd-info-label cd-save-status" />
             <!-- Every key and mouse action (Tutorial/ControlsPanel). F1 opens it from the title too. -->
             <ui:Button name="options-controls" text="#ui.controls.open" class="cd-button cd-button--narrow" />
             <ui:Button name="options-close" text="#ui.common.back" class="cd-button cd-button--narrow" />

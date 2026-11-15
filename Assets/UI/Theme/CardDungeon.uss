@@ -1241,7 +1241,9 @@
 .cd-inv-window {
     width: 1180px;
     height: 720px;
-    max-width: 98%;
+    /* No width cap: a cap would clip the fixed-pixel columns. A frame wider or taller than the screen
+       is scaled down whole instead (MainMenu/InterfaceScale + FitToScreen, 2026-11-15). */
+    max-width: none;
     max-height: none;
     padding: 0;
     overflow: hidden;
@@ -4178,6 +4180,39 @@
     width: 120px;
     height: 40px;
     margin-top: 0;
+}
+
+/* A second toggle in the same option row (Options > Save data: Export, Import). */
+.cd-option-toggle--gap {
+    margin-left: 8px;
+}
+
+/* What the last export or import did; wraps, since a desktop path can be long. Two lines are
+   always reserved, so a message appearing does not resize (and re-centre) the window. */
+.cd-save-status {
+    font-size: 16px;
+    white-space: normal;
+    margin-top: 4px;
+    min-height: 44px;
+}
+
+/* The title's Options window: as tall as the screen allows, with the settings scrolling inside it
+   rather than being squeezed into each other (a larger Interface size makes it taller). */
+.cd-window--options {
+    max-height: 94%;
+}
+
+.cd-window--options > * {
+    flex-shrink: 0;
+}
+
+.cd-window--options > .cd-options-scroll {
+    flex-shrink: 1;
+    min-height: 0;
+}
+
+.cd-options-scroll .cd-option-row {
+    flex-shrink: 0;
 }
 
 /* A square nudge button. Fixed width so the two sit either side of the readout without the row

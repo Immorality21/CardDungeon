@@ -37,6 +37,13 @@ namespace Assets.Scripts.Combat
             }
         }
 
+        /// <summary>Drops the cached settings so the next read comes off disk (after a save import).</summary>
+        public static void Invalidate()
+        {
+            _data = null;
+            _files = null;
+        }
+
         /// <summary>The speed fights run at.</summary>
         public static int Current => Data.CombatSpeed;
 

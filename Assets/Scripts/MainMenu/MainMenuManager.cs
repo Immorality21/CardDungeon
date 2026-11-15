@@ -34,6 +34,7 @@ public class MainMenuManager : MonoBehaviour
     private Button _quitButton;
 
     private AudioOptionsUI _options;
+    private SaveDataOptionsUI _saveData;
     private KeyboardNavigator _nav;
     private Assets.Scripts.Tutorial.ControlsPanel _controls;
 
@@ -82,6 +83,9 @@ public class MainMenuManager : MonoBehaviour
         {
             _options.OnClosed += ShowTitle;
         }
+
+        // Options > Save data: export / import the whole save (2026-11-15, mobile playtests).
+        _saveData = _optionsView != null ? new SaveDataOptionsUI(_optionsView, gameObject) : null;
 
         SetUpKeyboardNavigation();
 
@@ -196,8 +200,16 @@ public class MainMenuManager : MonoBehaviour
             return;
         }
         SetShown(_titleView, false);
+        _saveData?.Reset();
         _options.Show();
         ResetKeyboardNavigation();
+    }
+
+    /// <summary>The browser's file picker answers here (SendMessage by GameObject name, see
+    /// <c>SaveStorage.jslib</c>) with the chosen file's text.</summary>
+    public void OnSaveFilePicked(string text)
+    {
+        _saveData?.OnFilePicked(text);
     }
 
     private static void OnQuit()

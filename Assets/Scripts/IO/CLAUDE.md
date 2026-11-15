@@ -2,7 +2,49 @@
 
 `FileHandler` reads/writes JSON; every save type implements `IWriteable.GetFileName()`. The deferred commit/discard lifecycle (what's held in memory during a dungeon vs. written on clear/death) is documented in `Assets/Scripts/Dungeon/CLAUDE.md`.
 
-- **Save location:** `Application.persistentDataPath/savedata/` (JSON via `FileHandler`) — unless
+## Storage, safe writes, format version *(2026-11-15)*
+
+- **`FileHandler` decides what and by which name; `ISaveStorage` decides where the bytes go.**
+  `SaveStorage.Current` picks it: `LocalFileStorage` everywhere native (Windows, the editor, Steam later),
+  `WebGLSaveStorage` in the browser. A remote/cloud backend would be a third implementation; nothing
+  above the interface changes. Code that touches save files directly (`File.*`) instead of going
+  through the storage bypasses all of the below; today only the editor-only sandbox/bot/tutorial
+  sessions do, to wipe and seed their throwaway folders.
+- **Safe write:** the text goes to `<file>.tmp`, then replaces the real file (`File.Replace`, or
+  delete+move where that is unsupported). A crash leaves the old file or the new one, never half of
+  either; a finished `.tmp` with no real file next to it (crash between delete and move) is recovered
+  on read. `List` never returns `.tmp` files.
+- **Format version:** `SaveInfo.json` (`SaveFormat`, `SaveInfoData`) records the folder's
+  `FormatVersion` and the last build's `Application.version`. No file = version 0 (every save before
+  2026-11-15). The first load or save in a folder per session runs `SaveFormat.Ensure`: each step
+  from the folder's version up to `CurrentVersion`, then writes the new version. Looking into an empty
+  folder writes nothing. A folder from a newer build is loaded but **read-only** for the session
+  (`SaveFormat.IsReadOnly`; `FileHandler.Save`/`Delete` refuse with an error), since writing it in the
+  old format would drop the fields this build does not know. A damaged `SaveInfo.json` counts as
+  version 0 and is rewritten. **To change the
+  format: bump `CurrentVersion` and add the N-1 -> N case to `SaveFormat.Step`.** A folder wiped from
+  outside (`Directory.Delete`) must call `SaveFormat.Forget(dir)`, or its missing `SaveInfo.json` is
+  not rewritten until the next session.
+- **WebGL:** saves live in a **fixed** folder, `/idbfs/immoral-dungeon/savedata` (`SaveStorage.WebGLRoot`),
+  not `persistentDataPath`, which is a hash of the page URL; itch.io serves every upload from a new
+  URL, so every new build used to start empty. Unity restores all of `/idbfs` from IndexedDB before the
+  first scene; every write/delete then syncs back (`SaveStorage_Sync` in
+  `Assets/Plugins/WebGL/SaveStorage.jslib`, overlapping requests folded into one). The folder name is
+  the game's own because all itch games share one origin, so one IndexedDB.
+- **Export / import** (`SaveTransfer`, the title's Options > Save data, see the MainMenu guide): the
+  whole folder as one JSON bundle (`SaveBundle`: tag, format version, files). `SaveInfo.json` is not a
+  file in it; its version travels in the bundle and an import writes it back, so an older bundle goes
+  through the usual steps on the next load; a folder with no `SaveInfo.json` exports as version 0.
+  **Device files stay on the device** (`SaveTransfer.DeviceFiles`: Audio, Display, Gameplay): never
+  exported, never replaced. Import refuses a non-bundle, an empty one, a newer format and **any file
+  that is not a readable JSON object**, drops names that are not plain ASCII or are Windows-reserved
+  (`IsSafeName`), then: writes the current save as a bundle to `savedata_backup/before-import.json`
+  (`BackupPath`, importable again), writes the new files, deletes the old ones the bundle lacks, and
+  syncs the browser storage **once** at the end (`ISaveStorage.DeferFlush`), so a tab closed mid-import
+  never captures an empty folder. Export/import act on `FileHandler.CurrentDirectory`, so a sandbox
+  session's title screen never touches the real save.
+
+- **Save location:** `Application.persistentDataPath/savedata/` (WebGL: `/idbfs/immoral-dungeon/savedata/`) (JSON via `FileHandler`) — unless
   `FileHandler.DirectoryOverride` is set, which redirects every handler created afterwards. Only the
   sandbox sets it (`savedata_sandbox`, see `docs/SANDBOX.md`); it is editor-only and cleared on
   leaving play mode. Anything that builds a save path by hand instead of going through `FileHandler`

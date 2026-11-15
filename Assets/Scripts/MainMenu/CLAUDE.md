@@ -1,7 +1,7 @@
 # Title screen (`MainMenu`)
 
-`MainMenuManager` (global namespace) and `AudioOptionsUI` (`Assets.Scripts.MainMenu`). That is the
-whole folder.
+`MainMenuManager` (global namespace), `AudioOptionsUI`, `SaveDataOptionsUI` and `InterfaceScale`
+(`Assets.Scripts.MainMenu`).
 
 **Everything else moved to `Assets/Scripts/Hub/` on 2026-09-05** — read
 [the Hub guide](../Hub/CLAUDE.md) for the town, the run flow, the panels and the keyboard rules. This
@@ -64,6 +64,41 @@ deliberate **Main Menu** button.
   (Main Menu → Options). If that proves annoying, duplicating `options-view` into `Hub.uxml` is ~25
   lines of UXML and one extra `AudioOptionsUI` construction, precisely because it has no
   dependencies.
+
+- **The settings scroll** *(2026-11-15)*: everything between the title and Controls/Back sits in
+  `options-scroll`, and `.cd-window--options` lets the window use 94% of the screen. At a large
+  Interface size on a phone the list is taller than the screen; squeezing it crushed the rows into
+  each other.
+
+- **Interface size** *(2026-11-15)* - `InterfaceScale`, the `options-ui-size` button (also in the
+  dungeon's pause menu, through the same `AudioOptionsUI`). 100 / 115 / 130 / 150%, saved to
+  `savedata/Display.json`; the first launch on a phone or tablet (`Application.isMobilePlatform`, true
+  in a mobile browser) starts at 130%. It shrinks the shared `PanelSettings`' **reference
+  resolution** (130% = 1231×692), so everything is drawn larger with no UXML change; in the editor the
+  asset is put back when play mode ends. **Every `.cd-window` also gets `FitToScreen`** on scene load
+  (`ImmoralityGaming/Menu`): a window larger than the screen is scaled down around its centre until it
+  fits (picking follows the transform), so the fixed-pixel screens (the 1180×720 inventory) stay whole
+  while the rest grow. That is also the safety net for a 20:9 phone at 100%, which is shorter than
+  900 layout units. **A window must not cap itself with a percentage `max-width`/`max-height`**: the
+  cap clips its fixed-pixel content before it is ever measured as too big (`.cd-inv-window`, which
+  every big hub screen uses, had `max-width: 98%` and was cropped on a 4:3 tablet). `FitToScreen`
+  listens to the shared panel root only while the window is attached, so old scenes are not kept
+  alive. In the editor the panel's original size is kept in `SessionState`, so a recompile in play
+  mode cannot leave the asset shrunk.
+
+  On WebGL the Import button **arms** the file picker on press and the release's own browser event
+  opens it (Safari opens a picker only inside the tap); the click opens it only if that did not
+  happen (keyboard).
+
+- **Save data** *(2026-11-15)* - `SaveDataOptionsUI`: **Export** downloads the whole save as one file
+  (browser: a download through `BrowserBridge`; editor: a save dialog; desktop build: a fixed
+  `immoral-dungeon-save.json` next to the save folder). **Import** picks a file (browser: the file
+  picker, answering through `SendMessage` to `MainMenuManager.OnSaveFilePicked` - the GameObject's
+  name matters), shows Replace / Cancel **in place of** Export / Import (the row keeps its height, so the
+  centred window does not move under the finger), and on Replace writes the files and **restarts**:
+  a page reload in the browser (after the IndexedDB sync), elsewhere the static caches that outlive a
+  scene are dropped and MenuScene loads again. It is on the title only, where nothing holds the save.
+  The status line sits outside the scroll so the answer is always in view. Rules: the IO guide.
 
 - **The Controls screen** *(playtest 4 finding 58, 2026-11-10)* - Options' **Controls** button, or **F1**
   from anywhere on the title. `Tutorial/ControlsPanel` over `controls-overlay` (last in MainMenu.uxml),
