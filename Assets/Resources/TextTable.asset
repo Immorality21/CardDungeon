@@ -13531,3 +13531,13 @@ MonoBehaviour:
     - 'Save imported. Restarting...'
     Reviewed: 0
     Note: 'Import done, the game restarts'
+  - Key: ui.hub.forge-equip
+    Values:
+    - 'Equip'
+    Reviewed: 0
+    Note: 'Forge button after crafting gear: go to the Storehouse with it ready to put on'
+  - Key: abilities.forge.forged-equip
+    Values:
+    - 'Forged a {item}. Equip puts it on now; it also waits in the Storehouse.'
+    Reviewed: 0
+    Note: 'After crafting a piece of gear; {item} = what was made'

@@ -352,6 +352,13 @@ namespace Assets.Scripts.Items
             return CraftingOps.AlreadyKnown(item, _saveData.Items);
         }
 
+        /// <summary>How many of <paramref name="item"/> the party owns, in the bags and on heroes,
+        /// including what this floor has found so far. Finds use it to favour gear not yet owned.</summary>
+        public int CopiesOwned(ItemSO item)
+        {
+            return InventoryOperations.CopiesOwned(item, _saveData.Items);
+        }
+
         /// <summary>What stops <paramref name="recipe"/> being made with what is carried and the purse.</summary>
         public CraftBlock CheckCraft(ItemSO recipe, int gold)
         {

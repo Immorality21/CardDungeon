@@ -352,6 +352,8 @@ namespace Assets.Scripts.Hub
             _sphereGrid.SelectionChanged += RefreshTutorial;
             _sphereGrid.GuideRefused += NudgeTutorial;
             _forge.OnClosed += ShowTown;
+            // Equip on a piece just crafted: straight to the Storehouse with it ready to put on.
+            _forge.EquipRequested += OnForgeEquip;
             _bestiary.OnClosed += ShowTown;
             _tavern.OnClosed += ShowTown;
             _inventory.OnClosed += ShowTown;
@@ -2387,6 +2389,16 @@ namespace Assets.Scripts.Hub
             CoverTown();
             SetShown(_lotView, false);
             _inventory.Show();
+        }
+
+        /// <summary>The Forge's Equip: the Storehouse opens on the crafted piece, cursor on it. The
+        /// Forge has already closed itself without going back to the town, so the town stays covered.</summary>
+        private void OnForgeEquip(ItemSO item)
+        {
+            CoverTown();
+            SetShown(_lotView, false);
+            _inventory.ShowFor(item);
+            ResetKeyboardNavigation();
         }
 
         private void OnBack()

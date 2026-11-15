@@ -88,7 +88,11 @@ events leave it alone (`RoomKind.AcceptsOtherSpecials`) so a room offers exactly
 maximum** (a fraction, not a flat number, so it keeps its meaning as bars grow); a cache pays
 `15 + 10 x (depth-1)` gold into the *pending* pool - forfeited on death like a kill's - plus at most
 **one** item rolled through the ordinary `LootRoller` rarity/depth rules. One item, because rolling
-the whole catalog would empty it into the party's bags.
+the whole catalog would empty it into the party's bags. **Gear the party already owns is less likely**
+(owner, 2026-11-15: four Leather Caps before the Mage): each copy owned, loose or worn, multiplies its
+chance by `LootRoller.DuplicateFalloff` (0.4; `DuplicateFactor`, `InventoryManager.CopiesOwned`). An
+event's "one of" list (`RoomEventRunner.PickOneOf`) is weighted the same way; an enemy's authored drop
+table is not. Measured over 12 floor-1 caches: different items 8.0 -> 9.6, most copies of one 3.0 -> 2.1.
 
 A cache also yields the floor's **raw materials**, from `LevelDefinitionSO.MaterialTable`, through
 `RoomKindRewards.TreasureMaterials`. That is a *separate* roll from the single item slot above, and
@@ -133,7 +137,7 @@ through), or in the centre of a room nothing has claimed.
 ## Using what is in a room (`Rooms/UI/RoomActionUI.cs`)
 
 **There is no room bar (removed 2026-10-31): everything a room offers is an object, used by walking up
-to it.** **`UseAt(facing, standing)` is the one rule for what is usable** (2026-11-10): Enter (`UseFacing`), the walking hint ("Enter: rest", "Enter: take the stairs", "Enter: search the chest", the event's title; Enter is left out when nothing is at hand, `room.use.*`), stepping onto the stairs or a refuge (below) and the halo on usable objects all read it. **Stepping onto or into the stairs or a refuge opens its prompt** (playtest 4 findings 37/64): `PartyWalk.KeyStepEnded` / `KeyBumped`, only for steps the keys took (a click already uses what it walks to; `WalkStep` raises neither), once per step - a declined prompt stays shut while the party stands there or keeps pushing the key, Enter reopens it. **Usable, unused objects glow** (finding 10): `TickUsableGlow` puts a pulsing gold copy of the sprite, 1.22x, behind each one `UseAt` passes in the party's room, toggled by `SetActive` so `Room.Reveal` cannot switch it on. `UseFacing` is the one way in, from Enter on the tile the party faces or stands on, or from a
+to it.** **`UseAt(facing, standing)` is the one rule for what is usable** (2026-11-10): Enter (`UseFacing`), the walking hint ("Enter: rest", "Enter: take the stairs", "Enter: search the chest", the event's title; Enter is left out when nothing is at hand, `room.use.*`), stepping onto the stairs or a refuge (below) and the glint on usable objects all read it. **Stepping onto or into the stairs or a refuge opens its prompt** (playtest 4 findings 37/64): `PartyWalk.KeyStepEnded` / `KeyBumped`, only for steps the keys took (a click already uses what it walks to; `WalkStep` raises neither), once per step - a declined prompt stays shut while the party stands there or keeps pushing the key, Enter reopens it. **Usable, unused objects glint** (finding 10): `TickUsableGlint` puts a small twinkling sparkle (`Resources/CombatIcons/glint`, 9px) on the top-right corner of each one `UseAt` passes in the party's room, each on its own beat, toggled by `SetActive` so `Room.Reveal` cannot switch it on. It replaced a pulsing gold halo behind the sprite (2026-11-15): on a phone that rim was a few pixels wide and did not read. `UseFacing` is the one way in, from Enter on the tile the party faces or stands on, or from a
 click, which walks there first. It does nothing in a guarded room or on something spent.
 
 **So nothing may be out of reach.** `Room.SolidTiles` leaves an object walkable rather than let it box

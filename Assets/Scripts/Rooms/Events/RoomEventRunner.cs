@@ -476,7 +476,9 @@ namespace Assets.Scripts.Rooms.Events
         }
 
         /// <summary>Hands over one item of <paramref name="items"/>, never a recipe already known, or
-        /// null when there is none to give.</summary>
+        /// null when there is none to give. Gear the party already owns is less likely
+        /// (<see cref="LootRoller.DuplicateFactor"/>), so a list of three does not keep handing over the
+        /// same cap.</summary>
         public static ItemSO GrantOneOf(List<ItemSO> items)
         {
             if (items == null || !InventoryManager.HasInstance)
@@ -488,12 +490,39 @@ namespace Assets.Scripts.Rooms.Events
             {
                 return null;
             }
-            var item = open[Random.Range(0, open.Count)];
+            var item = PickOneOf(open, InventoryManager.Instance.CopiesOwned, Random.Range(0f, 1f));
             if (item != null)
             {
                 InventoryManager.Instance.AddItem(item, 1, EconomySource.RoomEvent);
             }
             return item;
+        }
+
+        /// <summary>
+        /// One of <paramref name="items"/>, weighted by <see cref="LootRoller.DuplicateFactor"/> so what
+        /// the party owns fewer of comes up more. <paramref name="roll"/> is in [0,1]. Pure, for tests.
+        /// </summary>
+        public static ItemSO PickOneOf(IList<ItemSO> items, System.Func<ItemSO, int> copiesOwned, float roll)
+        {
+            if (items == null || items.Count == 0)
+            {
+                return null;
+            }
+            float total = 0f;
+            foreach (var item in items)
+            {
+                total += LootRoller.DuplicateFactor(item, copiesOwned != null ? copiesOwned(item) : 0);
+            }
+            float target = Mathf.Clamp01(roll) * total;
+            foreach (var item in items)
+            {
+                target -= LootRoller.DuplicateFactor(item, copiesOwned != null ? copiesOwned(item) : 0);
+                if (target <= 0f)
+                {
+                    return item;
+                }
+            }
+            return items[items.Count - 1];
         }
 
         /// <summary>

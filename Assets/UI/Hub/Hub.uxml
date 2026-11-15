@@ -275,6 +275,8 @@
                     </ui:VisualElement>
                     <ui:VisualElement class="cd-camp-actions">
                         <ui:Button name="forge-upgrade" text="#ui.hub.forge-upgrade" class="cd-inv-tab cd-camp-action" />
+                        <!-- After a craft of gear: straight to the Storehouse with it ready to put on (2026-11-15). -->
+                        <ui:Button name="forge-equip" text="#ui.hub.forge-equip" class="cd-inv-tab cd-camp-action cd-hidden" />
                     </ui:VisualElement>
                     <ui:Label name="forge-reason" text="" class="cd-reason" />
                     <ui:ScrollView name="forge-detail-body" class="cd-inv-detail__body" mode="Vertical" horizontal-scroller-visibility="Hidden" />

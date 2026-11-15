@@ -289,6 +289,9 @@ Knowledge, and the first pass is a **small starter set**.
   (Mirefather 35%, Bog Shaman 6%), Hexsilk Gloves (Hex Weaver 8%, Chapel of Knives clear 40%), Gilded
   Charm (Gilded Hoarder 20%), Voidforged Blade, the rare one (Lich 10%, Cinder Tyrant 5%). A floor's
   clear drops come from `LevelDefinitionSO.RecipeTable`.
+- **Equip straight from the Forge** (owner, 2026-11-15): crafting a piece of gear shows **Equip** beside
+  Forge, which opens the Storehouse on it (`InventoryHubUI.ShowFor`): a hero who can wear it (one with
+  that slot empty first), its slot, the cursor on its row, so Enter puts it on. Back goes to the town.
 - **A base item** is taken from the bags first (the least grown copy), else from a hero, who then
   wears the result in the same slot.
 - **Crafted gear is `CraftOnly`**: never in the Merchant's stock or a cache. Its stats sit beside shop

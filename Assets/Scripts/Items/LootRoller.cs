@@ -35,6 +35,12 @@ namespace Assets.Scripts.Items
         private const int UnderLevelGrace = 1;
 
         /// <summary>
+        /// Each copy of a piece of gear the party already owns multiplies its chance in a find by this
+        /// (owner, 2026-11-15: four Leather Caps before the Mage). One copy 40%, two 16%, three 6%.
+        /// </summary>
+        public const float DuplicateFalloff = 0.4f;
+
+        /// <summary>
         /// Probability [0,1] that <paramref name="item"/> drops at the given 0-based run level.
         /// <paramref name="campaignStep"/> is how far into the campaign the run sits
         /// (<c>RunDefinitionSO.SequenceIndex</c>): it only fades out <b>equipment</b> the campaign has
@@ -76,6 +82,21 @@ namespace Assets.Scripts.Items
         public static bool ShouldDrop(ItemSO item, int runLevelIndex, float roll, int campaignStep = 0)
         {
             return roll < DropChance(item, runLevelIndex, campaignStep);
+        }
+
+        /// <summary>
+        /// How much less likely a find of <paramref name="item"/> is when the party already owns
+        /// <paramref name="copiesOwned"/> of it: 1 for none, then <see cref="DuplicateFalloff"/> per copy.
+        /// Gear only: materials and the like are meant to pile up. Applied by the finds that pick one item
+        /// out of many (a cache, an event's "one of"), not by an enemy's authored drop table.
+        /// </summary>
+        public static float DuplicateFactor(ItemSO item, int copiesOwned)
+        {
+            if (item == null || item.Category != ItemCategory.Equipment || copiesOwned <= 0)
+            {
+                return 1f;
+            }
+            return Mathf.Pow(DuplicateFalloff, copiesOwned);
         }
 
         // ============================================================

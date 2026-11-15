@@ -60,6 +60,7 @@ namespace Assets.Scripts.Cards.UI
         private readonly Label _detailName;
         private readonly Label _detailSub;
         private readonly Button _upgradeButton;
+        private readonly Button _equipButton;
         private readonly Label _reasonLabel;
         private readonly ScrollView _detailBody;
         private readonly Label _feedbackLabel;
@@ -68,7 +69,17 @@ namespace Assets.Scripts.Cards.UI
         private Tab _tab = Tab.Craft;
         private int _index;
 
+        // The piece of gear just crafted from the selected recipe, offered by Equip until the
+        // selection moves on. Null when there is nothing to offer.
+        private ItemSO _justMade;
+
         public event Action OnClosed;
+
+        /// <summary>
+        /// Equip was pressed on a piece just crafted: the Forge has closed itself without
+        /// <see cref="OnClosed"/>, and the hub opens the Storehouse with the piece ready to put on.
+        /// </summary>
+        public event Action<ItemSO> EquipRequested;
 
         public MagicForgeUI(VisualElement root)
         {
@@ -85,6 +96,7 @@ namespace Assets.Scripts.Cards.UI
             _detailName = root.Q<Label>("forge-detail-name");
             _detailSub = root.Q<Label>("forge-detail-sub");
             _upgradeButton = root.Q<Button>("forge-upgrade");
+            _equipButton = root.Q<Button>("forge-equip");
             _reasonLabel = root.Q<Label>("forge-reason");
             _detailBody = root.Q<ScrollView>("forge-detail-body");
             _feedbackLabel = root.Q<Label>("forge-feedback");
@@ -94,6 +106,10 @@ namespace Assets.Scripts.Cards.UI
             _tabCombos.clicked += () => SetTab(Tab.Combos);
             _closeButton.clicked += Hide;
             _upgradeButton.clicked += OnUpgrade;
+            if (_equipButton != null)
+            {
+                _equipButton.clicked += OnEquip;
+            }
 
             _root.style.display = DisplayStyle.None;
         }
@@ -138,6 +154,7 @@ namespace Assets.Scripts.Cards.UI
             _root.style.display = DisplayStyle.None;
             _list.Clear();
             _entries.Clear();
+            SetJustMade(null);
             OnClosed?.Invoke();
         }
 
@@ -149,6 +166,7 @@ namespace Assets.Scripts.Cards.UI
         {
             _tab = tab;
             _index = 0;
+            SetJustMade(null);
             _tabCraft.EnableInClassList("cd-inv-tab--active", tab == Tab.Craft);
             _tabMagic.EnableInClassList("cd-inv-tab--active", tab == Tab.Magic);
             _tabCombos.EnableInClassList("cd-inv-tab--active", tab == Tab.Combos);
@@ -316,6 +334,7 @@ namespace Assets.Scripts.Cards.UI
         {
             _index = index;
             SetText(_feedbackLabel, string.Empty);
+            SetJustMade(null);
             PaintSelection();
             RefreshDetail();
         }
@@ -593,7 +612,32 @@ namespace Assets.Scripts.Cards.UI
             int keep = _index;
             Refresh();
             Select(keep);
-            SetText(_feedbackLabel, Loc.Format("abilities.forge.forged", ("item", made.DisplayName)));
+            // Gear can be put on from here; anything else just goes to the Storehouse.
+            bool wearable = made != null && made.Category == ItemCategory.Equipment;
+            SetText(_feedbackLabel, Loc.Format(wearable ? "abilities.forge.forged-equip" : "abilities.forge.forged", ("item", made.DisplayName)));
+            SetJustMade(wearable ? made : null);
+        }
+
+        /// <summary>Shows or hides Equip for <paramref name="made"/>.</summary>
+        private void SetJustMade(ItemSO made)
+        {
+            _justMade = made;
+            SetShown(_equipButton, made != null);
+        }
+
+        private void OnEquip()
+        {
+            var made = _justMade;
+            if (made == null)
+            {
+                return;
+            }
+            // Closed without OnClosed, so the hub does not go back to the town in between.
+            _root.style.display = DisplayStyle.None;
+            _list.Clear();
+            _entries.Clear();
+            SetJustMade(null);
+            EquipRequested?.Invoke(made);
         }
 
         // ============================================================

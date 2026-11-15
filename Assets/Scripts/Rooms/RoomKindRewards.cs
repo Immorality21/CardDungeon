@@ -59,8 +59,11 @@ namespace Assets.Scripts.Rooms
         /// walk would mean the first shuffled material almost always won the single slot and a cache
         /// stopped producing gear entirely.</para>
         /// </summary>
+        /// <param name="copiesOwned">How many of an item the party owns; each copy makes it less likely
+        /// (<see cref="LootRoller.DuplicateFactor"/>). Null counts none.</param>
         public static ItemSO PickTreasureItem(
-            IList<ItemSO> candidates, int runLevelIndex, Func<float> roll, int campaignStep = 0)
+            IList<ItemSO> candidates, int runLevelIndex, Func<float> roll, int campaignStep = 0,
+            Func<ItemSO, int> copiesOwned = null)
         {
             if (candidates == null || roll == null)
             {
@@ -77,7 +80,9 @@ namespace Assets.Scripts.Rooms
                     continue;
                 }
 
-                if (LootRoller.ShouldDrop(item, runLevelIndex, roll(), campaignStep))
+                float chance = LootRoller.DropChance(item, runLevelIndex, campaignStep)
+                    * LootRoller.DuplicateFactor(item, copiesOwned != null ? copiesOwned(item) : 0);
+                if (roll() < chance)
                 {
                     return item;
                 }

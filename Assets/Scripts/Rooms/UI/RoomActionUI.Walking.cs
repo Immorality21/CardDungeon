@@ -110,7 +110,7 @@ namespace Assets.Scripts.Rooms
 
             TickRoomClick();
             TickWalk();
-            TickUsableGlow();
+            TickUsableGlint();
 
             // Fight/Flee is a question, so it carries its cursor from the moment it appears - the
             // command menu already does, and Enter should not need an arrow press to wake it up.
@@ -404,103 +404,139 @@ namespace Assets.Scripts.Rooms
         //  WHAT CAN BE USED STANDS OUT
         // ============================================================
 
-        // A soft halo behind each object in the room that Enter would use now, so it reads apart
-        // from the biome's decoration (playtest 4 finding 10, the Warren Tunnels). Keyed by the
-        // object's renderer; the halo is a child copy of its sprite, so the object itself is never
-        // tinted and its spent sprite needs no undo.
-        private readonly Dictionary<SpriteRenderer, SpriteRenderer> _glows = new Dictionary<SpriteRenderer, SpriteRenderer>();
-        private readonly List<SpriteRenderer> _glowMarkers = new List<SpriteRenderer>();
-        private readonly List<SpriteRenderer> _staleGlows = new List<SpriteRenderer>();
+        // A small twinkling glint at the top-right of each object in the room that Enter would use
+        // now, so it reads apart from the biome's decoration (playtest 4 finding 10, the Warren
+        // Tunnels). It replaced a gold halo behind the sprite (2026-11-15), which did not show on a
+        // phone: a soft rim around a 32px object is a few pixels wide there. Keyed by the object's
+        // renderer; the glint is a child sprite, so the object itself is never tinted and its spent
+        // sprite needs no undo.
+        private readonly Dictionary<SpriteRenderer, SpriteRenderer> _glints = new Dictionary<SpriteRenderer, SpriteRenderer>();
+        private readonly List<SpriteRenderer> _glintMarkers = new List<SpriteRenderer>();
+        private readonly List<SpriteRenderer> _staleGlints = new List<SpriteRenderer>();
+        private Sprite _glintSprite;
+        private bool _glintSpriteLoaded;
 
-        private const float GlowScale = 1.22f;
-        private const float GlowPulseSpeed = 2.6f;
-        private const float GlowAlphaLow = 0.18f;
-        private const float GlowAlphaHigh = 0.5f;
-        private static readonly Color GlowColor = new Color(1f, 0.88f, 0.45f);
+        /// <summary>Seconds per twinkle.</summary>
+        private const float GlintPeriod = 1.6f;
+        private const float GlintScaleLow = 0.8f;
+        private const float GlintScaleHigh = 1.5f;
+        private const float GlintAlphaLow = 0.5f;
+        /// <summary>How far in from the object's top-right corner the glint sits, in world units.</summary>
+        private static readonly Vector2 GlintInset = new Vector2(0.1f, 0.08f);
 
         /// <summary>
-        /// Lights the usable, unused objects of the party's room and puts out every other halo. Usable
-        /// is <see cref="UseAt"/> on the object's own tile, the rule Enter follows, so a guarded room,
-        /// a spent chest or a resolved event shows nothing.
+        /// Puts a glint on the usable, unused objects of the party's room and takes it off every other
+        /// one. Usable is <see cref="UseAt"/> on the object's own tile, the rule Enter follows, so a
+        /// guarded room, a spent chest or a resolved event shows nothing.
         /// </summary>
-        private void TickUsableGlow()
+        private void TickUsableGlint()
         {
-            _glowMarkers.Clear();
+            _glintMarkers.Clear();
             if (_currentRoom != null && !(CombatStage.HasInstance && CombatStage.Instance.IsRaised))
             {
-                AddGlowMarker(_currentRoom.ReturnMarker);
-                AddGlowMarker(_currentRoom.EventMarker);
-                AddGlowMarker(_currentRoom.KindMarker);
-                AddGlowMarker(_currentRoom.ExitMarker != null ? _currentRoom.ExitMarker.GetComponent<SpriteRenderer>() : null);
+                AddGlintMarker(_currentRoom.ReturnMarker);
+                AddGlintMarker(_currentRoom.EventMarker);
+                AddGlintMarker(_currentRoom.KindMarker);
+                AddGlintMarker(_currentRoom.ExitMarker != null ? _currentRoom.ExitMarker.GetComponent<SpriteRenderer>() : null);
             }
 
-            float t = 0.5f + 0.5f * Mathf.Sin(Time.time * GlowPulseSpeed);
-            foreach (var marker in _glowMarkers)
+            foreach (var marker in _glintMarkers)
             {
                 var tile = Vector2Int.RoundToInt(marker.transform.position);
                 bool usable = marker.enabled && UseAt(tile, tile) != RoomUse.None;
-                var glow = usable ? GlowFor(marker) : (_glows.TryGetValue(marker, out var existing) ? existing : null);
-                if (glow == null)
+                var glint = usable ? GlintFor(marker) : (_glints.TryGetValue(marker, out var existing) ? existing : null);
+                if (glint == null)
                 {
                     continue;
                 }
-                if (glow.gameObject.activeSelf != usable)
+                if (glint.gameObject.activeSelf != usable)
                 {
-                    glow.gameObject.SetActive(usable);
+                    glint.gameObject.SetActive(usable);
                 }
                 if (usable)
                 {
-                    glow.sprite = marker.sprite;
-                    glow.flipX = marker.flipX;
-                    glow.color = new Color(GlowColor.r, GlowColor.g, GlowColor.b, Mathf.Lerp(GlowAlphaLow, GlowAlphaHigh, t));
+                    PoseGlint(marker, glint, tile);
                 }
             }
 
-            // Halos of other rooms (or of objects gone) go out.
-            _staleGlows.Clear();
-            foreach (var pair in _glows)
+            // Glints of other rooms (or of objects gone) go out.
+            _staleGlints.Clear();
+            foreach (var pair in _glints)
             {
                 if (pair.Key == null || pair.Value == null)
                 {
-                    _staleGlows.Add(pair.Key);
+                    _staleGlints.Add(pair.Key);
                     continue;
                 }
-                if (!_glowMarkers.Contains(pair.Key) && pair.Value.gameObject.activeSelf)
+                if (!_glintMarkers.Contains(pair.Key) && pair.Value.gameObject.activeSelf)
                 {
                     pair.Value.gameObject.SetActive(false);
                 }
             }
-            foreach (var key in _staleGlows)
+            foreach (var key in _staleGlints)
             {
-                _glows.Remove(key);
+                _glints.Remove(key);
             }
         }
 
-        private void AddGlowMarker(SpriteRenderer marker)
+        /// <summary>Sits the glint on the object's top-right corner and twinkles it: a quick swell and
+        /// fade once per <see cref="GlintPeriod"/>, each object on its own beat so a room of them does
+        /// not blink in step.</summary>
+        private static void PoseGlint(SpriteRenderer marker, SpriteRenderer glint, Vector2Int tile)
+        {
+            var bounds = marker.bounds;
+            var at = new Vector3(bounds.max.x - GlintInset.x, bounds.max.y - GlintInset.y, marker.transform.position.z - 0.01f);
+            glint.transform.position = at;
+
+            float offset = ((tile.x * 7 + tile.y * 13) % 10) / 10f;
+            float phase = Mathf.Repeat(Time.time / GlintPeriod + offset, 1f);
+            // A sharp peak, not a sine: a glint flashes and settles, it does not breathe.
+            float flash = Mathf.Pow(Mathf.Sin(phase * Mathf.PI), 4f);
+            float scale = Mathf.Lerp(GlintScaleLow, GlintScaleHigh, flash);
+            var parentScale = marker.transform.lossyScale;
+            glint.transform.localScale = new Vector3(
+                scale / Mathf.Max(0.0001f, Mathf.Abs(parentScale.x)),
+                scale / Mathf.Max(0.0001f, Mathf.Abs(parentScale.y)),
+                1f);
+            glint.color = new Color(1f, 1f, 1f, Mathf.Lerp(GlintAlphaLow, 1f, flash));
+        }
+
+        private void AddGlintMarker(SpriteRenderer marker)
         {
             if (marker != null && marker.sprite != null)
             {
-                _glowMarkers.Add(marker);
+                _glintMarkers.Add(marker);
             }
         }
 
-        private SpriteRenderer GlowFor(SpriteRenderer marker)
+        private SpriteRenderer GlintFor(SpriteRenderer marker)
         {
-            if (_glows.TryGetValue(marker, out var glow) && glow != null)
+            if (_glints.TryGetValue(marker, out var glint) && glint != null)
             {
-                return glow;
+                return glint;
             }
-            var obj = new GameObject("UsableGlow");
+            if (!_glintSpriteLoaded)
+            {
+                _glintSpriteLoaded = true;
+                _glintSprite = CombatIcons.Get("glint");
+                if (_glintSprite == null)
+                {
+                    Debug.LogError("RoomActionUI: Resources/CombatIcons/glint is missing; usable objects will not be marked.");
+                }
+            }
+            if (_glintSprite == null)
+            {
+                return null;
+            }
+            var obj = new GameObject("UsableGlint");
             obj.transform.SetParent(marker.transform, false);
-            obj.transform.localScale = Vector3.one * GlowScale;
-            // Behind the object, so only the rim of the larger copy shows: an outline, not a wash.
-            obj.transform.localPosition = new Vector3(0f, 0f, 0.01f);
-            glow = obj.AddComponent<SpriteRenderer>();
-            glow.sortingLayerID = marker.sortingLayerID;
-            glow.sortingOrder = marker.sortingOrder - 1;
+            glint = obj.AddComponent<SpriteRenderer>();
+            glint.sprite = _glintSprite;
+            glint.sortingLayerID = marker.sortingLayerID;
+            glint.sortingOrder = marker.sortingOrder + 1;
             obj.SetActive(false);
-            _glows[marker] = glow;
-            return glow;
+            _glints[marker] = glint;
+            return glint;
         }
 
         private void CreateWalk()

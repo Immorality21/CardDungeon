@@ -752,7 +752,7 @@ namespace Assets.Scripts.Rooms
 
             return RoomKindRewards.PickTreasureItem(
                 candidates, DungeonManager.RunLevelIndex, () => UnityEngine.Random.Range(0f, 1f),
-                DungeonManager.LootCampaignStep);
+                DungeonManager.LootCampaignStep, InventoryManager.Instance.CopiesOwned);
         }
 
         /// <summary>

@@ -13,6 +13,25 @@ namespace Assets.Scripts.Items
     /// </summary>
     public static class InventoryOperations
     {
+        /// <summary>How many of <paramref name="item"/> are in <paramref name="items"/>, loose or worn
+        /// (a stack counts its quantity).</summary>
+        public static int CopiesOwned(ItemSO item, IList<ItemSaveData> items)
+        {
+            if (item == null || items == null || string.IsNullOrEmpty(item.Key))
+            {
+                return 0;
+            }
+            int copies = 0;
+            foreach (var entry in items)
+            {
+                if (entry != null && entry.ItemKey == item.Key)
+                {
+                    copies += Mathf.Max(1, entry.Quantity);
+                }
+            }
+            return copies;
+        }
+
         /// <summary>Old saves predate Quantity; JsonUtility leaves it 0. Treat non-positive as one.</summary>
         public static void NormalizeQuantities(List<ItemSaveData> items)
         {

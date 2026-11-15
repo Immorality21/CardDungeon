@@ -63,6 +63,11 @@ namespace Assets.Scripts.Items.UI
 
             /// <summary>The loadout this entry would leave the hero in (equipment list only).</summary>
             public List<GearPiece> Gear;
+
+            /// <summary>The item a candidate row puts on, and whether it is a loose copy in the bags
+            /// (<see cref="ShowFor"/> looks for one). Null on rows that are not an item.</summary>
+            public string ItemKey;
+            public bool InBag;
         }
 
         private readonly VisualElement _root;
@@ -219,6 +224,59 @@ namespace Assets.Scripts.Items.UI
 
             Refresh();
             FocusRoot();
+        }
+
+        /// <summary>
+        /// Opens on <paramref name="item"/>, ready to put on (the Forge's Equip after a craft): the
+        /// Equipment tab, a hero who can wear it, its slot, and the cursor on its row, so Enter equips
+        /// it. A hero with that slot empty comes first, then the first who can wear it at all. Falls back
+        /// to a plain <see cref="Show"/> for anything that is not gear or that nobody owned can wear.
+        /// </summary>
+        public void ShowFor(ItemSO item)
+        {
+            Show();
+            if (item == null || item.Category != ItemCategory.Equipment)
+            {
+                return;
+            }
+            int slot = Array.IndexOf(ItemPresenter.SlotOrder, item.SlotType);
+            if (slot < 0)
+            {
+                return;
+            }
+
+            HeroSO wearer = null;
+            foreach (var hero in RosterHeroes())
+            {
+                if (hero == null || !item.CanBeWornBy(hero.SaveKey))
+                {
+                    continue;
+                }
+                if (wearer == null)
+                {
+                    wearer = hero;
+                }
+                if (InventoryManager.Instance.GetEquipped(item.SlotType, hero.SaveKey) == null)
+                {
+                    wearer = hero;
+                    break;
+                }
+            }
+            if (wearer == null)
+            {
+                return;
+            }
+
+            SelectHero(wearer.SaveKey);
+            MoveSlotTo(slot + 1);
+            int row = _listEntries.FindIndex(e => e.InBag && e.ItemKey == item.Key && e.Confirm != null);
+            if (row < 0)
+            {
+                return;
+            }
+            _focus = Focus.List;
+            SetListIndex(row);
+            RefreshHint();
         }
 
         public void Hide()
@@ -715,7 +773,7 @@ namespace Assets.Scripts.Items.UI
             var preview = StatsWith(gear);
             var current = StatsWith(CurrentGear());
 
-            var entry = new Entry { Gear = gear };
+            var entry = new Entry { Gear = gear, ItemKey = item.ItemKey, InBag = string.IsNullOrEmpty(item.EquippedSlot) };
             // A class item another hero cannot wear: listed, so the party's gear is all on one page,
             // but dimmed, saying whose it is, and Enter does nothing.
             if (!wornBySelected && !so.CanBeWornBy(_selectedHeroKey))
