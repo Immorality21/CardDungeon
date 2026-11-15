@@ -92,7 +92,7 @@ the whole catalog would empty it into the party's bags. **Gear the party already
 (owner, 2026-11-15: four Leather Caps before the Mage): each copy owned, loose or worn, multiplies its
 chance by `LootRoller.DuplicateFalloff` (0.4; `DuplicateFactor`, `InventoryManager.CopiesOwned`). An
 event's "one of" list (`RoomEventRunner.PickOneOf`) is weighted the same way; an enemy's authored drop
-table is not. Measured over 12 floor-1 caches: different items 8.0 -> 9.6, most copies of one 3.0 -> 2.1.
+table is not. Measured over 12 floor-1 caches: different items 8.0 -> 9.6, most copies of one 3.0 -> 2.1; with six more level-1 commons the same day (Leather Pants, Quilted Vest, Wool Hood, Cord Amulet, Hide Bracers, Willow Wand: 12 in the floor-1 pool, every slot covered) 10.4 different items and 0.74 Leather Caps.
 
 A cache also yields the floor's **raw materials**, from `LevelDefinitionSO.MaterialTable`, through
 `RoomKindRewards.TreasureMaterials`. That is a *separate* roll from the single item slot above, and

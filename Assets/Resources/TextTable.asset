@@ -13541,3 +13541,63 @@ MonoBehaviour:
     - 'Forged a {item}. Equip puts it on now; it also waits in the Storehouse.'
     Reviewed: 0
     Note: 'After crafting a piece of gear; {item} = what was made'
+  - Key: item.leather-pants.name
+    Values:
+    - 'Leather Pants'
+    Reviewed: 0
+    Note: 
+  - Key: item.leather-pants.description
+    Values:
+    - 'Stiff at first, then they mould to you. Most people stop there.'
+    Reviewed: 0
+    Note: 
+  - Key: item.quilted-vest.name
+    Values:
+    - 'Quilted Vest'
+    Reviewed: 0
+    Note: 
+  - Key: item.quilted-vest.description
+    Values:
+    - 'Layers of cloth stitched tight. It turns a glancing blow, and little else.'
+    Reviewed: 0
+    Note: 
+  - Key: item.wool-hood.name
+    Values:
+    - 'Wool Hood'
+    Reviewed: 0
+    Note: 
+  - Key: item.wool-hood.description
+    Values:
+    - 'Warm, quiet, and good for thinking in. Clerics swear by them.'
+    Reviewed: 0
+    Note: 
+  - Key: item.cord-amulet.name
+    Values:
+    - 'Cord Amulet'
+    Reviewed: 0
+    Note: 
+  - Key: item.cord-amulet.description
+    Values:
+    - 'A knotted cord and a scrap of carved bone. Someone believed in it once.'
+    Reviewed: 0
+    Note: 
+  - Key: item.hide-bracers.name
+    Values:
+    - 'Hide Bracers'
+    Reviewed: 0
+    Note: 
+  - Key: item.hide-bracers.description
+    Values:
+    - 'Raw hide laced around the forearms. Ugly, cheap, and they hold.'
+    Reviewed: 0
+    Note: 
+  - Key: item.willow-wand.name
+    Values:
+    - 'Willow Wand'
+    Reviewed: 0
+    Note: 
+  - Key: item.willow-wand.description
+    Values:
+    - 'A green willow switch that still buds. Spells come easier through living wood.'
+    Reviewed: 0
+    Note: 
