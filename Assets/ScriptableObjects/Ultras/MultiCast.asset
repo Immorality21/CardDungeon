@@ -18,6 +18,45 @@ MonoBehaviour:
   Effects: []
   Hits: 1
   RandomTargets: 0
+  Delivery: 0
+  HitIcon: {fileID: 0}
+  HitArtAngle: 0
+  LeapSlamFrames: []
+  ImpactFrames: []
+  ImpactFps: 16
+  WindUpFrames:
+  - {fileID: 252818218801498751, guid: 5562a1d53beb441ea3334268c0d3d7ce, type: 3}
+  - {fileID: 3129646759856862903, guid: 5562a1d53beb441ea3334268c0d3d7ce, type: 3}
+  - {fileID: -3061977292895069256, guid: 5562a1d53beb441ea3334268c0d3d7ce, type: 3}
+  - {fileID: -2674169967649025303, guid: 5562a1d53beb441ea3334268c0d3d7ce, type: 3}
+  - {fileID: -2273099285366728321, guid: 5562a1d53beb441ea3334268c0d3d7ce, type: 3}
+  WindUpEffectFrames:
+  - {fileID: 3363510207924807860, guid: caa5feb016c54620b5d0daf3a9b284a7, type: 3}
+  - {fileID: -2812988736326920681, guid: caa5feb016c54620b5d0daf3a9b284a7, type: 3}
+  - {fileID: -3604331808557279706, guid: caa5feb016c54620b5d0daf3a9b284a7, type: 3}
+  - {fileID: -913921537529802528, guid: caa5feb016c54620b5d0daf3a9b284a7, type: 3}
+  - {fileID: -14641060593430222, guid: caa5feb016c54620b5d0daf3a9b284a7, type: 3}
+  - {fileID: -2184611160618753096, guid: caa5feb016c54620b5d0daf3a9b284a7, type: 3}
+  - {fileID: 2561300533016973210, guid: caa5feb016c54620b5d0daf3a9b284a7, type: 3}
+  - {fileID: -1854796273915483934, guid: caa5feb016c54620b5d0daf3a9b284a7, type: 3}
+  - {fileID: 1285966188651644058, guid: caa5feb016c54620b5d0daf3a9b284a7, type: 3}
+  - {fileID: -2622455912227382912, guid: caa5feb016c54620b5d0daf3a9b284a7, type: 3}
+  - {fileID: 590871161746317481, guid: caa5feb016c54620b5d0daf3a9b284a7, type: 3}
+  - {fileID: -710407898232675032, guid: caa5feb016c54620b5d0daf3a9b284a7, type: 3}
+  - {fileID: -705559534318979816, guid: caa5feb016c54620b5d0daf3a9b284a7, type: 3}
+  - {fileID: 4003246496596144984, guid: caa5feb016c54620b5d0daf3a9b284a7, type: 3}
+  - {fileID: 4129972260130638219, guid: caa5feb016c54620b5d0daf3a9b284a7, type: 3}
+  - {fileID: -2105581657397768669, guid: caa5feb016c54620b5d0daf3a9b284a7, type: 3}
+  - {fileID: -430305406787097669, guid: caa5feb016c54620b5d0daf3a9b284a7, type: 3}
+  - {fileID: 2480709978093441109, guid: caa5feb016c54620b5d0daf3a9b284a7, type: 3}
+  - {fileID: -3964405159701314636, guid: caa5feb016c54620b5d0daf3a9b284a7, type: 3}
+  - {fileID: 4327826999721388613, guid: caa5feb016c54620b5d0daf3a9b284a7, type: 3}
+  - {fileID: 2654198205068085837, guid: caa5feb016c54620b5d0daf3a9b284a7, type: 3}
+  - {fileID: 1058858204353637891, guid: caa5feb016c54620b5d0daf3a9b284a7, type: 3}
+  - {fileID: 476669827513444447, guid: caa5feb016c54620b5d0daf3a9b284a7, type: 3}
+  - {fileID: -4415223268687367273, guid: caa5feb016c54620b5d0daf3a9b284a7, type: 3}
+  WindUpEffectFps: 20
+  WindUpSeconds: 1.2
   Creature: {fileID: 0}
   StatAbilities: []
   Mech: {fileID: 0}

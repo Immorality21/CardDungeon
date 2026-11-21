@@ -34,6 +34,8 @@ namespace Assets.Scripts.Enemies.Behaviors
         public int Duration;                  // debuff / buff / brace duration in turns
         public StatType DebuffStat = StatType.Strength;   // the stat a Debuff lowers or a BuffAlly raises
         public int ApplyChance = 100;         // percent chance a Debuff takes hold (AfflictionRules)
+        public bool Melee;                    // a Debuff delivered as a blow (EnemyActionEntry.Melee)
+        public UnityEngine.Sprite StrikeArt;  // what a Melee Debuff draws across the target
 
         /// <summary>What a <see cref="EnemyActionType.Summon"/> calls, and how many of it.</summary>
         public EnemySO SummonDefinition;

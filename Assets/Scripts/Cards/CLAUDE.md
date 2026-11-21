@@ -538,7 +538,7 @@ Two consequences worth holding on to:
   `RetaliationTracker` at the first enemy whose blow lands on (or is soaked by) the bearer before its next
   turn, as a reaction (`HealthOps.ReactionScope`, raised as `ReactionResolved` "Retribution"). Built per
   fight in `CombatManager` and the simulator. The ally picker never offers the caster for an Ultra
-  that intercepts (`UltraOps.ProtectsOthers`; the sim's `ChosenAlly(..., notSelf)` agrees). The owner asked for "the next physical hit"; a cover takes
+  that intercepts (`UltraOps.ProtectsOthers`; the sim's `ChosenAlly(..., notSelf)` agrees). **Since 2026-11-21 Divine Intervention covers the whole party** (owner: too weak on one ally): `TargetType` AllAllies, so no picker; the executor skips the caster, who braces and strikes back. The owner asked for "the next physical hit"; a cover takes
   every single-target blow, physical or magic, until the Paladin acts again - a first draft.
 - **Ultras (`Cards/Ultras/`, COMBAT_DEPTH §13 — 2026-10-04).** `UltraSO` (`Resources/UltraCatalog`),
   taught by `SphereNodeKind.Ultra`, used from the **Ultra** command once the hero's gauge is full.
@@ -550,7 +550,7 @@ Two consequences worth holding on to:
   summon charges) and the dungeon save, empty on a run's first floor; `CombatManager` reads it when a
   fight opens and writes every change back (`SetUltraGauge`). It fills on **damage taken, damage dealt
   and healing done**, one rule for every hero (the Mage's MultiCast stays on Focus): `UltraOps.Credit`
-  turns each `HealthChange` into weighted health for the hero hit (`TakenWeight` 1, a blood price
+  turns each `HealthChange` into weighted health for the hero hit (`TakenWeight` 0.75 since 2026-11-21, was 1: a tanking Warrior filled it every fight and Flurry came round too often; a blood price
   included) and the hero who caused it (`DealtWeight` 0.5 on the other side, `HealedWeight` 1 on their
   own); forms, potions, Sacrifices and clamps fill nothing. `UpdateUltraGauges` settles it once per
   turn against the hero's max health: `FillShare` (60%) of the bar in weighted health fills it. Using
@@ -572,7 +572,7 @@ Two consequences worth holding on to:
   The Warlock's **Rain of Fire** and **Soul Harvest** are Strikes. A Strike may land **several times** (`UltraSO.Hits`), each hit picking its
   targets again from whoever stands (`UltraOps.StrikeTargets`, shared with the sim), and with
   `RandomTargets` a single-enemy Strike picks a random enemy per hit instead of the weakest - the
-  Warrior's **Flurry** (4 hits, branch B). Each hit is shown by `UltraSO.Delivery` + `HitIcon` + `HitArtAngle`, copied onto the castable (2026-11-04: Flurry slashes with Slash's art as a Strike, Rain of Arrows flies Aimed Shot's arrow; with no `HitIcon` a hit is the plain bolt). His **Take Cover** (branch A) is a Strike on the party
+  Warrior's **Flurry** (4 hits, branch B). **A Strike can leap and slam** (2026-11-21, Earthsplitter): with `UltraSO.LeapSlamFrames` (wind-up, swing, slam, hold) the hero jumps to the arena's middle (`CombatStage.CenterX`), lands in the slam pose while `ImpactFrames` play at their feet, the hits resolve, then they jump home (`CombatManager.LeapAndSlam` / `LeapHome`). Art: `Heroes/warrior-slam.png` (48x48, PixelLab animate_image) and `Ultras/earthsplitter-slam.png` (PixelLab VFX workbench, effect "Earthsplitter Slam"); `Sandbox/Earthsplitter.asset` shows it. **Any Ultra can wind up** (2026-11-21, the Mage's MultiCast): `UltraSO.WindUpFrames` is a pose played once and held while `WindUpEffectFrames` play at the hero's feet (pivot = the ground point), for `WindUpSeconds` (1.2), before it goes off (`CombatManager.PlayWindUp`, called from `ExecuteMultiCast`). Art: `Heroes/mage-multicast.png`, `Ultras/multicast-charge.png` (PixelLab effect "MultiCast Charge"); `Sandbox/MeleeAndMultiCast.asset`. Each hit is shown by `UltraSO.Delivery` + `HitIcon` + `HitArtAngle`, copied onto the castable (2026-11-04: Flurry slashes with Slash's art as a Strike, Rain of Arrows flies Aimed Shot's arrow; with no `HitIcon` a hit is the plain bolt). His **Take Cover** (branch A) is a Strike on the party
   of `BuffType.Guarded` 30 for 1 turn: a resistance to **every** element, Normal included
   (`CombatBuffTracker.ApplyResistanceToAll`), so every damage path that already passes
   `GetResistanceBonus` cuts the hit with no new plumbing; a gold shield on the HP bar. **The balance sim models Ultras**

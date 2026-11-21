@@ -168,6 +168,15 @@ namespace Assets.Scripts.Rooms
             ScreenFade.Instance.Flash(new Color(0.55f, 0.1f, 0.25f), 0.45f, 0.05f, 0.35f);
             ShowFloatingLabel(hero.Transform.position + new Vector3(0f, 0.5f, 0f), Loc.Format("combat.float.ultra", ("ultra", ultra.Label)), new Color(1f, 0.35f, 0.45f), 0.2f);
 
+            // Earthsplitter: up, across to the middle of the arena, and down on the ground before the
+            // blow lands; back to his place once it has.
+            Vector3 home = hero.transform.position;
+            bool leapt = ultra.LeapsAndSlams && CombatStage.HasInstance && CombatStage.Instance.IsRaised;
+            if (leapt)
+            {
+                yield return LeapAndSlam(hero, ultra);
+            }
+
             // Each hit picks its targets again from whoever is still standing (Flurry's slashes).
             for (int hit = 0; hit < UltraOps.HitsOf(ultra); hit++)
             {
@@ -185,6 +194,153 @@ namespace Assets.Scripts.Rooms
                 HealthDisplay.ReleaseAll();
                 ResolveDeaths();
             }
+
+            if (leapt)
+            {
+                yield return LeapHome(hero, home);
+            }
+        }
+
+        private const float LeapRiseSeconds = 0.38f;
+        private const float LeapHeight = 1.8f;
+        private const float LeapHomeSeconds = 0.32f;
+
+        /// <summary>
+        /// A leap-slam Strike's arrival (<see cref="UltraSO.LeapsAndSlams"/>): the hero jumps from their
+        /// place to the middle of the arena on an arc - sword up at the top, swinging down on the way
+        /// in - lands in the slam pose and the ground breaks under them (<see cref="UltraSO.ImpactFrames"/>).
+        /// Presentation only: the hits are resolved after it, as for any Strike.
+        /// </summary>
+        private IEnumerator LeapAndSlam(Hero hero, UltraSO ultra)
+        {
+            var tr = hero.transform;
+            var sr = tr.GetComponent<SpriteRenderer>();
+            var animator = tr.GetComponent<SpriteAnimator>();
+            if (animator == null)
+            {
+                animator = tr.gameObject.AddComponent<SpriteAnimator>();
+            }
+            var frames = ultra.LeapSlamFrames;
+            Vector3 from = tr.position;
+            Vector3 to = new Vector3(CombatStage.Instance.CenterX, from.y, from.z);
+            // Where the feet are now, from the idle sprite: the slam frames are padded for the swing.
+            float feetBelowPivot = sr != null ? from.y - sr.bounds.min.y : 0.5f;
+
+            animator.PlayOnceAndHold(new[] { frames[0] }, 0.05f);
+            CombatAudio.Play(CombatSound.MeleeSwing);
+
+            bool swinging = false;
+            float elapsed = 0f;
+            while (elapsed < LeapRiseSeconds)
+            {
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / LeapRiseSeconds);
+                float height = 4f * LeapHeight * t * (1f - t);
+                tr.position = Vector3.Lerp(from, to, t) + Vector3.up * height;
+                if (!swinging && t >= 0.7f)
+                {
+                    swinging = true;
+                    animator.PlayOnceAndHold(new[] { frames[1] }, (1f - t) * LeapRiseSeconds);
+                }
+                yield return null;
+            }
+            tr.position = to;
+
+            // The landing: slam pose, then the held impact; the ground breaks at his feet.
+            animator.PlayOnceAndHold(new[] { frames[2], frames[3] }, 0.2f);
+            if (ultra.ImpactFrames != null && ultra.ImpactFrames.Length > 0)
+            {
+                var at = new Vector3(to.x, to.y - feetBelowPivot, to.z);
+                int order = sr != null ? sr.sortingOrder - 1 : 599;
+                StartCoroutine(PlayGroundEffect(ultra.ImpactFrames, ultra.ImpactFps, at, order, tr.lossyScale.x));
+            }
+            CombatAudio.Play(CombatSound.Impact);
+            CombatFeedback.Instance.Shake(0.5f, 0.55f);
+            if (MainCamera.HasInstance)
+            {
+                MainCamera.Instance.ZoomPunch(0.5f, 0.35f);
+            }
+            yield return new WaitForSeconds(0.3f);
+        }
+
+        /// <summary>Back from the middle of the arena to where the hero stood, on a lower arc, and
+        /// back to the idle loop.</summary>
+        private IEnumerator LeapHome(Hero hero, Vector3 home)
+        {
+            var tr = hero.transform;
+            var animator = tr.GetComponent<SpriteAnimator>();
+            if (animator != null)
+            {
+                animator.Resume();
+            }
+            Vector3 from = tr.position;
+            float elapsed = 0f;
+            while (elapsed < LeapHomeSeconds)
+            {
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / LeapHomeSeconds);
+                tr.position = Vector3.Lerp(from, home, t) + Vector3.up * (4f * LeapHeight * 0.5f * t * (1f - t));
+                yield return null;
+            }
+            tr.position = home;
+        }
+
+        private const float WindUpEffectScale = 0.6f;
+
+        /// <summary>
+        /// An Ultra's wind-up (<see cref="UltraSO.WindsUp"/>): the hero takes the pose and holds it while
+        /// the effect plays at their feet, for <see cref="UltraSO.WindUpSeconds"/>, then goes back to the
+        /// idle loop. Presentation only.
+        /// </summary>
+        private IEnumerator PlayWindUp(ICombatUnit hero, UltraSO ultra)
+        {
+            var tr = hero.Transform;
+            if (tr == null)
+            {
+                yield break;
+            }
+            var sr = tr.GetComponent<SpriteRenderer>();
+            var animator = tr.GetComponent<SpriteAnimator>();
+            // The feet from the idle sprite, before the pose (padded for the staff) replaces it.
+            Vector3 feet = sr != null ? new Vector3(tr.position.x, sr.bounds.min.y, tr.position.z) : tr.position;
+            if (ultra.WindUpFrames != null && ultra.WindUpFrames.Length > 0)
+            {
+                if (animator == null)
+                {
+                    animator = tr.gameObject.AddComponent<SpriteAnimator>();
+                }
+                animator.PlayOnceAndHold(ultra.WindUpFrames, Mathf.Max(0.05f, ultra.WindUpSeconds * 0.6f));
+            }
+            if (ultra.WindUpEffectFrames != null && ultra.WindUpEffectFrames.Length > 0)
+            {
+                // Behind the hero and smaller than the hero's own pixels: a circle on the floor under
+                // them, not a disc over the unit below (verified in play 2026-11-21).
+                int order = sr != null ? sr.sortingOrder - 1 : 599;
+                StartCoroutine(PlayGroundEffect(ultra.WindUpEffectFrames, ultra.WindUpEffectFps, feet, order, tr.lossyScale.x * WindUpEffectScale));
+            }
+            CombatAudio.Play(CombatSound.MagicCast);
+            yield return new WaitForSeconds(ultra.WindUpSeconds);
+            if (animator != null)
+            {
+                animator.Resume();
+            }
+        }
+
+        /// <summary>Plays a ground effect's frames once where it struck, then removes it.</summary>
+        private static IEnumerator PlayGroundEffect(Sprite[] frames, float fps, Vector3 at, int sortingOrder, float scale)
+        {
+            var go = new GameObject("GroundImpact");
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sortingOrder = sortingOrder;
+            go.transform.position = at;
+            go.transform.localScale = Vector3.one * scale;
+            float step = 1f / Mathf.Max(1f, fps);
+            foreach (var frame in frames)
+            {
+                sr.sprite = frame;
+                yield return new WaitForSeconds(step);
+            }
+            Destroy(go);
         }
 
         /// <summary>

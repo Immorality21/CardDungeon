@@ -27,8 +27,11 @@ MonoBehaviour:
     Duration: 2
     TargetStat: 3
     ApplyChance: 100
+    Melee: 1
+    StrikeArt: {fileID: 21300000, guid: 758987a35b924cb585def5e2f655aed1, type: 3}
     Summons: {fileID: 0}
     SummonCount: 1
+    AlsoSummons: []
     MaxUses: 1
     Magic: {fileID: 0}
     Conditions:
@@ -47,8 +50,11 @@ MonoBehaviour:
     Duration: 3
     TargetStat: 1
     ApplyChance: 100
+    Melee: 0
+    StrikeArt: {fileID: 0}
     Summons: {fileID: 0}
     SummonCount: 1
+    AlsoSummons: []
     MaxUses: 1
     Magic: {fileID: 0}
     Conditions: []

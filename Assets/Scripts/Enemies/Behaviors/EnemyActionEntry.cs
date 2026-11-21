@@ -174,6 +174,14 @@ namespace Assets.Scripts.Enemies.Behaviors
         [Range(1, 100)]
         public int ApplyChance = 100;
 
+        [Tooltip("Debuff only: a physical blow, not a curse - the enemy lunges and StrikeArt cuts across " +
+                 "the target instead of the cast glow and falling sparks (the Ghoul's Paralysing Claw). " +
+                 "Presentation only.")]
+        public bool Melee;
+
+        [Tooltip("Debuff with Melee: the art drawn across the target. Empty draws the slash.")]
+        public Sprite StrikeArt;
+
         [Tooltip("Summon only: the enemy this action calls into the fight.")]
         public EnemySO Summons;
 

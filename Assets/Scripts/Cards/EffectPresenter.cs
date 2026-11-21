@@ -356,7 +356,7 @@ namespace Assets.Scripts.Cards
         /// in at full size, sweeps a short way down and across like a cut, and fades - over before the
         /// impact flash, so the blow and the flinch read as one. Untinted, so drawn art keeps its colours.
         /// </summary>
-        private IEnumerator StrikeOnTarget(ICombatUnit target, Sprite sprite)
+        public static IEnumerator StrikeOnTarget(ICombatUnit target, Sprite sprite)
         {
             var go = new GameObject("MagicStrike");
             var sr = go.AddComponent<SpriteRenderer>();

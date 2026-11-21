@@ -194,6 +194,9 @@ EnemyActionEntry
   Telegraphed   spend a turn winding up, then deliver (Heavy/Aoe only)
   Multiplier / Power / Duration / TargetStat / Magic
   Summons / SummonCount / MaxUses   (Summon only)
+  Melee / StrikeArt   (Debuff only, 2026-11-21) a blow, not a curse: lunge + StrikeArt
+                cut across the hero instead of the cast glow and falling sparks
+                (the Ghoul's Paralysing Claw, the Dark Jailor's Shackle)
   Conditions    every one must hold
 ```
 

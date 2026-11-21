@@ -1667,7 +1667,11 @@ namespace Assets.Scripts.Hub
             {
                 HideTown();
                 SetShown(_lotView, false);
-                _campaignMap.Show(_runSaveData.RunKey, _runSaveData.CurrentLevelIndex);
+                // A level picked but never entered is not underway: the map leaves every level open
+                // until the party has gone down (owner, 2026-11-21 - picking the Warrens by mistake
+                // locked the map onto it).
+                bool started = CampaignOps.LocksParty(_runSaveData);
+                _campaignMap.Show(started ? _runSaveData.RunKey : null, started ? _runSaveData.CurrentLevelIndex : 0);
                 WarnOfChallengeOnce();
                 HintRevisitOnce();
                 return;
@@ -1710,7 +1714,9 @@ namespace Assets.Scripts.Hub
             }
 
             var runKey = RunKeyOf(run);
-            if (_runSaveData.RunKey != runKey)
+            // A run that was picked but never entered is replaced by the new pick, revisit conditions
+            // and all; one that has started is only ever continued.
+            if (_runSaveData.RunKey != runKey || !CampaignOps.LocksParty(_runSaveData))
             {
                 // A revisit carries its conditions from here: they are fixed for the whole run, and
                 // DungeonManager reads them back on every floor (docs/plans/REVISITS.md).

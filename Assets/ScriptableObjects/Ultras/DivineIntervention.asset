@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Cards.UltraSO
   Key: DivineIntervention
   Kind: 1
-  TargetType: 3
+  TargetType: 4
   Effects:
   - EffectType: 12
     Power: 50

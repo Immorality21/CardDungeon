@@ -43,6 +43,12 @@ namespace Assets.Scripts.Rooms
 
             ShowFloatingLabel(caster.Transform.position + new Vector3(0f, 0.7f, 0f), Loc.Format("combat.float.multi-cast", ("cast", FocusOps.CastName(focus))),
                 new Color(0.55f, 0.75f, 1f), 0.15f);
+            // The Mage gathers it all first (owner, 2026-11-21): a held pose and the charge at her feet.
+            var multiCast = KnownUltras(caster).FirstOrDefault(u => u != null && u.Kind == UltraKind.MultiCast);
+            if (multiCast != null && multiCast.WindsUp)
+            {
+                yield return PlayWindUp(caster, multiCast);
+            }
             for (int i = 0; i < casts; i++)
             {
                 var repeat = new SpellcastAction

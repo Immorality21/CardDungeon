@@ -39,7 +39,6 @@ namespace Assets.Scripts.Rooms
         private VisualElement _pauseWindow;
         private Button _pauseResume;
         private Button _pauseQuit;
-        private Label _pauseNote;
         private Button _pauseMap;
         private Button _pausePotions;
         private UI.PotionWindow _potions;
@@ -236,7 +235,6 @@ namespace Assets.Scripts.Rooms
             _pauseWindow = root.Q<VisualElement>("pause-window");
             _pauseResume = root.Q<Button>("pause-resume");
             _pauseQuit = root.Q<Button>("pause-quit");
-            _pauseNote = root.Q<Label>("pause-note");
             _pauseMap = root.Q<Button>("pause-map");
             _pausePotions = root.Q<Button>("pause-potions");
             _mapWindow = root.Q<VisualElement>("map-window");

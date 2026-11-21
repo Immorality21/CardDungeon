@@ -1,0 +1,741 @@
+fileFormatVersion: 2
+guid: caa5feb016c54620b5d0daf3a9b284a7
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 3363510207924807860
+    second: multicast-charge_0
+  - first:
+      213: -2812988736326920681
+    second: multicast-charge_1
+  - first:
+      213: -3604331808557279706
+    second: multicast-charge_2
+  - first:
+      213: -913921537529802528
+    second: multicast-charge_3
+  - first:
+      213: -14641060593430222
+    second: multicast-charge_4
+  - first:
+      213: -2184611160618753096
+    second: multicast-charge_5
+  - first:
+      213: 2561300533016973210
+    second: multicast-charge_6
+  - first:
+      213: -1854796273915483934
+    second: multicast-charge_7
+  - first:
+      213: 1285966188651644058
+    second: multicast-charge_8
+  - first:
+      213: -2622455912227382912
+    second: multicast-charge_9
+  - first:
+      213: 590871161746317481
+    second: multicast-charge_10
+  - first:
+      213: -710407898232675032
+    second: multicast-charge_11
+  - first:
+      213: -705559534318979816
+    second: multicast-charge_12
+  - first:
+      213: 4003246496596144984
+    second: multicast-charge_13
+  - first:
+      213: 4129972260130638219
+    second: multicast-charge_14
+  - first:
+      213: -2105581657397768669
+    second: multicast-charge_15
+  - first:
+      213: -430305406787097669
+    second: multicast-charge_16
+  - first:
+      213: 2480709978093441109
+    second: multicast-charge_17
+  - first:
+      213: -3964405159701314636
+    second: multicast-charge_18
+  - first:
+      213: 4327826999721388613
+    second: multicast-charge_19
+  - first:
+      213: 2654198205068085837
+    second: multicast-charge_20
+  - first:
+      213: 1058858204353637891
+    second: multicast-charge_21
+  - first:
+      213: 476669827513444447
+    second: multicast-charge_22
+  - first:
+      213: -4415223268687367273
+    second: multicast-charge_23
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 32
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: multicast-charge_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 86
+        height: 95
+      alignment: 9
+      pivot: {x: 0.4884, y: 0.2316}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: abc93c7178e340709f824389e6b6e3d9
+      internalID: 3363510207924807860
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: multicast-charge_1
+      rect:
+        serializedVersion: 2
+        x: 86
+        y: 0
+        width: 86
+        height: 95
+      alignment: 9
+      pivot: {x: 0.4884, y: 0.2316}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1609a4decd744b1ca29c0478256f5461
+      internalID: -2812988736326920681
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: multicast-charge_2
+      rect:
+        serializedVersion: 2
+        x: 172
+        y: 0
+        width: 86
+        height: 95
+      alignment: 9
+      pivot: {x: 0.4884, y: 0.2316}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cc545fdb72f54173a86723e372d157b3
+      internalID: -3604331808557279706
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: multicast-charge_3
+      rect:
+        serializedVersion: 2
+        x: 258
+        y: 0
+        width: 86
+        height: 95
+      alignment: 9
+      pivot: {x: 0.4884, y: 0.2316}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 664954678d114a81a17dc649ef9dd5a2
+      internalID: -913921537529802528
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: multicast-charge_4
+      rect:
+        serializedVersion: 2
+        x: 344
+        y: 0
+        width: 86
+        height: 95
+      alignment: 9
+      pivot: {x: 0.4884, y: 0.2316}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 48186c56044e448d92feaa4020928d27
+      internalID: -14641060593430222
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: multicast-charge_5
+      rect:
+        serializedVersion: 2
+        x: 430
+        y: 0
+        width: 86
+        height: 95
+      alignment: 9
+      pivot: {x: 0.4884, y: 0.2316}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d02cd97441514de0a5caedd1e9f60342
+      internalID: -2184611160618753096
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: multicast-charge_6
+      rect:
+        serializedVersion: 2
+        x: 516
+        y: 0
+        width: 86
+        height: 95
+      alignment: 9
+      pivot: {x: 0.4884, y: 0.2316}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bafeeb5419d340fc9fb1475c17bccb57
+      internalID: 2561300533016973210
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: multicast-charge_7
+      rect:
+        serializedVersion: 2
+        x: 602
+        y: 0
+        width: 86
+        height: 95
+      alignment: 9
+      pivot: {x: 0.4884, y: 0.2316}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aae1803d55cc4cb290f9d5dae92a83fa
+      internalID: -1854796273915483934
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: multicast-charge_8
+      rect:
+        serializedVersion: 2
+        x: 688
+        y: 0
+        width: 86
+        height: 95
+      alignment: 9
+      pivot: {x: 0.4884, y: 0.2316}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fb315d83d4b04976857fdd1ff016958d
+      internalID: 1285966188651644058
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: multicast-charge_9
+      rect:
+        serializedVersion: 2
+        x: 774
+        y: 0
+        width: 86
+        height: 95
+      alignment: 9
+      pivot: {x: 0.4884, y: 0.2316}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 89634a0e3dae46298b8208d9e43cccca
+      internalID: -2622455912227382912
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: multicast-charge_10
+      rect:
+        serializedVersion: 2
+        x: 860
+        y: 0
+        width: 86
+        height: 95
+      alignment: 9
+      pivot: {x: 0.4884, y: 0.2316}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fb0250dcf53c4a3b9d07ebb1f4befc4a
+      internalID: 590871161746317481
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: multicast-charge_11
+      rect:
+        serializedVersion: 2
+        x: 946
+        y: 0
+        width: 86
+        height: 95
+      alignment: 9
+      pivot: {x: 0.4884, y: 0.2316}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0c387f20d81640e2a3b4add79df5a772
+      internalID: -710407898232675032
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: multicast-charge_12
+      rect:
+        serializedVersion: 2
+        x: 1032
+        y: 0
+        width: 86
+        height: 95
+      alignment: 9
+      pivot: {x: 0.4884, y: 0.2316}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: beb422e005ea42beb4532ded4b15da5b
+      internalID: -705559534318979816
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: multicast-charge_13
+      rect:
+        serializedVersion: 2
+        x: 1118
+        y: 0
+        width: 86
+        height: 95
+      alignment: 9
+      pivot: {x: 0.4884, y: 0.2316}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bd204df34df44515b5c03e677d310752
+      internalID: 4003246496596144984
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: multicast-charge_14
+      rect:
+        serializedVersion: 2
+        x: 1204
+        y: 0
+        width: 86
+        height: 95
+      alignment: 9
+      pivot: {x: 0.4884, y: 0.2316}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 990e2b2c09c94b6ca79e5a734cf92b08
+      internalID: 4129972260130638219
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: multicast-charge_15
+      rect:
+        serializedVersion: 2
+        x: 1290
+        y: 0
+        width: 86
+        height: 95
+      alignment: 9
+      pivot: {x: 0.4884, y: 0.2316}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7121c5649a9f4f0095a8b9792c64d912
+      internalID: -2105581657397768669
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: multicast-charge_16
+      rect:
+        serializedVersion: 2
+        x: 1376
+        y: 0
+        width: 86
+        height: 95
+      alignment: 9
+      pivot: {x: 0.4884, y: 0.2316}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d3d60ba77b32429f879cc378f34653aa
+      internalID: -430305406787097669
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: multicast-charge_17
+      rect:
+        serializedVersion: 2
+        x: 1462
+        y: 0
+        width: 86
+        height: 95
+      alignment: 9
+      pivot: {x: 0.4884, y: 0.2316}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5d6d47319c0d43f599acf85b4008aa27
+      internalID: 2480709978093441109
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: multicast-charge_18
+      rect:
+        serializedVersion: 2
+        x: 1548
+        y: 0
+        width: 86
+        height: 95
+      alignment: 9
+      pivot: {x: 0.4884, y: 0.2316}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7eb8f18ef05b40cbb502047bb32b936b
+      internalID: -3964405159701314636
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: multicast-charge_19
+      rect:
+        serializedVersion: 2
+        x: 1634
+        y: 0
+        width: 86
+        height: 95
+      alignment: 9
+      pivot: {x: 0.4884, y: 0.2316}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a2cdd1140c5349fe94e1b51525b4b852
+      internalID: 4327826999721388613
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: multicast-charge_20
+      rect:
+        serializedVersion: 2
+        x: 1720
+        y: 0
+        width: 86
+        height: 95
+      alignment: 9
+      pivot: {x: 0.4884, y: 0.2316}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5df6bb91c4d642c083735b53e2c5425c
+      internalID: 2654198205068085837
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: multicast-charge_21
+      rect:
+        serializedVersion: 2
+        x: 1806
+        y: 0
+        width: 86
+        height: 95
+      alignment: 9
+      pivot: {x: 0.4884, y: 0.2316}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e3b7b63a59ca462a8d36107d846673c3
+      internalID: 1058858204353637891
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: multicast-charge_22
+      rect:
+        serializedVersion: 2
+        x: 1892
+        y: 0
+        width: 86
+        height: 95
+      alignment: 9
+      pivot: {x: 0.4884, y: 0.2316}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c818aaeb94064b568be23762622b79f3
+      internalID: 476669827513444447
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: multicast-charge_23
+      rect:
+        serializedVersion: 2
+        x: 1978
+        y: 0
+        width: 86
+        height: 95
+      alignment: 9
+      pivot: {x: 0.4884, y: 0.2316}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 70a1ff1b9f7240b382d97a3c02c2bdbc
+      internalID: -4415223268687367273
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      multicast-charge_0: 3363510207924807860
+      multicast-charge_1: -2812988736326920681
+      multicast-charge_10: 590871161746317481
+      multicast-charge_11: -710407898232675032
+      multicast-charge_12: -705559534318979816
+      multicast-charge_13: 4003246496596144984
+      multicast-charge_14: 4129972260130638219
+      multicast-charge_15: -2105581657397768669
+      multicast-charge_16: -430305406787097669
+      multicast-charge_17: 2480709978093441109
+      multicast-charge_18: -3964405159701314636
+      multicast-charge_19: 4327826999721388613
+      multicast-charge_2: -3604331808557279706
+      multicast-charge_20: 2654198205068085837
+      multicast-charge_21: 1058858204353637891
+      multicast-charge_22: 476669827513444447
+      multicast-charge_23: -4415223268687367273
+      multicast-charge_3: -913921537529802528
+      multicast-charge_4: -14641060593430222
+      multicast-charge_5: -2184611160618753096
+      multicast-charge_6: 2561300533016973210
+      multicast-charge_7: -1854796273915483934
+      multicast-charge_8: 1285966188651644058
+      multicast-charge_9: -2622455912227382912
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

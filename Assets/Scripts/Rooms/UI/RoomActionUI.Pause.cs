@@ -759,9 +759,8 @@ namespace Assets.Scripts.Rooms
             {
                 _pauseQuit.text = _quitArmed ? Loc.Get("room.pause.leave-armed") : Loc.Get("room.pause.leave");
             }
-            SetText(_pauseNote, _quitArmed
-                ? Loc.Get("room.pause.note-armed")
-                : Loc.Get("room.pause.note"));
+            // No note under it (owner, 2026-11-21): the long warning did not fit, and "are you sure?"
+            // on the button already asks.
         }
 
         /// <summary>Whether a window is stacked over the room, dialog-style.</summary>

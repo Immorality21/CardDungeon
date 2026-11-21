@@ -312,14 +312,23 @@ namespace Tests.EditMode
             });
         }
 
+        /// <summary>Starts <paramref name="hero"/>'s gauge just short enough that losing
+        /// <paramref name="loss"/> health fills it, whatever <see cref="UltraOps.TakenWeight"/> is tuned to.</summary>
+        private static void PrimeSoLossFills(SimUnit hero, int loss)
+        {
+            int gain = UltraOps.GainFor(loss * UltraOps.TakenWeight, hero.GetEffectiveStat(StatType.MaxHealth));
+            hero.UltraGauge = Mathf.Max(0, UltraOps.Max - gain);
+        }
+
         [Test]
         public void SimUltras_FillOnLoss_TransformKeepsTheShare_AndComesOff()
         {
             var form = DemonForm();
             var hero = SimHero(100, form);
             var ultras = new SimUltras(new[] { hero }) { Events = new CombatEvents() };
+            PrimeSoLossFills(hero, 60);
 
-            Hit(ultras.Events, hero, 60);    // lost 60 of 100: the fill share
+            Hit(ultras.Events, hero, 60);    // lost 60 of 100: enough to top it up
             ultras.Read();
             Assert.AreSame(form, ultras.Ready(hero));
 
@@ -346,17 +355,19 @@ namespace Tests.EditMode
         {
             var hero = SimHero(100, DemonForm());
             var roomOne = new SimUltras(new[] { hero }) { Events = new CombatEvents() };
+            PrimeSoLossFills(hero, 60);
+            int primed = hero.UltraGauge;
             Hit(roomOne.Events, hero, 30);
             roomOne.Read();
             int built = roomOne.Gauge(hero);
-            Assert.Greater(built, 0);
+            Assert.Greater(built, primed);
             Assert.IsFalse(UltraOps.IsFull(built));
 
             var roomTwo = new SimUltras(new[] { hero }) { Events = new CombatEvents() };
             Assert.AreEqual(built, roomTwo.Gauge(hero), "Kept for the run, not emptied per fight.");
             Hit(roomTwo.Events, hero, 30);
             roomTwo.Read();
-            Assert.IsTrue(UltraOps.IsFull(roomTwo.Gauge(hero)), "Half the fill share in each of two rooms fills it.");
+            Assert.IsTrue(UltraOps.IsFull(roomTwo.Gauge(hero)), "Half the top-up in each of two rooms fills it.");
         }
 
         [Test]
@@ -451,6 +462,7 @@ namespace Tests.EditMode
             clock.Initialize(new List<ICombatUnit> { cultist, warrior });
             var allies = new SimAllies(clock, new List<SimUnit>());
             var ultras = new SimUltras(heroes) { Events = new CombatEvents() };
+            PrimeSoLossFills(cultist, 60);
             Hit(ultras.Events, cultist, 60);
             ultras.Read();                                   // 60 lost: the gauge is full
             Assert.AreSame(rite, ultras.Ready(cultist, heroes));

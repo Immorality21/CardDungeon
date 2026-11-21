@@ -104,7 +104,8 @@ namespace Assets.Scripts.Rooms
                     yield return ExecuteEnemyHeal(enemyUnit, decision.Target, decision.Amount);
                     break;
                 case EnemyActionType.Debuff:
-                    yield return ExecuteEnemyDebuff(enemyUnit, decision.Target, decision.DebuffStat, decision.Amount, decision.Duration, decision.ApplyChance);
+                    yield return ExecuteEnemyDebuff(enemyUnit, decision.Target, decision.DebuffStat, decision.Amount, decision.Duration, decision.ApplyChance,
+                        decision.Melee, decision.StrikeArt);
                     break;
                 case EnemyActionType.BuffAlly:
                     yield return ExecuteEnemyBuffAlly(enemyUnit, decision.Target, decision.DebuffStat, decision.Amount, decision.Duration);
@@ -361,16 +362,29 @@ namespace Assets.Scripts.Rooms
             yield return new WaitForSeconds(_turnDelay);
         }
 
-        private IEnumerator ExecuteEnemyDebuff(ICombatUnit enemyUnit, ICombatUnit target, StatType stat, int amount, int duration, int applyChance)
+        private IEnumerator ExecuteEnemyDebuff(ICombatUnit enemyUnit, ICombatUnit target, StatType stat, int amount, int duration, int applyChance,
+            bool melee = false, Sprite strikeArt = null)
         {
             if (target == null || !target.IsAlive)
             {
                 yield break;
             }
 
-            // The enemy gathers its power before the curse lands - a Weaken used to show only a number.
-            yield return SpellVfx.Cast(enemyUnit);
-            CombatAudio.Play(CombatSound.MagicCast);
+            if (melee)
+            {
+                // A blow, not a curse (the Ghoul's claw): it lunges and the art cuts across the hero.
+                CombatAudio.Play(CombatSound.MeleeSwing);
+                StartCoroutine(LungeAnimation(enemyUnit.Transform, Vector3.left));
+                yield return new WaitForSeconds(_lungeDuration);
+                yield return EffectPresenter.StrikeOnTarget(target, strikeArt != null ? strikeArt : CombatIcons.Get("burst"));
+                CombatAudio.Play(CombatSound.Impact);
+            }
+            else
+            {
+                // The enemy gathers its power before the curse lands - a Weaken used to show only a number.
+                yield return SpellVfx.Cast(enemyUnit);
+                CombatAudio.Play(CombatSound.MagicCast);
+            }
 
             // Every debuff is a chance (AfflictionRules), an enemy's own included.
             if (!AfflictionRules.Lands(applyChance))
@@ -380,8 +394,11 @@ namespace Assets.Scripts.Rooms
                 yield break;
             }
 
-            SpellVfx.Afflict(target, SpellVfx.HarmColor, true);
-            yield return new WaitForSeconds(SpellVfx.AfflictLands);
+            if (!melee)
+            {
+                SpellVfx.Afflict(target, SpellVfx.HarmColor, true);
+                yield return new WaitForSeconds(SpellVfx.AfflictLands);
+            }
             BuffTracker.ApplyBuff(target, stat, -amount, duration);
             ShowFloatingLabel(target.Transform.position, Loc.Format("combat.float.stat-down", ("amount", amount), ("stat", StatCatalog.ShortName(stat))), new Color(0.7f, 0.4f, 1f));
             yield return new WaitForSeconds(_turnDelay);

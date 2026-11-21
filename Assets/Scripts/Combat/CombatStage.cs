@@ -101,6 +101,9 @@ namespace Assets.Scripts.Combat
         /// <summary>True while the battle stage is up, which is what the menu band follows.</summary>
         public bool IsRaised => _backgroundGo != null && _backgroundGo.activeSelf;
 
+        /// <summary>The x of the arena's middle, between the two sides - where a leap-slam lands.</summary>
+        public float CenterX => _anchorX;
+
         // Hero sprites hidden while a summon has taken the party's place, shown again when it leaves.
         private readonly List<SpriteRenderer> _hidden = new List<SpriteRenderer>();
         private readonly List<UnitHealthBar> _hiddenBars = new List<UnitHealthBar>();

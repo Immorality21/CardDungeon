@@ -527,6 +527,8 @@ namespace Assets.Scripts.Enemies.Behaviors
                         Duration = entry.Duration,
                         DebuffStat = entry.TargetStat,
                         ApplyChance = entry.ApplyChance,
+                        Melee = entry.Melee,
+                        StrikeArt = entry.StrikeArt,
                         EntryIndex = index
                     };
 

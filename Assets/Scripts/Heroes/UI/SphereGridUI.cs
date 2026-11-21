@@ -623,7 +623,14 @@ namespace Assets.Scripts.Heroes.UI
                 case SphereNodeKind.MagicSlot:
                     return Loc.Get("grid.detail.ability-slot");
                 case SphereNodeKind.Summon:
-                    return Loc.Format("grid.detail.summon", ("summon", SummonName(node.GrantedSummonKey)));
+                {
+                    // What it does first, as for an ability node: the name alone said nothing.
+                    var summon = string.IsNullOrEmpty(node.GrantedSummonKey) ? null : SummonCatalogSO.Resolve(node.GrantedSummonKey);
+                    string line = Loc.Format("grid.detail.summon", ("summon", SummonName(node.GrantedSummonKey)));
+                    return summon != null && !string.IsNullOrEmpty(summon.Description)
+                        ? summon.Description + "\n\n" + line
+                        : line;
+                }
                 case SphereNodeKind.Ultra:
                 {
                     var ultra = string.IsNullOrEmpty(node.GrantedUltraKey) ? null : UltraCatalogSO.Resolve(node.GrantedUltraKey);

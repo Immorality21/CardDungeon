@@ -113,8 +113,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.absolution.description
     Values:
-    - 'The blessing finishes what it started: wounds close, and whatever clings to
-      them lets go.'
+    - Heals the whole party and removes their debuffs.
     Reviewed: 0
     Note: 
   - Key: ability.aegis.name
@@ -124,8 +123,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.aegis.description
     Values:
-    - 'Divine protection over the whole line: the next hit on each of them is turned
-      aside.'
+    - The whole party blocks the next hit taken.
     Reviewed: 0
     Note: 'UPDATE of existing row: Aegis is now the awakened Divine Protection (party-wide)'
   - Key: ability.aimed-shot.name
@@ -135,7 +133,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.aimed-shot.description
     Values:
-    - One shot, taken slowly, that goes exactly where it was sent.
+    - Deals damage to one enemy. Can crit.
     Reviewed: 0
     Note: 
   - Key: ability.arrow-storm.name
@@ -145,7 +143,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.arrow-storm.description
     Values:
-    - The sky goes dark with shafts, and every one of them draws blood.
+    - Deals damage to all enemies. May cause Bleeding.
     Reviewed: 0
     Note: 
   - Key: ability.backstab.name
@@ -155,7 +153,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.backstab.description
     Values:
-    - A short blade, put somewhere armour was never made to cover.
+    - Deals damage to one enemy. May cause Bleeding.
     Reviewed: 0
     Note: 
   - Key: ability.benediction.name
@@ -165,7 +163,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.benediction.description
     Values:
-    - A blessing spoken over the whole line at once.
+    - Heals the whole party.
     Reviewed: 0
     Note: 
   - Key: ability.bloodbolt.name
@@ -175,7 +173,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.bloodbolt.description
     Values:
-    - Power taken from the only source you are certain of.
+    - Costs health. Deals Shadow damage to one enemy.
     Reviewed: 0
     Note: 
   - Key: ability.blood-circle.name
@@ -185,7 +183,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.blood-circle.description
     Values:
-    - The circle drinks what he paid, and gives it back to those inside.
+    - Costs health. Raises the party's Endurance and Spirit and heals them over time.
     Reviewed: 0
     Note: 
   - Key: ability.blood-pact.name
@@ -195,8 +193,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.blood-pact.description
     Values:
-    - 'A bargain sealed in the Warlock''s blood: the ally it names burns brighter
-      for a while.'
+    - Costs health. Raises one ally's Intelligence and Strength.
     Reviewed: 0
     Note: 
   - Key: ability.blood-rite.name
@@ -206,7 +203,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.blood-rite.description
     Values:
-    - Every hand in the party bleeds a little, and strikes harder for it.
+    - Costs health. Raises the party's Strength.
     Reviewed: 0
     Note: 
   - Key: ability.blood-shower.name
@@ -216,7 +213,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.blood-shower.description
     Values:
-    - He opens his veins over the whole room, and it falls on them like rain.
+    - Costs health. Deals Shadow damage to all enemies.
     Reviewed: 0
     Note: 
   - Key: ability.bulwark.name
@@ -226,7 +223,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.bulwark.description
     Values:
-    - You plant yourself, and the whole line holds behind you.
+    - Raises the party's Endurance.
     Reviewed: 0
     Note: 
   - Key: ability.chain-lightning.name
@@ -236,7 +233,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.chain-lightning.description
     Values:
-    - Lightning leaps from foe to foe, striking every enemy.
+    - Deals Lightning damage to all enemies.
     Reviewed: 0
     Note: 
   - Key: ability.cleave.name
@@ -246,7 +243,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.cleave.description
     Values:
-    - A wide, heavy swing that catches every enemy in front of you.
+    - Deals damage to all enemies.
     Reviewed: 0
     Note: 
   - Key: ability.cluster-bomb.name
@@ -256,8 +253,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.cluster-bomb.description
     Values:
-    - The shell splits in the air. Every piece has its own fuse, and every one of
-      them is lit.
+    - Deals Fire damage to all enemies and sets them Burning.
     Reviewed: 0
     Note: 
   - Key: ability.consecrate.name
@@ -267,7 +263,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.consecrate.description
     Values:
-    - The ground itself turns against everything standing on it.
+    - Deals Holy damage to all enemies.
     Reviewed: 0
     Note: 
   - Key: ability.crimson-rain.name
@@ -277,7 +273,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.crimson-rain.description
     Values:
-    - The rain does not stop where it lands. Whatever has blood keeps losing it.
+    - Costs health. Deals Shadow damage to all enemies. May cause Bleeding.
     Reviewed: 0
     Note: 
   - Key: ability.dark-communion.name
@@ -287,7 +283,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.dark-communion.description
     Values:
-    - They share what he paid for. It keeps them standing.
+    - Costs health. Heals the party over time.
     Reviewed: 0
     Note: 
   - Key: ability.dark-pact.name
@@ -297,7 +293,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.dark-pact.description
     Values:
-    - A better bargain with a worse partner.
+    - Costs health. Restores charges to one of your abilities.
     Reviewed: 0
     Note: 
   - Key: ability.dark-pact-ii.name
@@ -307,7 +303,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.dark-pact-ii.description
     Values:
-    - The terms grow kinder. The one offering them does not.
+    - Costs health. Restores charges to one of your abilities.
     Reviewed: 0
     Note: 
   - Key: ability.dead-silence.name
@@ -317,7 +313,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.dead-silence.description
     Values:
-    - One word, and the whole room forgets how to speak.
+    - May Silence all enemies.
     Reviewed: 0
     Note: 
   - Key: ability.deluge.name
@@ -327,7 +323,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.deluge.description
     Values:
-    - A wall of water crashes over every enemy and leaves them wading.
+    - Deals damage to all enemies and delays their next turn.
     Reviewed: 0
     Note: 
   - Key: ability.disassemble.name
@@ -337,8 +333,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.disassemble.description
     Values:
-    - Wrench in hand, she finds the bolt that holds the whole thing together - and
-      pulls it.
+    - May take a machine apart outright and drop its salvage. Works better on machines you have killed often.
     Reviewed: 0
     Note: 
   - Key: ability.divine-bolt.name
@@ -348,7 +343,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.divine-bolt.description
     Values:
-    - A lance of light thrown at one foe.
+    - Deals Holy damage to one enemy.
     Reviewed: 0
     Note: 
   - Key: ability.drain-life.name
@@ -358,7 +353,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.drain-life.description
     Values:
-    - The wound closes on the wrong side.
+    - Deals Shadow damage to one enemy and heals you for part of it.
     Reviewed: 0
     Note: 
   - Key: ability.dread.name
@@ -368,7 +363,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.dread.description
     Values:
-    - The room remembers something it should not.
+    - Lowers all enemies' Strength and Agility.
     Reviewed: 0
     Note: 
   - Key: ability.eldritch-lash.name
@@ -378,7 +373,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.eldritch-lash.description
     Values:
-    - Something answers when he points.
+    - Deals Shadow damage to one enemy.
     Reviewed: 0
     Note: 
   - Key: ability.eviscerate.name
@@ -388,7 +383,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.eviscerate.description
     Values:
-    - She finds the wound that is already there, and makes it worse.
+    - Deals damage to one enemy, more for each debuff on it.
     Reviewed: 0
     Note: 
   - Key: ability.fence.name
@@ -398,7 +393,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.fence.description
     Values:
-    - She already knows who will buy it, and for how much.
+    - Kills and steals pay more gold for the rest of the fight.
     Reviewed: 0
     Note: 
   - Key: ability.finishing-blow.name
@@ -408,7 +403,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.finishing-blow.description
     Values:
-    - He has been waiting for it to stumble.
+    - Deals damage to one enemy, then finishes it off if its health is low. Not bosses.
     Reviewed: 0
     Note: 
   - Key: ability.fireball.name
@@ -418,7 +413,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.fireball.description
     Values:
-    - Hurls a ball of fire at an enemy.
+    - Deals Fire damage to one enemy.
     Reviewed: 0
     Note: 
   - Key: ability.fire-cloak.name
@@ -428,7 +423,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.fire-cloak.description
     Values:
-    - Sheathes the caster in a fire-warding ward.
+    - Raises your Fire resistance and hurts enemies that hit you.
     Reviewed: 0
     Note: 
   - Key: ability.flare-cannon.name
@@ -438,7 +433,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.flare-cannon.description
     Values:
-    - A hand cannon loaded with a magnesium flare. Bright, loud and very hot.
+    - Deals Fire damage to one enemy.
     Reviewed: 0
     Note: 
   - Key: ability.flushing-shot.name
@@ -448,7 +443,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.flushing-shot.description
     Values:
-    - An arrow that drives its quarry out of cover and off its stride.
+    - Deals damage to one enemy, more if Marked, and delays its next turn.
     Reviewed: 0
     Note: 
   - Key: ability.frost-cloak.name
@@ -458,7 +453,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.frost-cloak.description
     Values:
-    - A rime of frost turns the cold aside.
+    - Raises your Ice resistance and hurts enemies that hit you.
     Reviewed: 0
     Note: 
   - Key: ability.gear-jam.name
@@ -468,7 +463,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.gear-jam.description
     Values:
-    - A spanner thrown into the works. Whatever it hits loses its rhythm.
+    - Deals damage to one enemy and delays its next turn a lot.
     Reviewed: 0
     Note: 
   - Key: ability.hallowed-ground.name
@@ -478,7 +473,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.hallowed-ground.description
     Values:
-    - The ground remembers it is holy. The dead burn on it twice over.
+    - Deals Holy damage to all enemies, double to undead.
     Reviewed: 0
     Note: 
   - Key: ability.hamstring.name
@@ -488,7 +483,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.hamstring.description
     Values:
-    - A cut behind the knee. It will not be chasing anyone.
+    - Deals damage to one enemy and lowers its Agility.
     Reviewed: 0
     Note: 
   - Key: ability.heavenly-fire.name
@@ -498,7 +493,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.heavenly-fire.description
     Values:
-    - The holy ground catches. Everything standing on it keeps burning.
+    - Deals Holy damage to all enemies, double to undead, and sets them Burning.
     Reviewed: 0
     Note: 
   - Key: ability.holy-strike.name
@@ -508,7 +503,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.holy-strike.description
     Values:
-    - A blow wreathed in holy light, against a single enemy.
+    - Deals Holy damage to one enemy.
     Reviewed: 0
     Note: 
   - Key: ability.holy-touch.name
@@ -518,7 +513,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.holy-touch.description
     Values:
-    - A steadying hand. Restores health to one ally, or to yourself.
+    - Heals one ally.
     Reviewed: 0
     Note: 
   - Key: ability.hunters-mark.name
@@ -528,7 +523,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.hunters-mark.description
     Values:
-    - He picks one, and from then on everyone knows which.
+    - 'Marks one enemy: it takes more damage from every hit.'
     Reviewed: 0
     Note: 
   - Key: ability.hush.name
@@ -538,7 +533,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.hush.description
     Values:
-    - Smothers a foe's voice, sealing its abilities for a few turns.
+    - May Silence one enemy.
     Reviewed: 0
     Note: 
   - Key: ability.ice-shard.name
@@ -548,7 +543,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.ice-shard.description
     Values:
-    - Launches a razor-sharp shard of ice at a single enemy.
+    - Deals Ice damage to one enemy.
     Reviewed: 0
     Note: 
   - Key: ability.incendiary-bomb.name
@@ -558,7 +553,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.incendiary-bomb.description
     Values:
-    - A brass shell packed with coal dust and a short fuse.
+    - Deals Fire damage to one enemy and sets it Burning.
     Reviewed: 0
     Note: 
   - Key: ability.inferno.name
@@ -568,7 +563,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.inferno.description
     Values:
-    - The fireball does not go out. Everything it touches keeps burning.
+    - Deals Fire damage to all enemies and sets them Burning.
     Reviewed: 0
     Note: 
   - Key: ability.inspire.name
@@ -578,7 +573,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.inspire.description
     Values:
-    - A word of faith that gives an ally back what they spent.
+    - Restores a charge to one of an ally's abilities.
     Reviewed: 0
     Note: 
   - Key: ability.leeching-curse.name
@@ -588,7 +583,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.leeching-curse.description
     Values:
-    - Every wound you open on it, he drinks from.
+    - 'Curses one enemy: you heal for part of all damage it takes.'
     Reviewed: 0
     Note: 
   - Key: ability.life-tap.name
@@ -598,7 +593,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.life-tap.description
     Values:
-    - Blood spent is power regained.
+    - Costs health. Restores a charge to one of your abilities.
     Reviewed: 0
     Note: 
   - Key: ability.lightning-bolt.name
@@ -608,7 +603,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.lightning-bolt.description
     Values:
-    - Strikes an enemy with a crackling bolt of lightning.
+    - Deals Lightning damage to one enemy.
     Reviewed: 0
     Note: 
   - Key: ability.maim.name
@@ -618,7 +613,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.maim.description
     Values:
-    - A cut across the sword arm. It will not swing as hard again.
+    - Deals damage to one enemy and lowers its Strength.
     Reviewed: 0
     Note: 
   - Key: ability.mend.name
@@ -628,7 +623,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.mend.description
     Values:
-    - A quiet word and a steady hand. Restores health to one ally, or to herself.
+    - Heals one ally.
     Reviewed: 0
     Note: 
   - Key: ability.mind-rot.name
@@ -638,7 +633,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.mind-rot.description
     Values:
-    - It spreads from the inside.
+    - Deals Shadow damage to one enemy and Poisons it.
     Reviewed: 0
     Note: 
   - Key: ability.mug.name
@@ -648,7 +643,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.mug.description
     Values:
-    - A knee to the gut, and a hand in the purse on the way past.
+    - Deals damage to one enemy and tries to steal from it.
     Reviewed: 0
     Note: 
   - Key: ability.oil-flask.name
@@ -658,8 +653,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.oil-flask.description
     Values:
-    - A corked flask of black machine oil. It slows whatever it lands on, and it
-      burns beautifully.
+    - Deals damage to one enemy and lowers its Agility.
     Reviewed: 0
     Note: 
   - Key: ability.patch-kit.name
@@ -669,7 +663,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.patch-kit.description
     Values:
-    - Rivets, brass plates and a dab of grease. Not medicine, exactly, but it holds.
+    - Heals one ally.
     Reviewed: 0
     Note: 
   - Key: ability.poison-dart.name
@@ -679,7 +673,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.poison-dart.description
     Values:
-    - A toxic dart that damages and poisons an enemy.
+    - Deals damage to one enemy. May Poison.
     Reviewed: 0
     Note: 
   - Key: ability.press-the-attack.name
@@ -689,7 +683,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.press-the-attack.description
     Values:
-    - Two blows before it has its guard back up.
+    - Hits one enemy twice.
     Reviewed: 0
     Note: 
   - Key: ability.purge.name
@@ -699,7 +693,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.purge.description
     Values:
-    - Light poured over every enemy. The dead burn twice as bright.
+    - Deals Holy damage to all enemies, double to undead.
     Reviewed: 0
     Note: 
   - Key: ability.quicken.name
@@ -709,7 +703,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.quicken.description
     Values:
-    - A blessing on an ally's step. They act sooner, and more often.
+    - Gives one ally Haste.
     Reviewed: 0
     Note: 
   - Key: ability.rallying-roar.name
@@ -719,7 +713,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.rallying-roar.description
     Values:
-    - A roar that shakes the walls. Every ally hits harder and moves quicker.
+    - Raises the party's Strength and Agility.
     Reviewed: 0
     Note: 
   - Key: ability.renew.name
@@ -729,7 +723,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.renew.description
     Values:
-    - Knits an ally's wounds a little at a time.
+    - Heals one ally over time.
     Reviewed: 0
     Note: 
   - Key: ability.renewal.name
@@ -739,7 +733,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.renewal.description
     Values:
-    - The mending spreads to everyone he can reach.
+    - Heals the whole party over time.
     Reviewed: 0
     Note: 
   - Key: ability.revive.name
@@ -749,7 +743,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.revive.description
     Values:
-    - Calls a fallen ally back to their feet.
+    - Brings a fallen ally back with some health.
     Reviewed: 0
     Note: 
   - Key: ability.rite-of-warding.name
@@ -759,7 +753,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.rite-of-warding.description
     Values:
-    - A circle drawn in his own blood. Nothing crosses it lightly.
+    - Costs health. Raises the party's Endurance and Spirit.
     Reviewed: 0
     Note: 
   - Key: ability.rivet-gun.name
@@ -769,7 +763,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.rivet-gun.description
     Values:
-    - A pressurised spike of hot iron, fired at whatever is closest.
+    - Deals damage to one enemy.
     Reviewed: 0
     Note: 
   - Key: ability.rivet-storm.name
@@ -779,8 +773,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.rivet-storm.description
     Values:
-    - She stops aiming. The gun empties itself into the room, one hot rivet after
-      another.
+    - Fires shots at random enemies.
     Reviewed: 0
     Note: 
   - Key: ability.sacred-shield.name
@@ -790,7 +783,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.sacred-shield.description
     Values:
-    - A ward of light that takes the next blows in an ally's place.
+    - Gives one ally a barrier that absorbs damage.
     Reviewed: 0
     Note: 
   - Key: ability.sanctuary.name
@@ -800,7 +793,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.sanctuary.description
     Values:
-    - Holy ground under the whole line. Every blow lands a little softer.
+    - Raises the party's Endurance.
     Reviewed: 0
     Note: 
   - Key: ability.searing-light.name
@@ -810,7 +803,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.searing-light.description
     Values:
-    - Light too bright to speak through.
+    - Deals Holy damage to one enemy. May Silence it.
     Reviewed: 0
     Note: 
   - Key: ability.shadowstep.name
@@ -820,7 +813,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.shadowstep.description
     Values:
-    - The blow lands where she was standing.
+    - The next physical hit on you misses.
     Reviewed: 0
     Note: 
   - Key: ability.shield-up.name
@@ -830,7 +823,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.shield-up.description
     Values:
-    - Raises a sturdy shield, boosting defense and drawing the enemy's eye.
+    - Raises your Endurance.
     Reviewed: 0
     Note: 
   - Key: ability.siphon-soul.name
@@ -840,7 +833,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.siphon-soul.description
     Values:
-    - Every heart in the room beats a little for him.
+    - Deals Shadow damage to all enemies and heals you for part of it.
     Reviewed: 0
     Note: 
   - Key: ability.slash.name
@@ -850,7 +843,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.slash.description
     Values:
-    - A swift blade strike against a single enemy.
+    - Deals damage to one enemy. May cause Bleeding.
     Reviewed: 0
     Note: 
   - Key: ability.smoke-bomb.name
@@ -860,7 +853,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.smoke-bomb.description
     Values:
-    - Nobody can hit what nobody can see.
+    - May Blind all enemies.
     Reviewed: 0
     Note: 
   - Key: ability.snare.name
@@ -870,7 +863,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.snare.description
     Values:
-    - Cord and tension, left where something heavy is about to step.
+    - Lowers one enemy's Agility.
     Reviewed: 0
     Note: 
   - Key: ability.soul-feast.name
@@ -880,7 +873,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.soul-feast.description
     Values:
-    - What he takes from the room, he sets before the whole table.
+    - Deals Shadow damage to all enemies and heals the party for part of it.
     Reviewed: 0
     Note: 
   - Key: ability.steal.name
@@ -890,7 +883,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.steal.description
     Values:
-    - Whatever it was carrying, she is carrying now.
+    - Tries to steal an item or gold from one enemy.
     Reviewed: 0
     Note: 
   - Key: ability.steam-burst.name
@@ -900,8 +893,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.steam-burst.description
     Values:
-    - She opens every valve at once. Scalding steam fills the room and nobody can
-      see their feet.
+    - Deals damage to all enemies and lowers their Agility.
     Reviewed: 0
     Note: 
   - Key: ability.storm-cloak.name
@@ -911,7 +903,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.storm-cloak.description
     Values:
-    - Grounds the caster against the storm.
+    - Raises your Lightning resistance and hurts enemies that hit you.
     Reviewed: 0
     Note: 
   - Key: ability.sunder.name
@@ -921,7 +913,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.sunder.description
     Values:
-    - A brutal overhead blow that splits armour as readily as flesh.
+    - Deals damage to one enemy and lowers its Endurance.
     Reviewed: 0
     Note: 
   - Key: ability.tempest.name
@@ -931,7 +923,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.tempest.description
     Values:
-    - The storm stops choosing. Lightning tears through every enemy at once.
+    - Deals Lightning damage to all enemies.
     Reviewed: 0
     Note: 
   - Key: ability.terror.name
@@ -941,7 +933,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.terror.description
     Values:
-    - The room remembers, and some of them cannot bear it.
+    - Lowers all enemies' Strength and Agility. May Confuse them.
     Reviewed: 0
     Note: 
   - Key: ability.unbroken-line.name
@@ -951,7 +943,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.unbroken-line.description
     Values:
-    - You plant yourself, and the line does more than hold - it mends behind you.
+    - Raises the party's Endurance and heals them over time.
     Reviewed: 0
     Note: 
   - Key: ability.vanish.name
@@ -961,7 +953,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.vanish.description
     Values:
-    - One moment she is there. Then she is somewhere better.
+    - Enemies cannot target you until your next turn. Raises your Agility.
     Reviewed: 0
     Note: 
   - Key: ability.volley.name
@@ -971,7 +963,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.volley.description
     Values:
-    - Arrows loosed high, falling across everything in front of you.
+    - Deals damage to all enemies.
     Reviewed: 0
     Note: 
   - Key: ability.war-cry.name
@@ -981,7 +973,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.war-cry.description
     Values:
-    - A thunderous battle cry that boosts all allies' attack.
+    - Raises the party's Strength.
     Reviewed: 0
     Note: 
   - Key: ability.ward.name
@@ -991,7 +983,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.ward.description
     Values:
-    - A thinner ward against fire, ice and storm at once.
+    - Raises your Fire, Ice and Lightning resistance.
     Reviewed: 0
     Note: 
   - Key: ability.water-splash.name
@@ -1001,7 +993,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.water-splash.description
     Values:
-    - A torrent of water crashes into all enemies.
+    - Deals damage to all enemies.
     Reviewed: 0
     Note: 
   - Key: ability.whisper-of-madness.name
@@ -1011,7 +1003,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.whisper-of-madness.description
     Values:
-    - A word the mind cannot hold, and cannot drop.
+    - Delays one enemy's next turn and lowers its Spirit.
     Reviewed: 0
     Note: 
   - Key: ability.blinding-hex.name
@@ -1021,7 +1013,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.blinding-hex.description
     Values:
-    - A whispered curse that clouds every eye in the party.
+    - May Blind the whole party.
     Reviewed: 0
     Note: 
   - Key: ability.caustic-spit.name
@@ -1031,7 +1023,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.caustic-spit.description
     Values:
-    - A gob of digesting bile. It keeps burning after it lands.
+    - Deals damage to one hero. May Poison.
     Reviewed: 0
     Note: 
   - Key: ability.cinderstorm.name
@@ -1041,7 +1033,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.cinderstorm.description
     Values:
-    - A gale of burning ash that scours everything in front of it.
+    - Deals Fire damage to the whole party.
     Reviewed: 0
     Note: 
   - Key: ability.death-chill.name
@@ -1051,7 +1043,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.death-chill.description
     Values:
-    - The cold of the grave rolls over the whole party.
+    - Deals Ice damage to the whole party. May Slow.
     Reviewed: 0
     Note: 
   - Key: ability.grave-touch.name
@@ -1061,7 +1053,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.grave-touch.description
     Values:
-    - A cold hand on the heart. What it takes, the Wight keeps.
+    - Deals Shadow damage to one hero and heals itself for part of it.
     Reviewed: 0
     Note: 
   - Key: ability.heal.name
@@ -1071,7 +1063,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.heal.description
     Values:
-    - Restores health to yourself.
+    - Heals itself.
     Reviewed: 0
     Note: 
   - Key: ability.oil-slick.name
@@ -1081,7 +1073,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.oil-slick.description
     Values:
-    - Douses an enemy in slippery oil, weakening their stats.
+    - Lowers one hero's Agility.
     Reviewed: 0
     Note: 
   - Key: ability.soul-bolt.name
@@ -1091,7 +1083,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.soul-bolt.description
     Values:
-    - A shard of a stolen soul, thrown hard.
+    - Deals Shadow damage to one hero.
     Reviewed: 0
     Note: 
   - Key: ability.toxic-deluge.name
@@ -1101,7 +1093,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.toxic-deluge.description
     Values:
-    - The pool heaves and comes down on everyone.
+    - Deals damage to the whole party. May Poison.
     Reviewed: 0
     Note: 
   - Key: ability.archon-hallowing.name
@@ -1111,8 +1103,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.archon-hallowing.description
     Values:
-    - The Archon opens its hands and the room fills with light. The dead do not survive
-      it well.
+    - Deals Holy damage to all enemies, double to undead.
     Reviewed: 0
     Note: 
   - Key: ability.archon-lance.name
@@ -1122,7 +1113,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.archon-lance.description
     Values:
-    - A spear of light, thrown hard at one foe.
+    - Deals Holy damage to one enemy.
     Reviewed: 0
     Note: 
   - Key: ability.exatrix-nightfall.name
@@ -1132,8 +1123,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.exatrix-nightfall.description
     Values:
-    - She becomes the dark between the torches, and is at every throat at once. They
-      move slower after.
+    - Deals damage to all enemies and lowers their Agility.
     Reviewed: 0
     Note: 
   - Key: ability.exatrix-rend.name
@@ -1143,8 +1133,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.exatrix-rend.description
     Values:
-    - Shadow claws that tear through the moment. Whatever they catch is set back
-      on its way to its next move.
+    - Deals damage to one enemy and delays its next turn.
     Reviewed: 0
     Note: 
   - Key: ability.fang-bite.name
@@ -1154,7 +1143,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.fang-bite.description
     Values:
-    - It goes for the one he marked.
+    - Deals damage to one enemy, more if Marked. May cause Bleeding.
     Reviewed: 0
     Note: 
   - Key: ability.fang-run-down.name
@@ -1164,7 +1153,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.fang-run-down.description
     Values:
-    - It hits the prey at a run and knocks it off its feet.
+    - Deals damage to one enemy and delays its next turn.
     Reviewed: 0
     Note: 
   - Key: ability.golem-brace.name
@@ -1174,7 +1163,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.golem-brace.description
     Values:
-    - The golem sinks its weight into the ground and hardens.
+    - Raises its Endurance.
     Reviewed: 0
     Note: 
   - Key: ability.golem-boulder-toss.name
@@ -1184,7 +1173,7 @@ MonoBehaviour:
     Note: 'Summon move (CairnGolem)'
   - Key: ability.golem-boulder-toss.description
     Values:
-    - 'The golem tears a stone from the floor and throws it. Whatever it hits is knocked back from its next move.'
+    - Deals damage to one enemy and delays its next turn.
     Reviewed: 0
     Note: 'Summon move (CairnGolem)'
   - Key: ability.seraph-wings-of-mercy.name
@@ -1194,7 +1183,7 @@ MonoBehaviour:
     Note: 'Summon move (JudgementSeraph)'
   - Key: ability.seraph-wings-of-mercy.description
     Values:
-    - 'The seraph folds its wings around itself. The wounds close, and the light stays on it as a shield.'
+    - Heals itself and gains a barrier that absorbs damage.
     Reviewed: 0
     Note: 'Summon move (JudgementSeraph)'
   - Key: ability.archon-dawnward.name
@@ -1204,7 +1193,7 @@ MonoBehaviour:
     Note: 'Summon move (Archon)'
   - Key: ability.archon-dawnward.description
     Values:
-    - 'The Archon turns its face to a sun no one else can see, and mends in it.'
+    - Heals itself, then over time.
     Reviewed: 0
     Note: 'Summon move (Archon)'
   - Key: ability.exatrix-dread-howl.name
@@ -1214,7 +1203,7 @@ MonoBehaviour:
     Note: 'Summon move (Exatrix)'
   - Key: ability.exatrix-dread-howl.description
     Values:
-    - 'A sound from the dark between the torches. Hands that hear it hold their weapons a little looser.'
+    - Lowers all enemies' Strength.
     Reviewed: 0
     Note: 'Summon move (Exatrix)'
   - Key: ability.twin-smoke-step.name
@@ -1224,7 +1213,7 @@ MonoBehaviour:
     Note: 'Summon move (DarkTwin)'
   - Key: ability.twin-smoke-step.description
     Values:
-    - 'It is never quite where the blow lands. The next physical attack goes through smoke.'
+    - The next physical hit on it misses.
     Reviewed: 0
     Note: 'Summon move (DarkTwin)'
   - Key: ability.ifrit-flame-mantle.name
@@ -1234,7 +1223,7 @@ MonoBehaviour:
     Note: 'Summon move (Ifrit)'
   - Key: ability.ifrit-flame-mantle.description
     Values:
-    - 'The Ifrit lets its fire run over its skin. Whatever strikes it is burned for the trouble.'
+    - Hurts enemies that hit it.
     Reviewed: 0
     Note: 'Summon move (Ifrit)'
   - Key: ability.ifrit-claw.name
@@ -1244,7 +1233,7 @@ MonoBehaviour:
     Note: 'Summon move (Ifrit)'
   - Key: ability.ifrit-claw.description
     Values:
-    - 'A swipe of burning talons.'
+    - Deals Fire damage to one enemy.
     Reviewed: 0
     Note: 'Summon move (Ifrit)'
   - Key: ability.succubus-life-kiss.name
@@ -1254,7 +1243,7 @@ MonoBehaviour:
     Note: 'Summon move (Succubus)'
   - Key: ability.succubus-life-kiss.description
     Values:
-    - 'A kiss that takes more than it gives. Half of what it draws out mends the succubus.'
+    - Deals Shadow damage to one enemy and heals itself for part of it.
     Reviewed: 0
     Note: 'Summon move (Succubus)'
   - Key: ability.fang-pack-howl.name
@@ -1264,7 +1253,7 @@ MonoBehaviour:
     Note: 'Summon move (GreyFang)'
   - Key: ability.fang-pack-howl.description
     Values:
-    - 'Grey Fang throws back its head and howls, and the party runs with the pack.'
+    - Raises the party's Agility.
     Reviewed: 0
     Note: 'Summon move (GreyFang)'
   - Key: ability.watcher-unmake.name
@@ -1274,7 +1263,7 @@ MonoBehaviour:
     Note: 'Summon move (Watcher)'
   - Key: ability.watcher-unmake.description
     Values:
-    - 'It looks closer. Armour, hide, whatever holds the thing together comes loose.'
+    - Lowers one enemy's Endurance.
     Reviewed: 0
     Note: 'Summon move (Watcher)'
   - Key: ability.spawn-feed.name
@@ -1284,7 +1273,7 @@ MonoBehaviour:
     Note: 'Summon move (WrithingSpawn)'
   - Key: ability.spawn-feed.description
     Values:
-    - 'A tendril finds an open wound and drinks. The spawn grows on it.'
+    - Deals Shadow damage to one enemy and heals itself for part of it.
     Reviewed: 0
     Note: 'Summon move (WrithingSpawn)'
   - Key: ability.golem-quake.name
@@ -1294,8 +1283,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.golem-quake.description
     Values:
-    - The golem brings both fists down. The ground heaves under every enemy and slows
-      them.
+    - Deals damage to all enemies and Slows them.
     Reviewed: 0
     Note: 
   - Key: ability.hellfire.name
@@ -1305,7 +1293,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.hellfire.description
     Values:
-    - 'What the Ifrit leaves behind: the whole field in flames.'
+    - Deals Fire damage to all enemies.
     Reviewed: 0
     Note: 
   - Key: ability.idol-blood-ward.name
@@ -1315,7 +1303,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.idol-blood-ward.description
     Values:
-    - A skin of borrowed blood over every hero.
+    - Raises the party's Endurance.
     Reviewed: 0
     Note: 
   - Key: ability.idol-crimson-vigor.name
@@ -1325,7 +1313,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.idol-crimson-vigor.description
     Values:
-    - The idol drinks, and the party grows strong on it.
+    - Raises the party's Strength.
     Reviewed: 0
     Note: 
   - Key: ability.idol-lifeblood.name
@@ -1335,7 +1323,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.idol-lifeblood.description
     Values:
-    - What was paid flows back, slowly.
+    - Heals the party over time.
     Reviewed: 0
     Note: 
   - Key: ability.idol-offering.name
@@ -1345,7 +1333,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.idol-offering.description
     Values:
-    - The idol gives back all it was fed at once.
+    - Heals the whole party.
     Reviewed: 0
     Note: 
   - Key: ability.ifrit-flame.name
@@ -1355,7 +1343,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.ifrit-flame.description
     Values:
-    - A lance of flame at one enemy, and it catches.
+    - Deals Fire damage to one enemy and sets it Burning.
     Reviewed: 0
     Note: 
   - Key: ability.imp-firebolt.name
@@ -1365,7 +1353,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.imp-firebolt.description
     Values:
-    - A spit of hellfire.
+    - Deals Fire damage to one enemy.
     Reviewed: 0
     Note: 
   - Key: ability.imp-hellfire.name
@@ -1375,7 +1363,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.imp-hellfire.description
     Values:
-    - The imp empties itself over the room. Four of them at once is a lot of fire.
+    - Deals Fire damage to all enemies and sets them Burning.
     Reviewed: 0
     Note: 
   - Key: ability.mech-flame-jet.name
@@ -1385,7 +1373,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.mech-flame-jet.description
     Values:
-    - A tongue of fire from the nozzle arm.
+    - Deals Fire damage to one enemy.
     Reviewed: 0
     Note: 
   - Key: ability.mech-inferno-sweep.name
@@ -1395,7 +1383,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.mech-inferno-sweep.description
     Values:
-    - The nozzle swings across the room on full pressure.
+    - Deals Fire damage to all enemies and sets them Burning.
     Reviewed: 0
     Note: 
   - Key: ability.mech-oil-jet.name
@@ -1405,7 +1393,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.mech-oil-jet.description
     Values:
-    - A thick black jet of oil. Everything it hits slows down and gets slippery.
+    - Deals damage to one enemy and lowers its Agility.
     Reviewed: 0
     Note: 
   - Key: ability.mech-piston-punch.name
@@ -1415,7 +1403,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.mech-piston-punch.description
     Values:
-    - A steam-driven fist, all pressure and no subtlety.
+    - Deals damage to one enemy.
     Reviewed: 0
     Note: 
   - Key: ability.mech-slick-flood.name
@@ -1425,7 +1413,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.mech-slick-flood.description
     Values:
-    - The whole tank, all at once. Nobody keeps their footing.
+    - Deals damage to all enemies and lowers their Agility.
     Reviewed: 0
     Note: 
   - Key: ability.mech-steam-hammer.name
@@ -1435,7 +1423,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.mech-steam-hammer.description
     Values:
-    - Both fists come down at once and the floor cracks under every enemy.
+    - Deals damage to all enemies and lowers their Endurance.
     Reviewed: 0
     Note: 
   - Key: ability.seraph-judgement.name
@@ -1445,7 +1433,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.seraph-judgement.description
     Values:
-    - The seraph raises the blade and the light comes down on every enemy at once.
+    - Deals Holy damage to all enemies.
     Reviewed: 0
     Note: 
   - Key: ability.seraph-radiant-cut.name
@@ -1455,8 +1443,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.seraph-radiant-cut.description
     Values:
-    - One burning stroke of the greatsword. Holy, so it bites where steel is turned
-      aside.
+    - Deals Holy damage to one enemy.
     Reviewed: 0
     Note: 
   - Key: ability.spawn-grasp.name
@@ -1466,7 +1453,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.spawn-grasp.description
     Values:
-    - A tendril finds an ankle.
+    - Deals Shadow damage to one enemy and delays its next turn.
     Reviewed: 0
     Note: 
   - Key: ability.spawn-shriek.name
@@ -1476,7 +1463,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.spawn-shriek.description
     Values:
-    - A sound with too many mouths.
+    - Lowers all enemies' Spirit and delays their next turn.
     Reviewed: 0
     Note: 
   - Key: ability.succubus-lash.name
@@ -1486,7 +1473,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.succubus-lash.description
     Values:
-    - The whip finds the gap in the armour.
+    - Deals Shadow damage to one enemy.
     Reviewed: 0
     Note: 
   - Key: ability.succubus-mesmerize.name
@@ -1496,7 +1483,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.succubus-mesmerize.description
     Values:
-    - It forgets, for a while, that it is in a fight.
+    - Delays one enemy's next turn a lot and lowers its Agility.
     Reviewed: 0
     Note: 
   - Key: ability.turret-shot.name
@@ -1506,7 +1493,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.turret-shot.description
     Values:
-    - A bolt of iron from the tripod gun, at whatever moves.
+    - Deals damage to one enemy.
     Reviewed: 0
     Note: 
   - Key: ability.twin-shadow-dance.name
@@ -1516,7 +1503,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.twin-shadow-dance.description
     Values:
-    - It is behind every one of them at once.
+    - Deals damage to all enemies. May cause Bleeding.
     Reviewed: 0
     Note: 
   - Key: ability.twin-strike.name
@@ -1526,7 +1513,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.twin-strike.description
     Values:
-    - Two knives, one shadow.
+    - Hits one enemy twice.
     Reviewed: 0
     Note: 
   - Key: ability.watcher-gaze.name
@@ -1536,7 +1523,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.watcher-gaze.description
     Values:
-    - It looks, and keeps looking.
+    - Deals Shadow damage to one enemy.
     Reviewed: 0
     Note: 
   - Key: ability.watcher-revelation.name
@@ -1546,7 +1533,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.watcher-revelation.description
     Values:
-    - Every eye opens at once.
+    - Deals Shadow damage to all enemies. May Silence them.
     Reviewed: 0
     Note: 
   - Key: ability.chaos-bolt.name
@@ -1556,7 +1543,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.chaos-bolt.description
     Values:
-    - What Bloodbolt was always trying to be.
+    - Deals Shadow damage to one enemy.
     Reviewed: 0
     Note: 
   - Key: ability.horror-crushing-maw.name
@@ -1566,7 +1553,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.horror-crushing-maw.description
     Values:
-    - Something that was a fighter's arm closes like a jaw.
+    - Deals damage to one enemy. May cause Bleeding.
     Reviewed: 0
     Note: 
   - Key: ability.horror-engulf.name
@@ -1576,7 +1563,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.horror-engulf.description
     Values:
-    - A wall of flesh that will not let anything past it.
+    - Deals damage to one enemy, based on Endurance.
     Reviewed: 0
     Note: 
   - Key: ability.horror-lashing-tendrils.name
@@ -1586,7 +1573,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.horror-lashing-tendrils.description
     Values:
-    - Too many limbs, all of them fast.
+    - Deals damage to all enemies.
     Reviewed: 0
     Note: 
   - Key: ability.horror-madness.name
@@ -1596,7 +1583,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.horror-madness.description
     Values:
-    - It speaks, once. Nobody who hears it acts quickly afterwards.
+    - Delays all enemies' next turn and lowers their Spirit.
     Reviewed: 0
     Note: 
   - Key: ability.horror-unmaking.name
@@ -1606,7 +1593,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.horror-unmaking.description
     Values:
-    - It remembers a spell, and forgets the part that kept it safe.
+    - Deals Shadow damage to one enemy.
     Reviewed: 0
     Note: 
   - Key: ability.horror-whispers.name
@@ -1616,7 +1603,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.horror-whispers.description
     Values:
-    - A prayer turned inside out.
+    - Deals Shadow damage to one enemy. May Silence it.
     Reviewed: 0
     Note: 
   - Key: ability.horror-wrong-angles.name
@@ -1626,7 +1613,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.horror-wrong-angles.description
     Values:
-    - It strikes from a direction that is not there.
+    - Deals damage to one enemy, based on Luck, and delays its next turn.
     Reviewed: 0
     Note: 
   - Key: item.antidote-salve.name
@@ -2272,8 +2259,7 @@ MonoBehaviour:
     Note: 
   - Key: ultra.blood-moon.description
     Values:
-    - The moon comes up red, and every hand in the party is stronger for what he
-      bled.
+    - Costs health. Raises the party's Strength and Intelligence by half.
     Reviewed: 0
     Note: 
   - Key: ultra.death-mark.name
@@ -2283,7 +2269,7 @@ MonoBehaviour:
     Note: 
   - Key: ultra.death-mark.description
     Values:
-    - She picks the one that dies first, and everyone can see it.
+    - Every hit on one enemy is a critical hit.
     Reviewed: 0
     Note: 
   - Key: ultra.demon-form.name
@@ -2293,7 +2279,7 @@ MonoBehaviour:
     Note: 
   - Key: ultra.demon-form.description
     Values:
-    - The Warlock lets the thing he bargains with wear him for a while.
+    - 'Become a demon for a few turns: more health, Shadow attacks, Chaos Bolt.'
     Reviewed: 0
     Note: 
   - Key: ultra.divine-intervention.name
@@ -2303,8 +2289,7 @@ MonoBehaviour:
     Note: 
   - Key: ultra.divine-intervention.description
     Values:
-    - He steps between an ally and the blow, takes it at half weight, and answers
-      in kind.
+    - Takes the single-target hits aimed at the party. You take less damage and strike back.
     Reviewed: 0
     Note: 
   - Key: ultra.earthsplitter.name
@@ -2314,8 +2299,7 @@ MonoBehaviour:
     Note: 
   - Key: ultra.earthsplitter.description
     Values:
-    - Everything he has built up goes into one blow, and the floor splits under all
-      of them.
+    - Deals damage to all enemies.
     Reviewed: 0
     Note: 
   - Key: ultra.flamethrower-mech.name
@@ -2325,8 +2309,7 @@ MonoBehaviour:
     Note: 
   - Key: ultra.flamethrower-mech.description
     Values:
-    - She bolts together a flamethrower mech and climbs on. It sets the whole room
-      alight.
+    - Build a mech and ride it. It takes hits for you and sets enemies Burning.
     Reviewed: 0
     Note: 
   - Key: ultra.flurry.name
@@ -2336,7 +2319,7 @@ MonoBehaviour:
     Note: 
   - Key: ultra.flurry.description
     Values:
-    - He stops guarding and simply swings, again and again, at whatever is closest.
+    - Hits random enemies several times.
     Reviewed: 0
     Note: 
   - Key: ultra.grand-heist.name
@@ -2346,7 +2329,7 @@ MonoBehaviour:
     Note: 
   - Key: ultra.grand-heist.description
     Values:
-    - Every pocket in the room, in one pass.
+    - Steals from every enemy.
     Reviewed: 0
     Note: 
   - Key: ultra.judgement-day.name
@@ -2356,7 +2339,7 @@ MonoBehaviour:
     Note: 
   - Key: ultra.judgement-day.description
     Values:
-    - Light falls on every enemy at once. The dead get no second chance.
+    - Deals Holy damage to all enemies, double to undead.
     Reviewed: 0
     Note: 
   - Key: ultra.lay-on-hands.name
@@ -2366,7 +2349,7 @@ MonoBehaviour:
     Note: 
   - Key: ultra.lay-on-hands.description
     Values:
-    - His hands on one ally, and everything wrong with them is put right.
+    - Fully heals one ally and removes their debuffs.
     Reviewed: 0
     Note: 
   - Key: ultra.mass-hysteria.name
@@ -2376,7 +2359,7 @@ MonoBehaviour:
     Note: 
   - Key: ultra.mass-hysteria.description
     Values:
-    - A whisper in every head at once. Half of them believe it.
+    - 'Confuses all enemies: they may attack each other.'
     Reviewed: 0
     Note: 
   - Key: ultra.miracle-of-hope.name
@@ -2386,7 +2369,7 @@ MonoBehaviour:
     Note: 
   - Key: ultra.miracle-of-hope.description
     Values:
-    - A prayer for the long road. Everyone finds a little more in reserve.
+    - Restores a charge to every hero's abilities.
     Reviewed: 0
     Note: 
   - Key: ultra.miracle-of-light.name
@@ -2396,7 +2379,7 @@ MonoBehaviour:
     Note: 
   - Key: ultra.miracle-of-light.description
     Values:
-    - She asks, and is answered. Wounds close and every curse lifts.
+    - Heals the whole party and removes all debuffs.
     Reviewed: 0
     Note: 
   - Key: ultra.miracle-of-righteousness.name
@@ -2406,7 +2389,7 @@ MonoBehaviour:
     Note: 
   - Key: ultra.miracle-of-righteousness.description
     Values:
-    - Judgement falls on every enemy, and what should already be dead is made so.
+    - Deals Holy damage to all enemies and destroys undead with low health.
     Reviewed: 0
     Note: 
   - Key: ultra.multi-cast.name
@@ -2416,8 +2399,7 @@ MonoBehaviour:
     Note: 
   - Key: ultra.multi-cast.description
     Values:
-    - 'Focus spent all at once: any ability of yours that deals damage or heals,
-      again and again. Free, even with no charges left.'
+    - Spends Focus to cast a damage or healing ability several times, free.
     Reviewed: 0
     Note: 
   - Key: ultra.oil-spewing-mech.name
@@ -2427,8 +2409,7 @@ MonoBehaviour:
     Note: 
   - Key: ultra.oil-spewing-mech.description
     Values:
-    - She bolts together an oil-spewing walker and climbs on. Everything it hits
-      is oiled - and oil burns.
+    - Build a mech and ride it. It takes hits for you and lowers enemies' Agility.
     Reviewed: 0
     Note: 
   - Key: ultra.pack-hunt.name
@@ -2438,7 +2419,7 @@ MonoBehaviour:
     Note: 
   - Key: ultra.pack-hunt.description
     Values:
-    - Three grey shapes go through the line, and come back red.
+    - Hits all enemies three times, more if Marked. May cause Bleeding.
     Reviewed: 0
     Note: 
   - Key: ultra.pin-down.name
@@ -2448,7 +2429,7 @@ MonoBehaviour:
     Note: 
   - Key: ultra.pin-down.description
     Values:
-    - Arrows through boots, sleeves and shadows. Nobody is going anywhere soon.
+    - Delays all enemies' next turn and lowers their Agility.
     Reviewed: 0
     Note: 
   - Key: ultra.rain-of-arrows.name
@@ -2458,7 +2439,7 @@ MonoBehaviour:
     Note: 
   - Key: ultra.rain-of-arrows.description
     Values:
-    - Five arrows, five targets he never had to aim at.
+    - Fires arrows at random enemies and Poisons them.
     Reviewed: 0
     Note: 
   - Key: ultra.rain-of-fire.name
@@ -2468,7 +2449,7 @@ MonoBehaviour:
     Note: 
   - Key: ultra.rain-of-fire.description
     Values:
-    - The sky opens on the Warlock's word and the room burns.
+    - Deals Fire damage to all enemies and sets them Burning.
     Reviewed: 0
     Note: 
   - Key: ultra.sacrifice.name
@@ -2478,8 +2459,7 @@ MonoBehaviour:
     Note: 
   - Key: ultra.sacrifice.description
     Values:
-    - The Cultist gives an ally to what he serves. What comes back is still on your
-      side - mostly.
+    - An ally falls for the floor. A monster built from their stats fights in their place.
     Reviewed: 0
     Note: 
   - Key: ultra.smoke-and-mirrors.name
@@ -2489,7 +2469,7 @@ MonoBehaviour:
     Note: 
   - Key: ultra.smoke-and-mirrors.description
     Values:
-    - Smoke, and somewhere in it the party - or a dozen copies of it.
+    - Physical hits on the party miss until their next turn.
     Reviewed: 0
     Note: 
   - Key: ultra.soul-harvest.name
@@ -2499,7 +2479,7 @@ MonoBehaviour:
     Note: 
   - Key: ultra.soul-harvest.description
     Values:
-    - Every soul in the room pays a tithe, and the Warlock collects.
+    - Deals Shadow damage to all enemies and heals you for part of it.
     Reviewed: 0
     Note: 
   - Key: ultra.take-cover.name
@@ -2509,7 +2489,7 @@ MonoBehaviour:
     Note: 
   - Key: ultra.take-cover.description
     Values:
-    - '"Down!" The whole line braces behind his shield until the worst has passed.'
+    - The whole party takes less damage until their next turn.
     Reviewed: 0
     Note: 
   - Key: ultra.warrior-mech.name
@@ -2519,8 +2499,7 @@ MonoBehaviour:
     Note: 
   - Key: ultra.warrior-mech.description
     Values:
-    - She bolts together a brawling mech and climbs on. It takes the blows meant
-      for her.
+    - Build a mech and ride it. It takes hits for you and hits hard.
     Reviewed: 0
     Note: 
   - Key: summon.abyssal-nightmare.name
@@ -2530,7 +2509,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.abyssal-nightmare.description
     Values:
-    - No eyes. Only the mouth, and the teeth, and the teeth inside the teeth.
+    - Delays all enemies' next turn and lowers their Spirit and Strength. May Silence some.
     Reviewed: 0
     Note: 
   - Key: summon.aegis-lion.name
@@ -2540,8 +2519,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.aegis-lion.description
     Values:
-    - A lion of hammered light plants itself before the Paladin and roars. The enemies
-      turn on the Paladin, and the Paladin hardens to meet them.
+    - Raises your Endurance by half and draws enemy attacks.
     Reviewed: 0
     Note: 
   - Key: summon.archon.name
@@ -2551,7 +2529,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.archon.description
     Values:
-    - A figure of light takes the party's place. It does not strike so much as judge.
+    - Takes the party's place and fights for them. Holy attacks, heals itself.
     Reviewed: 0
     Note: 
   - Key: summon.auto-turret.name
@@ -2561,8 +2539,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.auto-turret.description
     Values:
-    - A brass tripod with a rivet gun on top and a boiler underneath. She sets it
-      down, opens the valve and lets it work.
+    - A turret that fights beside the party and shoots on its own.
     Reviewed: 0
     Note: 
   - Key: summon.bloodfang-boar.name
@@ -2572,8 +2549,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.bloodfang-boar.description
     Values:
-    - A primal war boar charges onto the field and bellows. Every hero's Strength
-      rises by half.
+    - Raises the party's Strength by half.
     Reviewed: 0
     Note: 
   - Key: summon.blood-idol.name
@@ -2583,8 +2559,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.blood-idol.description
     Values:
-    - A shape of clotted red, raised from what the Cultist bleeds. It feeds the party,
-      and the enemy hates it for it.
+    - Costs health. Fights beside the party and raises their Strength, Endurance and healing.
     Reviewed: 0
     Note: 
   - Key: summon.cairn-golem.name
@@ -2594,8 +2569,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.cairn-golem.description
     Values:
-    - The stones of an old cairn rise and take the party's place. It takes every
-      blow meant for them, and the one that breaks it goes no further.
+    - Takes the party's place and takes every hit for them. Delays and Slows enemies.
     Reviewed: 0
     Note: 
   - Key: summon.dark-twin.name
@@ -2605,7 +2579,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.dark-twin.description
     Values:
-    - Her shadow, stepped off the wall, faster than she is.
+    - Takes the party's place. Fast attacks, dodges hits.
     Reviewed: 0
     Note: 
   - Key: summon.dawn-stag.name
@@ -2615,8 +2589,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.dawn-stag.description
     Values:
-    - A white stag steps out of the morning. Where its light falls, wounds close,
-      and keep closing.
+    - Heals the whole party, then over time.
     Reviewed: 0
     Note: 
   - Key: summon.demon-army.name
@@ -2626,8 +2599,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.demon-army.description
     Values:
-    - The Warlock opens the way and his demons pour through, taking the party's place
-      until the bargain runs out.
+    - Demons take the party's place and fight for them.
     Reviewed: 0
     Note: 
   - Key: summon.exatrix.name
@@ -2637,8 +2609,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.exatrix.description
     Values:
-    - A shade of something that hunted before there were names takes the party's
-      place. Every wound she opens costs the enemy time.
+    - Takes the party's place. Its attacks delay enemies and lower their stats.
     Reviewed: 0
     Note: 
   - Key: summon.flamethrower-mech.name
@@ -2648,8 +2619,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.flamethrower-mech.description
     Values:
-    - Fuel tanks, a pilot light and a very long nozzle. It keeps its distance and
-      sets the room alight.
+    - A mech that fights beside the party with Fire attacks that set enemies Burning.
     Reviewed: 0
     Note: 
   - Key: summon.galewing.name
@@ -2659,8 +2629,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.galewing.description
     Values:
-    - A great hawk drops out of nowhere and rakes every enemy twice, finding the
-      gaps in their guard.
+    - Hits all enemies twice and lowers their Endurance.
     Reviewed: 0
     Note: 
   - Key: summon.glacius.name
@@ -2670,8 +2639,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.glacius.description
     Values:
-    - A frost bear. One claw rimes an enemy in ice, ready for the party's water;
-      its breath hardens the party's skin.
+    - Deals Ice damage to one enemy and gives the party a barrier that absorbs damage.
     Reviewed: 0
     Note: 
   - Key: summon.golden-ferret.name
@@ -2681,7 +2649,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.golden-ferret.description
     Values:
-    - It finds the loose coin in every pocket, and the party's luck turns with it.
+    - Raises the party's Luck by half.
     Reviewed: 0
     Note: 
   - Key: summon.grey-fang.name
@@ -2691,7 +2659,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.grey-fang.description
     Values:
-    - The Ranger's hound. It runs down what he marks.
+    - A hound that fights beside the party. Hits Marked enemies harder.
     Reviewed: 0
     Note: 
   - Key: summon.guardian-angel.name
@@ -2701,8 +2669,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.guardian-angel.description
     Values:
-    - Wings close around the whole party. For a while, the blows have to get through
-      her first.
+    - Gives the party a barrier that absorbs damage and raises their Endurance.
     Reviewed: 0
     Note: 
   - Key: summon.horror.name
@@ -2712,7 +2679,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.horror.description
     Values:
-    - 'What the rite leaves of a hero: everything they were, turned outward.'
+    - A sacrificed hero, turned into a monster that fights for the party.
     Reviewed: 0
     Note: 
   - Key: summon.ifrit.name
@@ -2722,8 +2689,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.ifrit.description
     Values:
-    - A fire spirit takes the party's place. When it goes, fallen or sent away, it
-      takes the field with it.
+    - Takes the party's place with Fire attacks. Deals Fire damage to all enemies when it leaves.
     Reviewed: 0
     Note: 
   - Key: summon.imp.name
@@ -2733,8 +2699,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.imp.description
     Values:
-    - 'A cackling scrap of the pit, bound to the Warlock''s blood. The Demon Army''s
-      rank and file: frail, fast, and full of fire.'
+    - A demon that fights for the party with Fire attacks.
     Reviewed: 0
     Note: 
   - Key: summon.iron-charger.name
@@ -2744,7 +2709,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.iron-charger.description
     Values:
-    - A barded warhorse that comes through the enemy line like a door through a wall.
+    - Deals damage to all enemies and delays their next turn.
     Reviewed: 0
     Note: 
   - Key: summon.judgement-seraph.name
@@ -2754,8 +2719,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.judgement-seraph.description
     Values:
-    - A winged knight takes the party's place. It hits far harder than it can be
-      hit, and the blow that finally breaks it goes no further.
+    - Takes the party's place. Holy attacks, heals and shields itself.
     Reviewed: 0
     Note: 
   - Key: summon.murder-of-crows.name
@@ -2765,7 +2729,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.murder-of-crows.description
     Values:
-    - A black cloud of wings and beaks that goes for the eyes.
+    - Blinds all enemies and lowers their Agility and Luck.
     Reviewed: 0
     Note: 
   - Key: summon.oil-mech.name
@@ -2775,8 +2739,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.oil-mech.description
     Values:
-    - A squat walker with a drum of machine oil on its back. Everything it touches
-      slows down - and catches fire easily.
+    - A mech that fights beside the party and lowers enemies' Agility.
     Reviewed: 0
     Note: 
   - Key: summon.phoenix.name
@@ -2786,8 +2749,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.phoenix.description
     Values:
-    - A bird of white fire passes over the line. The fallen rise in its wake, and
-      the standing breathe easier.
+    - Brings back every fallen hero and heals the party.
     Reviewed: 0
     Note: 
   - Key: summon.qyraxis.name
@@ -2797,8 +2759,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.qyraxis.description
     Values:
-    - A bird made of the storm itself. It strikes every enemy twice, and they move
-      like they are wading.
+    - Deals Lightning damage to all enemies twice and lowers their Agility.
     Reviewed: 0
     Note: 
   - Key: summon.succubus.name
@@ -2808,8 +2769,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.succubus.description
     Values:
-    - A demoness of the deep circles, an Imp the Warlock's bargains have raised.
-      She holds the line with whip and glamour.
+    - A demon that fights for the party. Drains health and delays enemies.
     Reviewed: 0
     Note: 
   - Key: summon.warrior-mech.name
@@ -2819,8 +2779,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.warrior-mech.description
     Values:
-    - Brass plate, piston fists and a boiler for a heart. It hits hard and takes
-      harder.
+    - A mech that fights beside the party with heavy hits that lower Endurance.
     Reviewed: 0
     Note: 
   - Key: summon.watcher.name
@@ -2830,7 +2789,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.watcher.description
     Values:
-    - Something from below the deep comes up to look. What it sees, it unmakes.
+    - Fights beside the party with Shadow attacks. Lowers Endurance, may Silence.
     Reviewed: 0
     Note: 
   - Key: summon.writhing-spawn.name
@@ -2840,7 +2799,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.writhing-spawn.description
     Values:
-    - A knot of the deep that came when he called. It holds things in place.
+    - Fights beside the party. Drains health and delays enemies.
     Reviewed: 0
     Note: 
   - Key: combo.conductor-3d-4c-5b-6a.name
@@ -3994,7 +3953,7 @@ MonoBehaviour:
     Note: 
   - Key: node.warrior-boar-charge.name
     Values:
-    - Boar's Second Wind
+    - Boar's Rage
     Reviewed: 0
     Note: 
   - Key: node.warrior-golem.name
@@ -4019,17 +3978,17 @@ MonoBehaviour:
     Note: 
   - Key: node.warrior-charger.name
     Values:
-    - Bloodfang Boar
+    - Iron Charger
     Reviewed: 0
     Note: 
   - Key: node.warrior-charger-power.name
     Values:
-    - Boar's Fury
+    - Charger's Barding
     Reviewed: 0
     Note: 
   - Key: node.warrior-charger-charge.name
     Values:
-    - Boar's Second Wind
+    - Charger's Momentum
     Reviewed: 0
     Note: 
   - Key: potion.healing.name
@@ -5944,7 +5903,7 @@ MonoBehaviour:
     Note: Why the Ability command is greyed
   - Key: room.command.reason.none-carried
     Values:
-    - None carried
+    - None equipped
     Reviewed: 0
     Note: Why the Ability command is greyed
   - Key: room.command.reason.spent
@@ -5997,17 +5956,6 @@ MonoBehaviour:
     - Quit - are you sure?
     Reviewed: 0
     Note: Pause menu button after the first press
-  - Key: room.pause.note
-    Values:
-    - Continue on the title screen brings you back to this level.
-    Reviewed: 0
-    Note: Pause menu note under the leave button
-  - Key: room.pause.note-armed
-    Values:
-    - You will restart this floor from the entrance with every enemy back, and your
-      party as hurt as it is now. Everything found on this floor so far is lost.
-    Reviewed: 0
-    Note: Pause menu note once leaving is armed
   - Key: room.keys.combat-bar
     Values:
     - "Enter fight \xB7 step back out to flee"
@@ -8296,12 +8244,12 @@ MonoBehaviour:
     Note: campfire detail line; xp = banked XP
   - Key: hub.camp.section.carried
     Values:
-    - Carried abilities
+    - Equipped abilities
     Reviewed: 0
     Note: campfire detail section title
   - Key: hub.camp.nothing-carried
     Values:
-    - Nothing carried.
+    - Nothing equipped.
     Reviewed: 0
     Note: campfire detail when no abilities are carried
   - Key: hub.camp.charges
@@ -8686,7 +8634,7 @@ MonoBehaviour:
     Note: inventory key hint, equipment tab on the item list
   - Key: items.inv.hint.abilities
     Values:
-    - "\u2191\u2193 ability \xB7 Enter carry or put away \xB7 Q/E hero \xB7 \u2190\u2192
+    - "\u2191\u2193 ability \xB7 Enter equip or unequip \xB7 Q/E hero \xB7 \u2190\u2192
       tab \xB7 Esc back"
     Reviewed: 0
     Note: inventory key hint, abilities tab
@@ -8773,7 +8721,7 @@ MonoBehaviour:
     Note: reassign confirmation; item = item, from = wearer, to = selected hero
   - Key: items.inv.title.carried
     Values:
-    - Carried
+    - Equipped
     Reviewed: 0
     Note: inventory left column title, abilities tab
   - Key: items.inv.title.known-abilities
@@ -8798,7 +8746,7 @@ MonoBehaviour:
     Note: carried ability row; max = charges
   - Key: items.inv.nothing-carried
     Values:
-    - Nothing carried.
+    - Nothing equipped.
     Reviewed: 0
     Note: abilities tab when nothing is carried
   - Key: items.inv.empty.no-abilities
@@ -8813,12 +8761,12 @@ MonoBehaviour:
     Note: known ability row caption
   - Key: items.inv.ability.carried
     Values:
-    - Carried
+    - Equipped
     Reviewed: 0
     Note: known ability row caption / detail subtitle
   - Key: items.inv.ability.not-carried
     Values:
-    - Not carried
+    - Not equipped
     Reviewed: 0
     Note: known ability row caption / detail subtitle
   - Key: items.inv.title.party-pouch
@@ -8843,7 +8791,7 @@ MonoBehaviour:
     Note: consumables tab note
   - Key: items.inv.empty.no-consumables
     Values:
-    - No consumables carried.
+    - No consumables.
     Reviewed: 0
     Note: consumables tab empty list
   - Key: items.inv.quantity
@@ -8928,32 +8876,32 @@ MonoBehaviour:
     Note: ability detail note
   - Key: items.inv.note.carried-last
     Values:
-    - Carried. Enter puts it away, and this hero carries no abilities.
+    - Equipped. Enter unequips it, and this hero has no abilities equipped.
     Reviewed: 0
     Note: ability detail note on the only carried ability
   - Key: items.inv.note.carried
     Values:
-    - Carried. Enter puts it away.
+    - Equipped. Enter unequips it.
     Reviewed: 0
     Note: ability detail note
   - Key: items.inv.note.slots-in-use
     Values:
-    - All slots are in use this level. You can carry it from the next level.
+    - All slots are in use this level. You can equip it from the next level.
     Reviewed: 0
     Note: ability detail note
   - Key: items.inv.note.slots-full
     Values:
-    - 'Slots are full: carrying this puts {ability} away.'
+    - 'Slots are full: equipping this unequips {ability}.'
     Reviewed: 0
     Note: ability detail note; ability = displaced ability name
   - Key: items.inv.note.carry-next-floor
     Values:
-    - Enter to carry it from the next floor, at full charges.
+    - Enter to equip it from the next floor, at full charges.
     Reviewed: 0
     Note: ability detail note
   - Key: items.inv.note.carry-next-run
     Values:
-    - Enter to carry it into the next level.
+    - Enter to equip it for the next level.
     Reviewed: 0
     Note: ability detail note
   - Key: items.inv.section.reacts
@@ -9515,7 +9463,7 @@ MonoBehaviour:
     Note: Resistance node payload; {element} damage type, {percent} whole number
   - Key: grid.payload.ability-slot
     Values:
-    - +1 ability slot (carry one more of what you know)
+    - +1 ability slot (equip one more of what you know)
     Reviewed: 0
     Note: Ability slot node payload
   - Key: grid.payload.learns
@@ -9540,7 +9488,7 @@ MonoBehaviour:
     Note: Ultra node payload; {ultra} Ultra name
   - Key: grid.payload.summon
     Values:
-    - "Learns the summon {summon}: always carried, cast with Summon"
+    - Learns the summon {summon}
     Reviewed: 0
     Note: Summon node payload; {summon} summon name
   - Key: grid.payload.summon-health
@@ -9774,8 +9722,7 @@ MonoBehaviour:
       1)
   - Key: grid.detail.learns
     Values:
-    - Learns {ability} ({charges} charges per level). Give it a slot in the Storehouse
-      to carry it.
+    - Learns {ability} ({charges} charges per level). Equip it in the Storehouse to use it.
     Reviewed: 0
     Note: Sphere grid known-ability node detail (after the ability's description);
       {ability} name, {charges} per run
@@ -9786,13 +9733,12 @@ MonoBehaviour:
     Note: Sphere grid awakening node detail; {from}/{to} ability names
   - Key: grid.detail.ability-slot
     Values:
-    - Carry one more ability into every level.
+    - Equip one more ability in every level.
     Reviewed: 0
     Note: Sphere grid ability slot node detail
   - Key: grid.detail.summon
     Values:
-    - Learns the summon {summon}. Always carried and cast with Summon; it takes no
-      ability slot.
+    - Learns the summon {summon}.
     Reviewed: 0
     Note: Sphere grid summon node detail; {summon} summon name
   - Key: grid.detail.ultra
@@ -10003,8 +9949,7 @@ MonoBehaviour:
     Note: Paladin ability name (replaces Shield Up on his grid)
   - Key: ability.divine-protection.description
     Values:
-    - 'A holy ward on one ally: the next hit that would strike them is turned aside
-      entirely.'
+    - One ally blocks the next hit taken.
     Reviewed: 0
     Note: Paladin ability flavour text (hub screens)
   - Key: ability.smite.name
@@ -10014,7 +9959,7 @@ MonoBehaviour:
     Note: Paladin ability name (replaces Sunder on his grid)
   - Key: ability.smite.description
     Values:
-    - A blow of righteous fury against one foe, hitting the undead and demons hardest.
+    - Deals Holy damage to one enemy, more to undead and demons.
     Reviewed: 0
     Note: Paladin ability flavour text (hub screens)
   - Key: combat.status.divine-protection
@@ -10049,17 +9994,17 @@ MonoBehaviour:
     Note: sphere grid, dialog title after learning an ability
   - Key: grid.learn.free
     Values:
-    - Carry it into the next level?
+    - Equip it for the next level?
     Reviewed: 0
     Note: sphere grid learn dialog, a slot is free
   - Key: grid.learn.full
     Values:
-    - 'All {slots} ability slots are full. Carry it in place of:'
+    - 'All {slots} ability slots are full. Equip it in place of:'
     Reviewed: 0
     Note: sphere grid learn dialog, every slot full; buttons follow
   - Key: grid.learn.carry
     Values:
-    - Carry it
+    - Equip it
     Reviewed: 0
     Note: sphere grid learn dialog button
   - Key: grid.learn.replace
@@ -10241,7 +10186,7 @@ MonoBehaviour:
     Note: The Floating Eye's single-target attack.
   - Key: ability.eye-laser.description
     Values:
-    - A beam from the eye at one hero.
+    - Deals damage to one hero.
     Reviewed: 0
     Note: 
   - Key: ability.screech.name
@@ -10251,7 +10196,7 @@ MonoBehaviour:
     Note: The Floating Eye's attack on the whole party.
   - Key: ability.screech.description
     Values:
-    - A pulse of force from the eye that hits the whole party.
+    - Deals damage to the whole party.
     Reviewed: 0
     Note: 
   - Key: run.threshold-entrance.name
@@ -10767,7 +10712,7 @@ MonoBehaviour:
     Note: The Stone Sentinel's crushing blow (it used to Slash).
   - Key: ability.enemy-slam.description
     Values:
-    - A stone fist brought down on one hero, denting their guard.
+    - Deals damage to one hero. May lower their Endurance.
     Reviewed: 0
     Note: 
   - Key: ability.enemy-slash.name
@@ -10777,7 +10722,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.enemy-slash.description
     Values:
-    - A swift blade strike against a single enemy.
+    - Deals damage to one hero. May cause Bleeding.
     Reviewed: 0
     Note: 
   - Key: ability.enemy-ice-shard.name
@@ -10787,7 +10732,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.enemy-ice-shard.description
     Values:
-    - Launches a razor-sharp shard of ice at a single enemy.
+    - Deals Ice damage to one hero.
     Reviewed: 0
     Note: 
   - Key: ability.enemy-poison-dart.name
@@ -10797,7 +10742,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.enemy-poison-dart.description
     Values:
-    - A toxic dart that damages and poisons an enemy.
+    - Deals damage to one hero. May Poison.
     Reviewed: 0
     Note: 
   - Key: ability.enemy-water-splash.name
@@ -10807,7 +10752,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.enemy-water-splash.description
     Values:
-    - A torrent of water crashes into all enemies.
+    - Deals damage to the whole party.
     Reviewed: 0
     Note: 
   - Key: ability.enemy-fireball.name
@@ -10817,7 +10762,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.enemy-fireball.description
     Values:
-    - Hurls a ball of fire at all enemies.
+    - Deals Fire damage to the whole party.
     Reviewed: 0
     Note: 
   - Key: ability.enemy-lightning-bolt.name
@@ -10827,7 +10772,7 @@ MonoBehaviour:
     Note: 
   - Key: ability.enemy-lightning-bolt.description
     Values:
-    - Strikes an enemy with a crackling bolt of lightning.
+    - Deals Lightning damage to one hero and lowers their Endurance.
     Reviewed: 0
     Note: 
   - Key: abilities.menu.meta-no-stack
@@ -12483,7 +12428,7 @@ MonoBehaviour:
     Note: Barrow King spell, wound up a turn ahead
   - Key: ability.grave-tide.description
     Values:
-    - Cold barrow water floods the hall and drags at every limb.
+    - Deals Shadow damage to the whole party. May lower their Agility.
     Reviewed: 0
     Note: Enemy ability description
   - Key: ability.requiem.name
@@ -12493,7 +12438,7 @@ MonoBehaviour:
     Note: Barrow King's last-phase spell, wound up a turn ahead
   - Key: ability.requiem.description
     Values:
-    - The king sings the dead to rest, and the living with them.
+    - Deals Shadow damage to the whole party. May Silence.
     Reviewed: 0
     Note: Enemy ability description
   - Key: move.rise-my-guard.name

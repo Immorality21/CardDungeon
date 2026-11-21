@@ -27,8 +27,9 @@ namespace Assets.Scripts.Cards
         public const float FillShare = 0.6f;
 
         /// <summary>Weight of a point of damage the hero takes (a blood price included). The fastest
-        /// filler.</summary>
-        public const float TakenWeight = 1f;
+        /// filler, but no longer a full point: at 1 a tanking Warrior filled it every fight and Flurry
+        /// came round too often (owner playtest, 2026-11-21).</summary>
+        public const float TakenWeight = 0.75f;
 
         /// <summary>Weight of a point of damage the hero deals - well below taking it, so the hitters
         /// do not outrun the tanks.</summary>

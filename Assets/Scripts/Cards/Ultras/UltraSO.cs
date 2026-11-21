@@ -110,6 +110,37 @@ namespace Assets.Scripts.Cards
         [Range(-180f, 180f)]
         public float HitArtAngle;
 
+        [Tooltip("Strike: when set, the hero leaps to the middle of the arena and slams the ground " +
+                 "before the hits land (the Warrior's Earthsplitter). In order: the wind-up held in the " +
+                 "air, the swing down, the landing, the held impact. Presentation only.")]
+        public Sprite[] LeapSlamFrames;
+
+        [Tooltip("Strike: the ground effect played where a leap-slam lands, once, at ImpactFps.")]
+        public Sprite[] ImpactFrames;
+
+        [Min(1f)] public float ImpactFps = 16f;
+
+        [Header("Wind-up")]
+        [Tooltip("A pose the hero takes before the Ultra goes off, played once over WindUpSeconds and " +
+                 "held (the Mage gathering power before MultiCast). Empty: no wind-up.")]
+        public Sprite[] WindUpFrames;
+
+        [Tooltip("The effect played at the hero's feet during the wind-up, once, at WindUpEffectFps. " +
+                 "Its pivot is the point it stands on.")]
+        public Sprite[] WindUpEffectFrames;
+
+        [Min(1f)] public float WindUpEffectFps = 20f;
+
+        [Tooltip("How long the wind-up holds the Ultra back, in seconds.")]
+        [Min(0f)] public float WindUpSeconds = 1.2f;
+
+        /// <summary>Whether this Ultra plays a wind-up before it goes off.</summary>
+        public bool WindsUp => (WindUpFrames != null && WindUpFrames.Length > 0)
+                               || (WindUpEffectFrames != null && WindUpEffectFrames.Length > 0);
+
+        /// <summary>Whether this Strike is shown as a leap to the arena's middle and a slam.</summary>
+        public bool LeapsAndSlams => LeapSlamFrames != null && LeapSlamFrames.Length >= 4;
+
         [Header("Sacrifice")]
         [Tooltip("Sacrifice: the creature that rises. Its StatPercents read the SACRIFICED hero's stats " +
                  "(base + gear), so every stat they had carries over; it arrives at full health and stays " +

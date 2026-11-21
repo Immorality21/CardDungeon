@@ -303,7 +303,6 @@
             </ui:VisualElement>
 
             <ui:Button name="pause-quit" text="#ui.room.pause-quit" class="cd-button cd-button--wide" />
-            <ui:Label name="pause-note" text="" class="cd-info-label cd-hint" />
         </ui:VisualElement>
 
         <!-- Keyboard hint. Shown only while the arrows actually mean "pick a door". -->
