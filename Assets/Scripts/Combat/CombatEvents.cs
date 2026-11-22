@@ -125,6 +125,16 @@ namespace Assets.Scripts.Combat
         public bool Dodged;
     }
 
+    /// <summary>A single-target ability aimed at <see cref="Aimed"/> was taken by the unit covering it
+    /// (<see cref="Guard"/>: the Paladin's Divine Intervention, an enemy's Guard). Raised by
+    /// <c>DamageEffectExecutor</c> as the hit turns, before it lands; presentation only. A basic blow's
+    /// cover is shown where <c>CombatManager.ExecuteBlow</c> redirects it.</summary>
+    public class BlowCovered
+    {
+        public ICombatUnit Guard;
+        public ICombatUnit Aimed;
+    }
+
     /// <summary>A consumable was used in combat, after its effect.</summary>
     public class ItemUsed
     {

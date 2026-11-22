@@ -228,6 +228,38 @@ namespace Tests.EditMode
         }
 
         [Test]
+        public void AbilityDamage_AimedAtACoveredUnit_RaisesBlowCovered_AMechDoesNot()
+        {
+            // The Paladin's Divine Intervention: the live fight shows "Cover" and a flare off this event.
+            var ward = new MockCombatUnit("Ward", strength: 1, endurance: 0, health: 20, agility: 10);
+            var paladin = new MockCombatUnit("Paladin", strength: 1, endurance: 0, health: 40, agility: 10);
+            var rider = new MockCombatUnit("Rider", strength: 1, endurance: 0, health: 20, agility: 10);
+            var mech = new MockCombatUnit("Mech", strength: 1, endurance: 0, health: 40, agility: 10);
+            var events = new CombatEvents();
+            events.Guards.Cover(ward, paladin);
+            events.Guards.Set(rider, mech);
+            var covered = new List<BlowCovered>();
+            events.Subscribe<BlowCovered>(covered.Add);
+            var resolver = new EffectResolver { Events = events };
+            var enemy = new MockCombatUnit("Enemy", strength: 1, endurance: 1, health: 20, agility: 10, isHero: false);
+
+            foreach (var aimed in new ICombatUnit[] { ward, rider })
+            {
+                resolver.Execute(new SpellcastAction
+                {
+                    Magic = DamageMagic(MagicTargetType.SingleEnemy, 10),
+                    Caster = enemy,
+                    Targets = new List<ICombatUnit> { aimed }
+                }, new CombatBuffTracker());
+            }
+
+            Assert.AreEqual(1, covered.Count, "a mech carrying its rider is not a cover");
+            Assert.AreSame(paladin, covered[0].Guard);
+            Assert.AreSame(ward, covered[0].Aimed);
+            Assert.AreEqual(30, paladin.Stats.Health);
+        }
+
+        [Test]
         public void SimulatedAttack_AimedAtTheRider_LandsOnTheMech()
         {
             var rider = Sim("Rider", 1, 20, 10);

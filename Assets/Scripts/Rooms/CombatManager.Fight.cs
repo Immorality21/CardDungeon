@@ -104,6 +104,7 @@ namespace Assets.Scripts.Rooms
             // log and floating text after them. The registry needs no reference kept: the stream holds it.
             new TriggerRegistry(Events, _calculator, BuffTracker, () => HeroSideUnits().Concat(GetAliveEnemies()));
             Events.Subscribe<ReactionResolved>(ShowReaction, TriggerRegistry.Order + 1);
+            Events.Subscribe<BlowCovered>(covered => ShowCovered(covered.Guard));
             // The Warrior's Momentum: stacks of Strength for every turn in a row he lands a hit.
             _momentum = new MomentumTracker(Events, BuffTracker);
             _momentum.Changed += ShowMomentum;

@@ -331,6 +331,23 @@ namespace Assets.Scripts.Rooms
             yield return PlayStrikeBacks();
         }
 
+        /// <summary>
+        /// A cover took a blow meant for someone else: "Cover" over the guard and a flare on it, gold for
+        /// a hero stepping in (the Paladin's Divine Intervention), pale blue for an enemy's Guard. For a
+        /// basic blow (<see cref="ExecuteBlow"/>) and a single-target ability (<see cref="BlowCovered"/>)
+        /// alike; the guard's strike back, if armed, follows once the blow has landed.
+        /// </summary>
+        private void ShowCovered(ICombatUnit guard)
+        {
+            if (guard?.Transform == null)
+            {
+                return;
+            }
+            ShowFloatingLabel(guard.Transform.position + new Vector3(0f, 0.3f, 0f), Loc.Get("combat.float.cover"),
+                new Color(0.75f, 0.85f, 1f), 0.14f);
+            SpellVfx.Covered(guard, guard.IsHero ? SpellVfx.BoonColor : new Color(0.75f, 0.85f, 1f));
+        }
+
         private IEnumerator ExecuteBlow(ICombatUnit attacker, ICombatUnit target, Vector3 lungeDirection, Color damageColor, float damageMultiplier, string verbKey)
         {
             // A guarded unit's blows land on its guard - the mech under its rider (GuardTable) - and
@@ -340,13 +357,9 @@ namespace Assets.Scripts.Rooms
                 var aimed = target;
                 target = Events.Guards.Redirect(target);
                 // An enemy's cover says so: the player picked one target and another took the blow.
-                if (!ReferenceEquals(aimed, target) && Events.Guards.IsCovered(aimed) && target.Transform != null)
+                if (!ReferenceEquals(aimed, target) && Events.Guards.IsCovered(aimed))
                 {
-                    ShowFloatingLabel(target.Transform.position + new Vector3(0f, 0.3f, 0f), Loc.Get("combat.float.cover"),
-                        new Color(0.75f, 0.85f, 1f), 0.14f);
-                    // The guard flares as the blow turns onto it: gold for a hero stepping in (the
-                    // Paladin's Divine Intervention), pale blue for an enemy's Guard.
-                    SpellVfx.Covered(target, target.IsHero ? SpellVfx.BoonColor : new Color(0.75f, 0.85f, 1f));
+                    ShowCovered(target);
                 }
             }
             // A ranged hero (the Mage, the Ranger) shoots the blow across the stage instead of stepping in.

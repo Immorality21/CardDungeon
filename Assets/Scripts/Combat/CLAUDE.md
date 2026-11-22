@@ -24,7 +24,7 @@ Turn scheduling, damage math, and the shared combat-unit interface. The higher-l
   mech under its rider) takes everything, and a **cover** (`Cover`, an enemy's Guard action) takes only
   single-target blows (`RedirectAreaHit` lets an area effect through) and ends when its guard's turn
   starts (`ExpireCovers`, subscribed to `TurnStarted` in the `CombatEvents` constructor so both loops
-  share it). A covered unit wears a light-blue shield icon; a redirected swing floats "Cover".
+  share it). A covered unit wears a light-blue shield icon; a redirected swing, or a single-target ability turned onto the guard (`BlowCovered`, raised by `DamageEffectExecutor`), floats "Cover" and flares the guard (`CombatManager.ShowCovered`).
 - **`UnitTraits`** (`[Flags]`, on `EnemySO.Traits`, read through `IHasTraits` by `Enemy` and `SimUnit`):
   Mechanical, Construct, Undead, Flying, Beast, Demon, Elemental, **Bloodless** (2026-10-11: never
   bleeds - the owner's rule for Blood Shower's bleed) - what a unit *is*. `UnitTraitOps.Has`
