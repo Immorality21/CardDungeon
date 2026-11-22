@@ -21,6 +21,7 @@ MonoBehaviour:
     Optional: 0
     Continues: 0
     MapPosition: {x: -380, y: 0}
+    MapIcon: {fileID: 21300000, guid: 70da956af68ceae4e929ffd2e6e54640, type: 3}
   - Run: {fileID: 11400000, guid: 48aeeeba40c53684e87b9da6523f8d09, type: 2}
     Requires:
     - {fileID: 11400000, guid: d0613f44f8b48854da4854e5c5f8bfb7, type: 2}
@@ -30,6 +31,7 @@ MonoBehaviour:
     Optional: 0
     Continues: 1
     MapPosition: {x: -190, y: 0}
+    MapIcon: {fileID: 21300000, guid: 2149d9b8ed20e2e498cd40b90a83daa4, type: 3}
   - Run: {fileID: 11400000, guid: 02238c2f5e7bf674cb347b495fc6ac00, type: 2}
     Requires:
     - {fileID: 11400000, guid: 48aeeeba40c53684e87b9da6523f8d09, type: 2}
@@ -39,6 +41,7 @@ MonoBehaviour:
     Optional: 0
     Continues: 1
     MapPosition: {x: 0, y: 0}
+    MapIcon: {fileID: 21300000, guid: 765575fc0f63c6048921eb843ba274e1, type: 3}
   - Run: {fileID: 11400000, guid: f59f383bb9804c249afa16877f266076, type: 2}
     Requires:
     - {fileID: 11400000, guid: 02238c2f5e7bf674cb347b495fc6ac00, type: 2}
@@ -48,6 +51,7 @@ MonoBehaviour:
     Optional: 0
     Continues: 0
     MapPosition: {x: 190, y: -60}
+    MapIcon: {fileID: 21300000, guid: a5edd4ea78d7821489fc705cd34f3a41, type: 3}
   - Run: {fileID: 11400000, guid: ba50ce57125c4584b8d454bd13545f36, type: 2}
     Requires:
     - {fileID: 11400000, guid: 4ac8b58699a191b44a32f08f373a61d5, type: 2}
@@ -57,6 +61,7 @@ MonoBehaviour:
     Optional: 0
     Continues: 0
     MapPosition: {x: 570, y: -60}
+    MapIcon: {fileID: 21300000, guid: 1aebe6b8dc1869343b079ca745c44e6c, type: 3}
   - Run: {fileID: 11400000, guid: e90ff9758e2770148a54d188a5913394, type: 2}
     Requires:
     - {fileID: 11400000, guid: 02238c2f5e7bf674cb347b495fc6ac00, type: 2}
@@ -66,6 +71,7 @@ MonoBehaviour:
     Optional: 1
     Continues: 0
     MapPosition: {x: 190, y: 70}
+    MapIcon: {fileID: 21300000, guid: ec8f81885281e594cba2d05b9f837986, type: 3}
   - Run: {fileID: 11400000, guid: 148f9f9eaa0cd7345bb2e4703723ac85, type: 2}
     Requires:
     - {fileID: 11400000, guid: ba50ce57125c4584b8d454bd13545f36, type: 2}
@@ -75,6 +81,7 @@ MonoBehaviour:
     Optional: 0
     Continues: 0
     MapPosition: {x: 760, y: -60}
+    MapIcon: {fileID: 21300000, guid: 8d1b23f26bc9d4247bde32f0c6ebcb4f, type: 3}
   - Run: {fileID: 11400000, guid: 281088d38c802044091ec47dfc8fb2e9, type: 2}
     Requires:
     - {fileID: 11400000, guid: 148f9f9eaa0cd7345bb2e4703723ac85, type: 2}
@@ -86,6 +93,7 @@ MonoBehaviour:
     Optional: 1
     Continues: 0
     MapPosition: {x: 950, y: 20}
+    MapIcon: {fileID: 21300000, guid: 34a3e33a1ab25f14082b38463d929c9a, type: 3}
   - Run: {fileID: 11400000, guid: 9a02abfb854ae1345bf877fe6306d847, type: 2}
     Requires:
     - {fileID: 11400000, guid: 02238c2f5e7bf674cb347b495fc6ac00, type: 2}
@@ -95,6 +103,7 @@ MonoBehaviour:
     Optional: 1
     Continues: 0
     MapPosition: {x: 170, y: 190}
+    MapIcon: {fileID: 21300000, guid: 5e236fff9e482654db0b2586a1d628ca, type: 3}
   - Run: {fileID: 11400000, guid: acc5e58445e1482478fede67ea90f3c0, type: 2}
     Requires:
     - {fileID: 11400000, guid: ba50ce57125c4584b8d454bd13545f36, type: 2}
@@ -105,6 +114,7 @@ MonoBehaviour:
     Optional: 1
     Continues: 0
     MapPosition: {x: 760, y: -180}
+    MapIcon: {fileID: 21300000, guid: 591a1ba85c9726d40a5faea73379b25c, type: 3}
   - Run: {fileID: 11400000, guid: 4ac8b58699a191b44a32f08f373a61d5, type: 2}
     Requires:
     - {fileID: 11400000, guid: f59f383bb9804c249afa16877f266076, type: 2}
@@ -114,6 +124,7 @@ MonoBehaviour:
     Optional: 0
     Continues: 0
     MapPosition: {x: 380, y: -60}
+    MapIcon: {fileID: 21300000, guid: 4501215f5b151b34a9eb9102b86bc311, type: 3}
   - Run: {fileID: 11400000, guid: 00d9c466aa413b1428906eb698af9567, type: 2}
     Requires:
     - {fileID: 11400000, guid: e90ff9758e2770148a54d188a5913394, type: 2}
@@ -123,6 +134,7 @@ MonoBehaviour:
     Optional: 1
     Continues: 0
     MapPosition: {x: 380, y: 130}
+    MapIcon: {fileID: 21300000, guid: 6e4ea82208e9c40488881b2cd5787eb4, type: 3}
   - Run: {fileID: 11400000, guid: 5623f5127260a8f44a799436462ed65c, type: 2}
     Requires:
     - {fileID: 11400000, guid: 4ac8b58699a191b44a32f08f373a61d5, type: 2}
@@ -132,3 +144,131 @@ MonoBehaviour:
     Optional: 1
     Continues: 0
     MapPosition: {x: 570, y: -190}
+    MapIcon: {fileID: 21300000, guid: e4e6b2f88dc803042829cff60c66fb59, type: 3}
+  MapGround: {fileID: 2800000, guid: 13c36554690955a44b45b983066fef92, type: 3}
+  MapGroundTileSize: 40
+  MapScenery:
+  - {fileID: 21300000, guid: d4a88a4e94e57fd4583627697454d985, type: 3}
+  - {fileID: 21300000, guid: 21d1ea19ae99071479413dff6c0fd458, type: 3}
+  - {fileID: 21300000, guid: f75a3f98bfe9f784ab398372e004f432, type: 3}
+  - {fileID: 21300000, guid: 078c7f8653fdc1f4f962f82114dda687, type: 3}
+  - {fileID: 21300000, guid: 749e81964787b174da6c52a4f47c33b0, type: 3}
+  - {fileID: 21300000, guid: 751102bc41874544a9cd5e8cb9da15a5, type: 3}
+  - {fileID: 21300000, guid: 282007dfad173e249931d75f37ee5709, type: 3}
+  MapSceneryOpen:
+  - {fileID: 21300000, guid: 9755159bb2bb3f4419f84d3651bde553, type: 3}
+  - {fileID: 21300000, guid: 4996d7f1832fa5c4ab687aeb9111eff8, type: 3}
+  - {fileID: 21300000, guid: 5959c3cb4086cc243a10fb46c01bfff0, type: 3}
+  - {fileID: 21300000, guid: a36e13e8862ef214296c727a7d1355ca, type: 3}
+  - {fileID: 21300000, guid: ea4b9bd2661225b4ea1a5a26308cd391, type: 3}
+  MapSceneryDensity: 0.45
+  MapScenerySeed: 7
+  MapFeatures:
+  - Sprite: {fileID: 21300000, guid: 54f1995aa1d0bb649a72765c9c59a31a, type: 3}
+    Position: {x: 460, y: -330}
+    Scale: 1.6
+    Ground: 1
+  - Sprite: {fileID: 21300000, guid: fd8874d58c48314428b4904845dc3206, type: 3}
+    Position: {x: 760, y: -340}
+    Scale: 1.5
+    Ground: 1
+  - Sprite: {fileID: 21300000, guid: 2bf690f229583704c9cdcd9d1aa0df57, type: 3}
+    Position: {x: 400, y: -330}
+    Scale: 1.1
+    Ground: 0
+  - Sprite: {fileID: 21300000, guid: 05036beadc7e50a4ca0f7a32f51be49c, type: 3}
+    Position: {x: 560, y: -360}
+    Scale: 1
+    Ground: 0
+  - Sprite: {fileID: 21300000, guid: 85f99adfb0b458849a4ee4326a03d7b2, type: 3}
+    Position: {x: 700, y: -330}
+    Scale: 1.1
+    Ground: 0
+  - Sprite: {fileID: 21300000, guid: 3f2ea0c8e6956a14daaa9accc9045d13, type: 3}
+    Position: {x: 870, y: -350}
+    Scale: 1
+    Ground: 0
+  - Sprite: {fileID: 21300000, guid: c354adf3dec739b489be243ba82b3a43, type: 3}
+    Position: {x: 1040, y: -300}
+    Scale: 1
+    Ground: 0
+  - Sprite: {fileID: 21300000, guid: 81927b8ec45d7fa408702e07c20e5531, type: 3}
+    Position: {x: 480, y: -270}
+    Scale: 1
+    Ground: 0
+  - Sprite: {fileID: 21300000, guid: 93de014e6439fcd4e91387c4921e5e49, type: 3}
+    Position: {x: 660, y: -265}
+    Scale: 1
+    Ground: 0
+  - Sprite: {fileID: 21300000, guid: 772ab80556db1ed43bd3ba2a6570e095, type: 3}
+    Position: {x: 860, y: -275}
+    Scale: 1
+    Ground: 0
+  - Sprite: {fileID: 21300000, guid: ea29607b646e7cc45856e9a6dd93dee4, type: 3}
+    Position: {x: 770, y: -50}
+    Scale: 1.4
+    Ground: 1
+  - Sprite: {fileID: 21300000, guid: 6e133c14c9bb70e41bb7ade08ee8dd3c, type: 3}
+    Position: {x: 900, y: -80}
+    Scale: 1
+    Ground: 1
+  - Sprite: {fileID: 21300000, guid: 2e5225d5603aed34d9334583b94cdecf, type: 3}
+    Position: {x: 575, y: -45}
+    Scale: 1.1
+    Ground: 1
+  - Sprite: {fileID: 21300000, guid: 687c6c3169e27484e87331f5ab97ce35, type: 3}
+    Position: {x: 700, y: -140}
+    Scale: 0.9
+    Ground: 1
+  - Sprite: {fileID: 21300000, guid: 6e925a214b4322a43b1e3f5e8d4a3b70, type: 3}
+    Position: {x: -300, y: -150}
+    Scale: 1
+    Ground: 0
+  - Sprite: {fileID: 21300000, guid: 30aa911017c4cac4f9b78e7fb6dc2b55, type: 3}
+    Position: {x: -500, y: 130}
+    Scale: 1
+    Ground: 0
+  - Sprite: {fileID: 21300000, guid: 6e925a214b4322a43b1e3f5e8d4a3b70, type: 3}
+    Position: {x: 1100, y: 120}
+    Scale: 1
+    Ground: 0
+  - Sprite: {fileID: 21300000, guid: 84e84272968edc94db58c30748ee41e3, type: 3}
+    Position: {x: -90, y: 180}
+    Scale: 1
+    Ground: 1
+  - Sprite: {fileID: 21300000, guid: 5c56a160f84196649bdea5f89a860478, type: 3}
+    Position: {x: 520, y: 260}
+    Scale: 1
+    Ground: 1
+  MapRivers:
+  - Points:
+    - {x: 300, y: -300}
+    - {x: 290, y: -260}
+    - {x: 285, y: -120}
+    - {x: 300, y: 20}
+    - {x: 275, y: 200}
+    - {x: 310, y: 420}
+    Width: 22
+    Source: {fileID: 21300000, guid: b7901d4daa17be049b7e67f7c294ce9b, type: 3}
+    Mouth: {fileID: 21300000, guid: 7133df71bed88994b9c636d5ffccce77, type: 3}
+  MapRiverStrip: {fileID: 2800000, guid: 3a17d1a655254b44aaf2b08265ce59d0, type: 3}
+  MapRiverCaps:
+  - Sprite: {fileID: 21300000, guid: b7901d4daa17be049b7e67f7c294ce9b, type: 3}
+    Flow: 1
+    Mouth: 0
+  - Sprite: {fileID: 21300000, guid: d09922905c3ffa446a6488f11829f378, type: 3}
+    Flow: 0
+    Mouth: 0
+  - Sprite: {fileID: 21300000, guid: c63ab08e120e567478b83e1ff0711a48, type: 3}
+    Flow: 2
+    Mouth: 0
+  - Sprite: {fileID: 21300000, guid: 7133df71bed88994b9c636d5ffccce77, type: 3}
+    Flow: 1
+    Mouth: 1
+  - Sprite: {fileID: 21300000, guid: b758968e293b7374fb66581ccf5a1d85, type: 3}
+    Flow: 0
+    Mouth: 1
+  - Sprite: {fileID: 21300000, guid: 0b460ad6b4a8627488968bfc3f539837, type: 3}
+    Flow: 2
+    Mouth: 1
+  ShowLockedLevels: 0

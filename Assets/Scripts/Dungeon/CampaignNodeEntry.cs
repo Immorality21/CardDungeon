@@ -54,5 +54,10 @@ namespace Assets.Scripts.Dungeon
         [Tooltip("Position on the campaign map screen, in graph units. Authored in " +
                  "Tools > Campaign Map Editor.")]
         public Vector2 MapPosition;
+
+        [Tooltip("The landmark drawn for this level on the story map (a tower, a gate, a marsh), " +
+                 "in place of the plain circle. Empty keeps the circle, so a new level works before " +
+                 "its art exists.")]
+        public Sprite MapIcon;
     }
 }

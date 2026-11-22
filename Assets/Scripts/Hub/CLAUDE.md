@@ -435,6 +435,30 @@ the close path — it raises `OnClosed`, and `HubManager` never calls it directl
   `SphereGridView.PanBy` / `ZoomByAtCentre`). Page Up/Down stay the hub's detail scroll. The detail
   column says **"Clearing it: X joins the party"** for a run's `JoinsOnClear` hero not yet owned
   (`CampaignOps.HeroJoiningOnClear`, finding 22).
+  **It is an illustrated world map since 2026-11-22** (owner: and it must keep working, the campaign is under
+  20% built), so nothing is painted for today's layout. The ground is `CampaignSO.MapGround`, one seamless
+  tile repeated under every level plus `CampaignScenery.Margin`; the trees (`MapScenery`) and the rocks and
+  ruins of the open moor (`MapSceneryOpen`) are scattered by the pure `CampaignScenery` **one cell at a
+  time from a hash of the cell**, with a slow noise deciding woods from moor, so adding a level anywhere
+  never moves what already stands; nothing stands on a visible level, its name or a trail
+  (`CampaignSceneryTests`). Each level draws its landmark, `CampaignNodeEntry.MapIcon` (a 64px PixelLab
+  icon, `Sprites/CampaignMap/landmark_<RunKey>.png`), with its state mark in the corner; with none it keeps
+  the circle. The links are dotted trails (`SphereGridView.TrailEdges`) and the art sits on
+  `SphereGridView.SetBackdrop`, a layer under the content that pans and zooms with it; both are opt-in, so
+  the sphere grid is unchanged. **A new level needs one landmark**: `create_image_pro` 64x64 with
+  `landmark_ThresholdEntrance.png` as the style image and the prompt the others used ("... world map
+  landmark icon for a dark fantasy RPG overworld, high 3/4 top-down angle, small self-contained icon on a
+  little patch of ground, muted earthy colours"), then set `MapIcon`. Everything draws at about 1.25 map
+  units per art pixel (ground tile 32px at 40, landmarks 64px at 80-96, scenery `SceneryPixelScale`).
+  **Hand-placed features and rivers** (2026-11-22, the owner wants "a sense of different environments"):
+  `CampaignSO.MapFeatures` (a sprite, a position, a scale; `Ground` lies flat and centred, else it stands on
+  its foot) and `MapRivers` (points and a width, drawn as a Catmull-Rom curve with banks). Both are placed
+  in the Campaign Map Editor (**Add Feature** with the sprite beside it, **Draw River**; handles drag, Delete
+  removes) from `Sprites/CampaignMap/features/` (a name with `patch` is placed as ground). The scattered
+  trees keep off them (`CampaignScenery.Scatter`'s `clear` circles). `CampaignPresenter.BuildBackdrop`
+  builds the whole land; the editor draws the same one. **Levels not open yet are not drawn**
+  (`CampaignPresenter.ShownOnMap`, `CampaignSO.ShowLockedLevels` off, owner 2026-11-22); the editor's
+  Preview fades them by the same rule. **A river wears `CampaignSO.MapRiverStrip`** when set (`Sprites/CampaignMap/map_river.png`, 240x32: a PixelLab stream stretch and its mirror image, so its two ends meet): `SphereGridView.DrawTexturedRiver` resamples the curve and lays the strip along it as a mesh, 30-pixel sections in order, each edge square to the river's direction, the band `RiverBandPerWater` (2.3) times the authored width. A replacement strip must flow left to right, keep its banks at the top and bottom rows and meet itself end to end, and lose any outline column at its ends (the first cut showed a dark seam). **A river can start and end in a cap** (`CampaignMapRiver.Source` / `Mouth`, from `CampaignSO.MapRiverCaps`: a sprite, the way its water runs, source or mouth). Six in `Sprites/CampaignMap/rivercaps/`: mountain springs flowing down / right / left, lakes taking the river from above / the left / the right. Each was made by **inpainting around a real piece of the strip**: a 96x96 canvas with 24 strip columns pasted, turned, at the middle of the joining edge (a source gets the strip's last columns, which end on the column the river starts with; a mouth its first), and PixelLab painted the rest, so the water and banks at the joint are the strip's own pixels. `CampaignPresenter.AddRiverCaps` draws a cap at the strip's pixel scale with its joining edge on the river's end point, runs the river on under the cap's stub and holds it straight for `CapStraight` as it leaves. **A new cap**: the same canvas recipe (keep it square, the stub centred on its edge; do not crop it), then a `MapRiverCaps` entry with its `Flow`. The land reaches past features and river points too (`SceneryArea`).
 - **PartySelectUI** (the campfire) — which owned heroes actually march out. Writes
   `PartySaveData.SelectedHeroKeys` through `HeroRoster.SetSelectedKeys`; `DungeonManager.FieldedHeroes()`
   reads it. **On the inventory frame since 2026-09-30** (`cd-inv-window` + `cd-camp-*`): the XP-share

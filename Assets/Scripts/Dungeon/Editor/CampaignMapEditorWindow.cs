@@ -35,6 +35,13 @@ namespace Assets.Scripts.Dungeon.Editor
         private const string HiddenClass = "cm-node--hidden";
         private const string WarningClass = "cm-node--warning";
 
+        // Handles for what is not a level (2026-11-22): a feature is "feature:<index>", a river point
+        // "river:<river>:<point>". They ride the graph as small nodes so the drag code moves them too.
+        private const string FeaturePrefix = "feature:";
+        private const string RiverPrefix = "river:";
+        private const string HandleClass = "cm-handle";
+        private const string RiverHandleClass = "cm-handle--river";
+
         private CampaignSO _campaign;
         private SerializedObject _serializedCampaign;
         private PartyRosterSO _roster;
@@ -42,6 +49,10 @@ namespace Assets.Scripts.Dungeon.Editor
         private SphereGridView _view;
         private ObjectField _campaignField;
         private ObjectField _addRunField;
+        private ToolbarToggle _featureToggle;
+        private ObjectField _featureSpriteField;
+        private ToolbarToggle _riverToggle;
+        private string _selectedHandle;
         private ToolbarToggle _addToggle;
         private ToolbarToggle _connectToggle;
         private ToolbarToggle _previewToggle;
@@ -138,6 +149,19 @@ namespace Assets.Scripts.Dungeon.Editor
             toolbar.Add(new ToolbarButton(() => { _previewCleared.Clear(); RebuildAll(); }) { text = "Reset preview" });
             toolbar.Add(new ToolbarButton(() => _view?.FrameAll()) { text = "Frame" });
 
+            _featureToggle = new ToolbarToggle { text = "Add Feature" };
+            _featureToggle.RegisterValueChangedCallback(evt => { if (evt.newValue) { _riverToggle.value = false; } UpdateModeHint(); });
+            toolbar.Add(_featureToggle);
+
+            _featureSpriteField = new ObjectField { objectType = typeof(Sprite), allowSceneObjects = false };
+            _featureSpriteField.style.minWidth = 150f;
+            _featureSpriteField.tooltip = "The sprite Add Feature places (Assets/Sprites/CampaignMap/features).";
+            toolbar.Add(_featureSpriteField);
+
+            _riverToggle = new ToolbarToggle { text = "Draw River" };
+            _riverToggle.RegisterValueChangedCallback(evt => { if (evt.newValue) { _featureToggle.value = false; } UpdateModeHint(); });
+            toolbar.Add(_riverToggle);
+
             _modeHint = new Label();
             _modeHint.style.unityTextAlign = TextAnchor.MiddleLeft;
             _modeHint.style.marginLeft = 8f;
@@ -197,7 +221,15 @@ namespace Assets.Scripts.Dungeon.Editor
             {
                 return;
             }
-            if (_connectToggle != null && _connectToggle.value)
+            if (_featureToggle != null && _featureToggle.value)
+            {
+                _modeHint.text = "Add Feature: click empty land to place the sprite picked beside the button.";
+            }
+            else if (_riverToggle != null && _riverToggle.value)
+            {
+                _modeHint.text = "Draw River: click to add a point to the selected river, or start a new one. Drag points to bend it.";
+            }
+            else if (_connectToggle != null && _connectToggle.value)
             {
                 _modeHint.text = "Connect: click the run that must be cleared, then the run it opens (again to unlink). Esc cancels.";
             }
@@ -262,6 +294,8 @@ namespace Assets.Scripts.Dungeon.Editor
                     Position = positions.TryGetValue(key, out var p) ? p : Vector2.zero,
                     KindClass = CampaignPresenter.KindClass(node),
                     Glyph = AuthoringGlyph(node),
+                    Icon = node.MapIcon,
+                    Badge = node.MapIcon != null ? AuthoringGlyph(node) : null,
                     Caption = Caption(node),
                     IsStart = node.Requires == null || node.Requires.Count == 0
                 });
@@ -288,7 +322,13 @@ namespace Assets.Scripts.Dungeon.Editor
                 }
             }
 
+            // The land the game draws, under every run (the backdrop is built from the runs alone),
+            // then a handle per feature and river point on top.
+            var runNodes = new List<SphereGridView.NodeInfo>(nodes);
+            _view.TrailEdges = _campaign.MapGround != null;
+            AddHandles(nodes);
             _view.SetGraph(nodes, edges);
+            _view.SetBackdrop(CampaignPresenter.BuildBackdrop(_campaign, runNodes, edges));
 
             foreach (var pair in _indexByKey)
             {
@@ -301,7 +341,11 @@ namespace Assets.Scripts.Dungeon.Editor
             {
                 _selectedIndex = -1;
             }
-            _view.SetSelected(KeyOf(_selectedIndex));
+            if (_selectedHandle != null && HandlePosition(_selectedHandle) == null)
+            {
+                _selectedHandle = null;
+            }
+            _view.SetSelected(_selectedHandle ?? KeyOf(_selectedIndex));
             RefreshStates();
         }
 
@@ -332,7 +376,7 @@ namespace Assets.Scripts.Dungeon.Editor
                 }
                 string key = CampaignOps.RunKeyOf(state.Node.Run);
                 _view.SetNodeState(key, CampaignPresenter.StateClass(state.Status));
-                _view.SetNodeFlag(key, HiddenClass, !state.IsVisible);
+                _view.SetNodeFlag(key, HiddenClass, !CampaignPresenter.ShownOnMap(_campaign, state));
             }
         }
 
@@ -408,6 +452,11 @@ namespace Assets.Scripts.Dungeon.Editor
 
         private void OnNodeClicked(string key)
         {
+            if (IsHandle(key))
+            {
+                SelectHandle(key);
+                return;
+            }
             if (_connectToggle != null && _connectToggle.value)
             {
                 HandleConnectClick(key);
@@ -428,6 +477,7 @@ namespace Assets.Scripts.Dungeon.Editor
 
         private void Select(string key)
         {
+            _selectedHandle = null;
             _selectedIndex = key != null && _indexByKey.TryGetValue(key, out int index) ? index : -1;
             _view.SetSelected(key);
             RebuildInspector();
@@ -484,7 +534,26 @@ namespace Assets.Scripts.Dungeon.Editor
 
         private void OnNodePointerDown(string key, PointerDownEvent evt)
         {
-            if (evt.button != 0 || _campaign == null || (_connectToggle != null && _connectToggle.value))
+            if (evt.button != 0 || _campaign == null)
+            {
+                return;
+            }
+            if (IsHandle(key))
+            {
+                var at = HandlePosition(key);
+                if (at == null)
+                {
+                    return;
+                }
+                _dragKey = key;
+                _dragStart = at.Value;
+                _dragOffset = at.Value - (Vector2)_view.ToGridSpace(evt.position);
+                _dragPointerId = evt.pointerId;
+                Undo.RecordObject(_campaign, "Move Map Feature");
+                _view.CapturePointer(evt.pointerId);
+                return;
+            }
+            if (_connectToggle != null && _connectToggle.value)
             {
                 return;
             }
@@ -529,6 +598,14 @@ namespace Assets.Scripts.Dungeon.Editor
 
         private void OnViewPointerMove(PointerMoveEvent evt)
         {
+            if (_dragKey != null && evt.pointerId == _dragPointerId && IsHandle(_dragKey))
+            {
+                var position = (Vector2)_view.ToGridSpace(evt.position) + _dragOffset;
+                position = new Vector2(Mathf.Round(position.x / 5f) * 5f, Mathf.Round(position.y / 5f) * 5f);
+                SetHandlePosition(_dragKey, position);
+                _view.SetNodePosition(_dragKey, position);
+                return;
+            }
             if (_dragKey != null && evt.pointerId == _dragPointerId)
             {
                 var node = NodeFor(_dragKey);
@@ -550,6 +627,20 @@ namespace Assets.Scripts.Dungeon.Editor
 
         private void OnViewPointerUp(PointerUpEvent evt)
         {
+            if (_dragKey != null && evt.pointerId == _dragPointerId && IsHandle(_dragKey))
+            {
+                _view.ReleasePointer(evt.pointerId);
+                var moved = HandlePosition(_dragKey) != _dragStart;
+                _dragKey = null;
+                _dragPointerId = -1;
+                if (moved)
+                {
+                    MarkDirty();
+                    // The land redraws once the drag ends: the trees make room around it.
+                    RebuildGraph();
+                }
+                return;
+            }
             if (_dragKey != null && evt.pointerId == _dragPointerId)
             {
                 _view.ReleasePointer(evt.pointerId);
@@ -574,6 +665,18 @@ namespace Assets.Scripts.Dungeon.Editor
             if (_addToggle != null && _addToggle.value)
             {
                 AddRunAt(gridPosition);
+                evt.StopPropagation();
+                return;
+            }
+            if (_featureToggle != null && _featureToggle.value)
+            {
+                AddFeatureAt(gridPosition);
+                evt.StopPropagation();
+                return;
+            }
+            if (_riverToggle != null && _riverToggle.value)
+            {
+                AddRiverPointAt(gridPosition);
                 evt.StopPropagation();
                 return;
             }
@@ -649,6 +752,11 @@ namespace Assets.Scripts.Dungeon.Editor
 
         private void DeleteSelected()
         {
+            if (_selectedHandle != null)
+            {
+                DeleteHandle(_selectedHandle);
+                return;
+            }
             var key = KeyOf(_selectedIndex);
             var node = NodeFor(key);
             if (node == null)
@@ -674,7 +782,7 @@ namespace Assets.Scripts.Dungeon.Editor
                 CancelConnect();
                 evt.StopPropagation();
             }
-            else if (evt.keyCode == KeyCode.Delete && !(evt.target is TextField) && _selectedIndex >= 0)
+            else if (evt.keyCode == KeyCode.Delete && !(evt.target is TextField) && (_selectedIndex >= 0 || _selectedHandle != null))
             {
                 DeleteSelected();
                 evt.StopPropagation();
@@ -703,6 +811,11 @@ namespace Assets.Scripts.Dungeon.Editor
                 return;
             }
 
+            if (_selectedHandle != null)
+            {
+                BuildHandleInspector();
+                return;
+            }
             if (_selectedIndex < 0 || KeyOf(_selectedIndex) == null)
             {
                 AddSummary();
@@ -763,6 +876,268 @@ namespace Assets.Scripts.Dungeon.Editor
                 runInspector.TrackSerializedObjectValue(runSerialized, _ => RebuildGraph());
                 _inspector.Add(runInspector);
             }
+        }
+
+        // --- map features and rivers ----------------------------------------------
+
+        private static bool IsHandle(string key)
+        {
+            return key != null && (key.StartsWith(FeaturePrefix) || key.StartsWith(RiverPrefix));
+        }
+
+        private void AddHandles(List<SphereGridView.NodeInfo> nodes)
+        {
+            if (_campaign.MapFeatures != null)
+            {
+                for (int i = 0; i < _campaign.MapFeatures.Count; i++)
+                {
+                    var feature = _campaign.MapFeatures[i];
+                    if (feature == null)
+                    {
+                        continue;
+                    }
+                    nodes.Add(new SphereGridView.NodeInfo
+                    {
+                        Key = FeaturePrefix + i,
+                        Position = feature.Position,
+                        KindClass = HandleClass,
+                        Glyph = feature.Ground ? "▦" : "▲"
+                    });
+                }
+            }
+            if (_campaign.MapRivers != null)
+            {
+                for (int r = 0; r < _campaign.MapRivers.Count; r++)
+                {
+                    var points = _campaign.MapRivers[r]?.Points;
+                    if (points == null)
+                    {
+                        continue;
+                    }
+                    for (int p = 0; p < points.Count; p++)
+                    {
+                        nodes.Add(new SphereGridView.NodeInfo
+                        {
+                            Key = RiverPrefix + r + ":" + p,
+                            Position = points[p],
+                            KindClass = HandleClass + " " + RiverHandleClass,
+                            Glyph = ""
+                        });
+                    }
+                }
+            }
+        }
+
+        /// <summary>The feature index, or the river and point indices, a handle key names (-1 when it names none).</summary>
+        private bool ParseHandle(string key, out int feature, out int river, out int point)
+        {
+            feature = river = point = -1;
+            if (key == null)
+            {
+                return false;
+            }
+            if (key.StartsWith(FeaturePrefix))
+            {
+                return int.TryParse(key.Substring(FeaturePrefix.Length), out feature)
+                    && _campaign.MapFeatures != null && feature >= 0 && feature < _campaign.MapFeatures.Count;
+            }
+            if (key.StartsWith(RiverPrefix))
+            {
+                var parts = key.Substring(RiverPrefix.Length).Split(':');
+                return parts.Length == 2 && int.TryParse(parts[0], out river) && int.TryParse(parts[1], out point)
+                    && _campaign.MapRivers != null && river >= 0 && river < _campaign.MapRivers.Count
+                    && _campaign.MapRivers[river]?.Points != null && point >= 0 && point < _campaign.MapRivers[river].Points.Count;
+            }
+            return false;
+        }
+
+        private Vector2? HandlePosition(string key)
+        {
+            if (!ParseHandle(key, out int feature, out int river, out int point))
+            {
+                return null;
+            }
+            return feature >= 0 ? _campaign.MapFeatures[feature].Position : _campaign.MapRivers[river].Points[point];
+        }
+
+        private void SetHandlePosition(string key, Vector2 position)
+        {
+            if (!ParseHandle(key, out int feature, out int river, out int point))
+            {
+                return;
+            }
+            if (feature >= 0)
+            {
+                _campaign.MapFeatures[feature].Position = position;
+            }
+            else
+            {
+                _campaign.MapRivers[river].Points[point] = position;
+            }
+        }
+
+        private void SelectHandle(string key)
+        {
+            _selectedIndex = -1;
+            _selectedHandle = key;
+            _view.SetSelected(key);
+            RebuildInspector();
+        }
+
+        private void AddFeatureAt(Vector2 gridPosition)
+        {
+            var sprite = _featureSpriteField.value as Sprite;
+            if (sprite == null)
+            {
+                EditorUtility.DisplayDialog("Add Feature", "Pick the sprite to place in the field beside Add Feature.", "OK");
+                return;
+            }
+            Undo.RecordObject(_campaign, "Add Map Feature");
+            _campaign.MapFeatures ??= new List<CampaignMapFeature>();
+            _campaign.MapFeatures.Add(new CampaignMapFeature
+            {
+                Sprite = sprite,
+                Position = new Vector2(Mathf.Round(gridPosition.x / 5f) * 5f, Mathf.Round(gridPosition.y / 5f) * 5f),
+                // A sprite with "patch" in its name lies flat (a snowfield, an ash flat).
+                Ground = sprite.name.Contains("patch")
+            });
+            MarkDirty();
+            _selectedHandle = FeaturePrefix + (_campaign.MapFeatures.Count - 1);
+            RebuildAll();
+        }
+
+        private void AddRiverPointAt(Vector2 gridPosition)
+        {
+            Undo.RecordObject(_campaign, "Draw River");
+            _campaign.MapRivers ??= new List<CampaignMapRiver>();
+            var point = new Vector2(Mathf.Round(gridPosition.x / 5f) * 5f, Mathf.Round(gridPosition.y / 5f) * 5f);
+            int river;
+            if (ParseHandle(_selectedHandle, out _, out int selectedRiver, out _) && selectedRiver >= 0)
+            {
+                river = selectedRiver;
+            }
+            else
+            {
+                _campaign.MapRivers.Add(new CampaignMapRiver());
+                river = _campaign.MapRivers.Count - 1;
+            }
+            _campaign.MapRivers[river].Points.Add(point);
+            MarkDirty();
+            _selectedHandle = RiverPrefix + river + ":" + (_campaign.MapRivers[river].Points.Count - 1);
+            RebuildAll();
+        }
+
+        private void DeleteHandle(string key)
+        {
+            if (!ParseHandle(key, out int feature, out int river, out int point))
+            {
+                return;
+            }
+            Undo.RecordObject(_campaign, "Remove Map Feature");
+            if (feature >= 0)
+            {
+                _campaign.MapFeatures.RemoveAt(feature);
+            }
+            else
+            {
+                var points = _campaign.MapRivers[river].Points;
+                points.RemoveAt(point);
+                if (points.Count == 0)
+                {
+                    _campaign.MapRivers.RemoveAt(river);
+                }
+            }
+            MarkDirty();
+            _selectedHandle = null;
+            RebuildAll();
+        }
+
+        private void BuildHandleInspector()
+        {
+            if (!ParseHandle(_selectedHandle, out int featureIndex, out int riverIndex, out int pointIndex))
+            {
+                AddSummary();
+                return;
+            }
+
+            var title = new Label(featureIndex >= 0 ? "Map feature" : "River");
+            title.style.unityFontStyleAndWeight = FontStyle.Bold;
+            title.style.fontSize = 14f;
+            title.style.marginTop = 6f;
+            _inspector.Add(title);
+
+            if (featureIndex >= 0)
+            {
+                var feature = _campaign.MapFeatures[featureIndex];
+                var sprite = new ObjectField("Sprite") { objectType = typeof(Sprite), allowSceneObjects = false, value = feature.Sprite };
+                sprite.RegisterValueChangedCallback(evt => ChangeFeature(f => f.Sprite = evt.newValue as Sprite));
+                _inspector.Add(sprite);
+                var scale = new FloatField("Scale") { value = feature.Scale };
+                scale.RegisterValueChangedCallback(evt => ChangeFeature(f => f.Scale = Mathf.Max(0.1f, evt.newValue)));
+                _inspector.Add(scale);
+                var ground = new Toggle("Ground patch") { value = feature.Ground, tooltip = "Lies flat under the trails and everything standing." };
+                ground.RegisterValueChangedCallback(evt => ChangeFeature(f => f.Ground = evt.newValue));
+                _inspector.Add(ground);
+                _inspector.Add(new Label("Position " + feature.Position + " · drag the handle to move it."));
+                _inspector.Add(new Button(() => DeleteHandle(_selectedHandle)) { text = "Remove feature" });
+            }
+            else
+            {
+                var river = _campaign.MapRivers[riverIndex];
+                var width = new FloatField("Width") { value = river.Width };
+                width.RegisterValueChangedCallback(evt =>
+                {
+                    Undo.RecordObject(_campaign, "River Width");
+                    river.Width = Mathf.Max(2f, evt.newValue);
+                    MarkDirty();
+                    RebuildGraph();
+                });
+                _inspector.Add(width);
+                _inspector.Add(CapField("Source (start)", river.Source, false, sprite => river.Source = sprite));
+                _inspector.Add(CapField("Mouth (end)", river.Mouth, true, sprite => river.Mouth = sprite));
+                _inspector.Add(new Label($"Point {pointIndex + 1} of {river.Points.Count}. Draw River adds points to this river; drag to bend it."));
+                _inspector.Add(new Button(() => DeleteHandle(_selectedHandle)) { text = "Remove point" });
+                _inspector.Add(new Button(() =>
+                {
+                    Undo.RecordObject(_campaign, "Remove River");
+                    _campaign.MapRivers.RemoveAt(riverIndex);
+                    MarkDirty();
+                    _selectedHandle = null;
+                    RebuildAll();
+                }) { text = "Remove river" });
+            }
+        }
+
+        /// <summary>A dropdown of the campaign's river caps of one kind (sources or mouths), plus none.</summary>
+        private VisualElement CapField(string label, Sprite current, bool mouths, System.Action<Sprite> set)
+        {
+            var caps = (_campaign.MapRiverCaps ?? new List<CampaignMapRiverCap>())
+                .Where(c => c?.Sprite != null && c.Mouth == mouths).ToList();
+            var choices = new List<string> { "(none)" };
+            choices.AddRange(caps.Select(c => c.Sprite.name + " (" + c.Flow + ")"));
+            int index = caps.FindIndex(c => c.Sprite == current) + 1;
+            var field = new PopupField<string>(label, choices, Mathf.Max(0, index));
+            field.RegisterValueChangedCallback(evt =>
+            {
+                int picked = choices.IndexOf(evt.newValue) - 1;
+                Undo.RecordObject(_campaign, "River Cap");
+                set(picked >= 0 ? caps[picked].Sprite : null);
+                MarkDirty();
+                RebuildGraph();
+            });
+            return field;
+        }
+
+        private void ChangeFeature(System.Action<CampaignMapFeature> change)
+        {
+            if (!ParseHandle(_selectedHandle, out int featureIndex, out _, out _) || featureIndex < 0)
+            {
+                return;
+            }
+            Undo.RecordObject(_campaign, "Edit Map Feature");
+            change(_campaign.MapFeatures[featureIndex]);
+            MarkDirty();
+            RebuildGraph();
         }
 
         private void AddSummary()

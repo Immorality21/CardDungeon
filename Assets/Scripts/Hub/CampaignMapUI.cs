@@ -93,7 +93,8 @@ namespace Assets.Scripts.Hub
                 {
                     StateClassNames = CampaignPresenter.StateClasses,
                     EdgeStrongStateClass = CampaignPresenter.CompletedClass,
-                    EdgeOpenStateClass = CampaignPresenter.AvailableClass
+                    EdgeOpenStateClass = CampaignPresenter.AvailableClass,
+                    TrailEdges = campaign != null && campaign.MapGround != null
                 };
                 _view.NodeClicked += OnNodeClicked;
                 graphHost.Add(_view);
@@ -169,6 +170,7 @@ namespace Assets.Scripts.Hub
             _states = BuildStates();
             CampaignPresenter.BuildViewModel(_campaign, _states, _nodeBuffer, _edgeBuffer);
             _view.SetGraph(_nodeBuffer, _edgeBuffer);
+            _view.SetBackdrop(CampaignPresenter.BuildBackdrop(_campaign, _nodeBuffer, _edgeBuffer));
 
             if (!string.IsNullOrEmpty(_selectedKey) && FindState(_selectedKey) == null)
             {

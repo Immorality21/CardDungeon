@@ -37,6 +37,65 @@ namespace Assets.Scripts.Dungeon
 
         public List<CampaignNodeEntry> Nodes = new List<CampaignNodeEntry>();
 
+        [Header("Story map art")]
+        [Tooltip("The ground under the story map: a seamless tile, repeated under every level " +
+                 "however far the campaign reaches (Hub/CampaignScenery). Empty draws the plain panel.")]
+        public Texture2D MapGround;
+
+        [Tooltip("How big one ground tile is drawn, in map units.")]
+        [Min(8f)] public float MapGroundTileSize = 128f;
+
+        [Tooltip("Scenery for the woods (trees). Woods and open moor come from a slow noise over the " +
+                 "map, and every piece is placed per map cell from MapScenerySeed, so a new level " +
+                 "never moves what is already there.")]
+        public List<Sprite> MapScenery = new List<Sprite>();
+
+        [Tooltip("Scenery for the open moor between the woods (rocks, ruins, a gravestone), much " +
+                 "sparser than the woods.")]
+        public List<Sprite> MapSceneryOpen = new List<Sprite>();
+
+        [Tooltip("The share of map cells that hold a piece of scenery.")]
+        [Range(0f, 1f)] public float MapSceneryDensity = 0.3f;
+
+        public int MapScenerySeed = 7;
+
+        [Tooltip("Hand-placed pieces of the map that are not levels: mountains, lakes, snowfields. " +
+                 "Placed in Tools > Campaign Map Editor (Add Feature).")]
+        public List<CampaignMapFeature> MapFeatures = new List<CampaignMapFeature>();
+
+        [Tooltip("Rivers across the map, drawn in Tools > Campaign Map Editor (Draw River).")]
+        public List<CampaignMapRiver> MapRivers = new List<CampaignMapRiver>();
+
+        [Tooltip("The art laid along every river: a horizontal strip of water with its banks, flowing " +
+                 "left to right, seamless end to end (it is cut into sections and laid in order along " +
+                 "the curve). Empty draws the plain painted river.")]
+        public Texture2D MapRiverStrip;
+
+        [Tooltip("What a river can start or end in (mountain springs, lakes), each with the way its " +
+                 "water runs. A river names one by its sprite (CampaignMapRiver.Source / Mouth).")]
+        public List<CampaignMapRiverCap> MapRiverCaps = new List<CampaignMapRiverCap>();
+
+        /// <summary>The cap entry for <paramref name="sprite"/>, or null.</summary>
+        public CampaignMapRiverCap FindRiverCap(Sprite sprite)
+        {
+            if (sprite == null || MapRiverCaps == null)
+            {
+                return null;
+            }
+            foreach (var cap in MapRiverCaps)
+            {
+                if (cap != null && cap.Sprite == sprite)
+                {
+                    return cap;
+                }
+            }
+            return null;
+        }
+
+        [Tooltip("Draw levels that are not open yet (greyed, with a lock). Off: the map shows only " +
+                 "what the player can play or has played (owner, 2026-11-22).")]
+        public bool ShowLockedLevels;
+
         /// <summary>The node holding this run, or null when the run is not in the campaign.</summary>
         public CampaignNodeEntry FindNode(RunDefinitionSO run)
         {

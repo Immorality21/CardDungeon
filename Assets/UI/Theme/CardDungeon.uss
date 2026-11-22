@@ -4126,6 +4126,108 @@
     color: var(--cd-parchment);
 }
 
+/* A level with a landmark (CampaignNodeEntry.MapIcon, 2026-11-22): no circle, the art stands on
+   the node's spot. The button itself grows to cover the whole picture, so the landmark is what you
+   click (owner, same day: the 44px circle under the art was too small a target). SphereGridView
+   places a node by its 44px box (left/top = position - 22); the margins move the 96px box so the
+   art stands on the same spot, its foot just below the node's point. The state mark rides in the
+   corner (NodeInfo.Badge). */
+.cm-node--landmark {
+    width: 96px;
+    height: 96px;
+    margin-left: -26px;
+    margin-top: -42px;
+    border-radius: 48px;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    overflow: visible;
+}
+
+.cm-node--landmark .sg-node__icon {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+}
+
+.cm-node--landmark .sg-node__badge {
+    right: 8px;
+    bottom: 8px;
+    font-size: 15px;
+}
+
+.cm-node--landmark .sg-node__caption {
+    margin-top: -6px;
+}
+
+/* Not open yet: the place is there, in shadow. */
+.cm-node--landmark.cm-node--locked {
+    opacity: 1;
+}
+
+.cm-node--landmark.cm-node--locked .sg-node__icon {
+    --unity-image-tint-color: rgb(110, 105, 120);
+    opacity: 0.7;
+}
+
+.cm-node--landmark.cm-node--locked .sg-node__caption {
+    color: rgb(170, 165, 180);
+}
+
+/* Open or underway: a thin gold ring around the place. */
+.cm-node--landmark.cm-node--available,
+.cm-node--landmark.cm-node--active {
+    border-width: 2px;
+    border-color: rgba(236, 190, 72, 0.6);
+}
+
+.cm-node--landmark:hover {
+    border-width: 2px;
+    border-color: var(--cd-accent);
+}
+
+/* The cursor on a landmark: the selected lift plus a gold ring. */
+.cm-node--landmark.sg-node--selected {
+    border-width: 3px;
+    border-color: var(--cd-gold);
+    scale: 1.12;
+}
+
+/* Campaign Map Editor only: a handle on a hand-placed map feature or a river point (2026-11-22).
+   A 16px square on the node's spot (the 44px node box, shrunk by its margins). */
+.cm-handle {
+    width: 16px;
+    height: 16px;
+    margin-left: 14px;
+    margin-top: 14px;
+    border-radius: 3px;
+    border-width: 2px;
+    border-color: rgba(255, 255, 255, 0.85);
+    background-color: rgba(30, 20, 50, 0.75);
+}
+
+.cm-handle .sg-node__glyph {
+    font-size: 9px;
+}
+
+.cm-handle--river {
+    border-radius: 8px;
+    border-color: rgb(120, 190, 230);
+    background-color: rgba(30, 60, 90, 0.8);
+}
+
+.cm-handle.sg-node--selected {
+    border-width: 3px;
+    border-color: var(--cd-gold);
+    scale: 1.3;
+}
+
+/* Story map scenery (SphereGridView.SetBackdrop): drawn pixel-crisp, never picked. */
+.sg-decoration {
+    -unity-background-scale-mode: scale-to-fit;
+}
+
 /* Campaign Map Editor only (CampaignMapEditorWindow): the game never draws a secret node until it
    opens, and never draws a hidden one at all, so neither class reaches the hub screen. */
 .cm-node--secret {

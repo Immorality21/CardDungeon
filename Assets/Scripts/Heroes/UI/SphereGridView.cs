@@ -65,6 +65,50 @@ namespace Assets.Scripts.Heroes.UI
 
         public const float NodeRadius = 22f;
 
+        /// <summary>One piece of scenery under the graph (the story map's trees and ruins): a sprite
+        /// whose foot stands on <see cref="Position"/>, <see cref="Height"/> map units tall.</summary>
+        public struct Decoration
+        {
+            public Sprite Sprite;
+            public Vector2 Position;
+            public float Height;
+
+            /// <summary>Centred on <see cref="Position"/> instead of standing on it (a ground patch).</summary>
+            public bool Centred;
+
+            /// <summary>When set, the point of the sprite (0..1 across, 0..1 down) that sits on
+            /// <see cref="Position"/> - a river cap's joining edge. Overrides <see cref="Centred"/>.</summary>
+            public bool UsePivot;
+            public Vector2 Pivot;
+        }
+
+        /// <summary>A river under the graph: a smooth curve through <see cref="Points"/>.</summary>
+        public struct Stroke
+        {
+            public List<Vector2> Points;
+            public float Width;
+
+            /// <summary>Optional art laid along the curve: a horizontal strip of water and banks,
+            /// seamless end to end. Null paints the plain river.</summary>
+            public Texture2D Texture;
+        }
+
+        /// <summary>Everything <see cref="SetBackdrop"/> draws, bottom to top: the ground tile over
+        /// <see cref="Area"/>, the ground patches, the rivers, then whatever stands (scenery and standing
+        /// features, in the order given - further down the map last).</summary>
+        public sealed class Backdrop
+        {
+            public Texture2D Ground;
+            public float TileSize = 128f;
+            public Rect Area;
+            public readonly List<Decoration> Patches = new List<Decoration>();
+            public readonly List<Stroke> Rivers = new List<Stroke>();
+
+            /// <summary>Where rivers start and end (springs, lakes): drawn over the water, under what stands.</summary>
+            public readonly List<Decoration> RiverCaps = new List<Decoration>();
+            public readonly List<Decoration> Standing = new List<Decoration>();
+        }
+
         /// <summary>Extra room <see cref="FrameAll"/> leaves when nodes carry captions: half a long name
         /// either side, and one caption's height below.</summary>
         private static readonly Vector2 CaptionFramePad = new Vector2(70f, 30f);
@@ -85,6 +129,10 @@ namespace Assets.Scripts.Heroes.UI
         private const float DashGap = 8f;
 
         private readonly VisualElement _content;
+
+        // Under the content, panned and zoomed with it (SetBackdrop): a sibling rather than a child,
+        // because the edges are painted on _content itself and its children would cover them.
+        private readonly VisualElement _backdrop;
         private readonly Dictionary<string, Button> _buttons = new Dictionary<string, Button>();
         private readonly Dictionary<string, NodeInfo> _nodes = new Dictionary<string, NodeInfo>();
 
@@ -137,6 +185,12 @@ namespace Assets.Scripts.Heroes.UI
         /// </summary>
         public bool DrawArrows { get; set; }
 
+        /// <summary>
+        /// Draws every edge as a dotted trail instead of a line - the story map's roads between
+        /// landmarks (2026-11-22). Off by default: the sphere grid keeps its lines.
+        /// </summary>
+        public bool TrailEdges { get; set; }
+
         public Vector2 Pan
         {
             get { return _pan; }
@@ -154,6 +208,10 @@ namespace Assets.Scripts.Heroes.UI
             // window's panel, where :root matching is not guaranteed.
             AddToClassList("sg-scope");
             focusable = false;
+
+            _backdrop = new VisualElement { name = "sg-backdrop", pickingMode = PickingMode.Ignore };
+            _backdrop.AddToClassList("sg-content");
+            Add(_backdrop);
 
             _content = new VisualElement { name = "sg-content", pickingMode = PickingMode.Ignore };
             _content.AddToClassList("sg-content");
@@ -214,7 +272,15 @@ namespace Assets.Scripts.Heroes.UI
             button.AddToClassList("sg-node");
             if (!string.IsNullOrEmpty(node.KindClass))
             {
-                button.AddToClassList(node.KindClass);
+                // Space-separated, so a node can carry more than one (the story map's
+                // "cm-node--main cm-node--landmark").
+                foreach (var kind in node.KindClass.Split(' '))
+                {
+                    if (kind.Length > 0)
+                    {
+                        button.AddToClassList(kind);
+                    }
+                }
             }
             if (node.IsStart)
             {
@@ -258,10 +324,12 @@ namespace Assets.Scripts.Heroes.UI
 
             string captured = node.Key;
             button.clicked += () => NodeClicked?.Invoke(captured);
+            // Trickle-down: the Button's own Clickable stops the press before later callbacks on the
+            // same element hear it, which left the editors' drag dead (owner, 2026-11-22).
             button.RegisterCallback<PointerDownEvent>(evt =>
             {
                 NodePointerDown?.Invoke(captured, evt);
-            });
+            }, TrickleDown.TrickleDown);
             button.RegisterCallback<PointerEnterEvent>(_ =>
             {
                 _hoveredKey = captured;
@@ -284,6 +352,235 @@ namespace Assets.Scripts.Heroes.UI
             float radius = isStart ? NodeRadius + 5f : NodeRadius;
             button.style.left = gridPosition.x - radius;
             button.style.top = gridPosition.y - radius;
+        }
+
+        /// <summary>
+        /// The land under the graph, in grid space (the story map): see <see cref="Backdrop"/> for what
+        /// is drawn and in which order. Opt-in; nothing is drawn until it is called, and null clears it.
+        /// </summary>
+        public void SetBackdrop(Backdrop backdrop)
+        {
+            _backdrop.Clear();
+            _rivers.Clear();
+            if (backdrop == null)
+            {
+                return;
+            }
+            if (backdrop.Ground != null)
+            {
+                var tiles = new VisualElement { pickingMode = PickingMode.Ignore };
+                tiles.style.position = Position.Absolute;
+                tiles.style.left = backdrop.Area.x;
+                tiles.style.top = backdrop.Area.y;
+                tiles.style.width = backdrop.Area.width;
+                tiles.style.height = backdrop.Area.height;
+                tiles.style.backgroundImage = new StyleBackground(backdrop.Ground);
+                tiles.style.backgroundRepeat = new BackgroundRepeat(Repeat.Repeat, Repeat.Repeat);
+                tiles.style.backgroundSize = new BackgroundSize(new Length(backdrop.TileSize), new Length(backdrop.TileSize));
+                _backdrop.Add(tiles);
+            }
+            AddDecorations(backdrop.Patches);
+
+            if (backdrop.Rivers.Count > 0)
+            {
+                _rivers.AddRange(backdrop.Rivers);
+                var water = new VisualElement { pickingMode = PickingMode.Ignore };
+                water.style.position = Position.Absolute;
+                water.style.left = 0f;
+                water.style.top = 0f;
+                water.generateVisualContent += DrawRivers;
+                _backdrop.Add(water);
+            }
+
+            AddDecorations(backdrop.RiverCaps);
+            AddDecorations(backdrop.Standing);
+        }
+
+        private void AddDecorations(List<Decoration> decorations)
+        {
+            foreach (var decoration in decorations)
+            {
+                if (decoration.Sprite == null)
+                {
+                    continue;
+                }
+                var rect = decoration.Sprite.rect;
+                float height = decoration.Height;
+                float width = rect.height > 0f ? height * rect.width / rect.height : height;
+                var image = new Image { sprite = decoration.Sprite, scaleMode = ScaleMode.ScaleToFit, pickingMode = PickingMode.Ignore };
+                image.AddToClassList("sg-decoration");
+                image.style.position = Position.Absolute;
+                image.style.width = width;
+                image.style.height = height;
+                if (decoration.UsePivot)
+                {
+                    image.style.left = decoration.Position.x - width * decoration.Pivot.x;
+                    image.style.top = decoration.Position.y - height * decoration.Pivot.y;
+                }
+                else
+                {
+                    image.style.left = decoration.Position.x - width * 0.5f;
+                    image.style.top = decoration.Centred ? decoration.Position.y - height * 0.5f : decoration.Position.y - height;
+                }
+                _backdrop.Add(image);
+            }
+        }
+
+        // River colours: a dark bank, the water, a lighter current down the middle.
+        private static readonly Color RiverBank = new Color(0.16f, 0.2f, 0.14f);
+        private static readonly Color RiverWater = new Color(0.22f, 0.36f, 0.45f);
+        private static readonly Color RiverCurrent = new Color(0.36f, 0.52f, 0.6f);
+        private readonly List<Stroke> _rivers = new List<Stroke>();
+
+        private void DrawRivers(MeshGenerationContext context)
+        {
+            var painter = context.painter2D;
+            painter.lineCap = LineCap.Round;
+            painter.lineJoin = LineJoin.Round;
+            foreach (var river in _rivers)
+            {
+                var curve = SmoothPath(river.Points);
+                if (curve.Count < 2)
+                {
+                    continue;
+                }
+                if (river.Texture != null)
+                {
+                    DrawTexturedRiver(context, curve, river.Width, river.Texture);
+                    continue;
+                }
+                StrokePath(painter, curve, river.Width + 5f, RiverBank);
+                StrokePath(painter, curve, river.Width, RiverWater);
+                StrokePath(painter, curve, Mathf.Max(1.5f, river.Width * 0.3f), RiverCurrent);
+            }
+        }
+
+        // A textured river's band is this many times its water width (the strip's banks around it),
+        // and the strip is laid in sections of this many art pixels, each run along the curve in steps.
+        public const float RiverBandPerWater = 2.3f;
+        private const int RiverSectionPixels = 30;
+        private const int RiverStepsPerSection = 6;
+
+        /// <summary>
+        /// The river strip laid along <paramref name="curve"/>: a band <paramref name="width"/> x
+        /// <see cref="RiverBandPerWater"/> wide, its art running down the curve section by section, the
+        /// strip's sections in order so its whole length plays before it repeats. Each edge is set
+        /// square to the river's direction at that point, so the band bends with it.
+        /// </summary>
+        private static void DrawTexturedRiver(MeshGenerationContext context, List<Vector2> curve, float width, Texture2D texture)
+        {
+            float band = width * RiverBandPerWater;
+            int sections = Mathf.Max(1, texture.width / RiverSectionPixels);
+            float sectionLength = band * RiverSectionPixels / Mathf.Max(1f, texture.height);
+            var samples = Resample(curve, sectionLength / RiverStepsPerSection);
+            if (samples.Count < 2)
+            {
+                return;
+            }
+
+            // One mesh per section, so each maps its own slice of the strip.
+            for (int start = 0, section = 0; start < samples.Count - 1; start += RiverStepsPerSection, section++)
+            {
+                int end = Mathf.Min(samples.Count - 1, start + RiverStepsPerSection);
+                int count = end - start + 1;
+                var mesh = context.Allocate(count * 2, (count - 1) * 6, texture);
+                var region = mesh.uvRegion;
+                float u0 = (section % sections) / (float)sections;
+                for (int i = 0; i < count; i++)
+                {
+                    int k = start + i;
+                    var tangent = samples[Mathf.Min(samples.Count - 1, k + 1)] - samples[Mathf.Max(0, k - 1)];
+                    var normal = new Vector2(-tangent.y, tangent.x).normalized * (band * 0.5f);
+                    float u = u0 + (i / (float)RiverStepsPerSection) / sections;
+                    var uvTop = new Vector2(region.x + u * region.width, region.y + region.height);
+                    var uvBottom = new Vector2(region.x + u * region.width, region.y);
+                    mesh.SetNextVertex(new Vertex { position = new Vector3(samples[k].x - normal.x, samples[k].y - normal.y, Vertex.nearZ), tint = Color.white, uv = uvTop });
+                    mesh.SetNextVertex(new Vertex { position = new Vector3(samples[k].x + normal.x, samples[k].y + normal.y, Vertex.nearZ), tint = Color.white, uv = uvBottom });
+                }
+                for (int i = 0; i < count - 1; i++)
+                {
+                    ushort a = (ushort)(i * 2);
+                    mesh.SetNextIndex(a);
+                    mesh.SetNextIndex((ushort)(a + 2));
+                    mesh.SetNextIndex((ushort)(a + 1));
+                    mesh.SetNextIndex((ushort)(a + 1));
+                    mesh.SetNextIndex((ushort)(a + 2));
+                    mesh.SetNextIndex((ushort)(a + 3));
+                }
+            }
+        }
+
+        /// <summary>Points every <paramref name="step"/> units along the path, the first and last kept.</summary>
+        private static List<Vector2> Resample(List<Vector2> path, float step)
+        {
+            var points = new List<Vector2> { path[0] };
+            float carried = 0f;
+            for (int i = 1; i < path.Count; i++)
+            {
+                var from = path[i - 1];
+                var segment = path[i] - from;
+                float length = segment.magnitude;
+                if (length <= 0f)
+                {
+                    continue;
+                }
+                float at = step - carried;
+                while (at <= length)
+                {
+                    points.Add(from + segment * (at / length));
+                    at += step;
+                }
+                carried = length - (at - step);
+            }
+            if ((points[points.Count - 1] - path[path.Count - 1]).sqrMagnitude > 1f)
+            {
+                points.Add(path[path.Count - 1]);
+            }
+            return points;
+        }
+
+        private static void StrokePath(Painter2D painter, List<Vector2> path, float width, Color color)
+        {
+            painter.lineWidth = width;
+            painter.strokeColor = color;
+            painter.BeginPath();
+            painter.MoveTo(path[0]);
+            for (int i = 1; i < path.Count; i++)
+            {
+                painter.LineTo(path[i]);
+            }
+            painter.Stroke();
+        }
+
+        /// <summary>A Catmull-Rom curve through the points, so a river bends instead of kinking.</summary>
+        public static List<Vector2> SmoothPath(IReadOnlyList<Vector2> points, int steps = 8)
+        {
+            var path = new List<Vector2>();
+            if (points == null || points.Count == 0)
+            {
+                return path;
+            }
+            if (points.Count < 3)
+            {
+                path.AddRange(points);
+                return path;
+            }
+            for (int i = 0; i < points.Count - 1; i++)
+            {
+                var p0 = points[Mathf.Max(0, i - 1)];
+                var p1 = points[i];
+                var p2 = points[i + 1];
+                var p3 = points[Mathf.Min(points.Count - 1, i + 2)];
+                for (int s = 0; s < steps; s++)
+                {
+                    float t = s / (float)steps;
+                    float t2 = t * t;
+                    float t3 = t2 * t;
+                    path.Add(0.5f * (2f * p1 + (p2 - p0) * t + (2f * p0 - 5f * p1 + 4f * p2 - p3) * t2 + (3f * p1 - p0 - 3f * p2 + p3) * t3));
+                }
+            }
+            path.Add(points[points.Count - 1]);
+            return path;
         }
 
         // --- state -----------------------------------------------------------
@@ -657,6 +954,8 @@ namespace Assets.Scripts.Heroes.UI
         {
             _content.style.translate = new Translate(_pan.x, _pan.y);
             _content.style.scale = new Scale(new Vector2(_zoom, _zoom));
+            _backdrop.style.translate = _content.style.translate;
+            _backdrop.style.scale = _content.style.scale;
             _content.MarkDirtyRepaint();
         }
 
@@ -753,6 +1052,18 @@ namespace Assets.Scripts.Heroes.UI
                     continue;
                 }
 
+                if (TrailEdges)
+                {
+                    DrawTrail(painter, a.Position, b.Position, TrailColorFor(edge.A, edge.B));
+                    if (DrawArrows)
+                    {
+                        painter.fillColor = TrailColorFor(edge.A, edge.B);
+                        painter.strokeColor = TrailColorFor(edge.A, edge.B);
+                        DrawArrowhead(painter, a.Position, b.Position, b.IsStart ? NodeRadius + 5f : NodeRadius);
+                    }
+                    continue;
+                }
+
                 painter.strokeColor = EdgeColorFor(edge.A, edge.B);
                 painter.BeginPath();
                 painter.MoveTo(a.Position);
@@ -809,6 +1120,56 @@ namespace Assets.Scripts.Heroes.UI
         {
             return gatedKey == _selectedKey || gatedKey == _hoveredKey
                 || requiredKey == _selectedKey || requiredKey == _hoveredKey;
+        }
+
+        // A trail's footprints: a dot every TrailStep units, a dark rim under each so it reads on any
+        // ground, stopping short of the landmarks at both ends.
+        private const float TrailStep = 11f;
+        private const float TrailDot = 2.6f;
+        private const float TrailEndGap = 30f;
+        private static readonly Color TrailRim = new Color(0.08f, 0.05f, 0.03f, 0.75f);
+        private static readonly Color TrailWalked = new Color(0.98f, 0.86f, 0.55f);
+        private static readonly Color TrailOpen = new Color(0.86f, 0.78f, 0.62f);
+        private static readonly Color TrailDim = new Color(0.55f, 0.5f, 0.45f, 0.6f);
+
+        private Color TrailColorFor(string a, string b)
+        {
+            string stateA = _stateClasses.TryGetValue(a, out var sa) ? sa : null;
+            string stateB = _stateClasses.TryGetValue(b, out var sb) ? sb : null;
+            if (stateA == EdgeStrongStateClass && stateB == EdgeStrongStateClass)
+            {
+                return TrailWalked;
+            }
+            if (stateA == EdgeStrongStateClass || stateA == EdgeOpenStateClass || stateB == EdgeOpenStateClass)
+            {
+                return TrailOpen;
+            }
+            return TrailDim;
+        }
+
+        private static void DrawTrail(Painter2D painter, Vector2 from, Vector2 to, Color color)
+        {
+            var line = to - from;
+            float length = line.magnitude;
+            if (length <= TrailEndGap * 2f)
+            {
+                return;
+            }
+            var direction = line / length;
+            float usable = length - TrailEndGap * 2f;
+            int dots = Mathf.Max(1, Mathf.RoundToInt(usable / TrailStep));
+            for (int i = 0; i <= dots; i++)
+            {
+                var at = from + direction * (TrailEndGap + usable * i / dots);
+                painter.fillColor = TrailRim;
+                painter.BeginPath();
+                painter.Arc(at, TrailDot + 1.2f, 0f, 360f);
+                painter.Fill();
+                painter.fillColor = color;
+                painter.BeginPath();
+                painter.Arc(at, TrailDot, 0f, 360f);
+                painter.Fill();
+            }
         }
 
         private static void DrawDashed(Painter2D painter, Vector2 from, Vector2 to)
