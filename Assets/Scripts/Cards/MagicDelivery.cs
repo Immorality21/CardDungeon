@@ -21,5 +21,10 @@ namespace Assets.Scripts.Cards
         /// <summary>The caster lets it out of itself - it swells and rings race out - and then every
         /// target is hit at once, with nothing crossing the stage (the Floating Eye's Screech).</summary>
         Burst = 3,
+
+        /// <summary>The ability's <c>ImpactFrames</c> break the ground under every target at once,
+        /// flat at their feet rather than rising as a column, and the hits land together. Nothing
+        /// crosses the stage (owner, playtest 2026-11-21: Earthsplitter and the Iron Charger).</summary>
+        Ground = 4,
     }
 }

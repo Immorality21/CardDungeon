@@ -179,6 +179,10 @@ namespace Assets.Scripts.Combat.Triggers
         public List<ICombatUnit> Targets = new List<ICombatUnit>();
         public EffectResult Result;
 
+        /// <summary>The bearer lashes out at <see cref="Targets"/> (Divine Intervention's Retribution),
+        /// so the fight shows it as the bearer's own attack rather than as numbers appearing.</summary>
+        public bool Strikes;
+
         /// <summary>"Soul Hunger" - the trigger's label, else what it came from.</summary>
         public string Name => !string.IsNullOrEmpty(Trigger?.Label) ? Trigger.Label : From;
     }

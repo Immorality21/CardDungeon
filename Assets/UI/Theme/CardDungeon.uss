@@ -1864,6 +1864,42 @@
     margin: 2px 0 6px 0;
 }
 
+/* An item's set, WoW style (playtest 2026-11-21): worn pieces lit, owned plain, missing greyed;
+   a tier the worn pieces reach is lit too. */
+.cd-inv-set-piece {
+    font-size: 16px;
+    color: var(--cd-text-light);
+    opacity: 0.85;
+    margin: 0 2px 1px 10px;
+}
+
+.cd-inv-set-piece--worn {
+    color: rgb(255, 217, 102);
+    opacity: 1;
+}
+
+.cd-inv-set-piece--missing {
+    opacity: 0.4;
+}
+
+.cd-inv-set-tiers {
+    margin-top: 6px;
+}
+
+.cd-inv-set-tier {
+    font-size: 16px;
+    -unity-font-style: italic;
+    color: var(--cd-text-light);
+    opacity: 0.45;
+    white-space: normal;
+    margin: 0 2px 4px 2px;
+}
+
+.cd-inv-set-tier--active {
+    color: rgb(255, 217, 102);
+    opacity: 1;
+}
+
 .cd-inv-grant {
     font-size: 16px;
     -unity-font-style: bold;

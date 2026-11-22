@@ -250,6 +250,9 @@ namespace Assets.Scripts.Heroes
 
         private bool _walking;
 
+        // Whether the leader is showing a walk cycle now, so a turn mid-walk swaps the frames in step.
+        private bool _showingWalk;
+
         /// <summary>
         /// Turns the party toward a step: the leader's frames for that way, mirrored for left. A leader
         /// with no walk frames keeps its idle loop and is only mirrored.
@@ -302,9 +305,20 @@ namespace Assets.Scripts.Heroes
             {
                 var cycle = new Sprite[frames.Length - 1];
                 System.Array.Copy(frames, 1, cycle, 0, cycle.Length);
-                _spriteAnimator.Initialize(cycle, WalkFps);
+                // Turning while walking keeps the stride; starting to walk starts the cycle.
+                if (_showingWalk)
+                {
+                    _spriteAnimator.SwapFrames(cycle, WalkFps);
+                }
+                else
+                {
+                    _spriteAnimator.Initialize(cycle, WalkFps);
+                }
+                _showingWalk = true;
+                return;
             }
-            else if (Facing == Vector2Int.down && Leader.HeroSO.AnimationFrames != null && Leader.HeroSO.AnimationFrames.Length > 0)
+            _showingWalk = false;
+            if (Facing == Vector2Int.down && Leader.HeroSO.AnimationFrames != null && Leader.HeroSO.AnimationFrames.Length > 0)
             {
                 _spriteAnimator.Initialize(Leader.HeroSO.AnimationFrames, Leader.HeroSO.AnimationFps);
             }

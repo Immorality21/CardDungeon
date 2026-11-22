@@ -184,6 +184,23 @@ namespace Tests.EditMode
         }
 
         [Test]
+        public void SetPieces_ListsEachPieceOnce_InSlotOrder_AndNothingElse()
+        {
+            var set = Shadowweave();
+            var pieces = Pieces(set, 3);
+            pieces[0].SlotType = SlotType.Legs;
+            pieces[1].SlotType = SlotType.Head;
+            pieces[2].SlotType = SlotType.Chest;
+            var stranger = ScriptableObject.CreateInstance<ItemSO>();
+            var catalog = new List<ItemSO> { pieces[0], stranger, pieces[1], pieces[2], pieces[1], null };
+
+            var listed = ItemPresenter.SetPieces(set, catalog);
+
+            CollectionAssert.AreEqual(new[] { pieces[1], pieces[2], pieces[0] }, listed);
+            Assert.IsEmpty(ItemPresenter.SetPieces(null, catalog));
+        }
+
+        [Test]
         public void ItemSets_ThreePieces_AddPercentIntelligence_ThroughTheGearPath()
         {
             var set = Shadowweave();

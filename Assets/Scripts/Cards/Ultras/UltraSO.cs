@@ -99,7 +99,8 @@ namespace Assets.Scripts.Cards
 
         [Tooltip("Strike: how each hit is shown reaching its target, as on an ability. Strike draws " +
                  "HitIcon across the target (Flurry's slashes), Projectile flies it from the hero " +
-                 "(Rain of Arrows). Presentation only.")]
+                 "(Rain of Arrows), Ground breaks the ground under every target at once with ImpactFrames " +
+                 "(Earthsplitter). Presentation only.")]
         public MagicDelivery Delivery = MagicDelivery.Projectile;
 
         [Tooltip("Strike: the art each hit shows - the blade or the arrow. Empty draws the plain bolt.")]

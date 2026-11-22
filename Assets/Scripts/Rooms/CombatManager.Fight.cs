@@ -73,6 +73,7 @@ namespace Assets.Scripts.Rooms
             _restorePartyAfterParting = false;
             // Every gauge opens the fight where the run left it (UltraOps: kept for the run).
             _ultraGauge.Clear();
+            _strikeBacks.Clear();
             _gaugeCredit.Clear();
             _threatWindow = null;
             _forms.Clear();
@@ -341,6 +342,7 @@ namespace Assets.Scripts.Rooms
 
                 // Every action path resolves its own deaths where they belong in its presentation;
                 // this catches anything a path did not (an item, a reaction) before the turn moves on.
+                yield return PlayStrikeBacks();
                 ResolveDeaths();
 
                 yield return EndOfTurnUpkeep(unit);
@@ -559,6 +561,24 @@ namespace Assets.Scripts.Rooms
             {
                 return;
             }
+            // A strike back waits for the blow that set it off, then plays as the bearer's attack
+            // (owner, playtest 2026-11-21: the Paladin intercepting should swing back).
+            if (reaction.Strikes)
+            {
+                // Its damage is already on the target: keep the plate where it was until the swing lands.
+                if (reaction.Result != null)
+                {
+                    foreach (var entry in reaction.Result.Entries)
+                    {
+                        if (entry.Target?.Stats != null && entry.Landed > 0 && !HealthDisplay.IsHeld(entry.Target))
+                        {
+                            HealthDisplay.HoldAt(entry.Target, entry.Target.Stats.Health + entry.Landed);
+                        }
+                    }
+                }
+                _strikeBacks.Add(reaction);
+                return;
+            }
             if (reaction.Bearer.Transform != null)
             {
                 ShowFloatingLabel(reaction.Bearer.Transform.position + new Vector3(0f, 0.55f, 0f),
@@ -574,6 +594,45 @@ namespace Assets.Scripts.Rooms
             if (reaction.Result != null && reaction.Result.Entries.Count > 0)
             {
                 StartCoroutine(_presenter.Present(reaction.Result));
+            }
+        }
+
+        // Strikes back raised during a blow (ShowReaction), played once it has landed.
+        private readonly List<ReactionResolved> _strikeBacks = new List<ReactionResolved>();
+
+        // How long a struck unit's flinch runs (CombatFeedback: snap, hold, return), unscaled. A lunge
+        // started inside it would fight it for the unit's position.
+        private const float FlinchSettleSeconds = 0.56f;
+
+        /// <summary>
+        /// Plays the strikes back the last blow set off: the bearer's name for it, a lunge at the
+        /// attacker once its flinch has settled, then the numbers. Called at the end of every blow
+        /// (<see cref="ExecuteAttack"/>) and after every action, before its deaths are resolved, so the
+        /// attacker is still on the stage to be struck.
+        /// </summary>
+        private IEnumerator PlayStrikeBacks()
+        {
+            if (_strikeBacks.Count == 0)
+            {
+                yield break;
+            }
+            yield return new WaitForSecondsRealtime(FlinchSettleSeconds);
+            while (_strikeBacks.Count > 0)
+            {
+                var reaction = _strikeBacks[0];
+                _strikeBacks.RemoveAt(0);
+                var bearer = reaction.Bearer;
+                if (bearer.IsAlive && bearer.Transform != null)
+                {
+                    ShowFloatingLabel(bearer.Transform.position + new Vector3(0f, 0.55f, 0f),
+                        reaction.Name, new Color(1f, 0.8f, 0.35f), 0.14f);
+                    CombatAudio.Play(CombatSound.MeleeSwing);
+                    yield return LungeAnimation(bearer.Transform, bearer.IsHero ? Vector3.right : Vector3.left);
+                }
+                if (reaction.Result != null && reaction.Result.Entries.Count > 0)
+                {
+                    yield return _presenter.Present(reaction.Result);
+                }
             }
         }
 

@@ -226,6 +226,54 @@ namespace Assets.Scripts.Combat
             }
         }
 
+        private const float GroundImpactFps = 16f;
+        private const float GroundImpactWidthShare = 2.6f;
+
+        /// <summary>How long after <see cref="GroundImpact"/> starts the ground has broken - when the
+        /// caller lands the hit.</summary>
+        public const float GroundImpactLands = 0.25f;
+
+        /// <summary>
+        /// The ground breaking under <paramref name="target"/> (<c>MagicDelivery.Ground</c>, the
+        /// Earthsplitter's quake): the frames play once, flat at its feet and a little wider than it,
+        /// behind the body. Not blocking: every target's ground can break at once.
+        /// </summary>
+        public static void GroundImpact(ICombatUnit target, Sprite[] frames)
+        {
+            if (target == null || target.Transform == null || frames == null || frames.Length == 0)
+            {
+                return;
+            }
+            CoroutineHandler.Handle(GroundImpactRoutine(target, frames));
+        }
+
+        private static IEnumerator GroundImpactRoutine(ICombatUnit target, Sprite[] frames)
+        {
+            Bounds body = BodyOf(target);
+            var sr = new GameObject("GroundImpactVfx").AddComponent<SpriteRenderer>();
+            sr.sortingOrder = BehindUnitOrder;
+            float spriteWidth = Mathf.Max(0.01f, frames[0].bounds.size.x);
+            float scale = Mathf.Max(0.5f, body.size.x) * GroundImpactWidthShare / spriteWidth;
+            sr.transform.localScale = new Vector3(scale, scale, 1f);
+            sr.transform.position = new Vector3(body.center.x, body.min.y, 0f);
+
+            var step = new WaitForSeconds(1f / GroundImpactFps);
+            foreach (var frame in frames)
+            {
+                if (sr == null)
+                {
+                    yield break;
+                }
+                sr.sprite = frame;
+                yield return step;
+            }
+
+            if (sr != null)
+            {
+                Object.Destroy(sr.gameObject);
+            }
+        }
+
         // A beam: how long it takes to open, how long it stays at full width, and how long it fades.
         private const float BeamOpen = 0.06f;
         private const float BeamHold = 0.16f;
@@ -355,6 +403,56 @@ namespace Assets.Scripts.Combat
             {
                 unit.localScale = scale;
             }
+            if (root != null)
+            {
+                Object.Destroy(root.gameObject);
+            }
+        }
+
+        private const float CoveredDuration = 0.45f;
+
+        /// <summary>
+        /// A blow taken for someone else (a cover, the Paladin's Divine Intervention; owner, playtest
+        /// 2026-11-21): a shield of <paramref name="tint"/> flares behind <paramref name="guard"/> and
+        /// two rings snap out over it, as the blow is redirected. Not blocking: the swing goes on.
+        /// </summary>
+        public static void Covered(ICombatUnit guard, Color tint)
+        {
+            if (guard == null || guard.Transform == null)
+            {
+                return;
+            }
+            CoroutineHandler.Handle(CoveredRoutine(guard, tint));
+        }
+
+        private static IEnumerator CoveredRoutine(ICombatUnit guard, Color tint)
+        {
+            Bounds body = BodyOf(guard);
+            var root = new GameObject("CoveredVfx").transform;
+            var glow = MakeRenderer(root, Glow, tint, BehindUnitOrder);
+            var rings = new[] { MakeRenderer(root, Ring, tint, OverUnitOrder), MakeRenderer(root, Ring, Color.white, OverUnitOrder) };
+            float size = Mathf.Max(0.6f, Mathf.Max(body.size.x, body.size.y));
+
+            float elapsed = 0f;
+            while (elapsed < CoveredDuration && root != null)
+            {
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / CoveredDuration);
+
+                // The shield flares at once and fades; the rings snap out one after the other.
+                glow.transform.position = body.center;
+                glow.transform.localScale = Vector3.one * size * Mathf.Lerp(1.5f, 1.2f, t);
+                glow.color = WithAlpha(tint, 0.85f * (1f - t * t));
+                for (int i = 0; i < rings.Length; i++)
+                {
+                    float r = Mathf.Clamp01((t - i * 0.2f) / 0.6f);
+                    rings[i].transform.position = body.center;
+                    rings[i].transform.localScale = Vector3.one * size * Mathf.Lerp(0.7f, 1.9f, r);
+                    rings[i].color = WithAlpha(i == 0 ? tint : Color.white, r <= 0f ? 0f : 0.95f * (1f - r));
+                }
+                yield return null;
+            }
+
             if (root != null)
             {
                 Object.Destroy(root.gameObject);

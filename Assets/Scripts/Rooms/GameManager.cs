@@ -77,7 +77,9 @@ namespace Assets.Scripts.Rooms
             MainCamera.Instance.SetPosition(CameraTarget());
         }
 
-        private void Update()
+        // LateUpdate: after the party has moved this frame (RoomActionUI.Update walks it), so the
+        // camera never chases last frame's position.
+        private void LateUpdate()
         {
             if (!_followParty || Party == null)
             {

@@ -121,6 +121,15 @@ namespace Assets.Scripts.Cards
                  "Power as a percentage of each target's own stat.")]
         public List<SpellEffect> Effects = new List<SpellEffect>();
 
+        [Tooltip("SpecialAttack: how Effects are shown reaching their targets, as on an ability. " +
+                 "Projectile flies the plain bolt from the summoner; Ground breaks the ground under every " +
+                 "target at once with ImpactFrames (the Iron Charger). Presentation only.")]
+        public MagicDelivery Delivery = MagicDelivery.Projectile;
+
+        [Tooltip("SpecialAttack: the frames a Ground delivery plays at each target's feet, or a column " +
+                 "rising over each target for any other delivery (as MagicSO.ImpactFrames). Empty: none.")]
+        public Sprite[] ImpactFrames;
+
         [Tooltip("SpecialAttack, optional: effects that land on ONE random target of the summon's " +
                  "targets, after Effects - the Abyssal Nightmare Silences one enemy at random.")]
         public List<SpellEffect> RandomTargetEffects = new List<SpellEffect>();

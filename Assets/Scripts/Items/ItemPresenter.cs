@@ -185,21 +185,26 @@ namespace Assets.Scripts.Items
         }
 
         /// <summary>The set a piece belongs to, one line per tier: "2 pieces: +10% Shadow damage".</summary>
-        public static List<string> SetLines(ItemSO item)
+        /// <summary>Every piece of <paramref name="set"/> in <paramref name="catalog"/>, each once, in
+        /// slot order (weapon to necklace) then by name - the list an item's set section shows.</summary>
+        public static List<ItemSO> SetPieces(ItemSetSO set, IEnumerable<ItemSO> catalog)
         {
-            var lines = new List<string>();
-            if (item == null || item.Set == null || item.Set.Tiers == null)
+            var pieces = new List<ItemSO>();
+            if (set == null || catalog == null)
             {
-                return lines;
+                return pieces;
             }
-            foreach (var tier in item.Set.Tiers)
+            foreach (var item in catalog)
             {
-                if (tier != null && !string.IsNullOrEmpty(tier.Text))
+                if (item != null && item.Set == set && !pieces.Contains(item))
                 {
-                    lines.Add(Loc.Format("items.set.tier-line", ("pieces", tier.Pieces), ("text", tier.Text)));
+                    pieces.Add(item);
                 }
             }
-            return lines;
+            pieces.Sort((a, b) => a.SlotType != b.SlotType
+                ? a.SlotType.CompareTo(b.SlotType)
+                : string.CompareOrdinal(a.DisplayName, b.DisplayName));
+            return pieces;
         }
 
         private static string CounterNoun(ItemCounterKind kind, int count)

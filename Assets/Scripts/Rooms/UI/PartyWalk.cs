@@ -117,18 +117,26 @@ namespace Assets.Scripts.Rooms
         /// <summary>
         /// Advances the step being drawn, then starts the next one if a key is held and
         /// <paramref name="canWalk"/> - the room panel's "the doors are live and nothing is over the
-        /// room".
+        /// room". Asked again after a step lands, since landing can open a prompt (the stairs).
         /// </summary>
-        public void Tick(Party party, Room room, bool canWalk, float deltaTime)
+        public void Tick(Party party, Room room, Func<bool> canWalk, float deltaTime)
         {
             ReadKeys();
             if (IsStepping)
             {
                 _sinceStep = 0f;
-                Advance(deltaTime);
+                // A step that lands partway through a frame hands the rest of the frame to the next
+                // one, so a held key walks at an even pace. Dropping it, and starting the next step a
+                // frame later, stood the party still for a frame on every tile (playtest 2026-11-21:
+                // "the walk feels janky"; at 60 fps that was about one frame in eight).
+                float spare = Advance(deltaTime);
+                if (spare > 0f && NextStep(party, room, canWalk()))
+                {
+                    Advance(spare);
+                }
                 return;
             }
-            if (NextStep(party, room, canWalk))
+            if (NextStep(party, room, canWalk()))
             {
                 return;
             }
@@ -258,12 +266,15 @@ namespace Assets.Scripts.Rooms
             _throughDoor = throughDoor;
         }
 
-        private void Advance(float deltaTime)
+        /// <summary>Moves the step on by <paramref name="deltaTime"/>. Returns the time left over when an
+        /// ordinary step lands, for the next step to use; 0 while stepping, waiting on a door, or after a
+        /// step through a door (the room has changed under the caller).</summary>
+        private float Advance(float deltaTime)
         {
             if (_doorWait > 0f)
             {
                 _doorWait -= deltaTime;
-                return;
+                return 0f;
             }
 
             _elapsed += deltaTime;
@@ -271,8 +282,9 @@ namespace Assets.Scripts.Rooms
             _party.transform.position = Vector3.Lerp(_from, _to, t);
             if (t < 1f)
             {
-                return;
+                return 0f;
             }
+            float spare = Mathf.Max(0f, _elapsed - _duration);
 
             var door = _throughDoor;
             var landed = Vector2Int.RoundToInt(_to);
@@ -283,11 +295,13 @@ namespace Assets.Scripts.Rooms
             if (door != null)
             {
                 _enterDoor(door);
+                return 0f;
             }
-            else if (byKey)
+            if (byKey)
             {
                 KeyStepEnded?.Invoke(landed);
             }
+            return spare;
         }
 
         private void ReadKeys()

@@ -46,6 +46,31 @@ MonoBehaviour:
     DrainToParty: 0
   Hits: 1
   RandomTargets: 0
+  Delivery: 0
+  HitIcon: {fileID: 0}
+  HitArtAngle: 0
+  LeapSlamFrames:
+  - {fileID: -1821625371, guid: bf24314672fcd694b8591396a981ee5e, type: 3}
+  - {fileID: 792213402, guid: bf24314672fcd694b8591396a981ee5e, type: 3}
+  - {fileID: -157264329, guid: bf24314672fcd694b8591396a981ee5e, type: 3}
+  - {fileID: 1667583705, guid: bf24314672fcd694b8591396a981ee5e, type: 3}
+  ImpactFrames:
+  - {fileID: 6434911620072163778, guid: 2122f88ea231ef64e958b6e0ca854a25, type: 3}
+  - {fileID: 2725946039781022998, guid: 2122f88ea231ef64e958b6e0ca854a25, type: 3}
+  - {fileID: -4302374431350463234, guid: 2122f88ea231ef64e958b6e0ca854a25, type: 3}
+  - {fileID: 4194660404253431264, guid: 2122f88ea231ef64e958b6e0ca854a25, type: 3}
+  - {fileID: 938954462504810785, guid: 2122f88ea231ef64e958b6e0ca854a25, type: 3}
+  - {fileID: 4569963488256742440, guid: 2122f88ea231ef64e958b6e0ca854a25, type: 3}
+  - {fileID: 7879925693786756601, guid: 2122f88ea231ef64e958b6e0ca854a25, type: 3}
+  - {fileID: 527750965075107585, guid: 2122f88ea231ef64e958b6e0ca854a25, type: 3}
+  - {fileID: 164273317379056746, guid: 2122f88ea231ef64e958b6e0ca854a25, type: 3}
+  - {fileID: 7935803971140162703, guid: 2122f88ea231ef64e958b6e0ca854a25, type: 3}
+  - {fileID: -603646020, guid: 2122f88ea231ef64e958b6e0ca854a25, type: 3}
+  ImpactFps: 14
+  WindUpFrames: []
+  WindUpEffectFrames: []
+  WindUpEffectFps: 20
+  WindUpSeconds: 1.2
   Creature: {fileID: 0}
   StatAbilities: []
   Mech: {fileID: 0}

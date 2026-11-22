@@ -638,7 +638,9 @@ namespace Assets.Scripts.Heroes.UI
                     return Loc.Format("grid.detail.ultra", ("ultra", UltraName(node.GrantedUltraKey)), ("what", what));
                 }
                 case SphereNodeKind.Stat:
-                    return Loc.Get("grid.detail.stat");
+                    // The changes list below already says which stats rise and by how much
+                    // (owner, playtest 2026-11-21: a line saying so added nothing).
+                    return "";
                 case SphereNodeKind.Resistance:
                     return SphereGridPresenter.DescribePayload(node);
                 default:
@@ -833,6 +835,7 @@ namespace Assets.Scripts.Heroes.UI
             if (_detailPayload != null)
             {
                 _detailPayload.text = payload;
+                SetShown(_detailPayload, !string.IsNullOrEmpty(payload));
             }
             if (_detailCost != null)
             {

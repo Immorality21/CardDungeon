@@ -38,19 +38,33 @@ namespace Assets.Scripts.Cards
             var entries = HitsFirst(result.Entries);
 
             // Drawn impact frames go up on every target hit at once, and the hits land together while
-            // they burn. Needs no caster: Ifrit's parting Hellfire is cast as he goes.
-            bool erupts = magic != null && magic.ImpactFrames != null && magic.ImpactFrames.Length > 0;
-            if (erupts)
+            // they burn. Needs no caster: Ifrit's parting Hellfire is cast as he goes. A Ground
+            // delivery plays them flat at each target's feet instead of as a column.
+            bool hasFrames = magic != null && magic.ImpactFrames != null && magic.ImpactFrames.Length > 0;
+            bool grounded = delivery == MagicDelivery.Ground;
+            bool erupts = hasFrames && !grounded;
+            if (hasFrames)
             {
                 foreach (var entry in entries)
                 {
                     if (entry.Impact > 0 && entry.Target != null && entry.Target.Transform != null)
                     {
-                        SpellVfx.Erupt(entry.Target, magic.ImpactFrames);
+                        if (grounded)
+                        {
+                            SpellVfx.GroundImpact(entry.Target, magic.ImpactFrames);
+                        }
+                        else
+                        {
+                            SpellVfx.Erupt(entry.Target, magic.ImpactFrames);
+                        }
                     }
                 }
                 Assets.Scripts.Audio.CombatAudio.Play(Assets.Scripts.Audio.CombatSound.Impact, 1f);
-                yield return new WaitForSeconds(SpellVfx.EruptLands);
+                yield return new WaitForSeconds(grounded ? SpellVfx.GroundImpactLands : SpellVfx.EruptLands);
+                together = true;
+            }
+            if (grounded)
+            {
                 together = true;
             }
 
@@ -66,7 +80,7 @@ namespace Assets.Scripts.Cards
                 // used to show no bolt and the unit simply dropped. Deaths resolve after this
                 // (CombatManager.ResolveDeaths), so the target is still on the stage.
                 // A missed or dodged blow still flies (EffectEntry.Avoided, playtest 4 finding 20).
-                if (!erupts && caster != null && (entry.Impact > 0 || entry.Avoided) && entry.Target != null
+                if (!erupts && !grounded && caster != null && (entry.Impact > 0 || entry.Avoided) && entry.Target != null
                     && caster.Transform != null && entry.Target.Transform != null)
                 {
                     if (delivery == MagicDelivery.Strike)

@@ -34,6 +34,16 @@ namespace Assets.Scripts.Combat
             }
         }
 
+        /// <summary>Shows <paramref name="shown"/> on the unit's plate until it is released: for a hit
+        /// that has already happened but has not been shown yet (a strike back waiting for its swing).</summary>
+        public static void HoldAt(ICombatUnit unit, int shown)
+        {
+            if (unit != null)
+            {
+                Held[unit] = shown;
+            }
+        }
+
         /// <summary>The unit's plate catches up with its real health.</summary>
         public static void Release(ICombatUnit unit)
         {

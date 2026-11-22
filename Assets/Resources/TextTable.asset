@@ -5724,11 +5724,6 @@ MonoBehaviour:
     - Leave
     Reviewed: 0
     Note: Stairs confirm button on the last floor
-  - Key: room.captive.joined-float
-    Values:
-    - '{hero} joined!'
-    Reviewed: 0
-    Note: Floating text when a captive is freed; {hero} = hero name
   - Key: room.captive.title
     Values:
     - '{hero} joins you'
@@ -5741,11 +5736,6 @@ MonoBehaviour:
     Reviewed: 0
     Note: Captive freed dialog; {hero} = hero name, {blurb} = hero blurb followed
       by a blank line, or empty
-  - Key: room.cache.gold-float
-    Values:
-    - +{amount} gold
-    Reviewed: 0
-    Note: Floating text when a cache is searched; {amount} = gold
   - Key: room.cache.title
     Values:
     - A Cache
@@ -5822,11 +5812,6 @@ MonoBehaviour:
     - Summon charges are restored.
     Reviewed: 0
     Note: Refuge result line
-  - Key: room.refuge.rested-float
-    Values:
-    - Rested
-    Reviewed: 0
-    Note: Floating text over the party after resting
   - Key: room.refuge.result
     Values:
     - 'The party rests.
@@ -8914,11 +8899,11 @@ MonoBehaviour:
     - '{set} set'
     Reviewed: 0
     Note: item detail section title; set = item set name
-  - Key: items.inv.section.set
+  - Key: items.inv.section.named-set-count
     Values:
-    - Set
+    - '{set} set ({worn}/{total})'
     Reviewed: 0
-    Note: item detail section title
+    Note: item detail set section title; set = set name, worn = pieces the hero wears, total = pieces in the set
   - Key: items.inv.section.grows
     Values:
     - Grows
@@ -9748,11 +9733,6 @@ MonoBehaviour:
     Reviewed: 0
     Note: Sphere grid Ultra node detail; {ultra} Ultra name, {what} the Ultra's description
       followed by ". " (or empty)
-  - Key: grid.detail.stat
-    Values:
-    - Raises this hero's stats for good.
-    Reviewed: 0
-    Note: Sphere grid stat node detail
   - Key: grid.feedback.awakened
     Values:
     - '{from} awakens into {to}.'

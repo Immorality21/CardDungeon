@@ -384,7 +384,7 @@ namespace Assets.Scripts.Rooms
                 CreateWalk();
             }
             var party = GameManager.HasInstance ? GameManager.Instance.Party : null;
-            _walk.Tick(party, _currentRoom, DoorNavActive(), Time.deltaTime);
+            _walk.Tick(party, _currentRoom, DoorNavActive, Time.deltaTime);
             ContinueWalkGoal();
             FinishWalkUse();
         }

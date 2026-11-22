@@ -1468,7 +1468,7 @@ namespace Assets.Scripts.Items.UI
             {
                 SetDetailHead(worn.Icon, worn.DisplayName,
                     $"{ItemPresenter.SlotLabel(slot)} · {ItemPresenter.RarityLabel(worn.Rarity)}", worn);
-                AddItemLines(worn, InventoryManager.Instance.GetEquipped(slot, _selectedHeroKey));
+                AddItemLines(worn, InventoryManager.Instance.GetEquipped(slot, _selectedHeroKey), WornByHero());
             }
             else
             {
@@ -1500,12 +1500,19 @@ namespace Assets.Scripts.Items.UI
 
             SetDetailHead(item.Icon, item.DisplayName,
                 $"{ItemPresenter.SlotLabel(item.SlotType)} · {ItemPresenter.RarityLabel(item.Rarity)}", item);
-            AddItemLines(item, entry);
+            AddItemLines(item, entry, WornByHero());
             if (!string.IsNullOrEmpty(note))
             {
                 AddNote(note);
             }
             if (preview == null)
+            {
+                return;
+            }
+            // Into an empty slot the change is exactly what the item grants, which the chips above
+            // already say (owner, playtest 2026-11-21). The comparison earns its place only against
+            // something worn.
+            if (!removing && InventoryManager.Instance.GetEquipped(item.SlotType, _selectedHeroKey) == null)
             {
                 return;
             }
@@ -1595,18 +1602,26 @@ namespace Assets.Scripts.Items.UI
                 : Loc.Get("items.inv.note.carry-next-run"));
         }
 
-        private void AddItemLines(ItemSO item, ItemSaveData entry = null)
+        private void AddItemLines(ItemSO item, ItemSaveData entry = null, List<ItemSO> worn = null)
         {
             if (_detailBody != null)
             {
-                AddItemLines(_detailBody, item, entry);
+                AddItemLines(_detailBody, item, entry, worn);
             }
+        }
+
+        /// <summary>What the selected hero wears now, for the set section's count.</summary>
+        private List<ItemSO> WornByHero()
+        {
+            return InventoryManager.Instance.GetEquippedItems(_selectedHeroKey) ?? new List<ItemSO>();
         }
 
         /// <summary>An item's description and what it grants, as chips, then what it grows into with
         /// use - with this copy's progress when its <paramref name="entry"/> is known. Shared with the
-        /// merchant, which sells fresh copies.</summary>
-        internal static void AddItemLines(VisualElement body, ItemSO item, ItemSaveData entry = null)
+        /// merchant, which sells fresh copies. With <paramref name="worn"/> (a hero's gear) the set
+        /// section counts and lights the pieces that hero wears.</summary>
+        internal static void AddItemLines(VisualElement body, ItemSO item, ItemSaveData entry = null,
+            List<ItemSO> worn = null)
         {
             AddGrants(body, item);
             string usableBy = ItemPresenter.UsableByNames(item);
@@ -1615,8 +1630,61 @@ namespace Assets.Scripts.Items.UI
                 AddLines(body, Loc.Get("items.inv.section.usable-by"), new List<string> { usableBy });
             }
             AddLines(body, Loc.Get("items.inv.section.reacts"), ItemPresenter.ReactionLines(item));
-            AddLines(body, item.Set != null ? Loc.Format("items.inv.section.named-set", ("set", item.Set.DisplayName)) : Loc.Get("items.inv.section.set"), ItemPresenter.SetLines(item));
+            AddSetSection(body, item, worn);
             AddLines(body, Loc.Get("items.inv.section.grows"), ItemPresenter.MilestoneLines(item, entry));
+        }
+
+        /// <summary>
+        /// An item's set as World of Warcraft shows one (owner, playtest 2026-11-21): the name with
+        /// the pieces worn out of all of them, every piece by name - worn lit, owned plain, missing
+        /// greyed - then each tier, lit once the worn pieces reach it.
+        /// </summary>
+        private static void AddSetSection(VisualElement body, ItemSO item, List<ItemSO> worn)
+        {
+            if (item == null || item.Set == null)
+            {
+                return;
+            }
+            var pieces = ItemPresenter.SetPieces(item.Set,
+                InventoryManager.HasInstance ? InventoryManager.Instance.AllItems() : null);
+            int wornCount = ItemSets.PiecesWorn(item.Set, worn);
+            body.Add(BestiaryLineView.Section(worn != null && pieces.Count > 0
+                ? Loc.Format("items.inv.section.named-set-count", ("set", item.Set.DisplayName),
+                    ("worn", wornCount), ("total", pieces.Count))
+                : Loc.Format("items.inv.section.named-set", ("set", item.Set.DisplayName))));
+
+            foreach (var piece in pieces)
+            {
+                var line = new Label(piece.DisplayName);
+                line.AddToClassList("cd-inv-set-piece");
+                if (worn != null && worn.Contains(piece))
+                {
+                    line.AddToClassList("cd-inv-set-piece--worn");
+                }
+                else if (!InventoryManager.HasInstance || InventoryManager.Instance.CopiesOwned(piece) == 0)
+                {
+                    line.AddToClassList("cd-inv-set-piece--missing");
+                }
+                body.Add(line);
+            }
+
+            var tiers = new VisualElement();
+            tiers.AddToClassList("cd-inv-set-tiers");
+            foreach (var tier in item.Set.Tiers)
+            {
+                if (tier == null || string.IsNullOrEmpty(tier.Text))
+                {
+                    continue;
+                }
+                var line = new Label(Loc.Format("items.set.tier-line", ("pieces", tier.Pieces), ("text", tier.Text)));
+                line.AddToClassList("cd-inv-set-tier");
+                if (worn != null && wornCount >= tier.Pieces)
+                {
+                    line.AddToClassList("cd-inv-set-tier--active");
+                }
+                tiers.Add(line);
+            }
+            body.Add(tiers);
         }
 
         private static void AddLines(VisualElement body, string title, List<string> lines)

@@ -55,6 +55,20 @@ MonoBehaviour:
     BonusVsStatus: 0
     BonusPerDebuff: 0
     DrainToParty: 0
+  Delivery: 4
+  ImpactFrames:
+  - {fileID: -2291499132025903944, guid: 0f15ec4718684cc6951a435530859eeb, type: 3}
+  - {fileID: -547690259828040694, guid: 0f15ec4718684cc6951a435530859eeb, type: 3}
+  - {fileID: -923184232622391624, guid: 0f15ec4718684cc6951a435530859eeb, type: 3}
+  - {fileID: 2508368815679368215, guid: 0f15ec4718684cc6951a435530859eeb, type: 3}
+  - {fileID: 3391906331056157526, guid: 0f15ec4718684cc6951a435530859eeb, type: 3}
+  - {fileID: -4336102147088988827, guid: 0f15ec4718684cc6951a435530859eeb, type: 3}
+  - {fileID: 3122344323501834170, guid: 0f15ec4718684cc6951a435530859eeb, type: 3}
+  - {fileID: 2909056243725362219, guid: 0f15ec4718684cc6951a435530859eeb, type: 3}
+  - {fileID: 1316341547345039824, guid: 0f15ec4718684cc6951a435530859eeb, type: 3}
+  - {fileID: -579536368234996050, guid: 0f15ec4718684cc6951a435530859eeb, type: 3}
+  - {fileID: -2350187987443611035, guid: 0f15ec4718684cc6951a435530859eeb, type: 3}
+  - {fileID: 529635111576899762, guid: 0f15ec4718684cc6951a435530859eeb, type: 3}
   RandomTargetEffects: []
   PartyEffects: []
   PowerRaisesPartyEffects: 0

@@ -17,15 +17,41 @@ public class SpriteAnimator : MonoBehaviour
     // Set while a one-shot ends on a held pose (the fall): no loop runs until Resume.
     private bool _holdLast;
 
+    /// <summary>Starts a loop from its first frame. The frame count and timer start over too: kept
+    /// from the loop before, the second frame could be skipped or the first flash by (playtest
+    /// 2026-11-21, the walk cycle).</summary>
     public void Initialize(Sprite[] frames, float fps)
     {
         _renderer = GetComponent<SpriteRenderer>();
         _frames = frames;
         _frameDuration = 1f / fps;
         _oneShot = null;
+        _frame = 0;
+        _timer = 0f;
 
         if (_frames.Length > 0)
             _renderer.sprite = _frames[0];
+    }
+
+    /// <summary>Swaps to another loop of the same rhythm without starting it over: the same frame and
+    /// timer, in the new frames. A walk turning a corner keeps its stride.</summary>
+    public void SwapFrames(Sprite[] frames, float fps)
+    {
+        if (frames == null || frames.Length == 0)
+        {
+            return;
+        }
+        if (_renderer == null)
+        {
+            _renderer = GetComponent<SpriteRenderer>();
+        }
+        _frames = frames;
+        _frameDuration = 1f / fps;
+        _frame %= frames.Length;
+        if (_oneShot == null)
+        {
+            _renderer.sprite = _frames[_frame];
+        }
     }
 
     /// <summary>

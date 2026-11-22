@@ -359,6 +359,9 @@ namespace Assets.Scripts.Cards
                 castable.Icon = ultra.HitIcon;
                 castable.Delivery = ultra.Delivery;
                 castable.ProjectileArtAngle = ultra.HitArtAngle;
+                // A Ground Strike breaks the ground under its targets with the Ultra's own impact
+                // frames - the ones a leap-slam plays at the hero's feet (Earthsplitter).
+                castable.ImpactFrames = ultra.Delivery == MagicDelivery.Ground ? ultra.ImpactFrames : null;
                 castable.Effects = new List<SpellEffect>(ultra.Effects ?? new List<SpellEffect>());
                 castable.Tags = new List<MagicTag>();
                 CastableCache[key] = castable;

@@ -88,7 +88,8 @@ namespace Assets.Scripts.Cards
                 Trigger = _label,
                 From = _label.Label,
                 Targets = targets,
-                Result = result
+                Result = result,
+                Strikes = true
             });
         }
 

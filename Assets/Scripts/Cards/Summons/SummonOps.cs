@@ -132,6 +132,8 @@ namespace Assets.Scripts.Cards
             magic.Description = summon != null ? summon.Description : "";
             magic.TargetType = summon != null ? summon.TargetType : MagicTargetType.AllAllies;
             magic.Effects = EffectsFor(summon, grant);
+            magic.Delivery = summon != null ? summon.Delivery : MagicDelivery.Projectile;
+            magic.ImpactFrames = summon != null ? summon.ImpactFrames : null;
             // Tagless unless the summon is authored to lay its own (Glacius's Ice).
             magic.Tags = summon != null && summon.UsesTags && summon.Tags != null
                 ? new List<MagicTag>(summon.Tags)

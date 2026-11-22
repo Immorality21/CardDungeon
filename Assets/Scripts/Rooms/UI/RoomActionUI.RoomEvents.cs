@@ -640,14 +640,6 @@ namespace Assets.Scripts.Rooms
             // which is why the newcomer used to be missing until the next room.
             ShowPartyStatusOutOfCombat();
 
-            if (FloatingTextHandler.HasInstance)
-            {
-                FloatingTextHandler.Instance.CreateFloatingText(
-                    GameManager.Instance.Party.transform.position,
-                    Loc.Format("room.captive.joined-float", ("hero", captive.DisplayName)),
-                    Color.cyan);
-            }
-
             string blurb = string.IsNullOrEmpty(captive.Blurb) ? "" : captive.Blurb + "\n\n";
             // A late hero arrives with their trunk built (playtest 4 finding 24).
             if (Heroes.SphereGridOps.JoinsWithGridStarted(captive.SphereGrid))
@@ -703,12 +695,6 @@ namespace Assets.Scripts.Rooms
             }
 
             TakePayload();
-
-            if (FloatingTextHandler.HasInstance && GameManager.Instance.Party != null)
-            {
-                FloatingTextHandler.Instance.CreateFloatingText(
-                    GameManager.Instance.Party.transform.position, Loc.Format("room.cache.gold-float", ("amount", gold)), new Color(1f, 0.85f, 0.25f));
-            }
 
             ShowDetail(Loc.Get("room.cache.title"), gold > 0
                 ? Loc.Format("room.cache.message-gold", ("amount", gold))
@@ -891,12 +877,6 @@ namespace Assets.Scripts.Rooms
             // (owner, 2026-11-04). They fill at a run's start only.
 
             TakePayload();
-
-            if (FloatingTextHandler.HasInstance && party != null)
-            {
-                FloatingTextHandler.Instance.CreateFloatingText(
-                    party.transform.position, Loc.Get("room.refuge.rested-float"), Color.green);
-            }
 
             ShowDetail(Loc.Get("room.refuge.title"), Loc.Format("room.refuge.result", ("lines", string.Join("\n", lines))));
             _detailOkAction = ClosePayloadResult;

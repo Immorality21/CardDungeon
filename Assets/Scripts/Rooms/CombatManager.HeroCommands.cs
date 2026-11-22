@@ -323,7 +323,15 @@ namespace Assets.Scripts.Rooms
             ResolveDeaths();
         }
 
+        /// <summary>One blow (<see cref="ExecuteBlow"/>), then any strike back it set off - Divine
+        /// Intervention's Retribution swings back once the blow has landed.</summary>
         private IEnumerator ExecuteAttack(ICombatUnit attacker, ICombatUnit target, Vector3 lungeDirection, Color damageColor, float damageMultiplier = 1f, string verbKey = "combat.verb.attacks")
+        {
+            yield return ExecuteBlow(attacker, target, lungeDirection, damageColor, damageMultiplier, verbKey);
+            yield return PlayStrikeBacks();
+        }
+
+        private IEnumerator ExecuteBlow(ICombatUnit attacker, ICombatUnit target, Vector3 lungeDirection, Color damageColor, float damageMultiplier, string verbKey)
         {
             // A guarded unit's blows land on its guard - the mech under its rider (GuardTable) - and
             // the guard's own Endurance, Luck and resistances answer them.
@@ -336,6 +344,9 @@ namespace Assets.Scripts.Rooms
                 {
                     ShowFloatingLabel(target.Transform.position + new Vector3(0f, 0.3f, 0f), Loc.Get("combat.float.cover"),
                         new Color(0.75f, 0.85f, 1f), 0.14f);
+                    // The guard flares as the blow turns onto it: gold for a hero stepping in (the
+                    // Paladin's Divine Intervention), pale blue for an enemy's Guard.
+                    SpellVfx.Covered(target, target.IsHero ? SpellVfx.BoonColor : new Color(0.75f, 0.85f, 1f));
                 }
             }
             // A ranged hero (the Mage, the Ranger) shoots the blow across the stage instead of stepping in.
