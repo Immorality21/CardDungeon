@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.Heroes
 {
-    public class Hero : MonoBehaviour, ICombatUnit, ITriggerSource, IFlinches, IAbilityUpgrades, IHasMomentum, IHasFocus, IOutgoingDamage, Cards.IStatusImmune, Cards.IStatusResistant
+    public class Hero : MonoBehaviour, ICombatUnit, ITriggerSource, IFlinches, IAbilityUpgrades, IHasMomentum, IHasFocus, IOutgoingDamage, Cards.IStatusImmune, Cards.IStatusResistant, Cards.IBloodPriceWaiver
     {
         public HeroSO HeroSO;
         public Stats Stats;
@@ -197,6 +197,10 @@ namespace Assets.Scripts.Heroes
         /// fields here, because Heroes does not depend on Cards.
         /// </summary>
         public bool InForm { get; set; }
+
+        /// <summary>True while a form waives the hero's blood prices (set by <c>CombatManager</c> from
+        /// <c>UltraSO.FormWaivesBloodPrices</c>): every health cost reads 0.</summary>
+        public bool BloodPricesWaived { get; set; }
 
         /// <summary>The hero's drawn hit reaction - none while a form is on.</summary>
         public Sprite[] HitFrames => InForm || HeroSO == null ? null : HeroSO.HitFrames;

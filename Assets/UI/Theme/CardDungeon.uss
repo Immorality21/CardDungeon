@@ -477,33 +477,37 @@
     width: 50%;
 }
 
-/* The hero bar lets its summon detail stand above it (playtest 4 finding 6); the list clips its own
-   long labels instead of the window doing it. */
-#hero-bar.cd-command-window {
-    overflow: visible;
-}
-
-#hero-bar .cd-command-list {
+/* The command list and, on a summon's turn, what the highlighted action does beside it (playtest
+   2026-11-22: it used to stand above the window and read as detached from it). With a detail the
+   list keeps the left half and the detail takes the rest; without one the list has the window. */
+.cd-command-body {
+    flex-direction: row;
+    flex-grow: 1;
     overflow: hidden;
 }
 
-/* What a summon's highlighted action does: a small parchment window sitting on top of the menu. */
+.cd-command-body .cd-command-list {
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.cd-command-body--detail .cd-command-list {
+    flex-grow: 0;
+    width: 50%;
+    min-width: 0;
+}
+
 .cd-sel-desc.cd-command-desc {
-    position: absolute;
-    left: -8px;
-    right: -8px;
-    bottom: 100%;
-    margin: 0 0 10px 0;
-    padding: 8px 12px;
+    flex-grow: 1;
+    flex-shrink: 1;
+    width: 50%;
+    margin: 4px 0 6px 6px;
+    padding: 2px 4px 2px 12px;
     border-top-width: 0;
+    border-left-width: 1px;
+    border-left-color: var(--cd-frame);
+    font-size: 15px;
     color: var(--cd-text-dark);
-    background-color: var(--cd-parchment);
-    background-image: url("project://database/Assets/UI/Frames/window_frame.png");
-    -unity-slice-left: 6;
-    -unity-slice-right: 6;
-    -unity-slice-top: 6;
-    -unity-slice-bottom: 6;
-    -unity-slice-scale: 3px;
 }
 
 .cd-cmd-row {
@@ -5446,4 +5450,243 @@
    parchment-light as .sg-node--selected on the sphere grid - and this only backs it up. */
 .dm-room--selected {
     background-color: rgba(245, 240, 255, 0.16);
+}
+
+/* ============================================================
+   Sphere grid: the orb look (SphereGridView.OrbNodes, 2026-11-22)
+
+   After FFX's sphere grid, in this game's pixel art: a starry violet void
+   (sg_sky, a PixelLab backdrop) with a star layer that drifts slower than
+   the graph (sg_stars), and every node a glass orb (sg_orb, grey, tinted
+   here per hue) in an iron socket with gold studs (sg_socket). Owned orbs
+   glow in their colour, affordable ones are dim glass in a breathing
+   ring of their colour (.sg-pulse is toggled on
+   the viewport), reachable ones are dim glass, locked ones dark. The story
+   map never sets OrbNodes, so none of this reaches it.
+   Art: Assets/UI/SphereGrid/, drawn at 2 screen px per art px (orbs 22px
+   in the 44px node), point filtered. The orb art is scratch drawn by a
+   script, not generated; tint it, do not repaint it per colour.
+   ============================================================ */
+
+.sg-viewport--orbs {
+    background-color: rgb(8, 4, 18);
+    background-image: url("project://database/Assets/UI/SphereGrid/sg_sky.png");
+    -unity-background-scale-mode: scale-and-crop;
+}
+
+.sg-stars {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url("project://database/Assets/UI/SphereGrid/sg_stars.png");
+    background-repeat: repeat repeat;
+    background-size: 256px 256px;
+    opacity: 0.7;
+}
+
+/* One colour per node, by what it grows (SphereGridPresenter.HueClass): full when owned, mid when
+   affordable, dim when only reachable. */
+.sg-hue--hp { --sg-hue: rgb(232, 84, 110); --sg-hue-mid: rgb(143, 52, 68); --sg-hue-dim: rgb(78, 28, 37); }
+.sg-hue--str { --sg-hue: rgb(240, 124, 60); --sg-hue-mid: rgb(148, 76, 37); --sg-hue-dim: rgb(81, 42, 20); }
+.sg-hue--end { --sg-hue: rgb(206, 160, 96); --sg-hue-mid: rgb(127, 99, 59); --sg-hue-dim: rgb(70, 54, 32); }
+.sg-hue--agi { --sg-hue: rgb(110, 210, 120); --sg-hue-mid: rgb(68, 130, 74); --sg-hue-dim: rgb(37, 71, 40); }
+.sg-hue--int { --sg-hue: rgb(90, 150, 255); --sg-hue-mid: rgb(55, 93, 158); --sg-hue-dim: rgb(30, 51, 86); }
+.sg-hue--spr { --sg-hue: rgb(120, 226, 226); --sg-hue-mid: rgb(74, 140, 140); --sg-hue-dim: rgb(40, 76, 76); }
+.sg-hue--lck { --sg-hue: rgb(236, 200, 80); --sg-hue-mid: rgb(146, 124, 49); --sg-hue-dim: rgb(80, 68, 27); }
+.sg-hue--resist { --sg-hue: rgb(160, 176, 206); --sg-hue-mid: rgb(99, 109, 127); --sg-hue-dim: rgb(54, 59, 70); }
+.sg-hue--slot { --sg-hue: rgb(205, 110, 255); --sg-hue-mid: rgb(127, 68, 158); --sg-hue-dim: rgb(69, 37, 86); }
+.sg-hue--ability { --sg-hue: rgb(232, 120, 220); --sg-hue-mid: rgb(143, 74, 136); --sg-hue-dim: rgb(78, 40, 74); }
+.sg-hue--summon { --sg-hue: rgb(80, 214, 170); --sg-hue-mid: rgb(49, 132, 105); --sg-hue-dim: rgb(27, 72, 57); }
+.sg-hue--ultra { --sg-hue: rgb(255, 226, 150); --sg-hue-mid: rgb(158, 140, 93); --sg-hue-dim: rgb(86, 76, 51); }
+.sg-hue--stat { --sg-hue: rgb(190, 170, 220); --sg-hue-mid: rgb(117, 105, 136); --sg-hue-dim: rgb(64, 57, 74); }
+
+/* The node itself is only the hit box: the layers draw it. */
+.sg-viewport--orbs .sg-node,
+.sg-viewport--orbs .sg-node--activated,
+.sg-viewport--orbs .sg-node--available,
+.sg-viewport--orbs .sg-node--adjacent,
+.sg-viewport--orbs .sg-node--locked,
+.sg-viewport--orbs .sg-node--gated,
+.sg-viewport--orbs .sg-node--selected,
+.sg-viewport--orbs .sg-node.cd-tutorial-target {
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    opacity: 1;
+}
+
+.sg-orb-layer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.sg-node__orb {
+    background-image: url("project://database/Assets/UI/SphereGrid/sg_orb.png");
+    -unity-background-image-tint-color: var(--sg-hue-dim);
+}
+
+.sg-node__socket {
+    background-image: url("project://database/Assets/UI/SphereGrid/sg_socket.png");
+}
+
+.sg-node__gloss {
+    background-image: url("project://database/Assets/UI/SphereGrid/sg_orb_gloss.png");
+    opacity: 0.35;
+}
+
+/* Twice the node, centred on it. */
+.sg-node__halo {
+    left: -50%;
+    top: -50%;
+    width: 200%;
+    height: 200%;
+    background-image: url("project://database/Assets/UI/SphereGrid/sg_halo.png");
+    -unity-background-image-tint-color: var(--sg-hue);
+    opacity: 0;
+    transition-property: opacity;
+    transition-duration: 0.9s;
+    transition-timing-function: ease-in-out;
+}
+
+/* The arcane circle the grid grows out of, under the start node. */
+.sg-node__sigil {
+    left: -100%;
+    top: -100%;
+    width: 300%;
+    height: 300%;
+    background-image: url("project://database/Assets/UI/SphereGrid/sg_sigil.png");
+    opacity: 0.55;
+}
+
+/* The cursor and the tutorial's pointer: a ring just outside the socket. */
+.sg-node__ring {
+    left: -5px;
+    top: -5px;
+    width: 54px;
+    height: 54px;
+    border-radius: 27px;
+    border-width: 0;
+    border-color: var(--cd-gold);
+}
+
+.sg-node--start > .sg-node__ring {
+    width: 64px;
+    height: 64px;
+    border-radius: 32px;
+}
+
+/* Owned: full colour, the shine, a steady glow. */
+.sg-node--activated > .sg-node__orb {
+    -unity-background-image-tint-color: var(--sg-hue);
+}
+
+.sg-node--activated > .sg-node__gloss {
+    opacity: 1;
+}
+
+.sg-node--activated > .sg-node__halo {
+    opacity: 0.7;
+}
+
+/* Affordable: still empty glass (owned is the only filled orb, as in FFX), but ringed in its
+   colour, and the ring breathes. The ring is what says "you can buy this". */
+.sg-node--available > .sg-node__orb {
+    -unity-background-image-tint-color: var(--sg-hue-dim);
+}
+
+.sg-node--available > .sg-node__gloss {
+    opacity: 0.45;
+}
+
+.sg-node--available > .sg-node__halo {
+    opacity: 0.05;
+}
+
+.sg-pulse .sg-node--available > .sg-node__halo {
+    opacity: 0.3;
+}
+
+.sg-node--available > .sg-node__ring {
+    border-width: 2px;
+    border-color: var(--sg-hue-mid);
+    transition-property: border-color, border-width;
+    transition-duration: 0.9s;
+    transition-timing-function: ease-in-out;
+}
+
+.sg-pulse .sg-node--available > .sg-node__ring {
+    border-width: 3px;
+    border-color: var(--sg-hue);
+}
+
+/* Waiting on another node first: a gold ring says "a condition, not a price". */
+.sg-node--gated > .sg-node__ring {
+    border-width: 2px;
+    border-color: rgba(236, 190, 72, 0.6);
+}
+
+/* Not reachable yet: dark glass in a darker socket. */
+.sg-node--locked > .sg-node__orb {
+    -unity-background-image-tint-color: rgb(44, 36, 60);
+}
+
+.sg-node--locked > .sg-node__socket {
+    -unity-background-image-tint-color: rgb(130, 120, 150);
+}
+
+.sg-node--locked > .sg-node__gloss {
+    opacity: 0.12;
+}
+
+.sg-viewport--orbs .sg-node:hover > .sg-node__ring {
+    border-width: 2px;
+    border-color: var(--cd-accent);
+}
+
+.sg-viewport--orbs .sg-node--selected > .sg-node__ring,
+.sg-viewport--orbs .sg-node--selected:hover > .sg-node__ring {
+    border-width: 3px;
+    border-color: var(--cd-gold);
+}
+
+.sg-viewport--orbs .sg-node.cd-tutorial-target > .sg-node__ring {
+    border-width: 3px;
+    border-color: var(--cd-gold);
+}
+
+.cd-tutorial--pulse .sg-viewport--orbs .sg-node.cd-tutorial-target > .sg-node__ring {
+    border-color: rgb(255, 246, 205);
+}
+
+/* Glyphs sit on coloured glass now: white with a dark rim reads on every hue. */
+.sg-viewport--orbs .sg-node__glyph,
+.sg-viewport--orbs .sg-node--activated .sg-node__glyph,
+.sg-viewport--orbs .sg-node--available .sg-node__glyph {
+    color: rgb(250, 246, 255);
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: rgb(16, 8, 30);
+}
+
+.sg-viewport--orbs .sg-node--adjacent .sg-node__glyph,
+.sg-viewport--orbs .sg-node--gated .sg-node__glyph {
+    color: rgb(200, 188, 220);
+}
+
+.sg-viewport--orbs .sg-node--locked .sg-node__glyph {
+    color: rgb(150, 138, 176);
+}
+
+.sg-viewport--orbs .sg-node__icon {
+    width: 62%;
+    height: 62%;
+}
+
+.sg-viewport--orbs .sg-node--locked .sg-node__icon {
+    --unity-image-tint-color: rgb(110, 100, 130);
+    opacity: 0.7;
 }

@@ -32,6 +32,38 @@ MonoBehaviour:
     DrainToParty: 0
   Hits: 1
   RandomTargets: 0
+  Delivery: 0
+  HitIcon: {fileID: 0}
+  HitArtAngle: 0
+  LeapSlamFrames: []
+  ImpactFrames: []
+  ImpactFps: 16
+  FlashColor: {r: 0.5, g: 0.7, b: 1, a: 1}
+  TargetFrames:
+  - {fileID: -5148715216381737390, guid: a6384aca6189436b938063d26794044d, type: 3}
+  - {fileID: -3088935196111230599, guid: a6384aca6189436b938063d26794044d, type: 3}
+  - {fileID: -1354631346338002953, guid: a6384aca6189436b938063d26794044d, type: 3}
+  - {fileID: -4973288217584292687, guid: a6384aca6189436b938063d26794044d, type: 3}
+  - {fileID: -2865888062087510605, guid: a6384aca6189436b938063d26794044d, type: 3}
+  - {fileID: -2630962216386021174, guid: a6384aca6189436b938063d26794044d, type: 3}
+  - {fileID: -6167149868704912295, guid: a6384aca6189436b938063d26794044d, type: 3}
+  - {fileID: -2499544646930024252, guid: a6384aca6189436b938063d26794044d, type: 3}
+  - {fileID: -3213328429819538285, guid: a6384aca6189436b938063d26794044d, type: 3}
+  - {fileID: 4476185646776244912, guid: a6384aca6189436b938063d26794044d, type: 3}
+  - {fileID: 7184525662399006906, guid: a6384aca6189436b938063d26794044d, type: 3}
+  - {fileID: -9164060512653140284, guid: a6384aca6189436b938063d26794044d, type: 3}
+  - {fileID: 3986455687892708746, guid: a6384aca6189436b938063d26794044d, type: 3}
+  - {fileID: 3447232330200350715, guid: a6384aca6189436b938063d26794044d, type: 3}
+  - {fileID: 6890759570042611261, guid: a6384aca6189436b938063d26794044d, type: 3}
+  - {fileID: -9110896838531245263, guid: a6384aca6189436b938063d26794044d, type: 3}
+  TargetFps: 12
+  TargetFramesCentred: 0
+  TargetFramesBehind: 0
+  TargetFramesLead: 0.5
+  WindUpFrames: []
+  WindUpEffectFrames: []
+  WindUpEffectFps: 20
+  WindUpSeconds: 1.2
   Creature: {fileID: 0}
   StatAbilities: []
   Mech: {fileID: 0}
@@ -39,6 +71,8 @@ MonoBehaviour:
   MaxHealthPercent: 50
   AttackDamageType: 0
   Abilities: []
+  FormWaivesBloodPrices: 0
+  FormOnlyBloodAbilities: 0
   FormFrames: []
   Icon: {fileID: 21300000, guid: fb95f81936864dd6a522c9ab8330bd37, type: 3}
   FormFps: 4

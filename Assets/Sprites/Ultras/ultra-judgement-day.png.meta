@@ -1,0 +1,481 @@
+fileFormatVersion: 2
+guid: 7c6249f3e0ce4311be982185930b1b9c
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -2534777610602397438
+    second: ultra-judgement-day_0
+  - first:
+      213: -8583278833148013878
+    second: ultra-judgement-day_1
+  - first:
+      213: 1555898291048871826
+    second: ultra-judgement-day_2
+  - first:
+      213: -7044246894093194355
+    second: ultra-judgement-day_3
+  - first:
+      213: 2332094413316408080
+    second: ultra-judgement-day_4
+  - first:
+      213: 2886073146511059314
+    second: ultra-judgement-day_5
+  - first:
+      213: -5816267761611423988
+    second: ultra-judgement-day_6
+  - first:
+      213: 8097573479719962170
+    second: ultra-judgement-day_7
+  - first:
+      213: 7685366066533559316
+    second: ultra-judgement-day_8
+  - first:
+      213: -3804918926356336417
+    second: ultra-judgement-day_9
+  - first:
+      213: 8306967099878132835
+    second: ultra-judgement-day_10
+  - first:
+      213: 3137869974849361668
+    second: ultra-judgement-day_11
+  - first:
+      213: -6482297240173501996
+    second: ultra-judgement-day_12
+  - first:
+      213: 2255343783046797041
+    second: ultra-judgement-day_13
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 4096
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 21
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: ultra-judgement-day_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 216
+        height: 204
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.0882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 611a3026ca0a41e0943d10aab0bc202c
+      internalID: -2534777610602397438
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-judgement-day_1
+      rect:
+        serializedVersion: 2
+        x: 216
+        y: 0
+        width: 216
+        height: 204
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.0882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d3aeb369133d4fe2beed786f6c73f189
+      internalID: -8583278833148013878
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-judgement-day_2
+      rect:
+        serializedVersion: 2
+        x: 432
+        y: 0
+        width: 216
+        height: 204
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.0882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0123608fd5b54683886afbf36c7a231f
+      internalID: 1555898291048871826
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-judgement-day_3
+      rect:
+        serializedVersion: 2
+        x: 648
+        y: 0
+        width: 216
+        height: 204
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.0882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a7c417256bb74a769974a75f9fe1906b
+      internalID: -7044246894093194355
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-judgement-day_4
+      rect:
+        serializedVersion: 2
+        x: 864
+        y: 0
+        width: 216
+        height: 204
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.0882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e26965c759fe42efa2fe6edc5618d660
+      internalID: 2332094413316408080
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-judgement-day_5
+      rect:
+        serializedVersion: 2
+        x: 1080
+        y: 0
+        width: 216
+        height: 204
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.0882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9e04bd7f68854cc7a49447f42e66cd50
+      internalID: 2886073146511059314
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-judgement-day_6
+      rect:
+        serializedVersion: 2
+        x: 1296
+        y: 0
+        width: 216
+        height: 204
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.0882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 45ef40781f0f4175b695304a859629a2
+      internalID: -5816267761611423988
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-judgement-day_7
+      rect:
+        serializedVersion: 2
+        x: 1512
+        y: 0
+        width: 216
+        height: 204
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.0882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c03e41ff55234534a35b30323493cb5d
+      internalID: 8097573479719962170
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-judgement-day_8
+      rect:
+        serializedVersion: 2
+        x: 1728
+        y: 0
+        width: 216
+        height: 204
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.0882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 49c83e77ad89424ab1bc7847f6ce6c7b
+      internalID: 7685366066533559316
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-judgement-day_9
+      rect:
+        serializedVersion: 2
+        x: 1944
+        y: 0
+        width: 216
+        height: 204
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.0882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 699c42de0fd64a528fd76c57c0f313d9
+      internalID: -3804918926356336417
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-judgement-day_10
+      rect:
+        serializedVersion: 2
+        x: 2160
+        y: 0
+        width: 216
+        height: 204
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.0882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c910b90beb9241d2bcd78bce1012588d
+      internalID: 8306967099878132835
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-judgement-day_11
+      rect:
+        serializedVersion: 2
+        x: 2376
+        y: 0
+        width: 216
+        height: 204
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.0882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eb0da1540e8a42f09cd447dcdd3c3b99
+      internalID: 3137869974849361668
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-judgement-day_12
+      rect:
+        serializedVersion: 2
+        x: 2592
+        y: 0
+        width: 216
+        height: 204
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.0882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 87a1d4a26b4f40a6aa20dfd05fab9c63
+      internalID: -6482297240173501996
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-judgement-day_13
+      rect:
+        serializedVersion: 2
+        x: 2808
+        y: 0
+        width: 216
+        height: 204
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.0882}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1c4ee1ab7c014782ab92efd67450b0a5
+      internalID: 2255343783046797041
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      ultra-judgement-day_0: -2534777610602397438
+      ultra-judgement-day_1: -8583278833148013878
+      ultra-judgement-day_2: 1555898291048871826
+      ultra-judgement-day_3: -7044246894093194355
+      ultra-judgement-day_4: 2332094413316408080
+      ultra-judgement-day_5: 2886073146511059314
+      ultra-judgement-day_6: -5816267761611423988
+      ultra-judgement-day_7: 8097573479719962170
+      ultra-judgement-day_8: 7685366066533559316
+      ultra-judgement-day_9: -3804918926356336417
+      ultra-judgement-day_10: 8306967099878132835
+      ultra-judgement-day_11: 3137869974849361668
+      ultra-judgement-day_12: -6482297240173501996
+      ultra-judgement-day_13: 2255343783046797041
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

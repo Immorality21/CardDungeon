@@ -92,7 +92,7 @@ MonoBehaviour:
     ManualLayout: {fileID: 0}
     BossEnemy: {fileID: 11400000, guid: e62cccd795c1c1942b396724ce782f6f, type: 2}
     BossAdds:
-    - Enemy: {fileID: 11400000, guid: bf6697af4924975448304c7112cc67ec, type: 2}
+    - Enemy: {fileID: 11400000, guid: 1267f31a7075441ebd1cb7bc578e30d9, type: 2}
       Count: 2
     BossDrops:
     - Item: {fileID: 11400000, guid: e504d659094453e4b9ece09478224de2, type: 2}

@@ -1,0 +1,481 @@
+fileFormatVersion: 2
+guid: 446ec619de8c40aab6bb5862977f3520
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -2370081850838417277
+    second: ultra-mass-hysteria_0
+  - first:
+      213: -4087584700605868726
+    second: ultra-mass-hysteria_1
+  - first:
+      213: 4697968895638211699
+    second: ultra-mass-hysteria_2
+  - first:
+      213: -1834958736230619727
+    second: ultra-mass-hysteria_3
+  - first:
+      213: -2271522761657066788
+    second: ultra-mass-hysteria_4
+  - first:
+      213: -8122669217946904363
+    second: ultra-mass-hysteria_5
+  - first:
+      213: -4486260830616988861
+    second: ultra-mass-hysteria_6
+  - first:
+      213: 8166802781281039718
+    second: ultra-mass-hysteria_7
+  - first:
+      213: -6429006334151098233
+    second: ultra-mass-hysteria_8
+  - first:
+      213: 9156447983192682925
+    second: ultra-mass-hysteria_9
+  - first:
+      213: 8516857442976335389
+    second: ultra-mass-hysteria_10
+  - first:
+      213: 1576977721906399144
+    second: ultra-mass-hysteria_11
+  - first:
+      213: 5663385896781437186
+    second: ultra-mass-hysteria_12
+  - first:
+      213: 5469976258125236189
+    second: ultra-mass-hysteria_13
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 4096
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 48
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: ultra-mass-hysteria_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 148
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.0750}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cab24124404845638a2897ca4fcad54c
+      internalID: -2370081850838417277
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-mass-hysteria_1
+      rect:
+        serializedVersion: 2
+        x: 148
+        y: 0
+        width: 148
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.0750}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7230ad1c278d4149b52d81ecb9fbc9f2
+      internalID: -4087584700605868726
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-mass-hysteria_2
+      rect:
+        serializedVersion: 2
+        x: 296
+        y: 0
+        width: 148
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.0750}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 338a1da5fc754a1cac8047f10a3437ed
+      internalID: 4697968895638211699
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-mass-hysteria_3
+      rect:
+        serializedVersion: 2
+        x: 444
+        y: 0
+        width: 148
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.0750}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 25c775ef6ca04182b8a63e837a56facb
+      internalID: -1834958736230619727
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-mass-hysteria_4
+      rect:
+        serializedVersion: 2
+        x: 592
+        y: 0
+        width: 148
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.0750}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 51a287ab44df42d3b6d6b4983774727b
+      internalID: -2271522761657066788
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-mass-hysteria_5
+      rect:
+        serializedVersion: 2
+        x: 740
+        y: 0
+        width: 148
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.0750}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 67a563b054274a61bd6747dda5bd9a50
+      internalID: -8122669217946904363
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-mass-hysteria_6
+      rect:
+        serializedVersion: 2
+        x: 888
+        y: 0
+        width: 148
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.0750}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6341d4333feb43daa7efb859b6179411
+      internalID: -4486260830616988861
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-mass-hysteria_7
+      rect:
+        serializedVersion: 2
+        x: 1036
+        y: 0
+        width: 148
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.0750}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7baab873d398478998d60e49bc602029
+      internalID: 8166802781281039718
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-mass-hysteria_8
+      rect:
+        serializedVersion: 2
+        x: 1184
+        y: 0
+        width: 148
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.0750}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b3cc01e7682a4d8382c1624ae110956b
+      internalID: -6429006334151098233
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-mass-hysteria_9
+      rect:
+        serializedVersion: 2
+        x: 1332
+        y: 0
+        width: 148
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.0750}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0b02ced26929454391320aabb5d7e1ba
+      internalID: 9156447983192682925
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-mass-hysteria_10
+      rect:
+        serializedVersion: 2
+        x: 1480
+        y: 0
+        width: 148
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.0750}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 38c9e21fe37843ebba74b28fe061b910
+      internalID: 8516857442976335389
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-mass-hysteria_11
+      rect:
+        serializedVersion: 2
+        x: 1628
+        y: 0
+        width: 148
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.0750}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 916e2aa68a1e4daba221bde7fb471a10
+      internalID: 1576977721906399144
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-mass-hysteria_12
+      rect:
+        serializedVersion: 2
+        x: 1776
+        y: 0
+        width: 148
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.0750}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7cf17a68d4284ad4ad4c70e87827db15
+      internalID: 5663385896781437186
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-mass-hysteria_13
+      rect:
+        serializedVersion: 2
+        x: 1924
+        y: 0
+        width: 148
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.0750}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cb509eb8594a4a7e9ee85ce9cbbb364a
+      internalID: 5469976258125236189
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      ultra-mass-hysteria_0: -2370081850838417277
+      ultra-mass-hysteria_1: -4087584700605868726
+      ultra-mass-hysteria_2: 4697968895638211699
+      ultra-mass-hysteria_3: -1834958736230619727
+      ultra-mass-hysteria_4: -2271522761657066788
+      ultra-mass-hysteria_5: -8122669217946904363
+      ultra-mass-hysteria_6: -4486260830616988861
+      ultra-mass-hysteria_7: 8166802781281039718
+      ultra-mass-hysteria_8: -6429006334151098233
+      ultra-mass-hysteria_9: 9156447983192682925
+      ultra-mass-hysteria_10: 8516857442976335389
+      ultra-mass-hysteria_11: 1576977721906399144
+      ultra-mass-hysteria_12: 5663385896781437186
+      ultra-mass-hysteria_13: 5469976258125236189
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

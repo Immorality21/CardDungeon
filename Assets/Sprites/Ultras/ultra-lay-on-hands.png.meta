@@ -1,0 +1,429 @@
+fileFormatVersion: 2
+guid: a041dca787964eff93e0faf06818c8f4
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -6463066987831338378
+    second: ultra-lay-on-hands_0
+  - first:
+      213: 5708011758240458546
+    second: ultra-lay-on-hands_1
+  - first:
+      213: 6322415317466591452
+    second: ultra-lay-on-hands_2
+  - first:
+      213: 4633961290151731073
+    second: ultra-lay-on-hands_3
+  - first:
+      213: -1424228675323560035
+    second: ultra-lay-on-hands_4
+  - first:
+      213: 2083639723966287739
+    second: ultra-lay-on-hands_5
+  - first:
+      213: 7860733263240494800
+    second: ultra-lay-on-hands_6
+  - first:
+      213: 1642619106325180433
+    second: ultra-lay-on-hands_7
+  - first:
+      213: 7248873966846568492
+    second: ultra-lay-on-hands_8
+  - first:
+      213: -1712842715590892231
+    second: ultra-lay-on-hands_9
+  - first:
+      213: -5498347012919721161
+    second: ultra-lay-on-hands_10
+  - first:
+      213: -6366401932731091711
+    second: ultra-lay-on-hands_11
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 4096
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 32
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: ultra-lay-on-hands_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 80
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1786}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 995ca20d9c2841a987a28ec340c7b1bb
+      internalID: -6463066987831338378
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-lay-on-hands_1
+      rect:
+        serializedVersion: 2
+        x: 80
+        y: 0
+        width: 80
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1786}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bea22091dbcd43c8849d8025d503b502
+      internalID: 5708011758240458546
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-lay-on-hands_2
+      rect:
+        serializedVersion: 2
+        x: 160
+        y: 0
+        width: 80
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1786}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8014184bf00443009c15327159e364c7
+      internalID: 6322415317466591452
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-lay-on-hands_3
+      rect:
+        serializedVersion: 2
+        x: 240
+        y: 0
+        width: 80
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1786}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: afb0c62d44b740a699539f008e0d5d5f
+      internalID: 4633961290151731073
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-lay-on-hands_4
+      rect:
+        serializedVersion: 2
+        x: 320
+        y: 0
+        width: 80
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1786}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9e39396a68d04a48a468ef80dc62639f
+      internalID: -1424228675323560035
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-lay-on-hands_5
+      rect:
+        serializedVersion: 2
+        x: 400
+        y: 0
+        width: 80
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1786}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 79382f8fbe224b38a4937fab770d3ce7
+      internalID: 2083639723966287739
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-lay-on-hands_6
+      rect:
+        serializedVersion: 2
+        x: 480
+        y: 0
+        width: 80
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1786}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e5ff8c82be39488289a5ceb06bf96886
+      internalID: 7860733263240494800
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-lay-on-hands_7
+      rect:
+        serializedVersion: 2
+        x: 560
+        y: 0
+        width: 80
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1786}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8cd58841bc6247bf950ae71e1405bdfa
+      internalID: 1642619106325180433
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-lay-on-hands_8
+      rect:
+        serializedVersion: 2
+        x: 640
+        y: 0
+        width: 80
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1786}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 64e6f0d1c9ce4669a0eda73c46fe3cf7
+      internalID: 7248873966846568492
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-lay-on-hands_9
+      rect:
+        serializedVersion: 2
+        x: 720
+        y: 0
+        width: 80
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1786}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f5b8ba6c1f9b4d1897dae6e5a850ee4b
+      internalID: -1712842715590892231
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-lay-on-hands_10
+      rect:
+        serializedVersion: 2
+        x: 800
+        y: 0
+        width: 80
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1786}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ff70670cec844718b9ce7c4620e9e9b4
+      internalID: -5498347012919721161
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-lay-on-hands_11
+      rect:
+        serializedVersion: 2
+        x: 880
+        y: 0
+        width: 80
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1786}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2f482a5ab2504e9483d2250feba2194b
+      internalID: -6366401932731091711
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      ultra-lay-on-hands_0: -6463066987831338378
+      ultra-lay-on-hands_1: 5708011758240458546
+      ultra-lay-on-hands_2: 6322415317466591452
+      ultra-lay-on-hands_3: 4633961290151731073
+      ultra-lay-on-hands_4: -1424228675323560035
+      ultra-lay-on-hands_5: 2083639723966287739
+      ultra-lay-on-hands_6: 7860733263240494800
+      ultra-lay-on-hands_7: 1642619106325180433
+      ultra-lay-on-hands_8: 7248873966846568492
+      ultra-lay-on-hands_9: -1712842715590892231
+      ultra-lay-on-hands_10: -5498347012919721161
+      ultra-lay-on-hands_11: -6366401932731091711
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

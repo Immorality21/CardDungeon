@@ -121,7 +121,7 @@ namespace Assets.Scripts.Heroes.UI
             }
 
             var graphHost = root.Q<VisualElement>("grid-graph");
-            _view = new SphereGridView();
+            _view = new SphereGridView { OrbNodes = true };
             if (graphHost != null)
             {
                 graphHost.Add(_view);

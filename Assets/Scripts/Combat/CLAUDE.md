@@ -150,6 +150,20 @@ command's dim reason reads "No Focus". Sim: `SimUltras.Focus` + `MultiCastReady`
 wait for max Focus, then MultiCast the best damage slot). How Focus is built and priced were open
 questions in his vision - these are drafts.
 
+## Stunned - a turn lost *(2026-11-22)*
+
+`BuffType.Stunned` (`StunnedBuffHandler`, the Ent's Root) skips the unit's turns while it lasts, as
+Frozen does, but no element breaks it. A status: curable, immune-able, wardable, the dizzy-stars
+glyph (`Resources/CombatIcons/stun`) on the HP bar. Duration 1 applied on someone else's turn costs
+exactly one turn (durations tick at the end of the skipped turn).
+
+## Acting again - `TurnManager.ActsNext` *(2026-11-22)*
+
+Puts a unit already on the clock at the front: it takes the very next turn, costing the clock
+nothing, then waits a full turn at its pace. A Transform Ultra calls it (owner: Demon Form spent the
+Warlock's turn and was not worth taking), live and in `SimUltras`, so the form's first turn is the
+one straight after taking it.
+
 ## Divine protection - a hit negated *(2026-10-30)*
 
 `BuffType.DivineProtection` (the Paladin's Divine Protection, one ally; Aegis, the whole party) puts

@@ -228,6 +228,77 @@ namespace Assets.Scripts.Heroes.UI
         }
 
         /// <summary>
+        /// The sg-hue--* USS class that colours a node's orb (2026-11-22, the FFX-style grid): a stat
+        /// node by the stat it grows most, so a branch reads as red Strength or blue Intelligence at a
+        /// glance, and the special kinds by what they give (abilities, slots, summons, Ultras).
+        /// </summary>
+        public static string HueClass(SphereGridNode node)
+        {
+            if (node == null)
+            {
+                return "sg-hue--stat";
+            }
+
+            switch (node.Kind)
+            {
+                case SphereNodeKind.Resistance:
+                    return "sg-hue--resist";
+                case SphereNodeKind.MagicSlot:
+                    return "sg-hue--slot";
+                case SphereNodeKind.MagicKnown:
+                case SphereNodeKind.MagicAwaken:
+                case SphereNodeKind.MagicUpgrade:
+                    return "sg-hue--ability";
+                case SphereNodeKind.Ultra:
+                    return "sg-hue--ultra";
+                case SphereNodeKind.Summon:
+                case SphereNodeKind.SummonPower:
+                case SphereNodeKind.SummonDuration:
+                case SphereNodeKind.SummonCharge:
+                case SphereNodeKind.SummonSize:
+                case SphereNodeKind.SummonPromote:
+                case SphereNodeKind.SummonApplyChance:
+                case SphereNodeKind.SummonDamage:
+                    return "sg-hue--summon";
+            }
+
+            UnitStat largest = null;
+            if (node.Gains != null)
+            {
+                foreach (var gain in node.Gains.NonZero())
+                {
+                    if (largest == null || gain.Amount > largest.Amount)
+                    {
+                        largest = gain;
+                    }
+                }
+            }
+            if (largest == null)
+            {
+                return "sg-hue--stat";
+            }
+            switch (largest.Type)
+            {
+                case StatType.MaxHealth:
+                    return "sg-hue--hp";
+                case StatType.Strength:
+                    return "sg-hue--str";
+                case StatType.Endurance:
+                    return "sg-hue--end";
+                case StatType.Agility:
+                    return "sg-hue--agi";
+                case StatType.Intelligence:
+                    return "sg-hue--int";
+                case StatType.Spirit:
+                    return "sg-hue--spr";
+                case StatType.Luck:
+                    return "sg-hue--lck";
+                default:
+                    return "sg-hue--stat";
+            }
+        }
+
+        /// <summary>
         /// What is drawn inside a node: one character for the special kinds, and for a stat node the
         /// short name of the stat it grows most ("STR", "HP") - every stat node used to read "S", so
         /// HP, STR, AGI and SPR looked the same until clicked (playtest 2 finding 7).
@@ -488,7 +559,7 @@ namespace Assets.Scripts.Heroes.UI
                 {
                     Key = node.Key,
                     Position = node.Position,
-                    KindClass = KindClass(node),
+                    KindClass = KindClass(node) + " " + HueClass(node),
                     Glyph = Glyph(node, node.Key == start),
                     IsStart = node.Key == start,
                     Requires = RequiredKeys(node)

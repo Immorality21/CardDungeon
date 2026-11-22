@@ -133,6 +133,7 @@ namespace Assets.Scripts.Heroes.UI
         // Under the content, panned and zoomed with it (SetBackdrop): a sibling rather than a child,
         // because the edges are painted on _content itself and its children would cover them.
         private readonly VisualElement _backdrop;
+        private readonly VisualElement _stars;
         private readonly Dictionary<string, Button> _buttons = new Dictionary<string, Button>();
         private readonly Dictionary<string, NodeInfo> _nodes = new Dictionary<string, NodeInfo>();
 
@@ -191,6 +192,47 @@ namespace Assets.Scripts.Heroes.UI
         /// </summary>
         public bool TrailEdges { get; set; }
 
+        /// <summary>
+        /// The sphere grid's own look (2026-11-22, after FFX): every node a glass orb in an iron
+        /// socket, coloured by its <c>sg-hue--*</c> class, owned orbs glowing, affordable ones
+        /// pulsing, the lit paths glowing, all over a starry void with a star layer that drifts slower
+        /// than the graph when it pans. The art is in USS (<c>Assets/UI/SphereGrid/</c>); this only
+        /// adds the elements it hangs on. Set it before <see cref="SetGraph"/>. Off by default, so the
+        /// story map keeps its landmarks.
+        /// </summary>
+        public bool OrbNodes
+        {
+            get { return _orbNodes; }
+            set
+            {
+                if (_orbNodes == value)
+                {
+                    return;
+                }
+                _orbNodes = value;
+                EnableInClassList("sg-viewport--orbs", value);
+                _stars.style.display = value ? DisplayStyle.Flex : DisplayStyle.None;
+                if (value && _pulse == null)
+                {
+                    _pulse = schedule.Execute(() => ToggleInClassList("sg-pulse")).Every(PulseMs);
+                }
+                else if (!value && _pulse != null)
+                {
+                    _pulse.Pause();
+                    _pulse = null;
+                    RemoveFromClassList("sg-pulse");
+                }
+                _content.MarkDirtyRepaint();
+            }
+        }
+
+        // How fast an affordable orb breathes (half a cycle), and how much slower than the graph the
+        // star layer moves when it pans - the depth the void would not have as a flat picture.
+        private const long PulseMs = 900;
+        private const float StarParallax = 0.35f;
+        private bool _orbNodes;
+        private IVisualElementScheduledItem _pulse;
+
         public Vector2 Pan
         {
             get { return _pan; }
@@ -208,6 +250,13 @@ namespace Assets.Scripts.Heroes.UI
             // window's panel, where :root matching is not guaranteed.
             AddToClassList("sg-scope");
             focusable = false;
+
+            // The drifting star layer (OrbNodes): fills the viewport and never scales, only its
+            // tile offset follows the pan, so it reads as far behind the graph.
+            _stars = new VisualElement { name = "sg-stars", pickingMode = PickingMode.Ignore };
+            _stars.AddToClassList("sg-stars");
+            _stars.style.display = DisplayStyle.None;
+            Add(_stars);
 
             _backdrop = new VisualElement { name = "sg-backdrop", pickingMode = PickingMode.Ignore };
             _backdrop.AddToClassList("sg-content");
@@ -287,6 +336,21 @@ namespace Assets.Scripts.Heroes.UI
                 button.AddToClassList("sg-node--start");
             }
 
+            if (_orbNodes)
+            {
+                // Bottom to top: the start's sigil, the glow, the glass, the iron socket round it, the
+                // shine, then the cursor ring; the glyph or icon goes over all of it below.
+                if (node.IsStart)
+                {
+                    AddOrbLayer(button, "sg-node__sigil");
+                }
+                AddOrbLayer(button, "sg-node__halo");
+                AddOrbLayer(button, "sg-node__orb");
+                AddOrbLayer(button, "sg-node__socket");
+                AddOrbLayer(button, "sg-node__gloss");
+                AddOrbLayer(button, "sg-node__ring");
+            }
+
             if (node.Icon != null)
             {
                 var icon = new Image { sprite = node.Icon, scaleMode = ScaleMode.ScaleToFit, pickingMode = PickingMode.Ignore };
@@ -345,6 +409,14 @@ namespace Assets.Scripts.Heroes.UI
             });
 
             return button;
+        }
+
+        private static void AddOrbLayer(VisualElement button, string className)
+        {
+            var layer = new VisualElement { pickingMode = PickingMode.Ignore };
+            layer.AddToClassList("sg-orb-layer");
+            layer.AddToClassList(className);
+            button.Add(layer);
         }
 
         private static void PositionButton(Button button, Vector2 gridPosition, bool isStart)
@@ -956,6 +1028,12 @@ namespace Assets.Scripts.Heroes.UI
             _content.style.scale = new Scale(new Vector2(_zoom, _zoom));
             _backdrop.style.translate = _content.style.translate;
             _backdrop.style.scale = _content.style.scale;
+            if (_orbNodes)
+            {
+                // A repeating background wraps any offset, so the stars never run out.
+                _stars.style.backgroundPositionX = new BackgroundPosition(BackgroundPositionKeyword.Left, new Length(_pan.x * StarParallax));
+                _stars.style.backgroundPositionY = new BackgroundPosition(BackgroundPositionKeyword.Top, new Length(_pan.y * StarParallax));
+            }
             _content.MarkDirtyRepaint();
         }
 
@@ -1064,11 +1142,18 @@ namespace Assets.Scripts.Heroes.UI
                     continue;
                 }
 
-                painter.strokeColor = EdgeColorFor(edge.A, edge.B);
-                painter.BeginPath();
-                painter.MoveTo(a.Position);
-                painter.LineTo(b.Position);
-                painter.Stroke();
+                if (_orbNodes)
+                {
+                    DrawOrbEdge(painter, edge.A, edge.B, a.Position, b.Position);
+                }
+                else
+                {
+                    painter.strokeColor = EdgeColorFor(edge.A, edge.B);
+                    painter.BeginPath();
+                    painter.MoveTo(a.Position);
+                    painter.LineTo(b.Position);
+                    painter.Stroke();
+                }
 
                 if (DrawArrows)
                 {
@@ -1212,6 +1297,48 @@ namespace Assets.Scripts.Heroes.UI
             painter.LineTo(tip - direction * length - normal * halfWidth);
             painter.ClosePath();
             painter.Fill();
+        }
+
+        // OrbNodes paths: a walked path is a beam of light with a wide soft glow under a bright core;
+        // one that leads somewhere buyable is a steady violet line; the rest a faint thread, so the
+        // owned part of the grid lights up like FFX's activated spheres. Widths are screen pixels.
+        private static readonly Color BeamGlow = new Color(205f / 255f, 110f / 255f, 1f, 0.22f);
+        private static readonly Color BeamCore = new Color(240f / 255f, 214f / 255f, 1f);
+        private static readonly Color PathOpen = new Color(150f / 255f, 92f / 255f, 214f / 255f, 0.95f);
+        private static readonly Color PathDim = new Color(86f / 255f, 58f / 255f, 130f / 255f, 0.7f);
+
+        private void DrawOrbEdge(Painter2D painter, string keyA, string keyB, Vector2 from, Vector2 to)
+        {
+            float pixel = 1f / Mathf.Max(0.01f, _zoom);
+            string stateA = _stateClasses.TryGetValue(keyA, out var sa) ? sa : null;
+            string stateB = _stateClasses.TryGetValue(keyB, out var sb) ? sb : null;
+            if (stateA == EdgeStrongStateClass && stateB == EdgeStrongStateClass)
+            {
+                StrokeLine(painter, from, to, 11f * pixel, BeamGlow);
+                StrokeLine(painter, from, to, 6f * pixel, BeamGlow);
+                StrokeLine(painter, from, to, 2.5f * pixel, BeamCore);
+            }
+            else if (stateA == EdgeOpenStateClass || stateB == EdgeOpenStateClass
+                     || stateA == EdgeStrongStateClass || stateB == EdgeStrongStateClass)
+            {
+                StrokeLine(painter, from, to, 2.5f * pixel, PathOpen);
+            }
+            else
+            {
+                StrokeLine(painter, from, to, 2f * pixel, PathDim);
+            }
+            // Leave the painter as the arrows and requirement links expect it.
+            painter.lineWidth = 3f * pixel;
+        }
+
+        private static void StrokeLine(Painter2D painter, Vector2 from, Vector2 to, float width, Color color)
+        {
+            painter.lineWidth = width;
+            painter.strokeColor = color;
+            painter.BeginPath();
+            painter.MoveTo(from);
+            painter.LineTo(to);
+            painter.Stroke();
         }
 
         private Color EdgeColorFor(string a, string b)

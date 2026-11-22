@@ -1358,9 +1358,9 @@ MonoBehaviour:
     Note: 
   - Key: ability.imp-hellfire.name
     Values:
-    - Hellfire
+    - Ember Spray
     Reviewed: 0
-    Note: 
+    Note: 'The Imp''s area attack: it spits embers, not hellfire (playtest 2026-11-22). Key kept.'
   - Key: ability.imp-hellfire.description
     Values:
     - Deals Fire damage to all enemies and sets them Burning.
@@ -2279,7 +2279,7 @@ MonoBehaviour:
     Note: 
   - Key: ultra.demon-form.description
     Values:
-    - 'Become a demon for a few turns: more health, Shadow attacks, Chaos Bolt.'
+    - 'Become a demon for a few turns: more health, Shadow attacks, Chaos Bolt and Abyssal Wave. Only blood magic can be cast, it costs no health, and no summons.'
     Reviewed: 0
     Note: 
   - Key: ultra.divine-intervention.name
@@ -2479,7 +2479,7 @@ MonoBehaviour:
     Note: 
   - Key: ultra.soul-harvest.description
     Values:
-    - Deals Shadow damage to all enemies and heals you for part of it.
+    - Deals heavy Shadow damage to all enemies and heals the whole party for most of it.
     Reviewed: 0
     Note: 
   - Key: ultra.take-cover.name
@@ -13526,3 +13526,78 @@ MonoBehaviour:
     - 'A green willow switch that still buds. Spells come easier through living wood.'
     Reviewed: 0
     Note: 
+  - Key: enemy.treant.name
+    Values:
+    - Bog Treant
+    Reviewed: 0
+    Note: 'The Mire''s main trash enemy (replaced the Floating Eye there, playtest 2026-11-22).'
+  - Key: enemy.treant.plural
+    Values:
+    - Bog Treants
+    Reviewed: 0
+    Note: 'Enemy name, plural: the run history''s ''2 Bog Shamans'''
+  - Key: enemy.ent.name
+    Values:
+    - Bog Ent
+    Reviewed: 0
+    Note: 'The big treant of the Mire: a heavy, golem-like bruiser that roots a hero.'
+  - Key: enemy.ent.plural
+    Values:
+    - Bog Ents
+    Reviewed: 0
+    Note: 'Enemy name, plural: the run history''s ''2 Bog Shamans'''
+  - Key: ability.ent-root.name
+    Values:
+    - Root
+    Reviewed: 0
+    Note: 'The Ent: roots wrap one hero, who loses their next turn.'
+  - Key: ability.ent-root.description
+    Values:
+    - Deals damage to one hero and Stuns them for a turn.
+    Reviewed: 0
+    Note: 
+  - Key: move.root.name
+    Values:
+    - Root
+    Reviewed: 0
+    Note: 'The Ent''s stun move, as the enemy action banner names it.'
+  - Key: combat.status.stunned
+    Values:
+    - Stunned!
+    Reviewed: 0
+    Note: Floating text when a stun lands.
+  - Key: bestiary.status.stun
+    Values:
+    - Stun
+    Reviewed: 0
+    Note: 
+  - Key: abilities.gloss.stunned
+    Values:
+    - loses its turns
+    Reviewed: 0
+    Note: 
+  - Key: ability.abyssal-wave.name
+    Values:
+    - Abyssal Wave
+    Reviewed: 0
+    Note: Demon Form's second ability (playtest 2026-11-22), beside Chaos Bolt.
+  - Key: ability.abyssal-wave.description
+    Values:
+    - Deals Shadow damage to all enemies.
+    Reviewed: 0
+    Note: 
+  - Key: abilities.ultra.transform-free-blood
+    Values:
+    - Blood magic only, free
+    Reviewed: 0
+    Note: Demon Form's Ultra line, between its parts.
+  - Key: abilities.ultra.transform-blood-free
+    Values:
+    - Blood magic free
+    Reviewed: 0
+    Note: A form that waives blood prices but keeps every ability.
+  - Key: room.command.reason.in-form
+    Values:
+    - In form
+    Reviewed: 0
+    Note: The Summon command greyed while Demon Form lasts.

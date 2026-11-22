@@ -27,6 +27,8 @@ namespace Assets.Scripts.Cards.Buffs
                     return Resistance(DamageType.Shadow);
                 case BuffType.Frozen:
                     return Loc.Get("bestiary.status.frozen");
+                case BuffType.Stunned:
+                    return Loc.Get("bestiary.status.stun");
                 case BuffType.Slow:
                     return Loc.Get("bestiary.status.slow");
                 case BuffType.Haste:

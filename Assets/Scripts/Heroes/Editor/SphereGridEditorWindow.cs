@@ -149,7 +149,9 @@ namespace Assets.Scripts.Heroes.Editor
             _view = new SphereGridView
             {
                 // Left button is reserved for select/drag/connect/place; middle or right pans.
-                PanButtons = (1 << 1) | (1 << 2)
+                PanButtons = (1 << 1) | (1 << 2),
+                // The hub's look, so the designer sees what the player will.
+                OrbNodes = true
             };
             _view.style.flexGrow = 1f;
             _view.NodeClicked += OnNodeClicked;

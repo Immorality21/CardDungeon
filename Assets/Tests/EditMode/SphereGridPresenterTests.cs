@@ -152,6 +152,24 @@ namespace Tests.EditMode
         }
 
         [Test]
+        public void HueClass_StatNodeByLargestGain_SpecialKindsByWhatTheyGive()
+        {
+            var mostlyHealth = new SphereGridNode
+            {
+                Key = "n",
+                Gains = new StatBlock(new UnitStat(StatType.Strength, 2), new UnitStat(StatType.MaxHealth, 5))
+            };
+            var intelligence = new SphereGridNode { Key = "i", Gains = new StatBlock(new UnitStat(StatType.Intelligence, 1)) };
+
+            Assert.AreEqual("sg-hue--hp", SphereGridPresenter.HueClass(mostlyHealth));
+            Assert.AreEqual("sg-hue--int", SphereGridPresenter.HueClass(intelligence));
+            Assert.AreEqual("sg-hue--stat", SphereGridPresenter.HueClass(new SphereGridNode { Key = "e" }));
+            Assert.AreEqual("sg-hue--ability", SphereGridPresenter.HueClass(new SphereGridNode { Key = "a", Kind = SphereNodeKind.MagicUpgrade }));
+            Assert.AreEqual("sg-hue--summon", SphereGridPresenter.HueClass(new SphereGridNode { Key = "s", Kind = SphereNodeKind.SummonSize }));
+            Assert.AreEqual("sg-hue--ultra", SphereGridPresenter.HueClass(new SphereGridNode { Key = "u", Kind = SphereNodeKind.Ultra }));
+        }
+
+        [Test]
         public void DescribePayload_StatNode_ListsNonZeroGains()
         {
             var node = new SphereGridNode

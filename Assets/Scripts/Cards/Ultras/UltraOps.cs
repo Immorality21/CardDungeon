@@ -361,7 +361,9 @@ namespace Assets.Scripts.Cards
                 castable.ProjectileArtAngle = ultra.HitArtAngle;
                 // A Ground Strike breaks the ground under its targets with the Ultra's own impact
                 // frames - the ones a leap-slam plays at the hero's feet (Earthsplitter).
-                castable.ImpactFrames = ultra.Delivery == MagicDelivery.Ground ? ultra.ImpactFrames : null;
+                // A Fall bursts them where each piece lands (Rain of Fire's fireballs).
+                castable.ImpactFrames = ultra.Delivery == MagicDelivery.Ground || ultra.Delivery == MagicDelivery.Fall
+                    ? ultra.ImpactFrames : null;
                 castable.Effects = new List<SpellEffect>(ultra.Effects ?? new List<SpellEffect>());
                 castable.Tags = new List<MagicTag>();
                 CastableCache[key] = castable;
@@ -417,6 +419,10 @@ namespace Assets.Scripts.Cards
             if (ultra.AttackDamageType != Combat.DamageType.Normal)
             {
                 parts.Add(Loc.Format("abilities.ultra.transform-attack", ("element", Combat.DamageTypeNames.Of(ultra.AttackDamageType))));
+            }
+            if (ultra.FormWaivesBloodPrices)
+            {
+                parts.Add(Loc.Get(ultra.FormOnlyBloodAbilities ? "abilities.ultra.transform-free-blood" : "abilities.ultra.transform-blood-free"));
             }
             if (ultra.Abilities != null)
             {

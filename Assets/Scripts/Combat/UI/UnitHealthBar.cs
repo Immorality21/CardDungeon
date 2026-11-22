@@ -46,6 +46,7 @@ namespace Assets.Scripts.Combat
         private static readonly Color ShadowViolet = new Color(0.6f, 0.5f, 0.85f);
         private static readonly Color DeathRed = new Color(0.85f, 0.15f, 0.2f);
         private static readonly Color HolyGold = new Color(1f, 0.78f, 0.3f);
+        private static readonly Color StunGold = new Color(0.9f, 0.85f, 0.45f);
 
         private static Sprite _centerSprite;
         private static Sprite _leftSprite;
@@ -365,6 +366,10 @@ namespace Assets.Scripts.Combat
                 {
                     case BuffType.Frozen:
                         list.Add(new IconDesc { Name = "snowflake", Tint = Cyan });
+                        break;
+                    // Stunned (the Ent's Root): the dizzy stars, in bark-and-leaf green-gold.
+                    case BuffType.Stunned:
+                        list.Add(new IconDesc { Name = "stun", Tint = StunGold });
                         break;
                     case BuffType.Haste:
                         list.Add(new IconDesc { Name = "chevrons", Tint = Yellow });

@@ -18,6 +18,34 @@ MonoBehaviour:
   Effects: []
   Hits: 1
   RandomTargets: 0
+  Delivery: 0
+  HitIcon: {fileID: 0}
+  HitArtAngle: 0
+  LeapSlamFrames: []
+  ImpactFrames: []
+  ImpactFps: 16
+  FlashColor: {r: 0.5, g: 0.05, b: 0.15, a: 1}
+  TargetFrames: []
+  TargetFps: 12
+  TargetFramesCentred: 0
+  TargetFramesBehind: 0
+  TargetFramesLead: 0.4
+  WindUpFrames: []
+  WindUpEffectFrames:
+  - {fileID: -7204154852145561528, guid: 7d7631fd8c254a6a8ace2fedf341b472, type: 3}
+  - {fileID: 2855590800881548751, guid: 7d7631fd8c254a6a8ace2fedf341b472, type: 3}
+  - {fileID: 6170307362662012591, guid: 7d7631fd8c254a6a8ace2fedf341b472, type: 3}
+  - {fileID: 6376547862171567808, guid: 7d7631fd8c254a6a8ace2fedf341b472, type: 3}
+  - {fileID: -5576051742472162485, guid: 7d7631fd8c254a6a8ace2fedf341b472, type: 3}
+  - {fileID: 1818550115502290098, guid: 7d7631fd8c254a6a8ace2fedf341b472, type: 3}
+  - {fileID: 5416504390621246461, guid: 7d7631fd8c254a6a8ace2fedf341b472, type: 3}
+  - {fileID: 8126582103779366715, guid: 7d7631fd8c254a6a8ace2fedf341b472, type: 3}
+  - {fileID: 4886858453333777555, guid: 7d7631fd8c254a6a8ace2fedf341b472, type: 3}
+  - {fileID: -3636560429205519402, guid: 7d7631fd8c254a6a8ace2fedf341b472, type: 3}
+  - {fileID: -1227060537850555760, guid: 7d7631fd8c254a6a8ace2fedf341b472, type: 3}
+  - {fileID: 6657035091575811374, guid: 7d7631fd8c254a6a8ace2fedf341b472, type: 3}
+  WindUpEffectFps: 12
+  WindUpSeconds: 1
   Creature: {fileID: 0}
   StatAbilities: []
   Mech: {fileID: 0}
@@ -26,8 +54,13 @@ MonoBehaviour:
   AttackDamageType: 5
   Abilities:
   - {fileID: 11400000, guid: 759a19c7a6399504786bd4cc2f0e896f, type: 2}
+  - {fileID: 11400000, guid: 52d5819643aa402bbb377ee20c68f210, type: 2}
+  FormWaivesBloodPrices: 1
+  FormOnlyBloodAbilities: 1
+  FormBlocksSummons: 1
   FormFrames:
   - {fileID: -4785867657745390160, guid: 2c5c46429c8843ab8915f23dc1e4d909, type: 3}
   - {fileID: -3700617790322742156, guid: 2c5c46429c8843ab8915f23dc1e4d909, type: 3}
   - {fileID: -6896297086587062026, guid: 2c5c46429c8843ab8915f23dc1e4d909, type: 3}
+  Icon: {fileID: 0}
   FormFps: 4

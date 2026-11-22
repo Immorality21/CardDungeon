@@ -1,0 +1,429 @@
+fileFormatVersion: 2
+guid: b22f7c9ff2b84618afb2b1622d535d95
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -8794654556897598356
+    second: ultra-miracle-light_0
+  - first:
+      213: 6591138186941578119
+    second: ultra-miracle-light_1
+  - first:
+      213: -4119996945346282240
+    second: ultra-miracle-light_2
+  - first:
+      213: 5936408669037344675
+    second: ultra-miracle-light_3
+  - first:
+      213: -6524128091762918520
+    second: ultra-miracle-light_4
+  - first:
+      213: -4781867652585584304
+    second: ultra-miracle-light_5
+  - first:
+      213: -5877558327639226423
+    second: ultra-miracle-light_6
+  - first:
+      213: 3582984397699576389
+    second: ultra-miracle-light_7
+  - first:
+      213: 1665543164942031538
+    second: ultra-miracle-light_8
+  - first:
+      213: -5714500297361566165
+    second: ultra-miracle-light_9
+  - first:
+      213: 3201009205699566621
+    second: ultra-miracle-light_10
+  - first:
+      213: -5049031555084106340
+    second: ultra-miracle-light_11
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 4096
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 32
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: ultra-miracle-light_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 80
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1786}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 874a1a406ae541b0a34404bdee3a33ae
+      internalID: -8794654556897598356
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-miracle-light_1
+      rect:
+        serializedVersion: 2
+        x: 80
+        y: 0
+        width: 80
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1786}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9702370e82b54bfb877cff662bf8ddb4
+      internalID: 6591138186941578119
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-miracle-light_2
+      rect:
+        serializedVersion: 2
+        x: 160
+        y: 0
+        width: 80
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1786}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 64e1df51a6664f4f88f54068c6c46ecf
+      internalID: -4119996945346282240
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-miracle-light_3
+      rect:
+        serializedVersion: 2
+        x: 240
+        y: 0
+        width: 80
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1786}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4efc18e45d5f4d9cb3812a4d6249c118
+      internalID: 5936408669037344675
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-miracle-light_4
+      rect:
+        serializedVersion: 2
+        x: 320
+        y: 0
+        width: 80
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1786}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d151ca06bc77472b954dbeaeee65ddf9
+      internalID: -6524128091762918520
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-miracle-light_5
+      rect:
+        serializedVersion: 2
+        x: 400
+        y: 0
+        width: 80
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1786}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 220d379b358d45d8a6ed790859404e23
+      internalID: -4781867652585584304
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-miracle-light_6
+      rect:
+        serializedVersion: 2
+        x: 480
+        y: 0
+        width: 80
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1786}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b5f7786492d24d87b9e72e1c84516f84
+      internalID: -5877558327639226423
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-miracle-light_7
+      rect:
+        serializedVersion: 2
+        x: 560
+        y: 0
+        width: 80
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1786}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4cbbab02eadd4be79e8cc0b9d03a3eb9
+      internalID: 3582984397699576389
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-miracle-light_8
+      rect:
+        serializedVersion: 2
+        x: 640
+        y: 0
+        width: 80
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1786}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 501930c6b27b4b87a5c363441f73e846
+      internalID: 1665543164942031538
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-miracle-light_9
+      rect:
+        serializedVersion: 2
+        x: 720
+        y: 0
+        width: 80
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1786}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f891938922c64d268e31bfe8a8df958a
+      internalID: -5714500297361566165
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-miracle-light_10
+      rect:
+        serializedVersion: 2
+        x: 800
+        y: 0
+        width: 80
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1786}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a26ac88ef306409b82fda4cf810b46a2
+      internalID: 3201009205699566621
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-miracle-light_11
+      rect:
+        serializedVersion: 2
+        x: 880
+        y: 0
+        width: 80
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1786}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d11500dc6c1042c6acf69bcb79a08e76
+      internalID: -5049031555084106340
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      ultra-miracle-light_0: -8794654556897598356
+      ultra-miracle-light_1: 6591138186941578119
+      ultra-miracle-light_2: -4119996945346282240
+      ultra-miracle-light_3: 5936408669037344675
+      ultra-miracle-light_4: -6524128091762918520
+      ultra-miracle-light_5: -4781867652585584304
+      ultra-miracle-light_6: -5877558327639226423
+      ultra-miracle-light_7: 3582984397699576389
+      ultra-miracle-light_8: 1665543164942031538
+      ultra-miracle-light_9: -5714500297361566165
+      ultra-miracle-light_10: 3201009205699566621
+      ultra-miracle-light_11: -5049031555084106340
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

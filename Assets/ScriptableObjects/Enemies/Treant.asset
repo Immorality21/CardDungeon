@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56867968c6cadda4fa0871e6572f8249, type: 3}
+  m_Name: Treant
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Enemies.EnemySO
+  Key: Treant
+  Sprite: {fileID: 21300000, guid: d99c662bf63143a993aefab9387f120d, type: 3}
+  AnimationFrames:
+  - {fileID: -6407663774676040188, guid: 6a3c497ae32a493d8bada9e676b5df90, type: 3}
+  - {fileID: -4700397836177445145, guid: 6a3c497ae32a493d8bada9e676b5df90, type: 3}
+  - {fileID: -1728500070783188492, guid: 6a3c497ae32a493d8bada9e676b5df90, type: 3}
+  AnimationFps: 4
+  HitFrames:
+  - {fileID: 1314278975490395473, guid: fd5b5849a07c462fa11729c3bb806819, type: 3}
+  - {fileID: 7773475128078669301, guid: fd5b5849a07c462fa11729c3bb806819, type: 3}
+  IsBoss: 0
+  CombatScale: 1
+  Traits: 128
+  BaseStats:
+    Values:
+    - Type: 1
+      Amount: 5
+    - Type: 2
+      Amount: 2
+    - Type: 3
+      Amount: 4
+    - Type: 4
+      Amount: 1
+    - Type: 7
+      Amount: 20
+  XpReward: 10
+  GoldReward: 5
+  AttackDamageType: 0
+  Archetype: 0
+  Behavior: {fileID: 11400000, guid: 20ebe1adb82946549180659aa21b89c1, type: 2}
+  Spells: []
+  Resistances:
+  - DamageType: 1
+    Percent: -50
+  - DamageType: 2
+    Percent: 25
+  StatusImmunities: 
+  LootTable:
+  - Item: {fileID: 11400000, guid: c0de5211aa030000000000000000ab03, type: 2}
+    Chance: 0.4
+    MinQuantity: 1
+    MaxQuantity: 2
+  SalvageTable: []
+  Triggers: []
+  Flinches: 1

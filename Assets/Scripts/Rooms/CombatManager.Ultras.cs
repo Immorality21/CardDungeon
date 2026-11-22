@@ -135,10 +135,16 @@ namespace Assets.Scripts.Rooms
         /// share filled, the form's attack element and art, its abilities on the Ability list.</summary>
         private IEnumerator ExecuteTransform(Hero hero, UltraSO ultra)
         {
+            // The circle opens under the hero before the change takes them (Demon Form's sigil).
+            if (ultra.WindsUp)
+            {
+                yield return PlayWindUp(hero, ultra);
+            }
             int oldMax = hero.GetEffectiveMaxHealth();
             hero.FormMaxHealthPercent = ultra.MaxHealthPercent;
             hero.FormAttackDamageType = ultra.AttackDamageType;
             hero.InForm = true;
+            hero.BloodPricesWaived = ultra.FormWaivesBloodPrices;
             HealthOps.Set(hero, UltraOps.KeepShare(hero.Stats.Health, oldMax, hero.GetEffectiveMaxHealth()),
                 new HealthSource(hero, HealthCause.Form), Events);
             SetHeroFrames(hero, ultra.FormFrames, ultra.FormFps);
@@ -150,8 +156,11 @@ namespace Assets.Scripts.Rooms
             {
                 MainCamera.Instance.ZoomPunch(0.35f, 0.35f);
             }
-            ScreenFade.Instance.Flash(new Color(0.55f, 0.1f, 0.25f), 0.45f, 0.05f, 0.35f);
+            ScreenFade.Instance.Flash(ultra.Flash, 0.45f, 0.05f, 0.35f);
             ShowFloatingLabel(hero.Transform.position + new Vector3(0f, 0.5f, 0f), Loc.Format("combat.float.ultra", ("ultra", ultra.Label)), new Color(1f, 0.35f, 0.45f), 0.2f);
+            // Taking the form is not the turn (owner, playtest 2026-11-22): the hero acts again at
+            // once, in the form, and that turn is the form's first.
+            _turnManager.ActsNext(hero);
             yield return new WaitForSeconds(_turnDelay);
         }
 
@@ -163,9 +172,15 @@ namespace Assets.Scripts.Rooms
         {
             var castable = UltraOps.CastableFor(ultra);
 
+            // A spell gathers itself first: the circle at the hero's feet (UltraSO.WindsUp).
+            if (ultra.WindsUp)
+            {
+                yield return PlayWindUp(hero, ultra);
+            }
+
             CombatAudio.Play(CombatSound.BossSignature);
             CombatFeedback.Instance.Shake(0.25f, 0.4f);
-            ScreenFade.Instance.Flash(new Color(0.55f, 0.1f, 0.25f), 0.45f, 0.05f, 0.35f);
+            ScreenFade.Instance.Flash(ultra.Flash, 0.45f, 0.05f, 0.35f);
             ShowFloatingLabel(hero.Transform.position + new Vector3(0f, 0.5f, 0f), Loc.Format("combat.float.ultra", ("ultra", ultra.Label)), new Color(1f, 0.35f, 0.45f), 0.2f);
 
             // Earthsplitter: up, across to the middle of the arena, and down on the ground before the
@@ -185,6 +200,16 @@ namespace Assets.Scripts.Rooms
                 if (targets.Count == 0)
                 {
                     break;
+                }
+                // Its own effect on everyone it reaches, as the first hit is about to land (a pillar of
+                // light on each enemy, a dome over each ally).
+                if (hit == 0 && ultra.TargetFrames != null && ultra.TargetFrames.Length > 0)
+                {
+                    foreach (var target in targets)
+                    {
+                        SpellVfx.Overlay(target, ultra.TargetFrames, ultra.TargetFps, ultra.TargetFramesCentred, ultra.TargetFramesBehind);
+                    }
+                    yield return new WaitForSeconds(ultra.TargetFramesLead);
                 }
                 var action = new SpellcastAction { Magic = castable, Caster = hero, Targets = targets, CastSlot = -1 };
                 HoldHealthDisplay();
@@ -526,6 +551,7 @@ namespace Assets.Scripts.Rooms
             hero.FormMaxHealthPercent = 0;
             hero.FormAttackDamageType = DamageType.Normal;
             hero.InForm = false;
+            hero.BloodPricesWaived = false;
             if (hero.IsAlive)
             {
                 HealthOps.Set(hero, UltraOps.KeepShare(hero.Stats.Health, oldMax, hero.GetEffectiveMaxHealth()),

@@ -15,7 +15,7 @@ MonoBehaviour:
   Key: FloodedNave
   RoomPool:
   - {fileID: 11400000, guid: 2746458f24f978b4eb0fa89fa0f4a04f, type: 2}
-  - {fileID: 11400000, guid: b2d5f8c31a6e5d0f9b4c7e2a3f8d5b01, type: 2}
+  - {fileID: 11400000, guid: 65d45c6b4d664067bb874013d2fafd4a, type: 2}
   - {fileID: 11400000, guid: ebf10468db648a74a893b73cc66afa89, type: 2}
   - {fileID: 11400000, guid: ebf10468db648a74a893b73cc66afa89, type: 2}
   RoomsToGenerate: 6

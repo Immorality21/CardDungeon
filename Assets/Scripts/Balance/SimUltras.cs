@@ -280,6 +280,8 @@ namespace Assets.Scripts.Balance
             SetMaxHealth(hero, Mathf.RoundToInt(form.BaseMaxHealth * (1f + ultra.MaxHealthPercent / 100f)));
             hero.AttackDamageType = ultra.AttackDamageType;
             _forms[hero] = form;
+            // As in the live fight: taking the form is not the turn, the hero acts again at once.
+            clock?.ActsNext(hero);
         }
 
         /// <summary>Whom the policy aims a one-ally Strike at: the first of the fallen for a revive, the

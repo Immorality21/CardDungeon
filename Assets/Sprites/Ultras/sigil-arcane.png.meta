@@ -1,0 +1,429 @@
+fileFormatVersion: 2
+guid: 180ef9c8058e4339a98e7d4e688fe1ff
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -7658583988471387552
+    second: sigil-arcane_0
+  - first:
+      213: 5473715307620245496
+    second: sigil-arcane_1
+  - first:
+      213: -3779183120569745379
+    second: sigil-arcane_2
+  - first:
+      213: 7251733009177326045
+    second: sigil-arcane_3
+  - first:
+      213: -7979096965947993781
+    second: sigil-arcane_4
+  - first:
+      213: -4883845957529872734
+    second: sigil-arcane_5
+  - first:
+      213: -2737942960487807769
+    second: sigil-arcane_6
+  - first:
+      213: -3390708223013498799
+    second: sigil-arcane_7
+  - first:
+      213: 7243205876860718275
+    second: sigil-arcane_8
+  - first:
+      213: -7740832082109504168
+    second: sigil-arcane_9
+  - first:
+      213: 7242309725311564575
+    second: sigil-arcane_10
+  - first:
+      213: -8437622264518017622
+    second: sigil-arcane_11
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 4096
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 64
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: sigil-arcane_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 128
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.2857}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f49cce3e07514f2697e0cb7801beb0f3
+      internalID: -7658583988471387552
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sigil-arcane_1
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 0
+        width: 128
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.2857}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: de2f90e493d644f081a92d0e6788f40f
+      internalID: 5473715307620245496
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sigil-arcane_2
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 0
+        width: 128
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.2857}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 689b8aa4a826423292a44a227ecca118
+      internalID: -3779183120569745379
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sigil-arcane_3
+      rect:
+        serializedVersion: 2
+        x: 384
+        y: 0
+        width: 128
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.2857}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 39aa23d39dc347e5a4f8aa4a2b90b97e
+      internalID: 7251733009177326045
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sigil-arcane_4
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 0
+        width: 128
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.2857}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1cb1d31f982641228baace054672f056
+      internalID: -7979096965947993781
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sigil-arcane_5
+      rect:
+        serializedVersion: 2
+        x: 640
+        y: 0
+        width: 128
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.2857}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 76be2b1d3014411a969b3beab2fac003
+      internalID: -4883845957529872734
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sigil-arcane_6
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 0
+        width: 128
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.2857}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 511ad782d6e94bad9f68c72bdd2249cf
+      internalID: -2737942960487807769
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sigil-arcane_7
+      rect:
+        serializedVersion: 2
+        x: 896
+        y: 0
+        width: 128
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.2857}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aba7af9d50d7470f93fd24478b3f33b6
+      internalID: -3390708223013498799
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sigil-arcane_8
+      rect:
+        serializedVersion: 2
+        x: 1024
+        y: 0
+        width: 128
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.2857}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 579b84f639994573ba98d0a622ca42ab
+      internalID: 7243205876860718275
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sigil-arcane_9
+      rect:
+        serializedVersion: 2
+        x: 1152
+        y: 0
+        width: 128
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.2857}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 740c747c39f94ebd895d0ad76e79bea3
+      internalID: -7740832082109504168
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sigil-arcane_10
+      rect:
+        serializedVersion: 2
+        x: 1280
+        y: 0
+        width: 128
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.2857}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 82e1b60fe6d94491bfb0b1b58caf117e
+      internalID: 7242309725311564575
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sigil-arcane_11
+      rect:
+        serializedVersion: 2
+        x: 1408
+        y: 0
+        width: 128
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.2857}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6f5aa47a31874a2d9cefce67d873e28c
+      internalID: -8437622264518017622
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      sigil-arcane_0: -7658583988471387552
+      sigil-arcane_1: 5473715307620245496
+      sigil-arcane_2: -3779183120569745379
+      sigil-arcane_3: 7251733009177326045
+      sigil-arcane_4: -7979096965947993781
+      sigil-arcane_5: -4883845957529872734
+      sigil-arcane_6: -2737942960487807769
+      sigil-arcane_7: -3390708223013498799
+      sigil-arcane_8: 7243205876860718275
+      sigil-arcane_9: -7740832082109504168
+      sigil-arcane_10: 7242309725311564575
+      sigil-arcane_11: -8437622264518017622
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

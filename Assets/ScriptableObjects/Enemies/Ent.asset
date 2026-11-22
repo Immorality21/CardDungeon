@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56867968c6cadda4fa0871e6572f8249, type: 3}
+  m_Name: Ent
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Enemies.EnemySO
+  Key: Ent
+  Sprite: {fileID: 21300000, guid: 76112a3f9032409989da482a73f856f4, type: 3}
+  AnimationFrames:
+  - {fileID: 4494176613569051870, guid: 2e539e16d772495eb3b19afcf445692a, type: 3}
+  - {fileID: -3565001537178541008, guid: 2e539e16d772495eb3b19afcf445692a, type: 3}
+  - {fileID: -8585669623779448987, guid: 2e539e16d772495eb3b19afcf445692a, type: 3}
+  AnimationFps: 4
+  HitFrames: []
+  IsBoss: 0
+  CombatScale: 1
+  Traits: 128
+  BaseStats:
+    Values:
+    - Type: 1
+      Amount: 6
+    - Type: 2
+      Amount: 7
+    - Type: 3
+      Amount: 2
+    - Type: 5
+      Amount: 2
+    - Type: 7
+      Amount: 34
+  XpReward: 28
+  GoldReward: 14
+  AttackDamageType: 0
+  Archetype: 1
+  Behavior: {fileID: 11400000, guid: 00ffe6021fdb42e5a17d76646c0a7613, type: 2}
+  Spells: []
+  Resistances:
+  - DamageType: 1
+    Percent: -50
+  - DamageType: 0
+    Percent: 20
+  - DamageType: 2
+    Percent: 25
+  StatusImmunities: 
+  LootTable:
+  - Item: {fileID: 11400000, guid: c0de5211aa030000000000000000ab03, type: 2}
+    Chance: 1
+    MinQuantity: 1
+    MaxQuantity: 2
+  - Item: {fileID: 11400000, guid: c0de5211aa080000000000000000ab08, type: 2}
+    Chance: 0.25
+    MinQuantity: 1
+    MaxQuantity: 1
+  SalvageTable: []
+  Triggers: []
+  Flinches: 0

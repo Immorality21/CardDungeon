@@ -46,6 +46,44 @@ MonoBehaviour:
     DrainToParty: 0
   Hits: 1
   RandomTargets: 0
+  Delivery: 4
+  HitIcon: {fileID: 0}
+  HitArtAngle: 0
+  LeapSlamFrames: []
+  ImpactFrames: []
+  ImpactFps: 16
+  FlashColor: {r: 1, g: 0.97, b: 0.85, a: 1}
+  TargetFrames:
+  - {fileID: -7421819461098637652, guid: 088092ca981044e1b455e708bd333a17, type: 3}
+  - {fileID: 3222040868980776860, guid: 088092ca981044e1b455e708bd333a17, type: 3}
+  - {fileID: 5731102160307735153, guid: 088092ca981044e1b455e708bd333a17, type: 3}
+  - {fileID: 1707846406530939326, guid: 088092ca981044e1b455e708bd333a17, type: 3}
+  - {fileID: 5435374379990726665, guid: 088092ca981044e1b455e708bd333a17, type: 3}
+  - {fileID: 5637312248093330091, guid: 088092ca981044e1b455e708bd333a17, type: 3}
+  - {fileID: 4237334102245037111, guid: 088092ca981044e1b455e708bd333a17, type: 3}
+  - {fileID: 3977969265862426228, guid: 088092ca981044e1b455e708bd333a17, type: 3}
+  - {fileID: 4079625915788806864, guid: 088092ca981044e1b455e708bd333a17, type: 3}
+  - {fileID: -3131753835797996079, guid: 088092ca981044e1b455e708bd333a17, type: 3}
+  TargetFps: 14
+  TargetFramesCentred: 0
+  TargetFramesBehind: 0
+  TargetFramesLead: 0.3
+  WindUpFrames: []
+  WindUpEffectFrames:
+  - {fileID: 1376382745486934534, guid: 191af7de52f84210bd5922d23db34a4e, type: 3}
+  - {fileID: -7036230174967179792, guid: 191af7de52f84210bd5922d23db34a4e, type: 3}
+  - {fileID: 8765611290854650384, guid: 191af7de52f84210bd5922d23db34a4e, type: 3}
+  - {fileID: -5281026650881292588, guid: 191af7de52f84210bd5922d23db34a4e, type: 3}
+  - {fileID: 1261401884737829163, guid: 191af7de52f84210bd5922d23db34a4e, type: 3}
+  - {fileID: -8471171912883001428, guid: 191af7de52f84210bd5922d23db34a4e, type: 3}
+  - {fileID: 7319813881051611417, guid: 191af7de52f84210bd5922d23db34a4e, type: 3}
+  - {fileID: -6525837248696525102, guid: 191af7de52f84210bd5922d23db34a4e, type: 3}
+  - {fileID: -1638788000662625565, guid: 191af7de52f84210bd5922d23db34a4e, type: 3}
+  - {fileID: -3720596873569266623, guid: 191af7de52f84210bd5922d23db34a4e, type: 3}
+  - {fileID: 2211318061048503001, guid: 191af7de52f84210bd5922d23db34a4e, type: 3}
+  - {fileID: -1416034079535228033, guid: 191af7de52f84210bd5922d23db34a4e, type: 3}
+  WindUpEffectFps: 12
+  WindUpSeconds: 1
   Creature: {fileID: 0}
   StatAbilities: []
   Mech: {fileID: 0}
@@ -53,6 +91,8 @@ MonoBehaviour:
   MaxHealthPercent: 50
   AttackDamageType: 0
   Abilities: []
+  FormWaivesBloodPrices: 0
+  FormOnlyBloodAbilities: 0
   FormFrames: []
   Icon: {fileID: 21300000, guid: f668994c8e4d4297a737fa107ade6b15, type: 3}
   FormFps: 4

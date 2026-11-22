@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d03ef8fb4f65d04aacc66749b7be8c3, type: 3}
+  m_Name: MireTreants
+  m_EditorClassIdentifier: CardDungeon::Assets.Scripts.Sandbox.SandboxConfigSO
+  Heroes:
+  - Hero: {fileID: 11400000, guid: 77ae12aafb9d437f8cc8149bd1cccb2b, type: 2}
+    BankedXp: 0
+    SpendXpOnGrid: 0
+    UnlockPathTo: []
+    UnlockEntireGrid: 1
+    Abilities:
+    - {fileID: 11400000, guid: d1909c00ad664e548bba403ccfc72192, type: 2}
+    - {fileID: 11400000, guid: 5cac7c6eade7bb8449af099a1e055faa, type: 2}
+    - {fileID: 11400000, guid: 791d04801c202a243abfa1fb37458db7, type: 2}
+  Level: {fileID: 11400000, guid: 6e31f43ba8574e244840406384d1b907, type: 2}
+  Seed: 12
+  Enemies:
+  - {fileID: 11400000, guid: 1267f31a7075441ebd1cb7bc578e30d9, type: 2}
+  - {fileID: 11400000, guid: 20b16d98e5064c7ba480700b9f10bc35, type: 2}
+  - {fileID: 11400000, guid: 1267f31a7075441ebd1cb7bc578e30d9, type: 2}
+  EnemyDifficulty: 2
+  ClearOtherRooms: 1
+  WalkIntoEncounter: 1
+  CopyInventory: 0
+  CopyMetaProgress: 0
+  Items: []

@@ -27,6 +27,6 @@ MonoBehaviour:
   - Enemy: {fileID: 11400000, guid: ce571ba2b36e6c14bb37279e004b146c, type: 2}
     SpawnChance: 0.9
     EvaluationCount: 1
-  - Enemy: {fileID: 11400000, guid: bf6697af4924975448304c7112cc67ec, type: 2}
+  - Enemy: {fileID: 11400000, guid: 1267f31a7075441ebd1cb7bc578e30d9, type: 2}
     SpawnChance: 0.6
     EvaluationCount: 1

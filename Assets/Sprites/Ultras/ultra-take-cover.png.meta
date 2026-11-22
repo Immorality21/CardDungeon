@@ -1,0 +1,533 @@
+fileFormatVersion: 2
+guid: a6384aca6189436b938063d26794044d
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -5148715216381737390
+    second: ultra-take-cover_0
+  - first:
+      213: -3088935196111230599
+    second: ultra-take-cover_1
+  - first:
+      213: -1354631346338002953
+    second: ultra-take-cover_2
+  - first:
+      213: -4973288217584292687
+    second: ultra-take-cover_3
+  - first:
+      213: -2865888062087510605
+    second: ultra-take-cover_4
+  - first:
+      213: -2630962216386021174
+    second: ultra-take-cover_5
+  - first:
+      213: -6167149868704912295
+    second: ultra-take-cover_6
+  - first:
+      213: -2499544646930024252
+    second: ultra-take-cover_7
+  - first:
+      213: -3213328429819538285
+    second: ultra-take-cover_8
+  - first:
+      213: 4476185646776244912
+    second: ultra-take-cover_9
+  - first:
+      213: 7184525662399006906
+    second: ultra-take-cover_10
+  - first:
+      213: -9164060512653140284
+    second: ultra-take-cover_11
+  - first:
+      213: 3986455687892708746
+    second: ultra-take-cover_12
+  - first:
+      213: 3447232330200350715
+    second: ultra-take-cover_13
+  - first:
+      213: 6890759570042611261
+    second: ultra-take-cover_14
+  - first:
+      213: -9110896838531245263
+    second: ultra-take-cover_15
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 4096
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 40
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: ultra-take-cover_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 136
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1429}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 706e1971f77841dab45209276fa565c8
+      internalID: -5148715216381737390
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-take-cover_1
+      rect:
+        serializedVersion: 2
+        x: 136
+        y: 0
+        width: 136
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1429}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0c363886963b45dcbf426185e5d6f6b9
+      internalID: -3088935196111230599
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-take-cover_2
+      rect:
+        serializedVersion: 2
+        x: 272
+        y: 0
+        width: 136
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1429}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 871422686e9343c5bd0812190902bd34
+      internalID: -1354631346338002953
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-take-cover_3
+      rect:
+        serializedVersion: 2
+        x: 408
+        y: 0
+        width: 136
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1429}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9dffad18e95843b38c5a542fbc9af09e
+      internalID: -4973288217584292687
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-take-cover_4
+      rect:
+        serializedVersion: 2
+        x: 544
+        y: 0
+        width: 136
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1429}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7793745aff5748359e6b248b7c9aa600
+      internalID: -2865888062087510605
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-take-cover_5
+      rect:
+        serializedVersion: 2
+        x: 680
+        y: 0
+        width: 136
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1429}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c6bfa7376a3742eb922413a38142f20b
+      internalID: -2630962216386021174
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-take-cover_6
+      rect:
+        serializedVersion: 2
+        x: 816
+        y: 0
+        width: 136
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1429}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cc5baeacb13b4fde9de3207d342f49c1
+      internalID: -6167149868704912295
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-take-cover_7
+      rect:
+        serializedVersion: 2
+        x: 952
+        y: 0
+        width: 136
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1429}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 950ab3d02bc24e6cb079a7a5caea090b
+      internalID: -2499544646930024252
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-take-cover_8
+      rect:
+        serializedVersion: 2
+        x: 1088
+        y: 0
+        width: 136
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1429}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a34020041e364edcbca234fca3281512
+      internalID: -3213328429819538285
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-take-cover_9
+      rect:
+        serializedVersion: 2
+        x: 1224
+        y: 0
+        width: 136
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1429}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f5beddb7ae8843d4835418847b07083b
+      internalID: 4476185646776244912
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-take-cover_10
+      rect:
+        serializedVersion: 2
+        x: 1360
+        y: 0
+        width: 136
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1429}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f7873634b2bf458597184d4b82ef1787
+      internalID: 7184525662399006906
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-take-cover_11
+      rect:
+        serializedVersion: 2
+        x: 1496
+        y: 0
+        width: 136
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1429}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c35d27dbefa047dda117d4bb3179a68b
+      internalID: -9164060512653140284
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-take-cover_12
+      rect:
+        serializedVersion: 2
+        x: 1632
+        y: 0
+        width: 136
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1429}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cb1b693e7cb64ded87d9c8735d64d349
+      internalID: 3986455687892708746
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-take-cover_13
+      rect:
+        serializedVersion: 2
+        x: 1768
+        y: 0
+        width: 136
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1429}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 28f9a81ef7934bf89b8bb37810574837
+      internalID: 3447232330200350715
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-take-cover_14
+      rect:
+        serializedVersion: 2
+        x: 1904
+        y: 0
+        width: 136
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1429}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0b3c06ccfa8c48189f6117a528eb69ef
+      internalID: 6890759570042611261
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-take-cover_15
+      rect:
+        serializedVersion: 2
+        x: 2040
+        y: 0
+        width: 136
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.1429}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 100161c0e8af48cdb1b52d57cd2ee2ae
+      internalID: -9110896838531245263
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      ultra-take-cover_0: -5148715216381737390
+      ultra-take-cover_1: -3088935196111230599
+      ultra-take-cover_2: -1354631346338002953
+      ultra-take-cover_3: -4973288217584292687
+      ultra-take-cover_4: -2865888062087510605
+      ultra-take-cover_5: -2630962216386021174
+      ultra-take-cover_6: -6167149868704912295
+      ultra-take-cover_7: -2499544646930024252
+      ultra-take-cover_8: -3213328429819538285
+      ultra-take-cover_9: 4476185646776244912
+      ultra-take-cover_10: 7184525662399006906
+      ultra-take-cover_11: -9164060512653140284
+      ultra-take-cover_12: 3986455687892708746
+      ultra-take-cover_13: 3447232330200350715
+      ultra-take-cover_14: 6890759570042611261
+      ultra-take-cover_15: -9110896838531245263
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

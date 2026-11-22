@@ -26,5 +26,16 @@ namespace Assets.Scripts.Cards
         /// flat at their feet rather than rising as a column, and the hits land together. Nothing
         /// crosses the stage (owner, playtest 2026-11-21: Earthsplitter and the Iron Charger).</summary>
         Ground = 4,
+
+        /// <summary>The hit lands on the target where it stands, then something is pulled out of it
+        /// and travels back into the caster - <see cref="MagicSO.TravelArt"/>, a soul wisp - before
+        /// any healing the cast gives is shown (owner, playtest 2026-11-22: Soul Feast threw its icon
+        /// at the enemies). For the drains: Soul Feast, Siphon Soul, Drain Life, Soul Harvest.</summary>
+        Drain = 5,
+
+        /// <summary>The art drops on each target from above, turned the way it falls, instead of
+        /// crossing the stage from the caster - Rain of Fire, Rain of Arrows, Pin Down. With
+        /// <c>ImpactFrames</c> they burst where each one lands.</summary>
+        Fall = 6,
     }
 }

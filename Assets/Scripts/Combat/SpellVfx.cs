@@ -274,6 +274,57 @@ namespace Assets.Scripts.Combat
             }
         }
 
+        /// <summary>A unit's height the overlay frames are drawn for: a hero (32 px at 1.5x) is the
+        /// reference, so an effect pixel is about a hero pixel on a hero.</summary>
+        private const float OverlayReferenceHeight = 1.5f;
+
+        /// <summary>
+        /// Drawn frames played once on <paramref name="target"/> (an Ultra's <c>TargetFrames</c>, a
+        /// falling hit's landing): the frames' own pivot - the effect's ground point - stands on the
+        /// unit's feet, or on its middle with <paramref name="centred"/>, sized to the unit (a big boss
+        /// gets a bigger pillar), in front of it or <paramref name="behind"/> it. Not blocking: every
+        /// target's effect can play at once.
+        /// </summary>
+        public static void Overlay(ICombatUnit target, Sprite[] frames, float fps, bool centred = false, bool behind = false)
+        {
+            if (target == null || target.Transform == null || frames == null || frames.Length == 0)
+            {
+                return;
+            }
+            CoroutineHandler.Handle(OverlayRoutine(target, frames, Mathf.Max(1f, fps), centred, behind));
+        }
+
+        private static IEnumerator OverlayRoutine(ICombatUnit target, Sprite[] frames, float fps, bool centred, bool behind)
+        {
+            Bounds body = BodyOf(target);
+            var unitRenderer = target.Transform.GetComponent<SpriteRenderer>();
+            var sr = new GameObject("OverlayVfx").AddComponent<SpriteRenderer>();
+            sr.sortingOrder = behind
+                ? (unitRenderer != null ? unitRenderer.sortingOrder - 1 : BehindUnitOrder)
+                : OverUnitOrder;
+            float scale = Mathf.Clamp(body.size.y / OverlayReferenceHeight, 0.75f, 2.2f);
+            sr.transform.localScale = new Vector3(scale, scale, 1f);
+            sr.transform.position = centred
+                ? new Vector3(body.center.x, body.center.y, 0f)
+                : new Vector3(body.center.x, body.min.y, 0f);
+
+            var step = new WaitForSeconds(1f / fps);
+            foreach (var frame in frames)
+            {
+                if (sr == null)
+                {
+                    yield break;
+                }
+                sr.sprite = frame;
+                yield return step;
+            }
+
+            if (sr != null)
+            {
+                Object.Destroy(sr.gameObject);
+            }
+        }
+
         // A beam: how long it takes to open, how long it stays at full width, and how long it fades.
         private const float BeamOpen = 0.06f;
         private const float BeamHold = 0.16f;

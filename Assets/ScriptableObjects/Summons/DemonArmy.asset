@@ -54,3 +54,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 4c54c4fc7749c764f96d41d343bef178, type: 2}
   SquadSize: 3
   MaxSquadSize: 4
+  PortalFrames:
+  - {fileID: 3761427886652196396, guid: ccfdb8de86d049a89cbb5b942434b4bd, type: 3}
+  - {fileID: -8130796989100348682, guid: ccfdb8de86d049a89cbb5b942434b4bd, type: 3}
+  - {fileID: -6731998334803264845, guid: ccfdb8de86d049a89cbb5b942434b4bd, type: 3}
+  - {fileID: 6672842384725440098, guid: ccfdb8de86d049a89cbb5b942434b4bd, type: 3}
+  - {fileID: 6266829510649225600, guid: ccfdb8de86d049a89cbb5b942434b4bd, type: 3}
+  PortalFps: 8

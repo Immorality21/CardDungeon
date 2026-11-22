@@ -175,18 +175,15 @@ namespace Assets.Scripts.Rooms
             CombatStage.Instance.HideUnits(standing.Cast<Component>());
             if (summon.IsSquad)
             {
+                // They come through a gate one after another (SummonSO.PortalFrames).
                 CombatStage.Instance.PlaceSquad(units);
-                // They pour out together; only the first roars.
-                for (int i = 1; i < units.Count; i++)
-                {
-                    StartCoroutine(SummonPresenter.Arrive(units[i], quiet: true));
-                }
+                yield return SummonPresenter.ArriveSquad(units, summon);
             }
             else
             {
                 CombatStage.Instance.PlaceSummon(units[0]);
+                yield return SummonPresenter.Arrive(units[0]);
             }
-            yield return SummonPresenter.Arrive(units[0]);
             OnSummonEnded?.Invoke();
 
             // The whole hero side swaps in one step, so nothing can ever see both or neither.

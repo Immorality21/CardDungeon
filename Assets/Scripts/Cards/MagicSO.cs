@@ -47,6 +47,13 @@ namespace Assets.Scripts.Cards
                  "hits land together while the frames play. Presentation only.")]
         public Sprite[] ImpactFrames;
 
+        [Tooltip("Optional: what a Drain or Fall delivery moves, when it is not the Icon - the soul wisp " +
+                 "a drain pulls back into its caster, while the Icon stays the menu art. Presentation only.")]
+        public Sprite TravelArt;
+
+        /// <summary>The art a hit travels as: <see cref="TravelArt"/>, else the <see cref="Icon"/>.</summary>
+        public Sprite TravelSprite => TravelArt != null ? TravelArt : Icon;
+
         public MagicTargetType TargetType;
         public MagicRarity Rarity;
         public List<SpellEffect> Effects = new List<SpellEffect>();

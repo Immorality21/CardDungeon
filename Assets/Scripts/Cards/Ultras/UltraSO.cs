@@ -98,9 +98,10 @@ namespace Assets.Scripts.Cards
         public bool RandomTargets;
 
         [Tooltip("Strike: how each hit is shown reaching its target, as on an ability. Strike draws " +
-                 "HitIcon across the target (Flurry's slashes), Projectile flies it from the hero " +
-                 "(Rain of Arrows), Ground breaks the ground under every target at once with ImpactFrames " +
-                 "(Earthsplitter). Presentation only.")]
+                 "HitIcon across the target (Flurry's slashes), Projectile flies it from the hero, Fall drops " +
+                 "it from above (Rain of Arrows, Rain of Fire; ImpactFrames burst where each lands), Drain " +
+                 "pulls it out of each target back into the hero (Soul Harvest), Ground breaks the ground " +
+                 "under every target at once with ImpactFrames (Earthsplitter). Presentation only.")]
         public MagicDelivery Delivery = MagicDelivery.Projectile;
 
         [Tooltip("Strike: the art each hit shows - the blade or the arrow. Empty draws the plain bolt.")]
@@ -120,6 +121,30 @@ namespace Assets.Scripts.Cards
         public Sprite[] ImpactFrames;
 
         [Min(1f)] public float ImpactFps = 16f;
+
+        [Header("Presentation")]
+        [Tooltip("The screen flash as it goes off. Fully transparent (the default) keeps the crimson every " +
+                 "Ultra used to share; a colour of its own says which one it is - gold for Judgement Day, " +
+                 "green for a Miracle of Light.")]
+        public Color FlashColor = new Color(0f, 0f, 0f, 0f);
+
+        [Tooltip("Strike: drawn frames played once on every target as the first hit is about to land - a " +
+                 "pillar of light on each enemy, a shield on each ally. The hits land TargetFramesLead in.")]
+        public Sprite[] TargetFrames;
+
+        [Min(1f)] public float TargetFps = 12f;
+
+        [Tooltip("The frames' pivot stands on the target's middle instead of its feet (a sigil, a cloud).")]
+        public bool TargetFramesCentred;
+
+        [Tooltip("The frames draw behind the target instead of over it (an aura, a pillar it stands in).")]
+        public bool TargetFramesBehind;
+
+        [Tooltip("How long the target frames play before the first hit lands, in seconds.")]
+        [Min(0f)] public float TargetFramesLead = 0.4f;
+
+        /// <summary>The screen flash colour: <see cref="FlashColor"/>, or the old shared crimson.</summary>
+        public Color Flash => FlashColor.a > 0f ? FlashColor : new Color(0.55f, 0.1f, 0.25f);
 
         [Header("Wind-up")]
         [Tooltip("A pose the hero takes before the Ultra goes off, played once over WindUpSeconds and " +
@@ -172,6 +197,18 @@ namespace Assets.Scripts.Cards
         [Tooltip("Abilities the form can use while it lasts, as often as it likes - no charges, no slot. " +
                  "They are not a hero's magic: never on a grid, never in the Forge.")]
         public List<MagicSO> Abilities = new List<MagicSO>();
+
+        [Tooltip("While the form lasts every blood price (a HealthCost effect) is 0 - the Warlock's Demon " +
+                 "Form (owner, playtest 2026-11-22). Charges are still spent.")]
+        public bool FormWaivesBloodPrices;
+
+        [Tooltip("While the form lasts the Ability list offers only the hero's abilities that cost health, " +
+                 "and the form's own Abilities - Demon Form's kit is its blood magic.")]
+        public bool FormOnlyBloodAbilities;
+
+        [Tooltip("While the form lasts the hero cannot summon (owner, playtest 2026-11-22: Demon Form). " +
+                 "The Summon command greys with \"In form\"; items stay open.")]
+        public bool FormBlocksSummons;
 
         [Tooltip("The form's art. Empty keeps the hero's own.")]
         public Sprite[] FormFrames;

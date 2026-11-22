@@ -382,6 +382,20 @@ the levels' references and the importer settings stayed.
   `style_copy: ["outline", "detail", "shading"]` and name the palette in the prompt. No inline base64.
 - **Eight jobs at a time**: a ninth is refused; wait for one to finish.
 
+## 8g. Effects from the VFX workbench - the 2026-11-22 Ultra pass
+
+Seventeen effects (the Ultras' target frames and five wind-up sigils) came from `vfx_workbench` **presets**,
+free: `start --preset heal_pillar|magic_circle|lightning_strike|slam_pillar|hex_shield|smoke_puff|
+glint_scatter|toxic_cloud|aura|explosion|ground_sigil`, recoloured with
+`render {"patch":[{"op":"set","path":"ramps.main","value":"holy"}]}` (ramps: arcane, blood, electric, fire,
+frost, holy, nature, poison, shadow, smoke, water), long ones squeezed with `{"op":"retime","frames":14}`,
+then `export`. The export's JSON gives each frame's rect and **pivot (the effect's origin, y from the
+top)**; the import writes a horizontal strip with that pivot per frame (alignment 9, y flipped) so the
+code can stand the ground point on a unit's feet. Size by PPU, per effect: pillars and auras 32, a dome 40,
+a gas cloud 48, front-facing circles and glints 64, sigils 64 (the wind-up scales them by the hero's 0.9),
+sky columns 21 so they run off the top. `holy` on the hex shield came out muddy brown: keep `water` for it.
+`holy` and `fire` sigils read nearly alike. Saved in the owner's My effects on pixellab.ai for slider tweaks.
+
 ## 9. Unused designs
 
 Every generation is kept in the PixelLab gallery. The armoured-guardian Warden candidate became the

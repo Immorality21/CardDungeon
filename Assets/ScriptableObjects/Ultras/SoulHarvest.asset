@@ -17,7 +17,7 @@ MonoBehaviour:
   TargetType: 1
   Effects:
   - EffectType: 0
-    Power: 4
+    Power: 8
     PowerMode: 0
     ScalingStat: 4
     DamageType: 5
@@ -31,7 +31,7 @@ MonoBehaviour:
     BonusPerDebuff: 0
     DrainToParty: 0
   - EffectType: 6
-    Power: 50
+    Power: 60
     PowerMode: 0
     ScalingStat: 0
     DamageType: 0
@@ -43,9 +43,37 @@ MonoBehaviour:
     BonusPercent: 0
     BonusVsStatus: 0
     BonusPerDebuff: 0
-    DrainToParty: 0
+    DrainToParty: 1
   Hits: 1
   RandomTargets: 0
+  Delivery: 5
+  HitIcon: {fileID: 21300000, guid: bfe914e8db254aa5a8e1686e8d9f460c, type: 3}
+  HitArtAngle: 0
+  LeapSlamFrames: []
+  ImpactFrames: []
+  ImpactFps: 16
+  FlashColor: {r: 0.45, g: 0.15, b: 0.7, a: 1}
+  TargetFrames: []
+  TargetFps: 12
+  TargetFramesCentred: 0
+  TargetFramesBehind: 0
+  TargetFramesLead: 0.4
+  WindUpFrames: []
+  WindUpEffectFrames:
+  - {fileID: -7204154852145561528, guid: 7d7631fd8c254a6a8ace2fedf341b472, type: 3}
+  - {fileID: 2855590800881548751, guid: 7d7631fd8c254a6a8ace2fedf341b472, type: 3}
+  - {fileID: 6170307362662012591, guid: 7d7631fd8c254a6a8ace2fedf341b472, type: 3}
+  - {fileID: 6376547862171567808, guid: 7d7631fd8c254a6a8ace2fedf341b472, type: 3}
+  - {fileID: -5576051742472162485, guid: 7d7631fd8c254a6a8ace2fedf341b472, type: 3}
+  - {fileID: 1818550115502290098, guid: 7d7631fd8c254a6a8ace2fedf341b472, type: 3}
+  - {fileID: 5416504390621246461, guid: 7d7631fd8c254a6a8ace2fedf341b472, type: 3}
+  - {fileID: 8126582103779366715, guid: 7d7631fd8c254a6a8ace2fedf341b472, type: 3}
+  - {fileID: 4886858453333777555, guid: 7d7631fd8c254a6a8ace2fedf341b472, type: 3}
+  - {fileID: -3636560429205519402, guid: 7d7631fd8c254a6a8ace2fedf341b472, type: 3}
+  - {fileID: -1227060537850555760, guid: 7d7631fd8c254a6a8ace2fedf341b472, type: 3}
+  - {fileID: 6657035091575811374, guid: 7d7631fd8c254a6a8ace2fedf341b472, type: 3}
+  WindUpEffectFps: 12
+  WindUpSeconds: 1
   Creature: {fileID: 0}
   StatAbilities: []
   Mech: {fileID: 0}
@@ -53,6 +81,8 @@ MonoBehaviour:
   MaxHealthPercent: 50
   AttackDamageType: 0
   Abilities: []
+  FormWaivesBloodPrices: 0
+  FormOnlyBloodAbilities: 0
   FormFrames: []
   Icon: {fileID: 21300000, guid: 7dcd8ebb289b40e3939d5d0602c45224, type: 3}
   FormFps: 4

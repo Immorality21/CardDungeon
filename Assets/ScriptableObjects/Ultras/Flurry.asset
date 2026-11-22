@@ -35,6 +35,19 @@ MonoBehaviour:
   Delivery: 1
   HitIcon: {fileID: -7438242413743671978, guid: f9b9570a47bee3541b17abf0c1f0c6c7, type: 3}
   HitArtAngle: 0
+  LeapSlamFrames: []
+  ImpactFrames: []
+  ImpactFps: 16
+  FlashColor: {r: 0.85, g: 0.9, b: 1, a: 1}
+  TargetFrames: []
+  TargetFps: 12
+  TargetFramesCentred: 0
+  TargetFramesBehind: 0
+  TargetFramesLead: 0.4
+  WindUpFrames: []
+  WindUpEffectFrames: []
+  WindUpEffectFps: 20
+  WindUpSeconds: 1.2
   Creature: {fileID: 0}
   StatAbilities: []
   Mech: {fileID: 0}
@@ -42,6 +55,8 @@ MonoBehaviour:
   MaxHealthPercent: 50
   AttackDamageType: 0
   Abilities: []
+  FormWaivesBloodPrices: 0
+  FormOnlyBloodAbilities: 0
   FormFrames: []
   Icon: {fileID: 21300000, guid: 0598ee22ae264e7a91bcaed8bd9092a0, type: 3}
   FormFps: 4

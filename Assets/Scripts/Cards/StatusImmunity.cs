@@ -54,6 +54,7 @@ namespace Assets.Scripts.Cards
             switch (type)
             {
                 case BuffType.Frozen:
+                case BuffType.Stunned:
                 case BuffType.Slow:
                 case BuffType.Haste:
                 case BuffType.Burning:

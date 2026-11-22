@@ -30,6 +30,7 @@ namespace Assets.Scripts.Cards.Buffs
                 { BuffType.Barrier, new BarrierBuffHandler() },
                 { BuffType.DivineProtection, new DivineProtectionBuffHandler() },
                 { BuffType.Frozen, new FrozenBuffHandler() },
+                { BuffType.Stunned, new StunnedBuffHandler() },
                 { BuffType.Slow, new SlowBuffHandler() },
                 { BuffType.Haste, new HasteBuffHandler() },
                 { BuffType.Silenced, new SilencedBuffHandler() },
@@ -115,6 +116,7 @@ namespace Assets.Scripts.Cards.Buffs
         private static readonly HashSet<BuffType> Curable = new HashSet<BuffType>
         {
             BuffType.Frozen,
+            BuffType.Stunned,
             BuffType.Slow,
             BuffType.Silenced,
             BuffType.Blinded,

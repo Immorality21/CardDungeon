@@ -82,6 +82,17 @@ All immune to Poison and **weak to Fire** (-50%); PixelLab art, two candidates e
 Caustic Spit and Toxic Deluge are `EnemyOnly` (`Enemies/Abilities/`). Rooms: Sump Channel, Bloat Nest,
 Seep Pool. Slimes drop the Antidote Salve (25%). Sandbox: `SeepingCistern`.
 
+## The Mire's treants *(playtest 2026-11-22)*
+
+The **Treant** replaced the Floating Eye as the Drowned March's trash: every March room and the
+Mirefather's two adds (the Drowned Chapel keeps its Eye). Plain melee, weak to Fire, resists Ice,
+drops Mire Reed. The **Ent** is its big one, built like the Bone Golem (64 px at PPU 38, no flinch,
+slow): every third of its turns (its 1st, 4th, 7th - `EveryNthTurn` 3 counts from 0) it casts
+**Root** (`Abilities/EntRoot`: a little damage and `BuffType.Stunned` for 1 turn, which skips exactly
+the hero's next turn); otherwise a telegraphed heavy blow now and then, else a swing. It holds the
+50% third slot of the Shrine and Hollow rooms. Sprites are PixelLab (`treant-idle/-hit`, `ent-idle`);
+`Sandbox/MireTreants.asset` puts the Warlock against two Treants and an Ent on a Swamp floor.
+
 ## The Barrow King - the test boss *(2026-11-02)*
 
 The owner's **fixed, telegraphed boss**: one hand-drawn floor (`Runs/BarrowThrone`; the rooms before

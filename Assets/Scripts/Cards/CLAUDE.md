@@ -605,6 +605,30 @@ Two consequences worth holding on to:
   through `HideUnits`, frozen behind her suspended clock, and comes back ridden; other guests are sent
   home as before. Sim: `SimAllies.ArriveMount` / `MountOf`, `DismissAll` skips mechs, and
   `SimUltras.Ready` holds the gauge while she already rides.
+- **Ultra presentation** *(playtest 2026-11-22: most Ultras had no flair beside Divine Intervention and
+  Earthsplitter)*. Every Ultra now has its own look, all data on `UltraSO`: `FlashColor` (the screen
+  flash; transparent keeps the old crimson), `TargetFrames` (drawn frames played once on every target
+  of the first hit, `TargetFramesLead` before it lands, on the feet or `TargetFramesCentred`, over or
+  `TargetFramesBehind` the unit - through `SpellVfx.Overlay`, sized to the unit) and a wind-up circle
+  (`WindUpEffectFrames`, now played before a Strike and a Transform too, not only MultiCast). Two new
+  deliveries: **`Fall`** drops the hit art from above (`ImpactFrames` burst where each lands - Rain of
+  Fire, Rain of Arrows, Pin Down) and **`Drain`** pulls `MagicSO.TravelArt` (a soul wisp) out of each
+  target back into the caster (Soul Feast, Siphon Soul, Drain Life, Soul Harvest). A Ground delivery with
+  no frames lands the hits together with nothing flying (Judgement Day and Miracle of Righteousness, whose
+  look is their target frames). The art is PixelLab VFX-workbench presets recoloured (`Sprites/Ultras/
+  ultra-*.png`, `sigil-*.png`, each frame pivoted on the effect's ground point), first drafts the owner
+  will adjust after playtesting. **Demon Form** (`FormWaivesBloodPrices`, `FormOnlyBloodAbilities`): every
+  blood price is 0 while it lasts (`IBloodPriceWaiver`, read in `SpellPower.ResolveHealthCost`, so the
+  quote and the charge agree) and the Ability list keeps only the hero's health-cost abilities plus the
+  form's own, Chaos Bolt and **Abyssal Wave** (Shadow, all enemies, Burst), and the Summon command greys "In form" (`FormBlocksSummons`; items stay open, owner). The hidden slots are passed as
+  empty so every real slot keeps its index. The Warlock acts again at once after taking it
+  (`TurnManager.ActsNext`). A stunned turn counts as one of the form's turns (owner: fine). **Soul Harvest**,
+  the Ultra, is now clearly above Soul Feast, the spell it mirrored: 8 + INT Shadow on every enemy, 60% drained
+  to the whole party (was 4 + INT and 50% to the Warlock alone, weaker than the spell's 35% to everyone).
+- **Squad entrance** *(2026-11-22)*: a squad comes through `SummonSO.PortalFrames` (the Demon Army's hell
+  gate) one troop after another, each leaping to its spot (`SummonPresenter.ArriveSquad`); they used to
+  rise together at the centre and overlap. The Imp's area attack is **Ember Spray** now (key
+  `ImpHellfire` kept), and its icon an ember rather than the Imp itself.
 - **The Mage's summon fields** *(2026-10-10)*: `SummonSO.PartyEffects` (a special attack's second half on
   the summoner's whole side, `SummonOps.BuildPartyCastable`) + `PowerRaisesPartyEffects`; `SummonSO.Tags`
   (a special attack with `UsesTags` lays them and may set off a combo, live and in the sim); a

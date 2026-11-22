@@ -67,6 +67,12 @@ MonoBehaviour:
   - {fileID: 7935803971140162703, guid: 2122f88ea231ef64e958b6e0ca854a25, type: 3}
   - {fileID: -603646020, guid: 2122f88ea231ef64e958b6e0ca854a25, type: 3}
   ImpactFps: 14
+  FlashColor: {r: 1, g: 0.85, b: 0.4, a: 1}
+  TargetFrames: []
+  TargetFps: 12
+  TargetFramesCentred: 0
+  TargetFramesBehind: 0
+  TargetFramesLead: 0.4
   WindUpFrames: []
   WindUpEffectFrames: []
   WindUpEffectFps: 20
@@ -78,6 +84,8 @@ MonoBehaviour:
   MaxHealthPercent: 50
   AttackDamageType: 0
   Abilities: []
+  FormWaivesBloodPrices: 0
+  FormOnlyBloodAbilities: 0
   FormFrames: []
   Icon: {fileID: 21300000, guid: 6b47230f4947443a97dee8f287914097, type: 3}
   FormFps: 4

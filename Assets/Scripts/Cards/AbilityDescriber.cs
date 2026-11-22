@@ -363,6 +363,7 @@ namespace Assets.Scripts.Cards
         private static readonly Dictionary<BuffType, string> Glosses = new Dictionary<BuffType, string>
         {
             { BuffType.Frozen, "abilities.gloss.frozen" },
+            { BuffType.Stunned, "abilities.gloss.stunned" },
             { BuffType.Slow, "abilities.gloss.slow" },
             { BuffType.Haste, "abilities.gloss.haste" },
             { BuffType.Silenced, "abilities.gloss.silenced" },

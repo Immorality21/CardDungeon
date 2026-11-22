@@ -71,10 +71,13 @@
         <!-- Hero turn command menu, left of the band: a cursor-driven list in two columns -->
         <ui:VisualElement name="hero-bar" class="cd-command-window cd-dock-band cd-hidden">
             <ui:Label name="hero-title" text="" class="cd-command-window__header" />
-            <ui:VisualElement name="command-list" class="cd-command-list" />
-            <!-- A summon's menu only: what the highlighted action does (playtest 4 finding 6). Drawn
-                 above the window, so the two-column list keeps its room. RoomActionUI.RenderCommandDetail. -->
-            <ui:Label name="command-desc" text="" class="cd-sel-desc cd-command-desc cd-hidden" picking-mode="Ignore" />
+            <!-- The list, and on a summon's turn what the highlighted action does beside it (playtest 4
+                 finding 6; beside rather than above since playtest 2026-11-22, as the ability picker
+                 lays out its list and description). RoomActionUI.RenderCommandDetail. -->
+            <ui:VisualElement name="command-body" class="cd-command-body">
+                <ui:VisualElement name="command-list" class="cd-command-list" />
+                <ui:Label name="command-desc" text="" class="cd-sel-desc cd-command-desc cd-hidden" picking-mode="Ignore" />
+            </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- Behind every dialog (event, detail, map, pause): "the game is waiting for you" reads apart

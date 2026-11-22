@@ -520,6 +520,28 @@ namespace Assets.Scripts.Rooms
             return new List<MagicSO>();
         }
 
+        /// <summary>
+        /// Whether <paramref name="hero"/>'s form keeps <paramref name="magic"/>, one of their own slots,
+        /// on the Ability list. Everything, unless the form limits them to their blood magic
+        /// (<see cref="UltraSO.FormOnlyBloodAbilities"/>, Demon Form): then only abilities that cost health.
+        /// </summary>
+        public bool FormOffersSlot(ICombatUnit hero, MagicSO magic)
+        {
+            if (magic == null || !(hero is Hero component) || !_forms.TryGetValue(component, out var form)
+                || !form.Ultra.FormOnlyBloodAbilities)
+            {
+                return true;
+            }
+            return magic.HasEffectType(SpellEffectType.HealthCost);
+        }
+
+        /// <summary>Whether <paramref name="hero"/>'s form shuts the Summon command
+        /// (<see cref="UltraSO.FormBlocksSummons"/>, Demon Form).</summary>
+        public bool FormBlocksSummons(ICombatUnit hero)
+        {
+            return hero is Hero component && _forms.TryGetValue(component, out var form) && form.Ultra.FormBlocksSummons;
+        }
+
         /// <summary>Sends the summon home. Uses its turn, like any other command it has.</summary>
         public void SubmitDismiss()
         {

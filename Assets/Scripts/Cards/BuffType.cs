@@ -70,6 +70,10 @@ namespace Assets.Scripts.Cards
         // The Paladin's Divine Protection and Aegis: the next Amount damaging hits on the unit - a blow
         // or an ability, any element - are negated outright (Combat.ProtectionTable, read by
         // HealthOps.Damage). Never a tick or a price. Not a status - it lives on the fight's event stream.
-        DivineProtection = 29
+        DivineProtection = 29,
+        // A stun: the unit loses its next Duration turns outright (the Ent's Root, owner 2026-11-22).
+        // Frozen's twin without the element - no damage breaks it. A status: curable, immune-able, on
+        // the HP bar. Duration 1 applied on someone else's turn costs the unit exactly one turn.
+        Stunned = 30
     }
 }

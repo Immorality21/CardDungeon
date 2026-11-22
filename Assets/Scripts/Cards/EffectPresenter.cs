@@ -42,8 +42,11 @@ namespace Assets.Scripts.Cards
             // delivery plays them flat at each target's feet instead of as a column.
             bool hasFrames = magic != null && magic.ImpactFrames != null && magic.ImpactFrames.Length > 0;
             bool grounded = delivery == MagicDelivery.Ground;
-            bool erupts = hasFrames && !grounded;
-            if (hasFrames)
+            // A falling hit plays its frames where each piece lands, not before anything moves.
+            bool falls = delivery == MagicDelivery.Fall;
+            bool drains = delivery == MagicDelivery.Drain;
+            bool erupts = hasFrames && !grounded && !falls;
+            if (hasFrames && !falls)
             {
                 foreach (var entry in entries)
                 {
@@ -83,7 +86,19 @@ namespace Assets.Scripts.Cards
                 if (!erupts && !grounded && caster != null && (entry.Impact > 0 || entry.Avoided) && entry.Target != null
                     && caster.Transform != null && entry.Target.Transform != null)
                 {
-                    if (delivery == MagicDelivery.Strike)
+                    if (drains)
+                    {
+                        // Nothing crosses the stage on the way in: the soul is torn out once the hit lands.
+                    }
+                    else if (falls)
+                    {
+                        yield return FallOnTarget(entry.Target, magic.TravelSprite, magic.ProjectileArtAngle);
+                        if (hasFrames && entry.Impact > 0)
+                        {
+                            SpellVfx.Overlay(entry.Target, magic.ImpactFrames, FallImpactFps, centred: true);
+                        }
+                    }
+                    else if (delivery == MagicDelivery.Strike)
                     {
                         // A blade does not cross the stage: the cut lands where the target stands.
                         yield return StrikeOnTarget(entry.Target, magic.Icon);
@@ -189,11 +204,102 @@ namespace Assets.Scripts.Cards
                     }
                 }
 
+                // A drain: the hit has landed, and what it took travels back into the caster.
+                if (drains && entry.Impact > 0 && caster != null && caster.Transform != null
+                    && entry.Target != null && entry.Target.Transform != null)
+                {
+                    yield return DrainToCaster(entry.Target, caster, magic.TravelSprite);
+                }
+
                 if (!simultaneous)
                 {
                     yield return new WaitForSeconds(entry.Delay);
                 }
             }
+        }
+
+        private const float FallImpactFps = 16f;
+        private const float FallSeconds = 0.32f;
+        private const float FallHeight = 4.5f;
+        private const float FallDrift = 1.4f;
+
+        /// <summary>
+        /// A falling hit (<see cref="MagicDelivery.Fall"/>): the art drops from high above and a little to
+        /// the side onto the target's middle, turned the way it falls, and is gone the moment it lands.
+        /// Untinted, so drawn art keeps its colours.
+        /// </summary>
+        private static IEnumerator FallOnTarget(ICombatUnit target, Sprite sprite, float artAngle)
+        {
+            var go = new GameObject("MagicFall");
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sprite = sprite != null ? sprite : CombatIcons.Get("burst");
+            sr.sortingOrder = 850;
+            go.transform.localScale = Vector3.one * 0.45f;
+
+            var targetRenderer = target.Transform.GetComponent<SpriteRenderer>();
+            Vector3 to = targetRenderer != null ? targetRenderer.bounds.center : target.Transform.position;
+            // From the enemies' side of the sky toward the party's, so it reads as raining down on them.
+            float side = target.IsHero ? -1f : 1f;
+            Vector3 from = to + new Vector3(FallDrift * side, FallHeight, 0f);
+            Vector2 direction = to - from;
+            go.transform.rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - artAngle);
+
+            float elapsed = 0f;
+            while (elapsed < FallSeconds && go != null)
+            {
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / FallSeconds);
+                go.transform.position = Vector3.Lerp(from, to, t * t);
+                yield return null;
+            }
+            if (go != null)
+            {
+                UnityEngine.Object.Destroy(go);
+            }
+        }
+
+        private const float DrainSeconds = 0.42f;
+
+        /// <summary>
+        /// A drain's return (<see cref="MagicDelivery.Drain"/>): <paramref name="sprite"/> - a soul wisp -
+        /// rises out of the target, arcs back across the stage and sinks into the caster, who glows with
+        /// it. Untinted, so drawn art keeps its colours.
+        /// </summary>
+        private static IEnumerator DrainToCaster(ICombatUnit target, ICombatUnit caster, Sprite sprite)
+        {
+            var go = new GameObject("DrainWisp");
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sprite = sprite != null ? sprite : CombatIcons.Get("burst");
+            sr.sortingOrder = 850;
+
+            var fromRenderer = target.Transform.GetComponent<SpriteRenderer>();
+            var toRenderer = caster.Transform.GetComponent<SpriteRenderer>();
+            Vector3 from = fromRenderer != null ? fromRenderer.bounds.center : target.Transform.position;
+            Vector3 to = toRenderer != null ? toRenderer.bounds.center : caster.Transform.position;
+            // Faces the way it travels: the art is drawn flying right, and a drain flies back left.
+            sr.flipX = to.x < from.x;
+            Vector3 control = (from + to) * 0.5f + Vector3.up * UnityEngine.Random.Range(0.8f, 1.6f);
+
+            float elapsed = 0f;
+            while (elapsed < DrainSeconds && go != null)
+            {
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / DrainSeconds);
+                float eased = t * t * (3f - 2f * t);
+                Vector3 a = Vector3.Lerp(from, control, eased);
+                Vector3 b = Vector3.Lerp(control, to, eased);
+                go.transform.position = Vector3.Lerp(a, b, eased);
+                // Torn out small, full-size in flight, swallowed at the end.
+                float size = t < 0.2f ? Mathf.Lerp(0.15f, 0.45f, t / 0.2f) : t > 0.8f ? Mathf.Lerp(0.45f, 0.2f, (t - 0.8f) / 0.2f) : 0.45f;
+                go.transform.localScale = Vector3.one * size;
+                sr.color = new Color(1f, 1f, 1f, t < 0.15f ? t / 0.15f : 1f);
+                yield return null;
+            }
+            if (go != null)
+            {
+                UnityEngine.Object.Destroy(go);
+            }
+            SpellVfx.Afflict(caster, SpellVfx.HarmColor, false);
         }
 
         /// <summary>The colour of a beam or a burst: its first damage effect's element.</summary>

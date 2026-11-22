@@ -221,6 +221,21 @@ namespace Assets.Scripts.Combat
         }
 
         /// <summary>
+        /// A unit already on the clock takes the very next turn, ahead of everyone, costing the clock
+        /// nothing - then waits a full turn at its own pace, as after any turn. What a Transform Ultra
+        /// gives its hero (owner, playtest 2026-11-22: Demon Form spent the Warlock's turn and was not
+        /// worth taking). A unit off the clock, suspended or fallen is left alone.
+        /// </summary>
+        public void ActsNext(ICombatUnit unit)
+        {
+            if (unit == null || !unit.IsAlive || !_ticksUntilTurn.ContainsKey(unit) || _suspended.ContainsKey(unit))
+            {
+                return;
+            }
+            _actsNext = unit;
+        }
+
+        /// <summary>
         /// Takes units off the clock with their counters frozen: time passes for everyone else and
         /// not for them, they are out of the turn-order preview, and <see cref="Resume"/> puts them
         /// back exactly where they left. What a party-replacing summon does to the party (§4b).

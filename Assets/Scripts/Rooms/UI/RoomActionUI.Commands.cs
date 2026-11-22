@@ -106,6 +106,15 @@ namespace Assets.Scripts.Rooms
             }
 
             var slots = new List<Cards.MagicSlot>(DungeonManager.Instance.MagicState.GetSlots(heroComponent.HeroKey));
+            // A form that keeps only the hero's blood magic (Demon Form) hides the rest. Hidden as an
+            // empty slot - the picker skips those - so every real slot keeps its index.
+            for (int i = 0; i < slots.Count; i++)
+            {
+                if (slots[i] != null && !CombatManager.Instance.FormOffersSlot(_currentHeroTurn, slots[i].Magic))
+                {
+                    slots[i] = new Cards.MagicSlot();
+                }
+            }
             // An Ultra's form adds its abilities after the real slots - appended, so a real slot's
             // index (what a cast spends a charge from) never moves. Casting one spends nothing:
             // EquippedMagicState.TryCast refuses an index past the hero's slots.
@@ -457,7 +466,8 @@ namespace Assets.Scripts.Rooms
             // who knows a summon, greyed when every charge is spent - and, like casting, by Silence.
             var summons = DungeonManager.HasInstance ? DungeonManager.Instance.Summons : null;
             bool knowsSummon = heroComponent != null && summons != null && summons.Knows(heroComponent.HeroKey);
-            bool canSummon = knowsSummon && !silenced && summons.HasAnyUsable(heroComponent.HeroKey);
+            bool inBlockingForm = CombatManager.Instance.FormBlocksSummons(heroComponent);
+            bool canSummon = knowsSummon && !silenced && !inBlockingForm && summons.HasAnyUsable(heroComponent.HeroKey);
 
             _commands.Add(new CommandEntry { Command = HeroCommand.Attack, Label = Loc.Get("room.command.attack"), Enabled = true });
             // A greyed command says why on its own row - "Ability" alone, dimmed, read as a bug.
@@ -471,7 +481,9 @@ namespace Assets.Scripts.Rooms
                 _commands.Add(new CommandEntry
                 {
                     Command = HeroCommand.Summon, Label = Loc.Get("room.command.summon"), Enabled = canSummon,
-                    Reason = silenced ? Loc.Get("room.command.reason.silenced") : Loc.Get("room.command.reason.spent")
+                    Reason = silenced ? Loc.Get("room.command.reason.silenced")
+                        : inBlockingForm ? Loc.Get("room.command.reason.in-form")
+                        : Loc.Get("room.command.reason.spent")
                 });
             }
             // Ultra (COMBAT_DEPTH §13): shown to a hero who knows one, open once the gauge is full.
@@ -528,7 +540,8 @@ namespace Assets.Scripts.Rooms
         }
 
         // The summon menu's detail line (playtest 4 finding 6): what the highlighted action does, as
-        // the ability picker's footer says it. A label inside the hero bar, so it hides with it.
+        // the ability picker's footer says it. A label inside the hero bar beside the list (playtest
+        // 2026-11-22: it stood above the window and read as detached), so it hides with it.
         private Label _commandDesc;
 
         private void RenderCommandDetail()
@@ -546,6 +559,9 @@ namespace Assets.Scripts.Rooms
                 : null;
             _commandDesc.text = text ?? string.Empty;
             _commandDesc.EnableInClassList("cd-hidden", string.IsNullOrEmpty(text));
+            // On a summon's turn the list gives up the right half of the window to the detail; a
+            // hero's list keeps it all (a hero's commands each open a list that says it already).
+            _commandDesc.parent?.EnableInClassList("cd-command-body--detail", _currentHeroTurn is SummonUnit);
         }
 
         /// <summary>

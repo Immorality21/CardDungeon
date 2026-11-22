@@ -1,0 +1,481 @@
+fileFormatVersion: 2
+guid: 69d720624cb84557ac243506579c2e4d
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 3939929208434438422
+    second: ultra-grand-heist_0
+  - first:
+      213: 6686176388196726912
+    second: ultra-grand-heist_1
+  - first:
+      213: -1558481557557467380
+    second: ultra-grand-heist_2
+  - first:
+      213: -4718646035966427695
+    second: ultra-grand-heist_3
+  - first:
+      213: 2433339289381943405
+    second: ultra-grand-heist_4
+  - first:
+      213: 3265633119974047624
+    second: ultra-grand-heist_5
+  - first:
+      213: 1660743284168979393
+    second: ultra-grand-heist_6
+  - first:
+      213: -8391157259609491170
+    second: ultra-grand-heist_7
+  - first:
+      213: -4417680532342609368
+    second: ultra-grand-heist_8
+  - first:
+      213: 4749840591270584648
+    second: ultra-grand-heist_9
+  - first:
+      213: -4869131699576457371
+    second: ultra-grand-heist_10
+  - first:
+      213: -2612700647221935617
+    second: ultra-grand-heist_11
+  - first:
+      213: -6415535936735482026
+    second: ultra-grand-heist_12
+  - first:
+      213: 4403448754699451112
+    second: ultra-grand-heist_13
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 4096
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 64
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: ultra-grand-heist_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 168
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.5000}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f295fa06ee12461692a9114ada3f47ea
+      internalID: 3939929208434438422
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-grand-heist_1
+      rect:
+        serializedVersion: 2
+        x: 168
+        y: 0
+        width: 168
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.5000}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c91187c539ce4268b41357b2c7efe4e7
+      internalID: 6686176388196726912
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-grand-heist_2
+      rect:
+        serializedVersion: 2
+        x: 336
+        y: 0
+        width: 168
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.5000}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f6a618815ccb496caffcc438a3e2cfbe
+      internalID: -1558481557557467380
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-grand-heist_3
+      rect:
+        serializedVersion: 2
+        x: 504
+        y: 0
+        width: 168
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.5000}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e73fd63d8baf4539a0c157c18709665a
+      internalID: -4718646035966427695
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-grand-heist_4
+      rect:
+        serializedVersion: 2
+        x: 672
+        y: 0
+        width: 168
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.5000}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f0c31fbe4ce74e0c884e2adc2363fde6
+      internalID: 2433339289381943405
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-grand-heist_5
+      rect:
+        serializedVersion: 2
+        x: 840
+        y: 0
+        width: 168
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.5000}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9bc87151c4d544fda65e35198a0fdcbf
+      internalID: 3265633119974047624
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-grand-heist_6
+      rect:
+        serializedVersion: 2
+        x: 1008
+        y: 0
+        width: 168
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.5000}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ae141153e3504f1f8c49669f1dbe966d
+      internalID: 1660743284168979393
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-grand-heist_7
+      rect:
+        serializedVersion: 2
+        x: 1176
+        y: 0
+        width: 168
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.5000}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4b4c04cfd4b642289bd1650910e7fb78
+      internalID: -8391157259609491170
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-grand-heist_8
+      rect:
+        serializedVersion: 2
+        x: 1344
+        y: 0
+        width: 168
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.5000}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 48b0dbfe3fc742679a5ac74f49e30dc9
+      internalID: -4417680532342609368
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-grand-heist_9
+      rect:
+        serializedVersion: 2
+        x: 1512
+        y: 0
+        width: 168
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.5000}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: acd91913f18a4cc09cc381cc9a74067a
+      internalID: 4749840591270584648
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-grand-heist_10
+      rect:
+        serializedVersion: 2
+        x: 1680
+        y: 0
+        width: 168
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.5000}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f68150aa6a774aceb8b5ac55c81a7542
+      internalID: -4869131699576457371
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-grand-heist_11
+      rect:
+        serializedVersion: 2
+        x: 1848
+        y: 0
+        width: 168
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.5000}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7f7a01fc57d1425486c28610cd44e596
+      internalID: -2612700647221935617
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-grand-heist_12
+      rect:
+        serializedVersion: 2
+        x: 2016
+        y: 0
+        width: 168
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.5000}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aaaf94419abd4c6681567135e8123b56
+      internalID: -6415535936735482026
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ultra-grand-heist_13
+      rect:
+        serializedVersion: 2
+        x: 2184
+        y: 0
+        width: 168
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5000, y: 0.5000}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aa80862c2704435c85a336c5f0dc1556
+      internalID: 4403448754699451112
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      ultra-grand-heist_0: 3939929208434438422
+      ultra-grand-heist_1: 6686176388196726912
+      ultra-grand-heist_2: -1558481557557467380
+      ultra-grand-heist_3: -4718646035966427695
+      ultra-grand-heist_4: 2433339289381943405
+      ultra-grand-heist_5: 3265633119974047624
+      ultra-grand-heist_6: 1660743284168979393
+      ultra-grand-heist_7: -8391157259609491170
+      ultra-grand-heist_8: -4417680532342609368
+      ultra-grand-heist_9: 4749840591270584648
+      ultra-grand-heist_10: -4869131699576457371
+      ultra-grand-heist_11: -2612700647221935617
+      ultra-grand-heist_12: -6415535936735482026
+      ultra-grand-heist_13: 4403448754699451112
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

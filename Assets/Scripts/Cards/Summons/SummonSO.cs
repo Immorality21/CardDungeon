@@ -255,6 +255,14 @@ namespace Assets.Scripts.Cards
                  "in two ranks, so more than four would need a new formation.")]
         [Min(1)] public int MaxSquadSize = 4;
 
+        [Tooltip("Squad: a gate the troops pour out of, one after another, before they stride to their " +
+                 "places (the Demon Army's hell portal; owner, playtest 2026-11-22: the troops all rising " +
+                 "at the centre at once overlapped). Looped while open. Empty: they still come out one by " +
+                 "one from the centre, with no gate drawn.")]
+        public Sprite[] PortalFrames;
+
+        [Min(1f)] public float PortalFps = 8f;
+
         /// <summary>A summon that brings troops (<see cref="SquadTiers"/>) rather than being the unit itself.</summary>
         public bool IsSquad => SquadTiers != null && SquadTiers.Exists(t => t != null);
 

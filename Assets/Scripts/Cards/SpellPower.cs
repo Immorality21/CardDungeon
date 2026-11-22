@@ -98,6 +98,13 @@ namespace Assets.Scripts.Cards
                 return 0;
             }
 
+            // A caster whose blood prices are waived pays nothing (the Warlock in Demon Form). Read
+            // here, so the price the picker quotes and the price the executor charges stay one number.
+            if (caster is IBloodPriceWaiver waiver && waiver.BloodPricesWaived)
+            {
+                return 0;
+            }
+
             if (effect.PowerMode == PowerMode.PercentOfMaxHealth)
             {
                 return PercentOfMaxHealth(effect.Power, caster);
@@ -152,4 +159,15 @@ namespace Assets.Scripts.Cards
             return caster != null && caster.Stats.Health > cost;
         }
     }
+
+    /// <summary>
+    /// A unit whose blood prices (<see cref="SpellEffectType.HealthCost"/>) can be waived for a while:
+    /// a hero in a Transform Ultra that says so (<c>UltraSO.FormWaivesBloodPrices</c>, Demon Form;
+    /// owner, playtest 2026-11-22). <see cref="SpellPower.ResolveHealthCost"/> is the one place it is read.
+    /// </summary>
+    public interface IBloodPriceWaiver
+    {
+        bool BloodPricesWaived { get; }
+    }
 }
+

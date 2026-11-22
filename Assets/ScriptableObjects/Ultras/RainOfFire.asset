@@ -46,6 +46,46 @@ MonoBehaviour:
     DrainToParty: 0
   Hits: 1
   RandomTargets: 0
+  Delivery: 6
+  HitIcon: {fileID: 21300000, guid: 87e6545a435f48fb9ed3720530639dee, type: 3}
+  HitArtAngle: 0
+  LeapSlamFrames: []
+  ImpactFrames:
+  - {fileID: 4415455985364632345, guid: 6c14792f3e554ea0b0386803de7030a2, type: 3}
+  - {fileID: 8514994400686960746, guid: 6c14792f3e554ea0b0386803de7030a2, type: 3}
+  - {fileID: -7486297112313761517, guid: 6c14792f3e554ea0b0386803de7030a2, type: 3}
+  - {fileID: 7208254188305433823, guid: 6c14792f3e554ea0b0386803de7030a2, type: 3}
+  - {fileID: 6848891902295103362, guid: 6c14792f3e554ea0b0386803de7030a2, type: 3}
+  - {fileID: 1290973426958659113, guid: 6c14792f3e554ea0b0386803de7030a2, type: 3}
+  - {fileID: -7932058302568289800, guid: 6c14792f3e554ea0b0386803de7030a2, type: 3}
+  - {fileID: -7877537688601595728, guid: 6c14792f3e554ea0b0386803de7030a2, type: 3}
+  - {fileID: -4544392599358449321, guid: 6c14792f3e554ea0b0386803de7030a2, type: 3}
+  - {fileID: -2991141249220247306, guid: 6c14792f3e554ea0b0386803de7030a2, type: 3}
+  - {fileID: 9165989847749869158, guid: 6c14792f3e554ea0b0386803de7030a2, type: 3}
+  - {fileID: 8844615914495766636, guid: 6c14792f3e554ea0b0386803de7030a2, type: 3}
+  ImpactFps: 16
+  FlashColor: {r: 1, g: 0.45, b: 0.1, a: 1}
+  TargetFrames: []
+  TargetFps: 12
+  TargetFramesCentred: 0
+  TargetFramesBehind: 0
+  TargetFramesLead: 0.4
+  WindUpFrames: []
+  WindUpEffectFrames:
+  - {fileID: 5473539808841407731, guid: c26d543caa694e1182e249e998bf8fd4, type: 3}
+  - {fileID: 3193465162569705757, guid: c26d543caa694e1182e249e998bf8fd4, type: 3}
+  - {fileID: 9089592809556406509, guid: c26d543caa694e1182e249e998bf8fd4, type: 3}
+  - {fileID: 3491694117959119149, guid: c26d543caa694e1182e249e998bf8fd4, type: 3}
+  - {fileID: 8081894284627088243, guid: c26d543caa694e1182e249e998bf8fd4, type: 3}
+  - {fileID: -2878836537154053674, guid: c26d543caa694e1182e249e998bf8fd4, type: 3}
+  - {fileID: 4087170598710653668, guid: c26d543caa694e1182e249e998bf8fd4, type: 3}
+  - {fileID: 7971858479514776302, guid: c26d543caa694e1182e249e998bf8fd4, type: 3}
+  - {fileID: 2440498045998919714, guid: c26d543caa694e1182e249e998bf8fd4, type: 3}
+  - {fileID: 3719922047479000032, guid: c26d543caa694e1182e249e998bf8fd4, type: 3}
+  - {fileID: 1571553066570314049, guid: c26d543caa694e1182e249e998bf8fd4, type: 3}
+  - {fileID: -8875138084450633880, guid: c26d543caa694e1182e249e998bf8fd4, type: 3}
+  WindUpEffectFps: 12
+  WindUpSeconds: 1
   Creature: {fileID: 0}
   StatAbilities: []
   Mech: {fileID: 0}
@@ -53,6 +93,8 @@ MonoBehaviour:
   MaxHealthPercent: 50
   AttackDamageType: 0
   Abilities: []
+  FormWaivesBloodPrices: 0
+  FormOnlyBloodAbilities: 0
   FormFrames: []
   Icon: {fileID: 21300000, guid: 0333a060b03646608c55093dfcf7bba1, type: 3}
   FormFps: 4
