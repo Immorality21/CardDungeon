@@ -65,7 +65,9 @@ namespace Assets.Scripts.Combat
         /// to the player.</summary>
         public bool IsHero => true;
 
-        public Transform Transform => transform;
+        // A destroyed unit has no transform rather than throwing, so a cast still being drawn
+        // over a unit that died mid-presentation reads it as gone (bot, 2026-11-27).
+        public Transform Transform => this != null ? transform : null;
         public List<Resistance> Resistances => _resistances;
         public DamageType AttackDamageType => DamageType.Normal;
         public StatType AttackStat => StatType.Strength;

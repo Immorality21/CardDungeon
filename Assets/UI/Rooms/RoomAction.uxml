@@ -229,6 +229,10 @@
         <ui:VisualElement name="pause-window" class="cd-window cd-window--flush cd-window--pause cd-dock-center cd-hidden">
             <ui:Label text="#ui.room.paused" class="cd-title" />
 
+            <!-- Everything between the title and Quit scrolls when it does not fit: at a large
+                 Interface size on a phone the menu is taller than the screen, and the size setting
+                 itself went off the bottom (owner, 2026-11-27). Same as the title screen's Options. -->
+            <ui:ScrollView name="pause-scroll" class="cd-options-scroll" mode="Vertical" horizontal-scroller-visibility="Hidden">
             <!-- Resume first - the default cursor and the common case - then Map, the audio dials
                  under their own heading, and Leave last (it is already two-press). 2026-09-30. -->
             <ui:Button name="pause-resume" text="#ui.room.pause-resume" class="cd-button cd-button--wide" />
@@ -310,8 +314,11 @@
             <!-- Interface size (MainMenu/InterfaceScale), so a phone player can change it mid-floor. -->
             <ui:VisualElement class="cd-option-row">
                 <ui:Label text="#ui.menu.interface-size" class="cd-option-label" />
-                <ui:Button name="options-ui-size" text="" class="cd-button cd-option-toggle" />
+                <ui:Button name="ui-size-down" text="-" class="cd-button cd-button--step" />
+                <ui:Label name="ui-size-value" text="" class="cd-option-value cd-option-value--size" />
+                <ui:Button name="ui-size-up" text="+" class="cd-button cd-button--step" />
             </ui:VisualElement>
+            </ui:ScrollView>
 
             <ui:Button name="pause-quit" text="#ui.room.pause-quit" class="cd-button cd-button--wide" />
         </ui:VisualElement>

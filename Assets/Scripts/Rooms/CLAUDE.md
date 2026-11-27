@@ -328,6 +328,9 @@ Up while walking the floor, hidden in combat and under the victory / level-clear
 
 ## The walking UI and room dialogs (2026-09-30)
 
+- **The plates under the units (`UnitNameplates`) ignore the Interface size**: each is counter-scaled
+  to its 100% size, hanging from the feet (owner, 2026-11-27). They belong to the battle, not the
+  menus; drawn at 130% on a phone they grew while the sprites did not and covered the enemy below.
 - **Fight / Flee is headed by who is in the room** (`fight-foes`, the pure `FoeLine`): met enemies
   by name, grouped by *kind* ("Slag Hound x2 + Cinder Imp"), every unmet one folded into one count
   ("+ 2 unknown", or "4 unknown foes"), no stats. A "???" per unmet kind read as "??? + ??? + ??? x2".

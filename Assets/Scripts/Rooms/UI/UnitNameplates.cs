@@ -43,6 +43,7 @@ namespace Assets.Scripts.Rooms.UI
             public Label Hp;
             public VisualElement Fill;
             public string LastHpText;
+            public float Scale = 1f;
         }
 
         private readonly Dictionary<ICombatUnit, Plate> _plates = new Dictionary<ICombatUnit, Plate>();
@@ -142,6 +143,8 @@ namespace Assets.Scripts.Rooms.UI
             // Centred on its anchor point: the plate's own width is unknown until layout.
             root.style.position = Position.Absolute;
             root.style.translate = new Translate(Length.Percent(-50), 0);
+            // Scaled from its top centre, so it still hangs from the feet (see Place).
+            root.style.transformOrigin = new TransformOrigin(Length.Percent(50), 0);
 
             var enemy = unit as Enemy;
             if (enemy != null && enemy.IsBoss)
@@ -200,9 +203,19 @@ namespace Assets.Scripts.Rooms.UI
                 ? new Vector3(sr.bounds.center.x, sr.bounds.min.y, unit.Transform.position.z)
                 : unit.Transform.position;
 
+            // A plate belongs to the battle, not the menus: it keeps its 100% size against the sprites
+            // whatever the Interface size. Drawn at 130% on a phone it grew while the enemies did
+            // not, and reached into the enemy standing below it (owner, 2026-11-27).
+            float inverse = 100f / Mathf.Max(1, MainMenu.InterfaceScale.Current);
+            if (!Mathf.Approximately(plate.Scale, inverse))
+            {
+                plate.Scale = inverse;
+                plate.Root.style.scale = new Scale(new Vector3(inverse, inverse, 1f));
+            }
+
             Vector2 p = RuntimePanelUtils.CameraTransformWorldToPanel(panel, feet, camera);
             plate.Root.style.left = p.x;
-            plate.Root.style.top = p.y + FeetGap;
+            plate.Root.style.top = p.y + FeetGap * inverse;
         }
 
         private void Remove(ICombatUnit unit)

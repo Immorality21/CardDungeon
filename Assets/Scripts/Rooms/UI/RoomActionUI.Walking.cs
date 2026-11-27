@@ -297,31 +297,6 @@ namespace Assets.Scripts.Rooms
             }
         }
 
-        /// <summary>The words after "Enter:" in the walking hint, or null when nothing is at hand.</summary>
-        private string UseLabel(RoomUse use)
-        {
-            switch (use)
-            {
-                case RoomUse.GoBack:
-                    return Loc.Get("room.use.go-back");
-                case RoomUse.Event:
-                    var roomEvent = PendingEvent();
-                    return roomEvent != null && !string.IsNullOrEmpty(roomEvent.Title)
-                        ? Loc.Format("room.use.event", ("event", roomEvent.Title))
-                        : Loc.Get("room.use.look");
-                case RoomUse.SideRoom:
-                    return Loc.Get("room.use.go-in");
-                case RoomUse.Search:
-                    return Loc.Get("room.use.search");
-                case RoomUse.Rest:
-                    return Loc.Get("room.use.rest");
-                case RoomUse.Stairs:
-                    return Loc.Get("room.use.stairs");
-                default:
-                    return null;
-            }
-        }
-
         /// <summary>
         /// Stepping onto (or into) the stairs or a refuge opens its prompt at once (playtest 4 findings
         /// 37 and 64). Only for a step the keys took, and only once per step: a declined prompt does

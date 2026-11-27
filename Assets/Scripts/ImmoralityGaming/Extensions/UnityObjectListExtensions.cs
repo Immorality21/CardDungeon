@@ -21,18 +21,6 @@ public static class UnityObjectListExtensions
         list.Clear();
     }
 
-    public static void DeactivateAndClear<T>(this List<T> list) where T : Object
-    {
-        foreach (var item in list.Where(x => x != null))
-        {
-            GameObject gameObject = item as GameObject;
-
-            gameObject.SetActive(false);
-        }
-
-        list.Clear();
-    }
-
     private static void DestroyAndClearInEditor<T>(this List<T> list, bool destroyGameObject) where T : Object
     {
         foreach (var item in list.Where(x => x != null))

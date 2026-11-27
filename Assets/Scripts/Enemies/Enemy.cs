@@ -140,7 +140,9 @@ namespace Assets.Scripts.Enemies
         public Sprite Icon => GetIcon();
         public bool IsAlive => Stats != null && Stats.Health > 0;
         public bool IsHero => false;
-        public Transform Transform => transform;
+        // A destroyed unit has no transform rather than throwing, so a cast still being drawn
+        // over a unit that died mid-presentation reads it as gone (bot, 2026-11-27).
+        public Transform Transform => this != null ? transform : null;
 
         Stats ICombatUnit.Stats => Stats;
         List<Resistance> ICombatUnit.Resistances => Resistances;

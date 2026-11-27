@@ -90,10 +90,12 @@ namespace Assets.Scripts.MainMenu
             }
         }
 
-        /// <summary>Moves to the next size (150% wraps to 100%), saves it and redraws at once.</summary>
-        public static int Cycle()
+        /// <summary>Moves one size smaller (<paramref name="direction"/> -1) or larger (+1), stopping
+        /// at either end, saves it and redraws at once. No wrap: cycling 130 -> 150 -> 100 put a phone
+        /// through 150%, where the setting itself ran off the screen (owner, 2026-11-27).</summary>
+        public static int Step(int direction)
         {
-            Data.InterfaceSize = Next(Data.InterfaceSize);
+            Data.InterfaceSize = Stepped(Data.InterfaceSize, direction);
             new FileHandler().Save(Data);
             Apply();
             return Data.InterfaceSize;
@@ -135,17 +137,23 @@ namespace Assets.Scripts.MainMenu
             return new Vector2Int(Mathf.RoundToInt(baseResolution.x / factor), Mathf.RoundToInt(baseResolution.y / factor));
         }
 
-        /// <summary>The size after <paramref name="size"/> in the cycle; anything unknown starts it again.</summary>
-        public static int Next(int size)
+        /// <summary>The size one step from <paramref name="size"/> towards <paramref name="direction"/>,
+        /// held at the smallest and largest; anything unknown starts from the smallest.</summary>
+        public static int Stepped(int size, int direction)
         {
-            for (int i = 0; i < Steps.Length; i++)
+            int index = System.Array.IndexOf(Steps, size);
+            if (index < 0)
             {
-                if (Steps[i] == size)
-                {
-                    return Steps[(i + 1) % Steps.Length];
-                }
+                return Steps[0];
             }
-            return Steps[0];
+            int next = Mathf.Clamp(index + System.Math.Sign(direction), 0, Steps.Length - 1);
+            return Steps[next];
+        }
+
+        /// <summary>Whether a step towards <paramref name="direction"/> would change the size.</summary>
+        public static bool CanStep(int size, int direction)
+        {
+            return Stepped(size, direction) != size;
         }
 
         /// <summary>A stored size outside the steps (no file yet, or a hand-edited one) becomes the

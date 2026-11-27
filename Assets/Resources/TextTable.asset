@@ -5952,54 +5952,6 @@ MonoBehaviour:
     - Enter fight
     Reviewed: 0
     Note: Keyboard hint on the Fight bar where fleeing is refused (boss rooms, side rooms)
-  - Key: room.keys.doors
-    Values:
-    - "Arrows / WASD walk \xB7 P potions"
-    Reviewed: 0
-    Note: Keyboard hint while walking the floor, with nothing at hand to use
-  - Key: room.keys.doors-use
-    Values:
-    - "Arrows / WASD walk \xB7 Enter: {use} \xB7 P potions"
-    Reviewed: 0
-    Note: Keyboard hint while walking the floor beside something usable; {use} =
-      a room.use.* phrase
-  - Key: room.use.rest
-    Values:
-    - rest
-    Reviewed: 0
-    Note: Walking hint after "Enter:", facing an unspent refuge
-  - Key: room.use.stairs
-    Values:
-    - take the stairs
-    Reviewed: 0
-    Note: Walking hint after "Enter:", facing the stairs of a cleared exit room
-  - Key: room.use.search
-    Values:
-    - search the chest
-    Reviewed: 0
-    Note: Walking hint after "Enter:", facing an unopened cache
-  - Key: room.use.event
-    Values:
-    - '{event}'
-    Reviewed: 0
-    Note: Walking hint after "Enter:", facing a room event's object; {event} = the
-      event's title
-  - Key: room.use.look
-    Values:
-    - look closer
-    Reviewed: 0
-    Note: Walking hint after "Enter:", facing a room event's object whose event has
-      no title
-  - Key: room.use.go-in
-    Values:
-    - go in
-    Reviewed: 0
-    Note: Walking hint after "Enter:", facing the way into a side room an event opened
-  - Key: room.use.go-back
-    Values:
-    - go back
-    Reviewed: 0
-    Note: Walking hint after "Enter:", in a side room, facing the way back out
   - Key: room.joined.grid-started
     Values:
     - Joins with part of their grid already learned.
@@ -6167,17 +6119,6 @@ MonoBehaviour:
     Reviewed: 0
     Note: Dungeon HUD run line; {run} = run name, {level} = level number, {total}
       = levels in run
-  - Key: room.hud.map-key
-    Values:
-    - M  map
-    Reviewed: 0
-    Note: Dungeon HUD map shortcut hint (two spaces)
-  - Key: room.hud.explore
-    Values:
-    - "{status}  \xB7  M  map"
-    Reviewed: 0
-    Note: Dungeon HUD exploration line; {status} = room.map.status text (keep the
-      double spaces)
   - Key: room.hud.gold-teaching
     Values:
     - Gold found  +{amount}   (kept when you take the stairs)

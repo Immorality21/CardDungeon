@@ -26,7 +26,9 @@ namespace Assets.Scripts.MainMenu
         private readonly VisualElement _sfxBar;
         private readonly Button _muteButton;
         private readonly Button _speedButton;
-        private readonly Button _sizeButton;
+        private readonly Label _sizeValue;
+        private readonly Button _sizeDown;
+        private readonly Button _sizeUp;
         private readonly Label _note;
         private readonly Button _closeButton;
 
@@ -43,7 +45,9 @@ namespace Assets.Scripts.MainMenu
             _sfxBar = root.Q<VisualElement>("sfx-bar");
             _muteButton = root.Q<Button>("options-mute");
             _speedButton = root.Q<Button>("options-speed");
-            _sizeButton = root.Q<Button>("options-ui-size");
+            _sizeValue = root.Q<Label>("ui-size-value");
+            _sizeDown = root.Q<Button>("ui-size-down");
+            _sizeUp = root.Q<Button>("ui-size-up");
             _note = root.Q<Label>("options-note");
             _closeButton = root.Q<Button>("options-close");
 
@@ -74,16 +78,11 @@ namespace Assets.Scripts.MainMenu
                     Refresh();
                 };
             }
-            if (_sizeButton != null)
-            {
-                // Interface size (2026-11-15): 100 -> 115 -> 130 -> 150%, redrawn at once.
-                _sizeButton.clicked += () =>
-                {
-                    InterfaceScale.Cycle();
-                    CombatAudio.Play(CombatSound.CursorMove);
-                    Refresh();
-                };
-            }
+            // Interface size (2026-11-15): - and + step through 100/115/130/150%, redrawn at once.
+            // Two buttons rather than one that cycles (owner, 2026-11-27): cycling sent a phone
+            // through 150% on the way back to 100, and there the setting ran off the screen.
+            WireSizeStep(_sizeDown, -1);
+            WireSizeStep(_sizeUp, 1);
             if (_closeButton != null)
             {
                 _closeButton.clicked += Hide;
@@ -102,6 +101,20 @@ namespace Assets.Scripts.MainMenu
         {
             _root.style.display = DisplayStyle.None;
             OnClosed?.Invoke();
+        }
+
+        private void WireSizeStep(Button button, int direction)
+        {
+            if (button == null)
+            {
+                return;
+            }
+            button.clicked += () =>
+            {
+                InterfaceScale.Step(direction);
+                CombatAudio.Play(CombatSound.CursorMove);
+                Refresh();
+            };
         }
 
         private void WireStep(VisualElement root, string buttonName, AudioChannel channel, int steps)
@@ -142,10 +155,9 @@ namespace Assets.Scripts.MainMenu
             {
                 _speedButton.text = Combat.CombatSpeed.Label(Combat.CombatSpeed.Current);
             }
-            if (_sizeButton != null)
-            {
-                _sizeButton.text = InterfaceScale.Label(InterfaceScale.Current);
-            }
+            SetText(_sizeValue, InterfaceScale.Label(InterfaceScale.Current));
+            _sizeDown?.SetEnabled(InterfaceScale.CanStep(InterfaceScale.Current, -1));
+            _sizeUp?.SetEnabled(InterfaceScale.CanStep(InterfaceScale.Current, 1));
             SetText(_note, muted
                 ? Loc.Get("menu.options.note-muted")
                 : Loc.Get("menu.options.note"));

@@ -3033,6 +3033,16 @@
     flex-shrink: 0;
 }
 
+.cd-window--pause > .cd-options-scroll {
+    flex-shrink: 1;
+    min-height: 0;
+}
+
+.cd-options-scroll .cd-button--wide,
+.cd-options-scroll .cd-pause-pair {
+    flex-shrink: 0;
+}
+
 /* The pause menu's Hints window: every line seen, oldest first. */
 .cd-window--hints {
     width: 720px;
@@ -4380,6 +4390,12 @@
     color: rgb(200, 190, 225);
     font-size: 16px;
     -unity-text-align: middle-right;
+}
+
+/* The interface size sits between its - and + buttons, so it reads centred. */
+.cd-option-value--size {
+    width: 72px;
+    -unity-text-align: middle-center;
 }
 
 /* The mute toggle, sized like the dial row it sits in rather than like a menu choice. */

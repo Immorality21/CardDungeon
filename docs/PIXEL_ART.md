@@ -217,7 +217,7 @@ the same flip. A unit with no hit frames still flinches; it just only recoils.
   `Assets/Sprites/Heroes/` (`<hero>-idle.png`, `<hero>-hit.png`, an Ultra form as
   `<hero>-<form>-idle.png`), `Assets/Sprites/Enemies/` (`<enemy>-idle.png`, `<enemy>-hit.png`, the
   static `<Enemy>.png`), `Assets/Sprites/Summons/`, `Items/`, `Abilities/`, `Environment/`, `Hub/`,
-  `UI/`, `Backgrounds/`. `_Unused/` holds art nothing references — some legacy, some not wired up yet.
+  `UI/`, `Backgrounds/`.
   Move sprites with `AssetDatabase.MoveAsset`, never on disk, so the GUIDs and references survive.
 - **Strips** are `<name>-idle.png` in their unit's folder: horizontal, 3 frames, full-frame
   slices (`x = k × width`, `y = 0`), `spriteMode: 2`, `filterMode: 0` (point),

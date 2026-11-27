@@ -362,11 +362,15 @@ namespace Tests.EditMode
         }
 
         [Test]
-        public void InterfaceScale_Next_CyclesAndWraps()
+        public void InterfaceScale_Stepped_MovesBothWaysAndStopsAtTheEnds()
         {
-            Assert.AreEqual(115, InterfaceScale.Next(100));
-            Assert.AreEqual(100, InterfaceScale.Next(150));
-            Assert.AreEqual(100, InterfaceScale.Next(7));
+            Assert.AreEqual(115, InterfaceScale.Stepped(100, 1));
+            Assert.AreEqual(115, InterfaceScale.Stepped(130, -1));
+            Assert.AreEqual(150, InterfaceScale.Stepped(150, 1), "no wrap past the largest");
+            Assert.AreEqual(100, InterfaceScale.Stepped(100, -1), "no wrap past the smallest");
+            Assert.AreEqual(100, InterfaceScale.Stepped(7, 1));
+            Assert.IsFalse(InterfaceScale.CanStep(150, 1));
+            Assert.IsTrue(InterfaceScale.CanStep(150, -1));
         }
 
         [Test]

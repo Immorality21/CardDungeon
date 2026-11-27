@@ -68,10 +68,13 @@ deliberate **Main Menu** button.
 - **The settings scroll** *(2026-11-15)*: everything between the title and Controls/Back sits in
   `options-scroll`, and `.cd-window--options` lets the window use 94% of the screen. At a large
   Interface size on a phone the list is taller than the screen; squeezing it crushed the rows into
-  each other.
+  each other. **The dungeon's pause menu scrolls the same way** (`pause-scroll`, owner 2026-11-27): it
+  had no scroll, and at 150% on a phone its last rows, the size setting among them, were off the screen.
 
-- **Interface size** *(2026-11-15)* - `InterfaceScale`, the `options-ui-size` button (also in the
-  dungeon's pause menu, through the same `AudioOptionsUI`). 100 / 115 / 130 / 150%, saved to
+- **Interface size** *(2026-11-15)* - `InterfaceScale`, the `ui-size-down` / `ui-size-up` buttons
+  either side of `ui-size-value` (also in the dungeon's pause menu, through the same `AudioOptionsUI`).
+  They step and stop at either end (`InterfaceScale.Stepped`, owner 2026-11-27): a single button that
+  cycled and wrapped sent a phone through 150% on the way back to 100. 100 / 115 / 130 / 150%, saved to
   `savedata/Display.json`; the first launch on a phone or tablet (`Application.isMobilePlatform`, true
   in a mobile browser) starts at 130%. It shrinks the shared `PanelSettings`' **reference
   resolution** (130% = 1231×692), so everything is drawn larger with no UXML change; in the editor the
