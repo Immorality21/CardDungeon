@@ -188,18 +188,19 @@ namespace Assets.Scripts.Tutorial
 
         /// <summary>
         /// Whether a step locks the town to one building (<see cref="GuidedLotKey"/>): the hall's two
-        /// steps, the Storehouse's, and the belt's.
+        /// steps, the Storehouse's, and the Merchant's. Packing the potion is not one of them: the belt
+        /// is packed on the level entry (2026-11-27), so that step locks the town to the road.
         /// </summary>
         private static bool GuidesBuilding(TutorialStep step)
         {
             return step == TutorialStep.BuildHall || step == TutorialStep.SpendXp || step == TutorialStep.EquipGear
                 || step == TutorialStep.RevisitHall || step == TutorialStep.BuildMerchant
-                || step == TutorialStep.UpgradeBelt || step == TutorialStep.EquipPotion;
+                || step == TutorialStep.UpgradeBelt;
         }
 
         /// <summary>The lot the step walks the player to.</summary>
         public static string GuidedLotKey(TutorialStep step, string hallKey, string gearKey,
-            string beltKey = null, string campKey = null)
+            string beltKey = null)
         {
             switch (step)
             {
@@ -208,8 +209,6 @@ namespace Assets.Scripts.Tutorial
                 case TutorialStep.BuildMerchant:
                 case TutorialStep.UpgradeBelt:
                     return beltKey;
-                case TutorialStep.EquipPotion:
-                    return campKey;
                 default:
                     return hallKey;
             }
@@ -221,13 +220,13 @@ namespace Assets.Scripts.Tutorial
         /// </summary>
         public static bool LocksTown(TutorialStep step)
         {
-            return step == TutorialStep.ClearFirstFloor || GuidesBuilding(step);
+            return step == TutorialStep.ClearFirstFloor || GuidesBuilding(step) || step == TutorialStep.EquipPotion;
         }
 
         /// <summary>Whether a lot can be clicked. While the town is locked, only the guide building can.</summary>
         public static bool AllowsLot(TutorialStep step, string lotKey, string guideKey)
         {
-            if (step == TutorialStep.ClearFirstFloor)
+            if (step == TutorialStep.ClearFirstFloor || step == TutorialStep.EquipPotion)
             {
                 return false;
             }
@@ -255,7 +254,7 @@ namespace Assets.Scripts.Tutorial
         public static bool GuidesRoad(TutorialStep step)
         {
             return step == TutorialStep.ClearFirstFloor || step == TutorialStep.TakeTheRoad
-                || step == TutorialStep.GoOn || step == TutorialStep.BeltReady;
+                || step == TutorialStep.GoOn || step == TutorialStep.EquipPotion || step == TutorialStep.BeltReady;
         }
 
         /// <summary>
@@ -380,13 +379,13 @@ namespace Assets.Scripts.Tutorial
                     switch (screen)
                     {
                         case TutorialScreen.Town:
-                            return TutorialCue.OpenCampfireInTown;
-                        case TutorialScreen.GuideLot:
-                            return TutorialCue.EnterCampfireOnPanel;
+                            return TutorialCue.PackPotionInTown;
+                        case TutorialScreen.CampaignMap:
+                            return TutorialCue.PackPotionOnMap;
                         case TutorialScreen.Merchant:
                             // The step starts the moment the upgrade is bought, with the Merchant still up.
                             return TutorialCue.BeltUpgraded;
-                        case TutorialScreen.Campfire:
+                        case TutorialScreen.LevelEntry:
                             return TutorialCue.EquipPotion;
                         default:
                             return TutorialCue.None;
@@ -397,7 +396,7 @@ namespace Assets.Scripts.Tutorial
                     {
                         return TutorialCue.BeltReady;
                     }
-                    return screen == TutorialScreen.Campfire ? TutorialCue.BeltPacked : TutorialCue.None;
+                    return screen == TutorialScreen.LevelEntry ? TutorialCue.BeltPacked : TutorialCue.None;
 
                 default:
                     return TutorialCue.None;

@@ -318,8 +318,7 @@ backlog.**
 
 ### [Needs a playtest](TO_PLAYTEST.md) — built, not yet played by a human
 
-- Everything playtest 3 (2026-10-26) changed, as a checklist, plus the owner's to-dos (boss finisher
-  names, the Hero Workbook). Playtest 3's findings all shipped or moved here and below; its file is gone.
+- Cleared by the owner 2026-11-27. New items go there as they are built.
 
 ### Later, small
 
@@ -431,7 +430,7 @@ backlog.**
 | **20** | **A tutorial — guide the player through the first hour** | **first loop shipped 2026-09-29** (New Game → floor 1 → build the Hall of Progression → first grid node → the road); learnings + todos in `docs/TUTORIAL.md` |
 | **17** | Content volume is the biggest single gap | not started |
 | **17a** | **Music leitmotifs** for bosses, heroes and places (playtest 4 finding 66) | backlog, after the demo |
-| **18** | Item and consumable depth | **healing repaired 2026-09-17** (§18b, `BALANCING.md` §5v); gear trade-offs, party-wide healing and *selling consumables at all* still open; **§18c the potion belt — overhaul or re-evaluate** (opened 2026-09-28; playtest 4 findings 50/51 folded in 2026-11-13: what the belt is, swapping, shared by the party); **set bonuses deferred** (owner unsure they make sense, 2026-10-07) — the 4-piece Shadowweave set is authored, no set logic (§18a-sets); **§18d gear restrictions** — equipment types on items + per-hero eligibilities, so a mage wears cloth and wands, not plate (opened 2026-10-29, owner; not started, four decisions open) |
+| **18** | Item and consumable depth | **healing repaired 2026-09-17** (§18b, `BALANCING.md` §5v); gear trade-offs, party-wide healing and *selling consumables at all* still open; **§18c the potion belt — overhaul or re-evaluate** (opened 2026-09-28; playtest 4 findings 50/51 folded in 2026-11-13: what the belt is, swapping, shared by the party; **first step 2026-11-27: packed on the level-entry screen, no longer at the campfire**); **set bonuses deferred** (owner unsure they make sense, 2026-10-07) — the 4-piece Shadowweave set is authored, no set logic (§18a-sets); **§18d gear restrictions** — equipment types on items + per-hero eligibilities, so a mage wears cloth and wands, not plate (opened 2026-10-29, owner; not started, four decisions open) |
 | **19** | Shipping surface | not started |
 | **22** | **Localization follow-ups** — after the 2026-10-30 text system | ✅ **done 2026-11-01** |
 | **21** | **Art pass** — every outdated sprite | **enemies done 2026-09-29** (the five still enemies redrawn + animated, both bosses at Warden size, a 32 px Dark Jailor); menu backdrops, combat backgrounds, floor rock and item icons done 2026-09-28. **all seven heroes in one style 2026-09-29** (Warrior, Cultist, Cleric, Ranger, Tinkerer redone). **2026-10-08: every floor has a biome combat background** (four new: Threshold halls and caverns, the Archive, the Drowned Chapel), **a pixel-art window frame** on every window, **a painted death screen**, **a calm flagstone dungeon floor**, and the title menu docked over the stairs. Left (deferred to polish by the owner): attack/hit animations; a title logo (the title is a placeholder); the parked `productName` / save-folder rename |

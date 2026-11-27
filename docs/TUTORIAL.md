@@ -103,8 +103,9 @@ rest of the Threshold, and the last floor's clear pays for the belt (`TutorialSO
 A belt recipe is not an item, so the Energy recipe (`BeltPotionKey`) is learned outright, ahead of its
 usual sale after The Catacombs. Home: `BuildMerchant` (skipped when it stands), `UpgradeBelt` (the Merchant
 opens on its Potion Belt tab, locked to the Healing capacity row, `MerchantUI.GuideBelt`, Back shut until
-bought), `EquipPotion` (town locked to the campfire, its second belt slot pointed at, Back shut until the
-potion is packed), `BeltReady` (town open; going down finishes the tutorial). Any step the save cannot pay
+bought), `EquipPotion` (town locked to the road since 2026-11-27, when the belt moved from the campfire to the level
+entry: the story map says to pick a level, the entry screen points at the empty belt slot and Enter Dungeon
+stays shut until the potion is packed), `BeltReady` (town open; going down finishes the tutorial). Any step the save cannot pay
 for is skipped. The materials show on the level-clear window; the recipe has no line there, only the
 banner says it (`BeltUpgraded`). The bot finishes the tutorial on its first town visit, so it gets none of
 this.

@@ -350,9 +350,15 @@ definition and the roster left with the screens that needed them, which is the s
 
 **The hit-test trap** is the most load-bearing UI rule here: a `cd-dock-center` window that *changes
 size* leaves UITK's input hit-testing on the old transform, offsetting every click. That is why
-`bestiary-view` and `campaign-view` are `cd-window--fixed`, `inventory-view`, `party-view`,
-`merchant-view` and `grid-view` are px-sized `cd-inv-window`s (1180x720) whose every region exists in every state, and why the town is one
-fixed canvas.
+**`campaign-view` and `grid-view` fill the screen** (`cd-window--fullscreen`, 2026-11-27, owner: pinned to
+the four edges, never translate-centred, and `FitToScreen` leaves them unscaled), the other service screens
+(`inventory-view`, `party-view`, `merchant-view`, `forge-view`, `bestiary-view`, `tavern-view`) are
+`cd-inv-window`s whose every region exists in every state, and the town is one fixed canvas. **A
+`cd-inv-window` is 88% x 90% of the screen since 2026-11-27** (owner: bigger, a little less than the two
+full-screen maps, so the town shows round the rim; 90% keeps the tutorial banner's strip above it), never
+below 1180x720, which the px columns need. Its size comes from the screen alone, never the content, so it
+cannot resize under the cursor; a screen too small for the minimum scales it down whole (`FitToScreen`). The
+detail column takes the extra width, and the Storehouse's middle list is 34% of the frame (min 360px).
 
 ## Keyboard navigation
 
@@ -471,10 +477,8 @@ the close path — it raises `OnClosed`, and `HubManager` never calls it directl
   row under the cursor - with a gold **Leader** badge (`cd-camp-row__lead-badge`) on seat 1. *Lead the
   party* on a benched hero brings them along in front when a seat is free (`CampfireLeadOps`, pure;
   refused while the run locks the lineup). Seat order beyond the leader is no longer shown.
-  **A belt slot opens a potion picker** (`party-belt-picker`, finding 50) instead of cycling: every
-  known type plus Empty, a type in another slot marked and swapped (`PotionBeltOps.Assign`). The rest of
-  the frame is disabled under it, and `HubManager.CancelButtonForCurrentView` presses
-  `PartySelectUI.CancelButton`, so Escape closes the picker first. Every control is a `Button`, so the shared navigator drives it (it is *not* one of
+  **The potion belt is no longer here** (owner, 2026-11-27): it moved to the level-entry screen below.
+  Every control is a `Button`, so the shared navigator drives it (it is *not* one of
   the screens with its own cursor). Minimum one hero; the cap is `MetaProgressManager.GetPartyCap()`
   (four; the slot purchase is gone). The screen states the XP share as the standing cost of width.
   Reachable from the campfire and from the run-progress screen next to *Enter Dungeon*;
@@ -488,9 +492,16 @@ the close path — it raises `OnClosed`, and `HubManager` never calls it directl
   Rescues still join mid-run (`TryFieldIfRoom`). They were earned inside the run.
 - **The level-entry screen** (`progress-view`, `HubManager.ShowRunProgressPanel`) — one fixed size
   (`.hub-entry`): run name + "Level N of M", a pip per floor (`BuildLevelPips`), the fielded party as
-  portrait tiles with HP (`BuildPartyTiles`), and Enter Dungeon / Change Party / Back in that order (Change Party hidden once the run is
-  underway).
-- **MerchantUI** — the Gold sink (gear, and the potion belt: slots, recipes, and each type's capacity and potency, for gold plus materials - `PotionBeltSO`). The campfire's **Potion belt** section (`party-belt-0..3`, two per row) picks the type per slot; a press opens the potion picker, and it locks with the lineup once a run starts. See the Progression guide.
+  portrait tiles with HP (`BuildPartyTiles`), **the potion belt** under them, and Enter Dungeon / Change Party / Back in that order (Change Party hidden once the run is
+  underway). The arrow cursor arms on Enter Dungeon, not the belt above it (`ArmCursorOnModalScreen`).
+  **The belt is packed here since 2026-11-27** (owner: "an easy-to-select option when going into the
+  dungeon, just like selecting the heroes"; it was the campfire's). `PotionBeltPanel` (a plain
+  view-controller, `progress-belt-0..3` + `progress-belt-picker`): one button per slot bought, a press
+  opens a picker of every known type plus Empty, a type in another slot marked and swapped
+  (`PotionBeltOps.Assign`, finding 50). The rest of the window is disabled under the picker, and
+  `CancelButtonForCurrentView` presses the picker's Back first. Once the run's first floor is entered the
+  belt is packed, like the lineup: the slots only say so. The tutorial's `EquipPotion` step points here.
+- **MerchantUI** — the Gold sink (gear, and the potion belt: slots, recipes, and each type's capacity and potency, for gold plus materials - `PotionBeltSO`). Which type sits in each slot is picked on the level-entry screen (above). See the Progression guide.
   **On the inventory frame since 2026-09-30**: Buy / Sell / Potion Belt tabs, a hero strip choosing
   who gear is compared against, and a detail column reusing the inventory's grants block
   (`InventoryHubUI.AddItemLines`, `StatCell`, `DeltaCell`, `SetIcon`, `ApplyRarity` are `internal static` for this).

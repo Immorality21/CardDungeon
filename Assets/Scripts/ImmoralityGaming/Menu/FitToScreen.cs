@@ -26,6 +26,10 @@ namespace ImmoralityGaming.Menu
         /// <summary>The share of the screen a fitted window may use, leaving a rim around it.</summary>
         public const float Margin = 0.97f;
 
+        /// <summary>A window pinned to the screen's edges: it is the screen's size by construction, so
+        /// it is never shrunk (it would only lose the rim <see cref="Margin"/> keeps).</summary>
+        public const string FillsScreenClass = "cd-window--fullscreen";
+
         /// <summary>Marks a window that is already fitted, so attaching twice adds nothing.</summary>
         private const string AttachedClass = "fit-to-screen";
 
@@ -71,7 +75,9 @@ namespace ImmoralityGaming.Menu
         public static void Fit(VisualElement window)
         {
             var screen = window.panel != null ? window.panel.visualTree : null;
-            var factor = screen != null ? Factor(window.layout.size, screen.layout.size, Margin) : 1f;
+            var factor = screen != null && !window.ClassListContains(FillsScreenClass)
+                ? Factor(window.layout.size, screen.layout.size, Margin)
+                : 1f;
             if (factor >= 1f)
             {
                 // Fits: hand the scale back to the stylesheet rather than pinning it at 1.

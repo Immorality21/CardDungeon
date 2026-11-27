@@ -49,8 +49,6 @@ namespace Assets.Scripts.Hub
         private readonly Label _capLabel;
         private readonly Label _shareLabel;
         private readonly Label _feedbackLabel;
-        private readonly List<Button> _beltSlots = new List<Button>();
-        private readonly Label _beltDesc;
         private readonly ScrollView _rosterList;
 
         private readonly VisualElement _detailIcon;
@@ -70,12 +68,6 @@ namespace Assets.Scripts.Hub
 
         private readonly Dictionary<string, Button> _rosterRows = new Dictionary<string, Button>();
 
-        // The potion picker a belt slot opens (playtest 4 finding 50), and the slot it fills.
-        private readonly VisualElement _beltPicker;
-        private readonly Label _beltPickerTitle;
-        private readonly VisualElement _beltPickerList;
-        private readonly Button _beltPickerCancel;
-        private int _pickingSlot = -1;
         private MagicLoadoutSaveData _loadout;
         private string _selectedKey;
 
@@ -85,10 +77,7 @@ namespace Assets.Scripts.Hub
 
         public event Action OnClosed;
 
-        /// <summary>A belt slot changed.</summary>
-        public event Action BeltChanged;
-
-        /// <summary>Asked before closing; false keeps the screen up (the tutorial's belt step).</summary>
+        /// <summary>Asked before closing; false keeps the screen up.</summary>
         public Func<bool> CanClose { get; set; }
 
         public PartySelectUI(VisualElement root, PartyRosterSO catalog)
@@ -116,25 +105,6 @@ namespace Assets.Scripts.Hub
             _splitFocusButton = root.Q<Button>("party-split-focus");
             _splitDescLabel = root.Q<Label>("party-split-desc");
             _closeButton = root.Q<Button>("party-close");
-            _beltDesc = root.Q<Label>("party-belt-desc");
-
-            // As many slot buttons as the markup authors; a belt with fewer slots hides the rest.
-            for (int i = 0; root.Q<Button>("party-belt-" + i) != null; i++)
-            {
-                var slot = root.Q<Button>("party-belt-" + i);
-                int index = i;
-                slot.clicked += () => OnBeltSlotClicked(index);
-                _beltSlots.Add(slot);
-            }
-
-            _beltPicker = root.Q<VisualElement>("party-belt-picker");
-            _beltPickerTitle = root.Q<Label>("party-belt-picker-title");
-            _beltPickerList = root.Q<VisualElement>("party-belt-picker-list");
-            _beltPickerCancel = root.Q<Button>("party-belt-picker-cancel");
-            if (_beltPickerCancel != null)
-            {
-                _beltPickerCancel.clicked += CloseBeltPicker;
-            }
 
             if (_toggleButton != null)
             {
@@ -177,7 +147,6 @@ namespace Assets.Scripts.Hub
             _loadout = _files.Load<MagicLoadoutSaveData>();
             _selectedKey = null;
             SetFeedback(string.Empty);
-            CloseBeltPicker();
             Refresh();
         }
 
@@ -187,7 +156,6 @@ namespace Assets.Scripts.Hub
             {
                 return;
             }
-            CloseBeltPicker();
             _root.style.display = DisplayStyle.None;
             OnClosed?.Invoke();
         }
@@ -242,7 +210,6 @@ namespace Assets.Scripts.Hub
             BuildRoster(owned, fieldedKeys);
             RefreshDetail(owned, fieldedKeys, cap);
             RefreshSplitControls(fieldedKeys);
-            RefreshBelt();
         }
 
         /// <summary>
@@ -522,158 +489,6 @@ namespace Assets.Scripts.Hub
         /// a disabled button here never reads as a bug. The chosen mode stays enabled so the
         /// keyboard cursor can land on it.</para>
         /// </summary>
-        // --- The potion belt --------------------------------------------------
-
-        /// <summary>
-        /// One button per slot the belt has: the potion in it and how many a run starts with, or
-        /// "Empty". Packed for the run once it is underway, like the lineup.
-        /// </summary>
-        private void RefreshBelt()
-        {
-            var belt = PotionBeltSO.Load();
-            int slots = belt != null ? PotionBeltState.Slots(belt) : 0;
-            var loadout = belt != null ? PotionBeltState.Loadout(belt) : new List<string>();
-            for (int i = 0; i < _beltSlots.Count; i++)
-            {
-                var button = _beltSlots[i];
-                bool shown = i < slots;
-                button.style.display = shown ? DisplayStyle.Flex : DisplayStyle.None;
-                if (!shown)
-                {
-                    continue;
-                }
-                var type = belt.Find(loadout[i]);
-                button.text = type != null ? Loc.Format("hub.camp.belt-slot", ("potion", type.DisplayName), ("count", PotionBeltState.Capacity(type))) : Loc.Get("hub.camp.belt-empty");
-                button.tooltip = type != null ? ItemPresenter.ConsumableEffectLine(type.Potion) : string.Empty;
-                button.EnableInClassList("cd-camp-mode--chosen", type != null);
-            }
-            SetText(_beltDesc, _lockedReason != null
-                ? Loc.Get("hub.camp.belt-packed")
-                : Loc.Get("hub.camp.belt-desc"));
-        }
-
-        private void OnBeltSlotClicked(int index)
-        {
-            if (_lockedReason != null)
-            {
-                SetFeedback(Loc.Get("hub.camp.belt-packed-feedback"));
-                return;
-            }
-            var belt = PotionBeltSO.Load();
-            if (belt == null)
-            {
-                return;
-            }
-            var loadout = PotionBeltState.Loadout(belt);
-            if (index >= loadout.Count)
-            {
-                return;
-            }
-            OpenBeltPicker(belt, loadout, index);
-        }
-
-        // --- The potion picker (playtest 4 finding 50) ---------------------------
-
-        /// <summary>Whether the potion picker is up over the screen.</summary>
-        public bool IsPickingPotion => _pickingSlot >= 0;
-
-        /// <summary>
-        /// The button Escape should press on this screen: the picker's Back while it is up, else the
-        /// screen's own. The hub presses it, so the keyboard closes one layer at a time.
-        /// </summary>
-        public Button CancelButton => IsPickingPotion && _beltPickerCancel != null
-            ? _beltPickerCancel
-            : _closeButton;
-
-        /// <summary>
-        /// A slot press opens a list of every potion type known plus Empty - a press used to cycle the
-        /// slot, and on an Empty slot whose types all sat in other slots it did nothing at all. A type in
-        /// another slot is marked and swaps places (<see cref="PotionBeltOps.Assign"/>). The rest of the
-        /// frame is disabled beneath it, so the hub's shared cursor walks only the picker's rows.
-        /// </summary>
-        private void OpenBeltPicker(PotionBeltSO belt, List<string> loadout, int index)
-        {
-            if (_beltPicker == null || _beltPickerList == null)
-            {
-                return;
-            }
-            _pickingSlot = index;
-            _beltPickerList.Clear();
-            SetText(_beltPickerTitle, Loc.Format("hub.camp.belt-pick-title", ("slot", index + 1)));
-
-            foreach (var type in belt.Types)
-            {
-                if (type == null || !PotionBeltState.Unlocked(type))
-                {
-                    continue;
-                }
-                int elsewhere = -1;
-                for (int other = 0; other < loadout.Count; other++)
-                {
-                    if (other != index && loadout[other] == type.Key)
-                    {
-                        elsewhere = other;
-                    }
-                }
-                string label = Loc.Format("hub.camp.belt-slot", ("potion", type.DisplayName), ("count", PotionBeltState.Capacity(type)));
-                if (elsewhere >= 0)
-                {
-                    label = Loc.Format("hub.camp.belt-pick-swap", ("potion", label), ("slot", elsewhere + 1));
-                }
-                AddPickerOption(label, type.Key, loadout[index] == type.Key,
-                    type.Potion != null ? ItemPresenter.ConsumableEffectLine(type.Potion) : string.Empty);
-            }
-            AddPickerOption(Loc.Get("hub.camp.belt-empty"), PotionBeltOps.Empty,
-                string.IsNullOrEmpty(loadout[index]), string.Empty);
-
-            foreach (var child in _root.Children())
-            {
-                if (child != _beltPicker)
-                {
-                    child.SetEnabled(false);
-                }
-            }
-            _beltPicker.RemoveFromClassList("cd-hidden");
-        }
-
-        private void AddPickerOption(string label, string key, bool chosen, string tooltip)
-        {
-            var button = new Button(() => PickPotion(key)) { text = label, focusable = false, tooltip = tooltip };
-            button.AddToClassList("cd-inv-tab");
-            button.AddToClassList("cd-camp-mode");
-            button.EnableInClassList("cd-camp-mode--chosen", chosen);
-            _beltPickerList.Add(button);
-        }
-
-        private void PickPotion(string key)
-        {
-            int index = _pickingSlot;
-            CloseBeltPicker();
-            var belt = PotionBeltSO.Load();
-            if (belt == null || index < 0)
-            {
-                return;
-            }
-            PotionBeltState.SetLoadout(PotionBeltOps.Assign(PotionBeltState.Loadout(belt), index, key));
-            SetFeedback(string.Empty);
-            RefreshBelt();
-            BeltChanged?.Invoke();
-        }
-
-        private void CloseBeltPicker()
-        {
-            if (_beltPicker == null || _pickingSlot < 0)
-            {
-                return;
-            }
-            _pickingSlot = -1;
-            _beltPicker.AddToClassList("cd-hidden");
-            foreach (var child in _root.Children())
-            {
-                child.SetEnabled(true);
-            }
-        }
-
         private void RefreshSplitControls(List<string> fieldedKeys)
         {
             int campfireLevel = HubState.LevelOf(HubService.Party);

@@ -78,8 +78,11 @@ namespace Assets.Scripts.Tutorial
 
         Merchant = 6,
 
-        /// <summary>The campfire's screen, where the belt is packed.</summary>
+        /// <summary>The campfire's screen (the party and the XP split).</summary>
         Campfire = 7,
+
+        /// <summary>The level-entry screen: the party going in, and the potion belt packed for it.</summary>
+        LevelEntry = 8,
     }
 
     /// <summary>
@@ -114,8 +117,8 @@ namespace Assets.Scripts.Tutorial
         EnterMerchantOnPanel = 23,
         UpgradeBelt = 24,
         BeltUpgraded = 25,
-        OpenCampfireInTown = 26,
-        EnterCampfireOnPanel = 27,
+        PackPotionInTown = 26, // was OpenCampfireInTown until the belt left the campfire (2026-11-27)
+        PackPotionOnMap = 27,  // was EnterCampfireOnPanel
         EquipPotion = 28,
         BeltPacked = 29,
         BeltReady = 30,

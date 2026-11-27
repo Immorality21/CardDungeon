@@ -81,8 +81,8 @@
 
         <!-- RUN PROGRESS -->
         <!-- The "you are about to go in" moment (2026-09-30): one fixed size, the run and the floor in
-             the header, a pip per floor, the party as portrait tiles, and Enter Dungeon first and
-             primary - the shared cursor's first arrow lands on it. -->
+             the header, a pip per floor, the party as portrait tiles, the potion belt, and Enter Dungeon
+             primary - the shared cursor's first arrow lands on it (HubManager.ArmCursorOnModalScreen). -->
         <ui:VisualElement name="progress-view" class="cd-window cd-window--flush hub-entry cd-dock-center cd-hidden">
             <ui:VisualElement class="cd-inv-header">
                 <ui:Label name="level-indicator" text="" class="cd-inv-header__title" />
@@ -95,11 +95,35 @@
                 <ui:Label text="#ui.hub.marching-out" class="cd-inv-col__title hub-entry__party-title" />
                 <ui:VisualElement name="progress-party-tiles" class="hub-entry__party" />
                 <ui:Label name="progress-party" text="" class="cd-inv-detail__note" />
+                <!-- The potion belt, packed on the way in (owner, 2026-11-27; it was the campfire's). One
+                     button per slot bought, hidden past the slots this save has; a press opens the picker
+                     below. Packed for the run once its first floor is entered, like the lineup. -->
+                <ui:VisualElement name="progress-belt" class="hub-entry__belt">
+                    <ui:Label text="#ui.hub.potion-belt" class="cd-inv-col__title hub-entry__party-title" />
+                    <ui:VisualElement class="hub-entry__belt-row">
+                        <ui:Button name="progress-belt-0" text="" class="cd-inv-tab cd-camp-mode hub-entry__belt-slot" />
+                        <ui:Button name="progress-belt-1" text="" class="cd-inv-tab cd-camp-mode hub-entry__belt-slot" />
+                        <ui:Button name="progress-belt-2" text="" class="cd-inv-tab cd-camp-mode hub-entry__belt-slot" />
+                        <ui:Button name="progress-belt-3" text="" class="cd-inv-tab cd-camp-mode hub-entry__belt-slot" />
+                    </ui:VisualElement>
+                    <ui:Label name="progress-belt-desc" text="" class="cd-camp-split-desc hub-entry__belt-desc" />
+                </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement class="hub-lotpanel__actions hub-entry__actions">
                 <ui:Button name="enter-btn" text="#ui.hub.enter-btn" class="cd-inv-tab cd-camp-action hub-entry__enter" />
                 <ui:Button name="progress-party-btn" text="#ui.hub.progress-party-btn" class="cd-inv-tab cd-camp-action" />
                 <ui:Button name="back-btn" text="#ui.common.back" class="cd-inv-close hub-lotpanel__back" />
+            </ui:VisualElement>
+
+            <!-- The potion picker (playtest 4 finding 50): a belt slot opens it. One row per potion type
+                 known, plus Empty, built by PotionBeltPanel; a type already in another slot swaps. Over the
+                 whole window, which is disabled beneath it so the shared cursor walks only these rows. -->
+            <ui:VisualElement name="progress-belt-picker" class="cd-camp-picker cd-hidden">
+                <ui:VisualElement class="cd-camp-picker__panel">
+                    <ui:Label name="progress-belt-picker-title" text="" class="cd-inv-col__title" />
+                    <ui:VisualElement name="progress-belt-picker-list" class="cd-camp-picker__list" />
+                    <ui:Button name="progress-belt-picker-cancel" text="#ui.common.back" class="cd-inv-tab cd-camp-mode" />
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
 
@@ -161,7 +185,7 @@
             <ui:Label text="#ui.common.arrows-move-enter-choose-esc" class="cd-inv-hint" />
         </ui:VisualElement>
 
-        <!-- PARTY SELECT (the campfire). The inventory's fixed frame (cd-inv-window, 1180x720):
+        <!-- PARTY SELECT (the campfire). The inventory's frame (cd-inv-window, 88% x 90% of the screen, at least 1180x720):
              every region below exists in every state, so the dock-centred window never resizes
              and hit-testing never desyncs. The strip across the top states the XP share; the
              roster is everyone owned, the leader marked; the detail column is the hero the
@@ -213,32 +237,11 @@
                     <ui:Button name="party-split-catchup" text="#ui.hub.party-split-catchup" class="cd-inv-tab cd-camp-mode" />
                     <ui:Button name="party-split-focus" text="" class="cd-inv-tab cd-camp-focus" />
                     <ui:Label name="party-split-desc" text="" class="cd-camp-split-desc" />
-                    <!-- The potion belt (playtest 3 finding 5): one button per slot bought; a press cycles the
-                         potion type in it. Hidden past the slots this save has. Locked once a run starts. -->
-                    <ui:Label text="#ui.hub.potion-belt" class="cd-inv-col__title cd-camp-belt-title" />
-                    <ui:VisualElement class="cd-camp-belt">
-                        <ui:Button name="party-belt-0" text="" class="cd-inv-tab cd-camp-mode cd-camp-belt__slot" />
-                        <ui:Button name="party-belt-1" text="" class="cd-inv-tab cd-camp-mode cd-camp-belt__slot" />
-                        <ui:Button name="party-belt-2" text="" class="cd-inv-tab cd-camp-mode cd-camp-belt__slot" />
-                        <ui:Button name="party-belt-3" text="" class="cd-inv-tab cd-camp-mode cd-camp-belt__slot" />
-                    </ui:VisualElement>
-                    <ui:Label name="party-belt-desc" text="" class="cd-camp-split-desc" />
                     <ui:Label name="party-feedback" text="" class="cd-camp-feedback" />
                 </ui:VisualElement>
             </ui:VisualElement>
 
             <ui:Label text="#ui.common.arrows-move-enter-choose-esc" class="cd-inv-hint" />
-
-            <!-- The potion picker (playtest 4 finding 50): a belt slot opens it. One row per potion type
-                 known, plus Empty, built by PartySelectUI; a type already in another slot swaps. Over the
-                 whole frame, which is disabled beneath it so the shared cursor walks only these rows. -->
-            <ui:VisualElement name="party-belt-picker" class="cd-camp-picker cd-hidden">
-                <ui:VisualElement class="cd-camp-picker__panel">
-                    <ui:Label name="party-belt-picker-title" text="" class="cd-inv-col__title" />
-                    <ui:VisualElement name="party-belt-picker-list" class="cd-camp-picker__list" />
-                    <ui:Button name="party-belt-picker-cancel" text="#ui.common.back" class="cd-inv-tab cd-camp-mode" />
-                </ui:VisualElement>
-            </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- FORGE -->
@@ -417,9 +420,9 @@
         </ui:VisualElement>
 
 
-        <!-- SPHERE GRID (fixed size on both axes: the pannable graph and the always-present
-             detail panel must never resize the dock-centered window, or hit-testing desyncs) -->
-        <ui:VisualElement name="grid-view" class="cd-window cd-window--flush cd-inv-window cd-dock-center cd-hidden">
+        <!-- SPHERE GRID: the whole screen since 2026-11-27 (owner), like the story map. Pinned to the
+             four edges, never translate-centred, so the pannable graph never moves its hit-testing. -->
+        <ui:VisualElement name="grid-view" class="cd-window cd-window--flush cd-window--fullscreen cd-hidden">
             <!-- On the inventory frame (2026-09-30): Back in the header band, a portrait strip with
                  each hero's banked XP, and the freed height given to the pannable graph. Still one
                  fixed px size in every state, so hit-testing never desyncs. -->
@@ -459,12 +462,13 @@
             </ui:VisualElement>
         </ui:VisualElement>
 
-        <!-- CAMPAIGN MAP (fixed size on both axes, same reason as the sphere grid: a pannable
-             graph inside a dock-centered window must never change the window's size) -->
+        <!-- CAMPAIGN MAP: the whole screen since 2026-11-27 (owner). Pinned to the screen's four edges
+             rather than centred by translate, so its size never changes under the cursor and hit-testing
+             stays true (a pannable graph inside a resizing centred window desyncs clicks). -->
         <!-- On the inventory frame (2026-09-30): Back in the header, the graph with a legend under it,
              and a detail column that says where you are in a run, every floor of it, and what
              clearing it opens. Keeps its own cursor (it pans content the shared one cannot see). -->
-        <ui:VisualElement name="campaign-view" class="cd-window cd-window--flush cd-inv-window cd-dock-center cd-hidden">
+        <ui:VisualElement name="campaign-view" class="cd-window cd-window--flush cd-window--fullscreen cd-hidden">
             <ui:VisualElement class="cd-inv-header">
                 <ui:Label name="campaign-title" text="#ui.hub.campaign-title" class="cd-inv-header__title" />
                 <ui:Label text="" class="cd-camp-header__cap" />

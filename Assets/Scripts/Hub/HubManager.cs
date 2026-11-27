@@ -106,6 +106,8 @@ namespace Assets.Scripts.Hub
         private CampaignMapUI _campaignMap;
         private MerchantUI _merchant;
         private PartySelectUI _partySelect;
+        // The potion belt on the level-entry screen (packed on the way in since 2026-11-27, owner).
+        private PotionBeltPanel _belt;
         private SphereGridUI _sphereGrid;
         private MagicForgeUI _forge;
         private BestiaryUI _bestiary;
@@ -330,6 +332,7 @@ namespace Assets.Scripts.Hub
                 : null;
             _merchant = new MerchantUI(_merchantView, _partyRoster);
             _partySelect = new PartySelectUI(_partyView, _partyRoster);
+            _belt = new PotionBeltPanel(_progressView, "progress");
             _sphereGrid = new SphereGridUI(_gridView, _partyRoster);
             _forge = new MagicForgeUI(_forgeView);
             _bestiary = new BestiaryUI(_bestiaryView, _partyRoster);
@@ -345,8 +348,7 @@ namespace Assets.Scripts.Hub
             _merchant.CanClose = () => AllowsOrNudges(_tutorialStep != TutorialStep.UpgradeBelt);
             _merchant.BeltBought += OnBeltBought;
             _partySelect.OnClosed += OnPartyClosed;
-            _partySelect.CanClose = () => AllowsOrNudges(_tutorialStep != TutorialStep.EquipPotion);
-            _partySelect.BeltChanged += RefreshTutorial;
+            _belt.Changed += RefreshTutorial;
             _sphereGrid.OnClosed += OnGridClosed;
             _sphereGrid.NodeActivated += OnGridNodeActivated;
             _sphereGrid.SelectionChanged += RefreshTutorial;
@@ -1098,8 +1100,7 @@ namespace Assets.Scripts.Hub
             }
             if (IsShown(_partyView))
             {
-                // The potion picker first, then the campfire itself (playtest 4 finding 50).
-                return _partySelect != null ? _partySelect.CancelButton : _root.Q<Button>("party-close");
+                return _root.Q<Button>("party-close");
             }
             if (IsShown(_forgeView))
             {
@@ -1107,7 +1108,8 @@ namespace Assets.Scripts.Hub
             }
             if (IsShown(_progressView))
             {
-                return _backButton;
+                // The potion picker first, then the screen itself (playtest 4 finding 50).
+                return _belt != null && _belt.CancelButton != null ? _belt.CancelButton : _backButton;
             }
             if (IsShown(_completeView))
             {
@@ -1167,7 +1169,7 @@ namespace Assets.Scripts.Hub
             }
             if (IsShown(_partyView))
             {
-                return _partySelect != null ? _partySelect.CancelButton : _root.Q<Button>("party-close");
+                return _root.Q<Button>("party-close");
             }
             if (IsShown(_forgeView))
             {
@@ -1274,7 +1276,9 @@ namespace Assets.Scripts.Hub
                 _armCursor = false;
                 return;
             }
-            if (_nav.SelectFirst())
+            // Enter Dungeon first on the level entry, though the belt's slots stand above it.
+            bool onEnter = IsShown(_progressView) && _nav.SelectElement(_enterButton);
+            if (onEnter || _nav.SelectFirst())
             {
                 _armCursor = false;
             }
@@ -1449,6 +1453,11 @@ namespace Assets.Scripts.Hub
             // Locked from the first floor on - the tiles still say who is going, and a line says why
             // Change Party is gone rather than leaving the player to look for it (playtest 2 finding 11).
             bool locked = PartyLockedReason() != null;
+            if (_belt != null)
+            {
+                _belt.Close();
+                _belt.Refresh(locked);
+            }
             SetShown(_progressPartyButton, !locked);
             if (locked && _progressParty != null && string.IsNullOrEmpty(_progressParty.text))
             {
@@ -1831,8 +1840,7 @@ namespace Assets.Scripts.Hub
         {
             return TutorialOps.GuidedLotKey(_tutorialStep, GuideKey(),
                 _tutorial != null ? _tutorial.GearBuildingKey : null,
-                _tutorial != null ? _tutorial.BeltBuildingKey : null,
-                _tutorial != null ? _tutorial.CampBuildingKey : null);
+                _tutorial != null ? _tutorial.BeltBuildingKey : null);
         }
 
         /// <summary>The hero the tutorial walks through the grid: the first starting hero the save owns.</summary>
@@ -2001,8 +2009,7 @@ namespace Assets.Scripts.Hub
                 onGuideLot && (step == TutorialStep.BuildHall || step == TutorialStep.BuildMerchant));
             SetClass(_lotEnterButton, HubView.TutorialTargetClass,
                 onGuideLot && (step == TutorialStep.SpendXp || step == TutorialStep.EquipGear
-                               || step == TutorialStep.RevisitHall || step == TutorialStep.UpgradeBelt
-                               || step == TutorialStep.EquipPotion));
+                               || step == TutorialStep.RevisitHall || step == TutorialStep.UpgradeBelt));
 
             // Once the node is bought the only way on is back to town, so the grid's Back is what gets
             // pointed at. Keyed on the step alone: the class only shows while the grid does.
@@ -2018,10 +2025,14 @@ namespace Assets.Scripts.Hub
             var merchantClose = _root.Q<Button>("merchant-close");
             SetEnabled(merchantClose, step != TutorialStep.UpgradeBelt);
             SetClass(merchantClose, HubView.TutorialTargetClass, step == TutorialStep.EquipPotion);
-            SetClass(_root.Q<Button>("party-belt-1"), HubView.TutorialTargetClass, step == TutorialStep.EquipPotion);
-            var partyClose = _root.Q<Button>("party-close");
-            SetEnabled(partyClose, step != TutorialStep.EquipPotion);
-            SetClass(partyClose, HubView.TutorialTargetClass, step == TutorialStep.BeltReady);
+            // The belt is packed on the level entry: its empty slot first, then Enter Dungeon.
+            var emptySlot = _belt != null ? _belt.FirstEmptySlot() : null;
+            foreach (var slot in _progressView.Query<Button>(className: "hub-entry__belt-slot").ToList())
+            {
+                SetClass(slot, HubView.TutorialTargetClass, step == TutorialStep.EquipPotion && slot == emptySlot);
+            }
+            SetEnabled(_enterButton, step != TutorialStep.EquipPotion);
+            SetClass(_enterButton, HubView.TutorialTargetClass, step == TutorialStep.BeltReady);
 
             RefreshTutorialBanner();
         }
@@ -2041,7 +2052,7 @@ namespace Assets.Scripts.Hub
             // edge (playtest 2 finding 7): over the grid the banner is set smaller and tighter.
             bool compact = screen == TutorialScreen.Grid || screen == TutorialScreen.Inventory
                 || screen == TutorialScreen.CampaignMap || screen == TutorialScreen.Merchant
-                || screen == TutorialScreen.Campfire;
+                || screen == TutorialScreen.Campfire || screen == TutorialScreen.LevelEntry;
             if (_tutorialBanner.ClassListContains(TutorialCompactClass) != compact)
             {
                 SetClass(_tutorialBanner, TutorialCompactClass, compact);
@@ -2121,6 +2132,10 @@ namespace Assets.Scripts.Hub
             if (IsShown(_partyView))
             {
                 return TutorialScreen.Campfire;
+            }
+            if (IsShown(_progressView))
+            {
+                return TutorialScreen.LevelEntry;
             }
             if (IsShown(_lotView))
             {

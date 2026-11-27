@@ -20,7 +20,6 @@ MonoBehaviour:
   GearBuildingKey: storehouse
   BeltRun: {fileID: 11400000, guid: 02238c2f5e7bf674cb347b495fc6ac00, type: 2}
   BeltBuildingKey: merchant
-  CampBuildingKey: campfire
   BeltPotionKey: Energy
   Lines:
   - Cue: 1

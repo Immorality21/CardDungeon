@@ -256,6 +256,13 @@ Hard-won gotchas (each cost a failed compile until learned):
       controllers** — the next screenshot is an empty or dead UI. Reload the scene (or re-enter play
       mode) after every stylesheet edit before judging anything.
 
+**With the editor in the background, the game view stops repainting** (met 2026-11-27): frames still
+advance, but UI Toolkit layout is not recomputed and `CaptureScreenshot` never writes its file, so a
+measured `layout` is stale and looks like a style that "does not apply". Call
+`UnityEditorInternal.InternalEditorUtility.RepaintAllViews()` (and `EditorApplication.ExecuteMenuItem("Window/General/Game")`
+once) in the command before measuring or capturing, and check the PNG exists before reading it. Re-importing
+a `.uss` mid-play blanks the hub (a dead UI): stop play, import, start again.
+
 ## Screenshotting a **UI Toolkit** screen — `ScreenCapture.CaptureScreenshot` + the Read tool
 
 `Capture2DScene` renders its own orthographic view of a **world-space** rectangle, so it cannot see

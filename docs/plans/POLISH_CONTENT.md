@@ -562,8 +562,12 @@ Decide what the belt *is* before touching the numbers.
 - **What the outside tester could not tell** (playtest 4 findings 50 and 51, folded here by the owner
   2026-11-13): nothing says what the belt is, nothing shows that potions can be swapped between slots
   (it works), and nothing says the belt is the **whole party's**; only the Merchant greying out every hero
-  hints at it. (The "Empty" slot that did nothing is fixed: since 2026-11-11 any campfire belt slot
-  opens a potion picker.) Explaining the belt belongs in this revisit, once the belt's design is decided.
+  hints at it. (The "Empty" slot that did nothing is fixed: since 2026-11-11 any belt slot
+  opens a potion picker.)
+
+- **First step, 2026-11-27 (owner): the belt is packed on the way in.** It left the campfire for the
+  level-entry screen, under the party, so it is chosen every run at the moment it matters
+  (`Hub/PotionBeltPanel`, the Hub guide). What the belt *is* is still the open question above. Explaining the belt belongs in this revisit, once the belt's design is decided.
 
 **18d. Gear restrictions — who may wear what** *(opened 2026-10-29, owner)*. Today any hero can equip
 any item: `SlotType` is the only gate, so the Mage can wear Steel Plate and swing a Tower Shield. The

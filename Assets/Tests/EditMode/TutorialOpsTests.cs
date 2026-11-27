@@ -80,12 +80,24 @@ namespace Tests.EditMode
 
         [TestCase(TutorialStep.BuildMerchant, "merchant")]
         [TestCase(TutorialStep.UpgradeBelt, "merchant")]
-        [TestCase(TutorialStep.EquipPotion, "campfire")]
         public void TheBeltSteps_LockTheTownToTheirLot(TutorialStep step, string lot)
         {
-            Assert.AreEqual(lot, TutorialOps.GuidedLotKey(step, Hall, "storehouse", "merchant", "campfire"));
+            Assert.AreEqual(lot, TutorialOps.GuidedLotKey(step, Hall, "storehouse", "merchant"));
             Assert.IsTrue(TutorialOps.LocksTown(step));
             Assert.IsFalse(TutorialOps.AllowsRoad(step));
+        }
+
+        [Test]
+        public void PackingThePotion_LocksTheTownToTheRoad()
+        {
+            // The belt is packed on the level entry (2026-11-27), so the step points down the road.
+            var step = TutorialStep.EquipPotion;
+            Assert.IsTrue(TutorialOps.LocksTown(step));
+            Assert.IsFalse(TutorialOps.AllowsLot(step, "campfire", "campfire"));
+            Assert.IsFalse(TutorialOps.GuidesLot(step, "campfire", "campfire"));
+            Assert.IsTrue(TutorialOps.AllowsRoad(step));
+            Assert.IsTrue(TutorialOps.GuidesRoad(step));
+            Assert.IsTrue(TutorialOps.AllowsLeaving(step));
         }
 
         [Test]
@@ -95,10 +107,14 @@ namespace Tests.EditMode
                 TutorialOps.CueFor(TutorialStep.UpgradeBelt, TutorialScreen.Merchant, false));
             Assert.AreEqual(TutorialCue.BeltUpgraded,
                 TutorialOps.CueFor(TutorialStep.EquipPotion, TutorialScreen.Merchant, false));
+            Assert.AreEqual(TutorialCue.PackPotionInTown,
+                TutorialOps.CueFor(TutorialStep.EquipPotion, TutorialScreen.Town, false));
+            Assert.AreEqual(TutorialCue.PackPotionOnMap,
+                TutorialOps.CueFor(TutorialStep.EquipPotion, TutorialScreen.CampaignMap, false));
             Assert.AreEqual(TutorialCue.EquipPotion,
-                TutorialOps.CueFor(TutorialStep.EquipPotion, TutorialScreen.Campfire, false));
+                TutorialOps.CueFor(TutorialStep.EquipPotion, TutorialScreen.LevelEntry, false));
             Assert.AreEqual(TutorialCue.BeltPacked,
-                TutorialOps.CueFor(TutorialStep.BeltReady, TutorialScreen.Campfire, false));
+                TutorialOps.CueFor(TutorialStep.BeltReady, TutorialScreen.LevelEntry, false));
         }
 
         [Test]

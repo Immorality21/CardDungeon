@@ -68,9 +68,6 @@ namespace Assets.Scripts.Tutorial
         [Tooltip("BuildingSO.Key of the lot that sells belt steps.")]
         public string BeltBuildingKey = "merchant";
 
-        [Tooltip("BuildingSO.Key of the lot where the belt is packed.")]
-        public string CampBuildingKey = "campfire";
-
         [Tooltip("BeltPotionType.Key of the potion the belt step teaches and packs.")]
         public string BeltPotionKey = "Energy";
 

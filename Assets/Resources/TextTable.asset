@@ -3708,17 +3708,18 @@ MonoBehaviour:
     Note: 
   - Key: tutorial.belt-upgraded.text
     Values:
-    - You also found the Energy potion recipe. Go back, then pack it at the campfire.
+    - 'You also found the Energy potion recipe. Go back: you pack it on your way
+      into the next level.'
     Reviewed: 0
     Note: 
-  - Key: tutorial.open-campfire-in-town.text
+  - Key: tutorial.pack-potion-in-town.text
     Values:
-    - Visit the campfire to pack your new potion.
+    - 'Take the road: your new potion is packed on the way in.'
     Reviewed: 0
     Note: 
-  - Key: tutorial.enter-campfire-on-panel.text
+  - Key: tutorial.pack-potion-on-map.text
     Values:
-    - Enter the campfire.
+    - Choose where to go next. The belt is packed before you go in.
     Reviewed: 0
     Note: 
   - Key: tutorial.equip-potion.text
@@ -3729,8 +3730,8 @@ MonoBehaviour:
     Note: 
   - Key: tutorial.belt-packed.text
     Values:
-    - Packed. The belt refills at the start of each level. Go back when you are
-      ready.
+    - Packed. The belt refills at the start of each level. Enter the dungeon when
+      you are ready.
     Reviewed: 0
     Note: 
   - Key: tutorial.belt-ready.text
@@ -12975,12 +12976,12 @@ MonoBehaviour:
     Values:
     - 'Slot {slot}: which potion?'
     Reviewed: 0
-    Note: 'Campfire potion picker title'
+    Note: 'Level entry potion picker title'
   - Key: hub.camp.belt-pick-swap
     Values:
     - '{potion} (in slot {slot}, swaps)'
     Reviewed: 0
-    Note: 'Campfire potion picker: a type already in another slot'
+    Note: 'Level entry potion picker: a type already in another slot'
   - Key: hub.campaign.clearing-joins
     Values:
     - 'Clearing it: {hero} joins the party'
