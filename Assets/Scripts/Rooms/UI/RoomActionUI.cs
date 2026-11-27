@@ -37,6 +37,7 @@ namespace Assets.Scripts.Rooms
         private VisualElement _partyStatus;
         private VisualElement _partyStatusRows;
         private VisualElement _pauseWindow;
+        private Button _pauseOpen;
         private Button _pauseResume;
         private Button _pauseQuit;
         private Button _pauseMap;
@@ -113,7 +114,6 @@ namespace Assets.Scripts.Rooms
         private Label _hudLevel;
         private Label _hudRun;
         private Label _hudGold;
-        private Label _hudExplore;
         private int _hudGoldShown = -1;
 
         private VisualElement _levelWindow;
@@ -233,6 +233,7 @@ namespace Assets.Scripts.Rooms
             _partyStatus = root.Q<VisualElement>("party-status");
             _partyStatusRows = root.Q<VisualElement>("party-status-rows");
             _pauseWindow = root.Q<VisualElement>("pause-window");
+            _pauseOpen = root.Q<Button>("pause-open");
             _pauseResume = root.Q<Button>("pause-resume");
             _pauseQuit = root.Q<Button>("pause-quit");
             _pauseMap = root.Q<Button>("pause-map");
@@ -253,7 +254,6 @@ namespace Assets.Scripts.Rooms
             _hudLevel = root.Q<Label>("hud-level");
             _hudRun = root.Q<Label>("hud-run");
             _hudGold = root.Q<Label>("hud-gold");
-            _hudExplore = root.Q<Label>("hud-explore");
             _levelWindow = root.Q<VisualElement>("level-clear-window");
             _levelTitle = root.Q<Label>("level-clear-title");
             _levelSubtitle = root.Q<Label>("level-clear-subtitle");
@@ -347,6 +347,16 @@ namespace Assets.Scripts.Rooms
             if (_pauseResume != null)
             {
                 _pauseResume.clicked += ClosePause;
+            }
+            if (_pauseOpen != null)
+            {
+                _pauseOpen.clicked += () =>
+                {
+                    if (CanOpenPause())
+                    {
+                        OpenPause();
+                    }
+                };
             }
             if (_pauseQuit != null)
             {

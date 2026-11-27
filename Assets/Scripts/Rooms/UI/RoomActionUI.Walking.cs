@@ -134,6 +134,8 @@ namespace Assets.Scripts.Rooms
                 _hintsNav?.SelectFirst();
             }
 
+            TickPauseButton();
+
             var text = NavHintText();
             SetShown(_navHint, text != null);
             if (text != null && _navHint != null && _navHint.text != text)
@@ -159,15 +161,8 @@ namespace Assets.Scripts.Rooms
                 return _canFlee ? Loc.Get("room.keys.combat-bar") : Loc.Get("room.keys.combat-bar-no-flee");
             }
 
-            if (DoorNavActive())
-            {
-                // Name what Enter would use right now, or leave Enter out (playtest 4 finding 36).
-                string use = UseLabel(UseAtHand());
-                return use != null
-                    ? Loc.Format("room.keys.doors-use", ("use", use))
-                    : Loc.Get("room.keys.doors");
-            }
-
+            // Walking says nothing (owner, 2026-11-27: the walk/potions line was noise). The
+            // Controls screen in the pause menu lists the keys.
             return null;
         }
 

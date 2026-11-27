@@ -47,6 +47,43 @@ namespace Assets.Scripts.Rooms
 
         private bool PotionsOpen => _potions != null && _potions.IsOpen;
 
+        /// <summary>
+        /// Per frame: the top-right pause button, the way into the pause menu on a phone (owner,
+        /// 2026-11-27). Up in the room whenever no window sits over it; greyed rather than hidden
+        /// when pause cannot open (an enemy's turn, the ability picker), so it does not blink on and
+        /// off between turns. In a fight it steps left of the turn order, which holds the corner.
+        /// </summary>
+        private void TickPauseButton()
+        {
+            if (_pauseOpen == null)
+            {
+                return;
+            }
+
+            bool overlay = IsShown(_pauseWindow) || IsShown(_mapWindow) || PotionsOpen || HintsOpen
+                || IsDialogUp() || IsShown(_deathBackdrop);
+            bool visible = _currentRoom != null && !overlay;
+            if (IsShown(_pauseOpen) != visible)
+            {
+                SetShown(_pauseOpen, visible);
+            }
+            if (!visible)
+            {
+                return;
+            }
+
+            bool canOpen = CanOpenPause();
+            if (_pauseOpen.enabledSelf != canOpen)
+            {
+                _pauseOpen.SetEnabled(canOpen);
+            }
+            bool besideTurns = IsShown(_turnOrder);
+            if (_pauseOpen.ClassListContains("cd-pause-open--beside-turns") != besideTurns)
+            {
+                _pauseOpen.EnableInClassList("cd-pause-open--beside-turns", besideTurns);
+            }
+        }
+
         /// <summary>Only while the party walks: in a fight a potion costs a turn, which is the Item command.</summary>
         private bool CanOpenPotions()
         {

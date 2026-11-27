@@ -156,6 +156,16 @@ namespace Assets.Scripts.Heroes.UI
         private Vector3 _panStartPointer;
         private Vector2 _panStartValue;
 
+        // Touch: every finger down on the view, in local space. Two of them pinch (zoom about their
+        // midpoint, which also pans); the browser's own pinch is off in the WebGL template.
+        private readonly Dictionary<int, Vector2> _touches = new Dictionary<int, Vector2>();
+        private bool _pinching;
+        private int _pinchA = -1;
+        private int _pinchB = -1;
+        private float _pinchStartDistance;
+        private float _pinchStartZoom;
+        private Vector2 _pinchGridAnchor;
+
         /// <summary>Fires when a node button is clicked. The runtime screen's only event.</summary>
         public event Action<string> NodeClicked;
 
@@ -271,7 +281,21 @@ namespace Assets.Scripts.Heroes.UI
             RegisterCallback<PointerDownEvent>(OnPointerDown);
             RegisterCallback<PointerMoveEvent>(OnPointerMove);
             RegisterCallback<PointerUpEvent>(OnPointerUp);
-            RegisterCallback<PointerCaptureOutEvent>(_ => EndPan());
+            // Only the pan's own pointer ends it: the pinch hands capture between fingers, and a
+            // queued capture-out for another finger must not stop the pan that follows.
+            RegisterCallback<PointerCaptureOutEvent>(evt =>
+            {
+                if (evt.pointerId == _panPointerId)
+                {
+                    EndPan();
+                }
+            });
+
+            // Trickle-down, so a finger that lands on a node button is still counted for a pinch.
+            RegisterCallback<PointerDownEvent>(OnTouchDown, TrickleDown.TrickleDown);
+            RegisterCallback<PointerMoveEvent>(OnTouchMove, TrickleDown.TrickleDown);
+            RegisterCallback<PointerUpEvent>(OnTouchUp, TrickleDown.TrickleDown);
+            RegisterCallback<PointerCancelEvent>(OnTouchCancel, TrickleDown.TrickleDown);
         }
 
         // --- population ------------------------------------------------------
@@ -1113,6 +1137,124 @@ namespace Assets.Scripts.Heroes.UI
         {
             _panning = false;
             _panPointerId = -1;
+        }
+
+        // --- touch: pinch to zoom -------------------------------------------------------
+
+        private void OnTouchDown(PointerDownEvent evt)
+        {
+            if (evt.pointerType != UnityEngine.UIElements.PointerType.touch)
+            {
+                return;
+            }
+            _touches[evt.pointerId] = this.WorldToLocal(evt.position);
+            if (!_pinching && _touches.Count >= 2)
+            {
+                BeginPinch();
+                evt.StopPropagation();
+            }
+        }
+
+        private void OnTouchMove(PointerMoveEvent evt)
+        {
+            if (evt.pointerType != UnityEngine.UIElements.PointerType.touch || !_touches.ContainsKey(evt.pointerId))
+            {
+                return;
+            }
+            _touches[evt.pointerId] = this.WorldToLocal(evt.position);
+            if (!_pinching)
+            {
+                return;
+            }
+
+            var a = _touches[_pinchA];
+            var b = _touches[_pinchB];
+            float distance = Vector2.Distance(a, b);
+            if (_pinchStartDistance > 1f)
+            {
+                _zoom = Mathf.Clamp(_pinchStartZoom * distance / _pinchStartDistance, MinZoom, MaxZoom);
+            }
+            // Keep the grid point that was between the fingers between them.
+            _pan = (a + b) * 0.5f - _pinchGridAnchor * _zoom;
+            ApplyTransform();
+            evt.StopPropagation();
+        }
+
+        private void OnTouchUp(PointerUpEvent evt)
+        {
+            if (evt.pointerType == UnityEngine.UIElements.PointerType.touch)
+            {
+                EndTouch(evt.pointerId);
+            }
+        }
+
+        private void OnTouchCancel(PointerCancelEvent evt)
+        {
+            if (evt.pointerType == UnityEngine.UIElements.PointerType.touch)
+            {
+                EndTouch(evt.pointerId);
+            }
+        }
+
+        private void BeginPinch()
+        {
+            // A one-finger pan in progress gives way to the pinch.
+            if (_panning)
+            {
+                int panId = _panPointerId;
+                EndPan();
+                if (this.HasPointerCapture(panId))
+                {
+                    this.ReleasePointer(panId);
+                }
+            }
+
+            using (var keys = _touches.Keys.GetEnumerator())
+            {
+                keys.MoveNext();
+                _pinchA = keys.Current;
+                keys.MoveNext();
+                _pinchB = keys.Current;
+            }
+
+            // Capturing both fingers takes them from any node button, so a pinch never clicks a node.
+            this.CapturePointer(_pinchA);
+            this.CapturePointer(_pinchB);
+
+            var a = _touches[_pinchA];
+            var b = _touches[_pinchB];
+            _pinchStartDistance = Vector2.Distance(a, b);
+            _pinchStartZoom = _zoom;
+            _pinchGridAnchor = ((a + b) * 0.5f - _pan) / Mathf.Max(0.01f, _zoom);
+            _pinching = true;
+        }
+
+        private void EndTouch(int pointerId)
+        {
+            _touches.Remove(pointerId);
+            if (!_pinching || (pointerId != _pinchA && pointerId != _pinchB))
+            {
+                return;
+            }
+
+            _pinching = false;
+            int remaining = pointerId == _pinchA ? _pinchB : _pinchA;
+            if (this.HasPointerCapture(pointerId))
+            {
+                this.ReleasePointer(pointerId);
+            }
+            _pinchA = -1;
+            _pinchB = -1;
+
+            // The finger still down carries on as a one-finger pan from where the pinch left off.
+            // It keeps its capture, so no capture-out arrives to end that pan.
+            if (_touches.TryGetValue(remaining, out var position))
+            {
+                _panning = true;
+                _panPointerId = remaining;
+                _panStartPointer = this.LocalToWorld(position);
+                _panStartValue = _pan;
+            }
         }
 
         // --- edges ------------------------------------------------------------------

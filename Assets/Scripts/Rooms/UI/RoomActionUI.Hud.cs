@@ -64,10 +64,7 @@ namespace Assets.Scripts.Rooms
             SetText(_hudRun, runLine);
             SetShown(_hudRun, !string.IsNullOrEmpty(runLine));
 
-            var rooms = dungeon != null ? dungeon.CurrentRooms : null;
-            var model = DungeonMapOps.Build(BuildMapInputs(rooms), _currentRoom != null ? _currentRoom.RoomIndex : -1);
-            string explore = DungeonMapOps.StatusLine(model);
-            SetText(_hudExplore, string.IsNullOrEmpty(explore) ? Loc.Get("room.hud.map-key") : Loc.Format("room.hud.explore", ("status", explore)));
+            // No explored line any more (owner, 2026-11-27: noise); the map says it when asked.
 
             _hudGoldShown = -1; // force the gold label to redraw
             TickHud();
