@@ -3361,3 +3361,40 @@ bot (or a player) that earned its own XP and gear arrives weaker than the model'
 optimally on gear and assumes the belt bought. The ending-health spread (Orrery 12 points optimistic, Counting Room 25
 pessimistic) is within what 5 tries can say. So the next question is not the simulator but the reference party: whether
 `StraightPartyGearShare` and the assumed belt describe a real player.
+
+## §5bg — Special attacks get a second half, joiners a small rise (2026-11-28)
+
+**Why:** playtest 2026-11-28 finding 9 (owner): summons that replace the party swing fights; the others feel weak.
+Owner's scope: mainly the special attacks, the joiners only a bit, the replacers untouched. Owner: some summons can be
+situational, so they are not all tuned to one number.
+
+**How it was measured** (ad-hoc `RunFloor` harness through the MCP, not checked in): each finale's floor, a party of
+two (the summoner on `InvestmentFrontier.SummonBuildNodes` to that summon at the finale's XP, plus the model party's
+first hero), 300-400 trials, the summon with no growth nodes, both sides starting with full charges (see the bug
+below). Only **The Sealed Archive** reads cleanly at two heroes; most other finales always win or always lose there.
+
+**Before** (percentage-point change in how often the party died on The Sealed Archive): replacers about -18 (Golem -28
+to Archon -12); special attacks about -3, spread from Iron Charger -22 to Aegis Lion +17; joiners about -2.
+
+**What changed:** each weak special attack got a second half on the other side, through the existing
+`Effects` / `PartyEffects` split (no code). Where the vision half moved to `PartyEffects`, `PowerRaisesPartyEffects`
+keeps the power node growing it.
+
+| summon | extra | Sealed Archive, before -> after |
+|---|---|---|
+| Bloodfang Boar | Bleed (2 + Strength) on every enemy, 3 turns; now faces the enemies | -2 -> -16 |
+| Murder of Crows | a peck (1 + Agility) on every enemy | -6 -> -17 |
+| Guardian Angel | one picked hero healed to full (`SingleAlly`, the summon list asks); faces the party | 0 -> -10 |
+| Phoenix | Fire (2 + Intelligence) and Burn (2 + Intelligence, 3 turns) on every enemy | 0 -> -10 |
+| Aegis Lion | a 10% barrier on the party, 3 turns | +12 -> -1 (its taunt is invisible to the model) |
+| Golden Ferret | Haste +3 on the party, 3 turns, first, so its power node grows it (node 15 -> 2) | about +5 either way (situational) |
+| Glacius | the claw Slows its target 2 turns | about 0 (a 10% barrier read -11, but the owner's vision starts it at 5%) |
+| Abyssal Nightmare | a Shadow hit (1 + Intelligence) on every enemy | unreadable (the Cultist's floor is 99% wipes at two heroes) |
+
+Joiners: +20 points of the summoner's stats on health and on the attack's stat (Grey Fang Agility, Auto Turret and
+Writhing Spawn Intelligence, Watcher Spirit; Blood Idol health only). Small by design: Grey Fang on The Catacombs
+10% -> 7%, the rest within noise.
+
+**Found, not fixed:** `EncounterSimulator.DrainCharges` empties summon charges on every floor after a run's first,
+so the frontier (§5be) priced every non-first finale with no summon. Summons are once per level and saving one for
+the finale is real play.

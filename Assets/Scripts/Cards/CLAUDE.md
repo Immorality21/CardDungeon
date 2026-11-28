@@ -466,16 +466,24 @@ Two consequences worth holding on to:
 
   | hero | branch | summon | kind | does |
   |---|---|---|---|---|
-  | Warrior | B (damage) | **Bloodfang Boar** | special attack | +50% own Strength, whole party, 3 turns |
+  | Warrior | B (damage) | **Bloodfang Boar** | special attack | every enemy **bleeds** (2 + STR, 3 turns); the party gets +50% own Strength for 3 turns (`PartyEffects`, which the power node grows) |
   | Warrior | A (defence) | **Cairn Golem** | replaces the party | a wall: 250% HP, Quake (damage + Slow) |
-  | Paladin | A (Divine Protection, Ward) | **Aegis Lion** | special attack | the Paladin: +50% own Endurance for 3 turns, and **+60 threat** |
+  | Paladin | A (Divine Protection, Ward) | **Aegis Lion** | special attack | the Paladin: +50% own Endurance for 3 turns, and **+60 threat**; the party gets a 10% barrier for 3 turns |
   | Paladin | B (Smite, Consecrate) | **Judgement Seraph** | replaces the party | a **hitter**: 120% HP, 180% STR, 70% END; Radiant Cut (Holy, one enemy) + Judgement (Holy, all) |
   | Paladin | C (Heal, Renew) | **Dawn Stag** | special attack | every hero healed 40% of their health, then regenerates 3 a turn for 3 turns |
   | Ranger | A (Poison Dart, Volley) | **Galewing** | special attack | a hawk: 2 hits of the Ranger's Agility on every enemy, then -3 Endurance for 2 turns |
   | Ranger | B (Snare, Hush) | **Exatrix** | replaces the party | a shade, medium: 150% HP, 130% AGI; her Attack is **Rend** (damage + turn delay), Signature **Nightfall** (damage + Agility cut, all) |
   | Mage | A (storm) | **Qyraxis** | special attack | a lightning bird: 2 Lightning hits (2 + INT) on every enemy, then -3 Agility for 2 turns |
-  | Mage | B (frost) | **Glacius** | special attack | a frost bear: one claw (5 + INT Ice) at a **picked enemy** that lays **Ice** (Water then sets off Freeze), and a **barrier of 5% of health** on the whole party - its power node grows the barrier (`PowerRaisesPartyEffects`) |
+  | Mage | B (frost) | **Glacius** | special attack | a frost bear: one claw (5 + INT Ice) at a **picked enemy** that lays **Ice** (Water then sets off Freeze), and a **barrier of 5% of health** on the whole party - its power node grows the barrier (`PowerRaisesPartyEffects`); the claw also **Slows** its target for 2 turns |
   | Mage | C (fire) | **Ifrit** | replaces the party | 150% HP, 300% STR; plain Attack + **Ifrit's Flame** (Fire + Burn); no Signature - its big move is **Hellfire** (10 + INT Fire, all) cast as it leaves, fallen, dismissed or out of turns (`PartingAbility`) |
+- **Every special attack has a second half** *(2026-11-28, playtest finding 9, `BALANCING_HISTORY.md` §5bg)*: the owner's
+  vision half plus an extra on the other side, so a once-per-level button weighs something next to a replacer. The rows
+  above carry the Warrior's, Paladin's and Mage's; the rest: **Phoenix** Fire + Burn on every enemy before it revives and
+  heals; **Guardian Angel** heals one picked hero to full (`SingleAlly`, the list asks) before its barrier and Endurance;
+  **Golden Ferret** Hastes the party (+3, first, so its power node grows it, +2 a node) as well as Luck; **Murder of Crows**
+  pecks (1 + AGI) every enemy it blinds; **Abyssal Nightmare** adds a Shadow hit (1 + INT). Some are situational on
+  purpose (owner: summons are not all compared equally). Where the vision half moved to `PartyEffects`,
+  `PowerRaisesPartyEffects` keeps its power node growing the same number.
 - **The ally kind (`JoinParty`, the Warlock's Imp and Succubus — 2026-10-04).** The same unit as a
   replacement (`SummonUnit`, `StatPercents`, `TurnsActive`, `AttackAbility`, `Signature`, its own menu),
   but it fights **beside** the party: `CombatManager._allies`, placed by `CombatStage.PlaceAllies` in a

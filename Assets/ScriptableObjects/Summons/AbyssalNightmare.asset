@@ -69,6 +69,22 @@ MonoBehaviour:
     BonusVsStatus: 0
     BonusPerDebuff: 0
     DrainToParty: 0
+  - EffectType: 0
+    Power: 1
+    PowerMode: 0
+    ScalingStat: 4
+    DamageType: 5
+    BuffType: 0
+    Duration: 0
+    UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
+  Delivery: 0
+  ImpactFrames: []
   RandomTargetEffects:
   - EffectType: 3
     Power: 1
@@ -101,12 +117,16 @@ MonoBehaviour:
   TurnsActive: 0
   Actions: []
   Signature: {fileID: 0}
+  SignatureCooldown: 3
   AttackAbility: {fileID: 0}
   UsesTags: 0
   PartingAbility: {fileID: 0}
+  PartingFrames: []
   MountedFrames: []
   RotateActions: 0
   ActsAlone: 0
   SquadTiers: []
   SquadSize: 3
   MaxSquadSize: 4
+  PortalFrames: []
+  PortalFps: 8

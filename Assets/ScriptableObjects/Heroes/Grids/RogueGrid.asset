@@ -1105,7 +1105,7 @@ MonoBehaviour:
     UpgradeAmount: 1
     GrantedSummonKey: GoldenFerret
     GrantedUltraKey: 
-    SummonAmount: 15
+    SummonAmount: 2
     Neighbors:
     - rogue-c-tip-a
   - Key: rogue-ferret-charge

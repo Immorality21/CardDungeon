@@ -25,6 +25,8 @@ MonoBehaviour:
   Kind: 2
   TargetType: 0
   Effects: []
+  Delivery: 0
+  ImpactFrames: []
   RandomTargetEffects: []
   PartyEffects: []
   PowerRaisesPartyEffects: 0
@@ -40,7 +42,7 @@ MonoBehaviour:
   StatPercents:
     Values:
     - Type: 7
-      Amount: 160
+      Amount: 180
     - Type: 1
       Amount: 20
     - Type: 2
@@ -60,12 +62,16 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 71c0348d5cd64e71aff9c4b5bbf161c5, type: 2}
   - {fileID: 11400000, guid: 8cd017a3fd2846c09c612ea51e1ef28d, type: 2}
   Signature: {fileID: 11400000, guid: 765b153349e74934a9fcbb1dfbd13c0b, type: 2}
+  SignatureCooldown: 3
   AttackAbility: {fileID: 11400000, guid: e2d8a7f9915745e79abce0b3a8ad581f, type: 2}
   UsesTags: 0
   PartingAbility: {fileID: 0}
+  PartingFrames: []
   MountedFrames: []
   RotateActions: 1
   ActsAlone: 0
   SquadTiers: []
   SquadSize: 3
   MaxSquadSize: 4
+  PortalFrames: []
+  PortalFps: 8

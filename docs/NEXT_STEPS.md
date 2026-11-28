@@ -282,7 +282,11 @@ backlog.**
 
 ### Next up
 
-- **First: buff the non-replacing summons** (owner, playtest 2026-11-28 finding 9) - in play the summons that
+- **Buff the non-replacing summons** (owner, playtest 2026-11-28 finding 9) - ✅ **built 2026-11-28**: every weak special attack got a
+  second half (Boar bleeds every enemy, Ferret Hastes the party, Guardian Angel heals one hero to full, Phoenix burns, Lion
+  shields the party, Glacius slows, Crows peck, the Nightmare hits), the joiners +20 points of health and attack stat
+  (`BALANCING_HISTORY.md` §5bg, Cards guide). Open: play it; the floor sim drains summon charges on every floor after a
+  level's first, so the frontier never sees a summon on most finales (not fixed). The original entry: in play the summons that
   replace the party are game changers, especially timed right; the ones that join beside it are weaker. **Leave the
   replacing summons alone.** Measure first to size the buff (the simulator's summon sweeps: same party and fights,
   each summon in turn, split by type, priced for what each costs), then tune the non-replacing ones. Summons stay

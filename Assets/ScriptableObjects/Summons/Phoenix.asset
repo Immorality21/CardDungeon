@@ -28,8 +28,40 @@ MonoBehaviour:
   ArrivalSound: {fileID: 0}
   ArrivalSoundVolume: 0.9
   Kind: 0
-  TargetType: 4
+  TargetType: 1
   Effects:
+  - EffectType: 0
+    Power: 2
+    PowerMode: 0
+    ScalingStat: 4
+    DamageType: 1
+    BuffType: 0
+    Duration: 0
+    UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
+  - EffectType: 3
+    Power: 2
+    PowerMode: 0
+    ScalingStat: 4
+    DamageType: 1
+    BuffType: 15
+    Duration: 3
+    UnlockLevel: 0
+    ApplyChance: 100
+    BonusVsTrait: 0
+    BonusPercent: 0
+    BonusVsStatus: 0
+    BonusPerDebuff: 0
+    DrainToParty: 0
+  Delivery: 0
+  ImpactFrames: []
+  RandomTargetEffects: []
+  PartyEffects:
   - EffectType: 9
     Power: 20
     PowerMode: 0
@@ -58,9 +90,7 @@ MonoBehaviour:
     BonusVsStatus: 0
     BonusPerDebuff: 0
     DrainToParty: 0
-  RandomTargetEffects: []
-  PartyEffects: []
-  PowerRaisesPartyEffects: 0
+  PowerRaisesPartyEffects: 1
   Tags: 
   TagDuration: 3
   SummonerHealthCostPercent: 0
@@ -76,12 +106,16 @@ MonoBehaviour:
   TurnsActive: 3
   Actions: []
   Signature: {fileID: 0}
+  SignatureCooldown: 3
   AttackAbility: {fileID: 0}
   UsesTags: 0
   PartingAbility: {fileID: 0}
+  PartingFrames: []
   MountedFrames: []
   RotateActions: 0
   ActsAlone: 0
   SquadTiers: []
   SquadSize: 3
   MaxSquadSize: 4
+  PortalFrames: []
+  PortalFps: 8

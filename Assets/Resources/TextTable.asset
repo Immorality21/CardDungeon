@@ -2509,7 +2509,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.abyssal-nightmare.description
     Values:
-    - Delays all enemies' next turn and lowers their Spirit and Strength. May Silence some.
+    - Deals Shadow damage to all enemies, delays their next turn and lowers their Spirit and Strength. May Silence some.
     Reviewed: 0
     Note: 
   - Key: summon.aegis-lion.name
@@ -2519,7 +2519,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.aegis-lion.description
     Values:
-    - Raises your Endurance by half and draws enemy attacks.
+    - Raises your Endurance by half, draws enemy attacks and gives the party a barrier that absorbs damage.
     Reviewed: 0
     Note: 
   - Key: summon.archon.name
@@ -2549,7 +2549,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.bloodfang-boar.description
     Values:
-    - Raises the party's Strength by half.
+    - Raises the party's Strength by half and makes every enemy bleed.
     Reviewed: 0
     Note: 
   - Key: summon.blood-idol.name
@@ -2639,7 +2639,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.glacius.description
     Values:
-    - Deals Ice damage to one enemy and gives the party a barrier that absorbs damage.
+    - Deals Ice damage to one enemy and Slows it, and gives the party a barrier that absorbs damage.
     Reviewed: 0
     Note: 
   - Key: summon.golden-ferret.name
@@ -2649,7 +2649,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.golden-ferret.description
     Values:
-    - Raises the party's Luck by half.
+    - Hastes the party and raises their Luck by half.
     Reviewed: 0
     Note: 
   - Key: summon.grey-fang.name
@@ -2669,7 +2669,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.guardian-angel.description
     Values:
-    - Gives the party a barrier that absorbs damage and raises their Endurance.
+    - Heals one hero to full, then gives the party a barrier that absorbs damage and raises their Endurance.
     Reviewed: 0
     Note: 
   - Key: summon.horror.name
@@ -2729,7 +2729,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.murder-of-crows.description
     Values:
-    - Blinds all enemies and lowers their Agility and Luck.
+    - Pecks and blinds all enemies and lowers their Agility and Luck.
     Reviewed: 0
     Note: 
   - Key: summon.oil-mech.name
@@ -2749,7 +2749,7 @@ MonoBehaviour:
     Note: 
   - Key: summon.phoenix.description
     Values:
-    - Brings back every fallen hero and heals the party.
+    - Burns every enemy with fire, brings back every fallen hero and heals the party.
     Reviewed: 0
     Note: 
   - Key: summon.qyraxis.name

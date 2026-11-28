@@ -23,8 +23,9 @@ a tuning pass starts from what was already measured rather than re-deriving it.
 
 **The dated passes (§4, §5, §5b onward) live in `docs/archive/BALANCING_HISTORY.md`** (moved 2026-11-14, same
 section numbers, newest last; later entries correct earlier ones). This file keeps what is true now and the
-rules. Open the history only to see how a number was arrived at. The latest passes: §5be (summons that stay, by the
-frontier), §5bf (the model's party through the bot).
+rules. Open the history only to see how a number was arrived at. The latest passes: §5bf (the model's party through the bot),
+§5bg (special attacks got a second half; and the floor sim drains summon charges on non-first floors, so the
+frontier never sees a summon on most finales).
 
 ### Live warnings
 
