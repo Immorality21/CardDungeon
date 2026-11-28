@@ -171,7 +171,10 @@ namespace Assets.Scripts.Events
     public enum ForfeitReason
     {
         PartyDied,
-        LeftTheDungeon
+        LeftTheDungeon,
+
+        /// <summary>Surrender from the pause menu: the run ends like a wipe, with no consolation.</summary>
+        Surrendered
     }
 
     /// <summary>The level ended without being cleared: its items, kill-gold and XP are gone.</summary>

@@ -135,7 +135,9 @@ namespace Assets.Scripts.Rooms
             // Arming is per-visit: a player who opened the menu, thought better of quitting and
             // resumed must not find the button still primed the next time they pause.
             _quitArmed = false;
+            _surrenderArmed = false;
             RefreshQuitButton();
+            RefreshSurrenderButton();
 
             // AudioOptionsUI owns this element's display and refreshes the readouts as it shows, so
             // the dials always read the live values rather than whatever they said last time.
@@ -154,6 +156,7 @@ namespace Assets.Scripts.Rooms
             }
 
             _quitArmed = false;
+            _surrenderArmed = false;
             _pauseAudio?.Hide();
             SetShown(_pauseWindow, false);
             _pauseWindow.parent?.RemoveFromClassList("cd-root--paused");
@@ -788,6 +791,51 @@ namespace Assets.Scripts.Rooms
             // The title screen, never the hub: the town is reached only at a run's end (owner,
             // 2026-10-30). Continue there sends the party straight back down (HubManager.Start).
             SceneManager.LoadScene("MenuScene");
+        }
+
+        /// <summary>
+        /// Surrender (owner, playtest 2026-11-28): the run ends and the floor in progress loses
+        /// everything it gained, like a wipe without the consolation, and the party goes home. The
+        /// first press only arms it, as Quit does. Only while a run is underway, and not before the
+        /// tutorial's first level is cleared (owner, same day): the town is not set up until then.
+        /// </summary>
+        private void OnSurrender()
+        {
+            if (!CanSurrender())
+            {
+                return;
+            }
+            if (!_surrenderArmed)
+            {
+                _surrenderArmed = true;
+                RefreshSurrenderButton();
+                return;
+            }
+
+            DungeonManager.Instance.HandleSurrender();
+            // The town, as after a wipe: the run is over, so there is nothing to go back down to.
+            SceneManager.LoadScene("HubScene");
+        }
+
+        private void RefreshSurrenderButton()
+        {
+            if (_pauseSurrender == null)
+            {
+                return;
+            }
+            SetShown(_pauseSurrender, CanSurrender());
+            _pauseSurrender.text = _surrenderArmed ? Loc.Get("room.pause.surrender-armed") : Loc.Get("room.pause.surrender");
+        }
+
+        private static bool CanSurrender()
+        {
+            if (!DungeonManager.HasInstance || DungeonManager.ActiveRun == null || !MetaProgressManager.HasInstance)
+            {
+                return false;
+            }
+            var tutorial = UnityEngine.Resources.Load<Assets.Scripts.Tutorial.TutorialSO>(Assets.Scripts.Tutorial.TutorialSO.ResourcePath);
+            return tutorial == null || tutorial.FirstRun == null
+                || MetaProgressManager.Instance.HasCompletedRun(CampaignOps.RunKeyOf(tutorial.FirstRun));
         }
 
         private void RefreshQuitButton()

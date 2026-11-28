@@ -152,6 +152,26 @@ namespace Tests.EditMode
         }
 
         [Test]
+        public void ClampedPan_KeepsTheViewCentreOverTheGraph()
+        {
+            var min = new Vector2(0f, 0f);
+            var max = new Vector2(1000f, 500f);
+            var viewport = new Vector2(800f, 600f);
+
+            // Inside the bounds: untouched.
+            var inside = new Vector2(-100f, 50f);
+            Assert.AreEqual(inside, SphereGridView.ClampedPan(inside, 1f, min, max, viewport));
+
+            // Dragged far right/down: the graph's left/top edge stops at the view's centre.
+            var far = SphereGridView.ClampedPan(new Vector2(5000f, 5000f), 1f, min, max, viewport);
+            Assert.AreEqual(new Vector2(400f, 300f), far);
+
+            // Dragged far left/up at zoom 2: the right/bottom edge stops at the centre.
+            var farBack = SphereGridView.ClampedPan(new Vector2(-9000f, -9000f), 2f, min, max, viewport);
+            Assert.AreEqual(new Vector2(400f - 2000f, 300f - 1000f), farBack);
+        }
+
+        [Test]
         public void HeroJoiningOnClear_OnlyWhileNotOwned()
         {
             var hero = ScriptableObject.CreateInstance<HeroSO>();

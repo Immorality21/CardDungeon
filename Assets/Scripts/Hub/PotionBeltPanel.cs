@@ -27,6 +27,8 @@ namespace Assets.Scripts.Hub
         private readonly VisualElement _host;
         private readonly VisualElement _section;
         private readonly List<Button> _slots = new List<Button>();
+        private readonly List<VisualElement> _slotIcons = new List<VisualElement>();
+        private readonly List<Label> _slotCounts = new List<Label>();
         private readonly Label _desc;
         private readonly VisualElement _picker;
         private readonly Label _pickerTitle;
@@ -55,6 +57,17 @@ namespace Assets.Scripts.Hub
                 int index = i;
                 slot.clicked += () => OnSlotClicked(index);
                 _slots.Add(slot);
+
+                // A filled slot shows the potion's icon and how many, not its name (playtest
+                // 2026-11-28 finding 5); the name and effect are its tooltip.
+                var icon = new VisualElement { pickingMode = PickingMode.Ignore };
+                icon.AddToClassList("hub-entry__belt-icon");
+                var count = new Label { pickingMode = PickingMode.Ignore };
+                count.AddToClassList("hub-entry__belt-count");
+                slot.Add(icon);
+                slot.Add(count);
+                _slotIcons.Add(icon);
+                _slotCounts.Add(count);
             }
 
             _picker = host.Q<VisualElement>(prefix + "-belt-picker");
@@ -98,10 +111,20 @@ namespace Assets.Scripts.Hub
                     continue;
                 }
                 var type = belt.Find(loadout[i]);
-                button.text = type != null
-                    ? Loc.Format("hub.camp.belt-slot", ("potion", type.DisplayName), ("count", PotionBeltState.Capacity(type)))
-                    : Loc.Get("hub.camp.belt-empty");
-                button.tooltip = type != null ? ItemPresenter.ConsumableEffectLine(type.Potion) : string.Empty;
+                var sprite = type != null && type.Potion != null ? type.Potion.Icon : null;
+                bool showIcon = sprite != null;
+                // No icon to show (an empty slot, or a potion without art): the words, as before.
+                button.text = type == null
+                    ? Loc.Get("hub.camp.belt-empty")
+                    : showIcon ? string.Empty : Loc.Format("hub.camp.belt-slot", ("potion", type.DisplayName), ("count", PotionBeltState.Capacity(type)));
+                _slotIcons[i].style.backgroundImage = showIcon ? new StyleBackground(sprite) : new StyleBackground(StyleKeyword.None);
+                _slotIcons[i].style.display = showIcon ? DisplayStyle.Flex : DisplayStyle.None;
+                _slotCounts[i].text = showIcon ? Loc.Format("hub.camp.belt-slot-count", ("count", PotionBeltState.Capacity(type))) : string.Empty;
+                _slotCounts[i].style.display = showIcon ? DisplayStyle.Flex : DisplayStyle.None;
+                button.EnableInClassList("hub-entry__belt-slot--icon", showIcon);
+                button.tooltip = type != null
+                    ? Loc.Format("hub.camp.belt-slot-tip", ("potion", type.DisplayName), ("effect", ItemPresenter.ConsumableEffectLine(type.Potion)))
+                    : string.Empty;
                 button.EnableInClassList("cd-camp-mode--chosen", type != null);
             }
             SetText(_desc, locked ? Loc.Get("hub.camp.belt-packed") : Loc.Get("hub.camp.belt-desc"));

@@ -57,5 +57,15 @@ namespace Tests.EditMode
             Assert.Greater(s1, s0);
             Assert.Less(a1, a0);
         }
+
+        [Test]
+        public void BackdropRect_SafeAreaCoversTheTownBox()
+        {
+            // A 448x240 painting whose middle 320x180 (from 64,30) is the 1280x720 town: 4x, bleeding
+            // 256 design px left/right and 120 up/down.
+            var rect = Assets.Scripts.Hub.UI.HubView.BackdropRect(
+                new Vector2(448f, 240f), new Rect(64f, 30f, 320f, 180f), new Vector2(1280f, 720f));
+            Assert.AreEqual(new Rect(-256f, -120f, 1792f, 960f), rect);
+        }
     }
 }

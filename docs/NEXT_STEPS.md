@@ -282,12 +282,26 @@ backlog.**
 
 ### Next up
 
+- **First: buff the non-replacing summons** (owner, playtest 2026-11-28 finding 9) - in play the summons that
+  replace the party are game changers, especially timed right; the ones that join beside it are weaker. **Leave the
+  replacing summons alone.** Measure first to size the buff (the simulator's summon sweeps: same party and fights,
+  each summon in turn, split by type, priced for what each costs), then tune the non-replacing ones. Summons stay
+  once per level. `PLAYTEST_2026-11-28.md`, `BALANCING.md`, `plans/SPECIALIZATION.md` §4.
+- **First: ability charge nodes on the sphere grids** (owner, playtest 2026-11-28 finding 10) - nodes that give
+  abilities extra uses on most heroes' grids, before the first real demo. Charges are a balance lever (the loadout is
+  scarce on purpose), so check with the bot or simulator after. Abilities only: no grid sells a summon a second use.
+  Read the Hero Workbook for each hero's vision while placing them.
 - **Class items** (owner, 2026-11-14) - ✅ **built the same day**: `ItemSO.UsableBy`, and a class weapon per hero as a rare
   (10%) boss drop on a replayable level near where they join (Dungeon guide); every weapon names who can use it
   (Hub guide). Open: shields and armour are still open to all. Open: the owner's review of the stats and names, and whether more class gear (armour) follows.
 - **Playtest 4** (external playtester, played up to 2026-11-05) - 66 findings in `PLAYTEST_4.md`. Bugs fixed
   2026-11-10, still to be confirmed with a real keyboard. The owner's decisions were built 2026-11-11 (drafts
   awaiting review, listed in the file), doors everywhere and Holy Touch's grid upgrades 2026-11-13.
+- **Playtest 2026-11-28** (owner, mostly mobile) - 10 findings in `PLAYTEST_2026-11-28.md`: two renames, mobile
+  layout (hub bars, combat ability list and description, Inspect), pan limits, campfire potions, and two balance
+  items (non-replacing summons, ability charge nodes before the demo). The small ones were fixed 2026-11-28 (renames,
+  pan limits, level-entry potions, mobile combat layout and a one-column command menu, Inspect, slimmer enemy plates).
+  Open: the wider hub background, the summon buff, the charge nodes.
 - **First-time hints** (owner, 2026-11-09) - ✅ **built the same day**: one line, once per save, the first time
   charges, a refuge, a summon, an Ultra, a replay or a full party matters, and a Hints list in the pause menu
   (`TUTORIAL.md`, "First-time hints"). Open: combos (named when they first fire, or left hidden?), and Hints in town.
@@ -302,7 +316,7 @@ backlog.**
   `plans/SPECIALIZATION.md` §4b.
 - **No way back to town mid-run** (owner, 2026-10-30) — ✅ **built the same day**: a mid-run level
   clear offers only Continue, the pause menu's Leave became **Quit to Title** (the title's Continue
-  goes straight back down), and the Threshold is three runs (Dungeon Entrance → Upper Halls → The
+  goes straight back down), and the Threshold is three runs (Ruined Passage → Upper Halls → The
   Threshold, `CampaignNodeEntry.Continues` keeps them one tier). Walked in play through
   `Tools ▸ Tutorial`. The split nudged the Lich's boss room to 6.02x its trash (ceiling 6.0x: the
   model's party goes home twice more in the tutorial); the owner dropped one of its two Skeleton adds.

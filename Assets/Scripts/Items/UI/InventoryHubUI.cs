@@ -46,7 +46,9 @@ namespace Assets.Scripts.Items.UI
     public class InventoryHubUI
     {
         // Declaration order is the tab row's order: Left/Right step through it.
-        private enum Tab { Equipment, Spells, Consumables, Materials }
+        // No Consumables tab since playtest 2026-11-28: potions are packed at the level entry and
+        // bought at the Merchant, so a list of them here was a screen with nothing to do.
+        private enum Tab { Equipment, Spells, Materials }
 
         // The slot column's first row lists every piece of gear; the slots follow it.
         private const int AllEquipmentIndex = 0;
@@ -77,7 +79,6 @@ namespace Assets.Scripts.Items.UI
         private readonly VisualElement _heroesRow;
         private readonly Button _tabEquipment;
         private readonly Button _tabSpells;
-        private readonly Button _tabConsumables;
         private readonly Button _tabMaterials;
         private readonly Label _leftTitle;
         private readonly VisualElement _left;
@@ -128,7 +129,6 @@ namespace Assets.Scripts.Items.UI
             _heroesRow = root.Q<VisualElement>("inventory-heroes");
             _tabEquipment = root.Q<Button>("tab-equipment");
             _tabSpells = root.Q<Button>("tab-spells");
-            _tabConsumables = root.Q<Button>("tab-consumables");
             _tabMaterials = root.Q<Button>("tab-materials");
             _leftTitle = root.Q<Label>("inv-left-title");
             _left = root.Q<VisualElement>("inv-left");
@@ -159,7 +159,6 @@ namespace Assets.Scripts.Items.UI
 
             WireTab(_tabEquipment, Tab.Equipment);
             WireTab(_tabSpells, Tab.Spells);
-            WireTab(_tabConsumables, Tab.Consumables);
             WireTab(_tabMaterials, Tab.Materials);
             if (_closeButton != null)
             {
@@ -337,7 +336,6 @@ namespace Assets.Scripts.Items.UI
         {
             _tabEquipment?.EnableInClassList("cd-inv-tab--active", _tab == Tab.Equipment);
             _tabSpells?.EnableInClassList("cd-inv-tab--active", _tab == Tab.Spells);
-            _tabConsumables?.EnableInClassList("cd-inv-tab--active", _tab == Tab.Consumables);
             _tabMaterials?.EnableInClassList("cd-inv-tab--active", _tab == Tab.Materials);
         }
 
@@ -499,9 +497,6 @@ namespace Assets.Scripts.Items.UI
                     break;
                 case Tab.Spells:
                     BuildSpells();
-                    break;
-                case Tab.Consumables:
-                    BuildConsumables();
                     break;
                 default:
                     BuildMaterials();
@@ -1314,47 +1309,7 @@ namespace Assets.Scripts.Items.UI
             return MagicCatalog.HasInstance ? MagicCatalog.Instance.GetMagic(key) : null;
         }
 
-        // ------------------------------------------------------------ consumables and materials
-
-        private void BuildConsumables()
-        {
-            SetText(_leftTitle, Loc.Get("items.inv.title.party-pouch"));
-            SetText(_listTitle, Loc.Get("items.inv.title.consumables"));
-
-            var consumables = InventoryManager.Instance.GetConsumables();
-            int total = 0;
-            foreach (var item in consumables)
-            {
-                total += Mathf.Max(0, item.Quantity);
-            }
-            AddSummary(Loc.Format("items.inv.kinds-summary", ("kinds", consumables.Count), ("total", total)),
-                Loc.Get("items.inv.consumables-note"));
-
-            if (consumables.Count == 0)
-            {
-                ShowEmpty(Loc.Get("items.inv.empty.no-consumables"));
-                ClearDetail();
-                return;
-            }
-
-            foreach (var item in consumables)
-            {
-                var so = InventoryManager.Instance.GetItemSO(item.ItemKey);
-                if (so == null)
-                {
-                    continue;
-                }
-                int quantity = item.Quantity;
-                var entry = new Entry
-                {
-                    Preview = () => ShowStackDetail(so, quantity, ItemPresenter.ConsumableEffectLine(so, 0,
-                        PotionBeltState.HealBonusFor(so), PotionBeltState.ChargeBonusFor(so))),
-                };
-                entry.Row = BuildRow(so.Icon, so.DisplayName, ItemPresenter.RarityLabel(so.Rarity),
-                    Loc.Format("items.inv.quantity", ("count", quantity)), so, out entry.Cursor);
-                AddListEntry(entry);
-            }
-        }
+        // ------------------------------------------------------------ materials
 
         /// <summary>
         /// The raw stuff the party has hauled home, biggest pile first. Spent by sphere-grid nodes and

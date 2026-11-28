@@ -48,7 +48,6 @@ namespace Assets.Scripts.Rooms
         private void OnHeroTurnStarted(ICombatUnit hero)
         {
             _currentHeroTurn = hero;
-            _heroTitle.text = Loc.Format("room.combat.turn-title", ("hero", hero.DisplayName));
             HighlightActiveHero(hero);
             RefreshPartyStatus();
 
@@ -632,8 +631,10 @@ namespace Assets.Scripts.Rooms
             }
         }
 
-        /// <summary>Rows per column of the command menu, as <c>.cd-command-list</c>'s height lays it out.</summary>
-        private const int CommandRowsPerColumn = 4;
+        /// <summary>Rows per column of the command menu. One column since playtest 2026-11-28
+        /// (<c>.cd-command-list</c>), so this is past any hero's command count and left/right never
+        /// finds another column.</summary>
+        private const int CommandRowsPerColumn = 64;
 
         /// <summary>
         /// The other column: the same row, or the last row a shorter column has. A greyed row there

@@ -287,7 +287,7 @@ match the other screens.
 **From the outside playtest (2026-10-30, owner):** lock going back to town until the run is completed,
 and split the tutorial into separate runs instead. Going home mid-run invites abuse, confusion (a
 run's spent charges showed in town) and bugs. ✅ **Built 2026-10-30**: the Threshold is three runs
-(Dungeon Entrance, Upper Halls, The Threshold), each ending at the hub, so the steps that send the
+(Ruined Passage, Upper Halls, The Threshold), each ending at the hub, so the steps that send the
 player home (spend on the sphere grid, equip a weapon) fall between runs; mid-run there is no way to
 town at all (see `docs/TUTORIAL.md`).
 
@@ -306,7 +306,7 @@ is just a game with things missing from it.
 > Story** — is a small box on the far right edge. The first beat of the tutorial has to be pointing at
 > it.
 
-**The opening beat is already built and priced for this**: clearing *Dungeon Entrance* guarantees
+**The opening beat is already built and priced for this**: clearing *Ruined Passage* guarantees
 1 Rotted Timber (`LevelDefinitionSO.GuaranteedMaterials`), and the Sphere Hall costs exactly that.
 So the first loop the tutorial can point at is closed and cannot fail: *take the road → clear the
 floor → come home → build the Sphere Hall → spend the XP you banked*. That guarantee exists

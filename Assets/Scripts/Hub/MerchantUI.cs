@@ -151,6 +151,16 @@ namespace Assets.Scripts.Hub
             Refresh();
         }
 
+        /// <summary>Opens on the potions tab: the level-entry screen's way to the Merchant (playtest
+        /// 2026-11-28 finding 5).</summary>
+        public void ShowPotions()
+        {
+            Show();
+            _tab = Tab.Belt;
+            _index = 0;
+            Refresh();
+        }
+
         public void Hide()
         {
             if (CanClose != null && !CanClose())

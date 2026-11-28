@@ -114,6 +114,39 @@ namespace Assets.Scripts.Hub.UI
             RegisterCallback<GeometryChangedEvent>(_ => Relayout());
         }
 
+        /// <summary>
+        /// Sizes the backdrop so its safe area covers the town's box exactly and its bleed hangs past
+        /// it (playtest 2026-11-28 finding 2: a phone's wider screen showed black bars either side).
+        /// The viewport crops whatever bleed the screen has no room for.
+        /// </summary>
+        private void PlaceBackdrop(Sprite backdrop, Rect safeArea)
+        {
+            if (backdrop == null || safeArea.width <= 0f || safeArea.height <= 0f)
+            {
+                Stretch(_backdrop);
+                return;
+            }
+            var rect = BackdropRect(backdrop.rect.size, safeArea, _referenceSize);
+            _backdrop.style.right = StyleKeyword.Auto;
+            _backdrop.style.bottom = StyleKeyword.Auto;
+            _backdrop.style.left = rect.x;
+            _backdrop.style.top = rect.y;
+            _backdrop.style.width = rect.width;
+            _backdrop.style.height = rect.height;
+        }
+
+        /// <summary>
+        /// Where an image of <paramref name="imageSize"/> pixels goes, in the town's design space, so
+        /// that <paramref name="safeArea"/> (image pixels, from the top left) lands exactly on
+        /// 0..<paramref name="referenceSize"/>. Pure.
+        /// </summary>
+        public static Rect BackdropRect(Vector2 imageSize, Rect safeArea, Vector2 referenceSize)
+        {
+            float kx = referenceSize.x / safeArea.width;
+            float ky = referenceSize.y / safeArea.height;
+            return new Rect(-safeArea.x * kx, -safeArea.y * ky, imageSize.x * kx, imageSize.y * ky);
+        }
+
         private static void Stretch(VisualElement element)
         {
             element.style.position = Position.Absolute;
@@ -127,7 +160,10 @@ namespace Assets.Scripts.Hub.UI
 
         /// <summary>Replaces the whole town. Lots are added in the order given, which <b>is</b> the
         /// paint order — pass <see cref="HubPresenter.BuildViewModel"/>'s output unmodified.</summary>
-        public void SetTown(Vector2 referenceSize, Sprite backdrop, IReadOnlyList<LotInfo> lots)
+        /// <param name="backdropSafeArea">The part of <paramref name="backdrop"/>, in its pixels from the
+        /// top left, that fills <paramref name="referenceSize"/>; the rest bleeds past the town's box
+        /// (<see cref="HubSO.BackdropSafeArea"/>). Width 0: the whole image is the box.</param>
+        public void SetTown(Vector2 referenceSize, Sprite backdrop, IReadOnlyList<LotInfo> lots, Rect backdropSafeArea = default)
         {
             _spriteLayer.Clear();
             _lotLayer.Clear();
@@ -140,6 +176,7 @@ namespace Assets.Scripts.Hub.UI
             _backdrop.style.backgroundImage = backdrop != null
                 ? new StyleBackground(backdrop)
                 : new StyleBackground((Texture2D)null);
+            PlaceBackdrop(backdrop, backdropSafeArea);
 
             if (lots != null)
             {

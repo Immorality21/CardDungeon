@@ -150,6 +150,8 @@ namespace Assets.Scripts.Heroes.Editor
             {
                 // Left button is reserved for select/drag/connect/place; middle or right pans.
                 PanButtons = (1 << 1) | (1 << 2),
+                // Nodes get placed out in the empty space, so the view pans freely.
+                BoundPan = false,
                 // The hub's look, so the designer sees what the player will.
                 OrbNodes = true
             };

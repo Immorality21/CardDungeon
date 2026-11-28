@@ -7,7 +7,7 @@ building it, and what is still to do**. Add to it after every tutorial pass.
 ---
 
 > **The town is reached only at a run's end (owner, 2026-10-30).** The Threshold, once one four-floor
-> run the tutorial left mid-way, is now three runs: **Dungeon Entrance** (`TutorialSO.FirstRun`, one
+> run the tutorial left mid-way, is now three runs: **Ruined Passage** (`TutorialSO.FirstRun`, one
 > floor - its clear sends the player home for the hall and the first node), **Upper Halls**
 > (`TutorialSO.GearRun`, one floor - its clear pays the sword and sends them home for the gear step and
 > the second hall visit) and **The Threshold** (two floors, the Warden; key `TutorialRun`). Each clear
@@ -15,14 +15,14 @@ building it, and what is still to do**. Add to it after every tutorial pass.
 > menu goes to the title, whose Continue goes straight back down; a wipe still deletes the run and
 > leaves the town locked to the road. Where this file says "floor 1" / "floor 2" below, read "the
 > first run" / "the second run". `TutorialContentTests.TheTownSteps_EachFollowAWholeRun` guards it.
-> Walked in play 2026-10-30 (`Tools ▸ Tutorial`): New Game → Dungeon Entrance → Back to Town only →
+> Walked in play 2026-10-30 (`Tools ▸ Tutorial`): New Game → Ruined Passage → Back to Town only →
 > run complete → town locked to the hall; a mid-run clear of the Threshold offers Continue only; Quit
 > to Title on its floor 2, then Continue, lands back on that floor.
 
 ## What ships today (2026-09-29): the first loop, closed
 
 ```
-Title: New Game ──▶ straight into The Threshold, floor 1 (Dungeon Entrance)
+Title: New Game ──▶ straight into The Threshold, floor 1 (Ruined Passage)
                           │ clear it               │ wipe / quit to town
                           ▼                        ▼
           Town, locked to the Hall of Progression   Town, locked to the road ──▶ floor 1 again
@@ -102,9 +102,9 @@ rest of the Threshold, and the last floor's clear pays for the belt (`TutorialSO
 (3 Scrap Iron + 2 Rotted Timber + 60 gold), counting what the player holds, so a saved pile is not doubled.
 A belt recipe is not an item, so the Energy recipe (`BeltPotionKey`) is learned outright, ahead of its
 usual sale after The Catacombs. Home: `BuildMerchant` (skipped when it stands), `UpgradeBelt` (the Merchant
-opens on its Potion Belt tab, locked to the Healing capacity row, `MerchantUI.GuideBelt`, Back shut until
+opens on its Potions tab, locked to the Healing capacity row, `MerchantUI.GuideBelt`, Back shut until
 bought), `EquipPotion` (town locked to the road since 2026-11-27, when the belt moved from the campfire to the level
-entry: the story map says to pick a level, the entry screen points at the empty belt slot and Enter Dungeon
+entry: the story map says to pick a level, the entry screen points at the empty potion slot and Enter Dungeon
 stays shut until the potion is packed), `BeltReady` (town open; going down finishes the tutorial). Any step the save cannot pay
 for is skipped. The materials show on the level-clear window; the recipe has no line there, only the
 banner says it (`BeltUpgraded`). The bot finishes the tutorial on its first town visit, so it gets none of

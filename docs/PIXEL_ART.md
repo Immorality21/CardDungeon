@@ -552,3 +552,18 @@ then four of the cycle. About 4 generations a hero in all, by far the cheapest a
 
 **Never hand-copy base64 into a tool call**, even at 1 KB: three of eight failed with "a character was
 altered in transit". `get_upload_url`, `curl -F`, then `upload:<id>` as `first_frame_url`. Free.
+
+## Widening a backdrop by outpainting - the 2026-11-28 hub pass
+
+The hub backdrop went from 320x180 to 448x240 so phones (20:9) and tablets (4:3) show scenery instead of
+black bars (`HubSO.BackdropSafeArea` marks the original box; `HubView` hangs the rest past it).
+
+- **`inpaint_image` keeps everything outside the mask pixel-identical**, so the original stays exactly
+  as it was. On Tier 1 a side may not pass 256 px, so work in overlapping 256-wide crops and paste each
+  result back through its own mask. Left and right first, then the middle's top and bottom bands with
+  a mask that stops 32 px short of the crop's sides, so the side results are context instead of seams.
+- **Pre-fill the new area by repeating the nearest kept pixel.** Any shape cut off by the old edge
+  gets stretched into a column, though (a cobblestone patch at the bottom came back as a pillar), so
+  include those last few rows of the original in a later mask and let the model round them off.
+- **Plan a seam pass.** The new ground came back a shade darker and the old rectangle showed. A second
+  pass over 30 px bands straddling each edge of the original blended it. Total: 6 calls, 60 generations.

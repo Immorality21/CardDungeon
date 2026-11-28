@@ -1904,9 +1904,30 @@ namespace Assets.Scripts.Dungeon
                 MetaProgressManager.Instance.AwardRunProgressOnDeath(RunLevelIndex);
             }
 
+            MetaProgressManager.Instance.RecordPartyDeath();
+            EndRunDiscardingFloor(forfeited);
+        }
+
+        /// <summary>
+        /// Gives up the run from the pause menu (owner, playtest 2026-11-28). It ends exactly as a
+        /// wipe does - the floor in progress loses its XP, kill-gold and loot, and the run is over -
+        /// but pays <b>no</b> consolation Essence and counts as no death: giving up must never be worth
+        /// more than fighting on. Floors already cleared keep what they paid, as with a wipe, since
+        /// each one banked its rewards when it was cleared. The caller loads the town.
+        /// </summary>
+        public void HandleSurrender()
+        {
+            EndRunDiscardingFloor(new LevelForfeited
+            {
+                RunKey = CurrentRunKey, LevelIndex = RunLevelIndex, Reason = ForfeitReason.Surrendered
+            });
+        }
+
+        /// <summary>The half of a wipe a surrender shares: the floor's gains are dropped and the run ends.</summary>
+        private void EndRunDiscardingFloor(LevelForfeited forfeited)
+        {
             // Forfeit this level's un-banked kill-gold.
             MetaProgressManager.Instance.DiscardPendingGold();
-            MetaProgressManager.Instance.RecordPartyDeath();
 
             // Delete dungeon save — all in-memory XP/items are discarded with the scene
             if (DungeonSaveManager.HasInstance)

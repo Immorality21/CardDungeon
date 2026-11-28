@@ -498,7 +498,7 @@ namespace Assets.Scripts.Cards.UI
         private static string HaveNeed(string name, int have, int need)
         {
             string colour = have >= need ? MaterialCostText.HaveColour : MaterialCostText.ShortColour;
-            return Loc.Format("abilities.forge.have-need", ("colour", colour), ("name", name), ("have", Mathf.Min(have, need)), ("need", need));
+            return Loc.Format("abilities.forge.have-need", ("colour", colour), ("name", name), ("have", have), ("need", need));
         }
 
         private static Label RichLine(string text)

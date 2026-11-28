@@ -10,7 +10,8 @@ namespace Assets.Scripts.Progression
     {
         InProgress = 0,
         Cleared = 1,
-        Fell = 2
+        Fell = 2,
+        Surrendered = 3
     }
 
     /// <summary>
@@ -282,6 +283,18 @@ namespace Assets.Scripts.Progression
             Finish(data, RunOutcome.Fell, fellTo, nowUtc);
         }
 
+        /// <summary>A surrender ends the attempt like a wipe, the floor's share lost with it.</summary>
+        public static void Surrendered(RunHistorySaveData data, string nowUtc)
+        {
+            if (!Active(data))
+            {
+                return;
+            }
+            data.Current.FloorXp = 0;
+            data.Current.FloorItems = 0;
+            Finish(data, RunOutcome.Surrendered, null, nowUtc);
+        }
+
         private static void Finish(RunHistorySaveData data, RunOutcome outcome, IEnumerable<string> fellTo, string nowUtc)
         {
             var record = data.Current;
@@ -356,6 +369,8 @@ namespace Assets.Scripts.Progression
                     return string.IsNullOrEmpty(foes)
                         ? Loc.Format("dungeon.history.end.fell", ("floor", floor))
                         : Loc.Format("dungeon.history.end.fell-to", ("floor", floor), ("foes", foes));
+                case RunOutcome.Surrendered:
+                    return Loc.Format("dungeon.history.end.surrendered", ("floor", floor));
                 default:
                     return Loc.Format("dungeon.history.end.on", ("floor", floor));
             }

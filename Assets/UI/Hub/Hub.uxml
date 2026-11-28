@@ -107,6 +107,9 @@
                         <ui:Button name="progress-belt-3" text="" class="cd-inv-tab cd-camp-mode hub-entry__belt-slot" />
                     </ui:VisualElement>
                     <ui:Label name="progress-belt-desc" text="" class="cd-camp-split-desc hub-entry__belt-desc" />
+                    <!-- Straight to the Merchant's potions and back (playtest 2026-11-28 finding 5). Shown
+                         once the Merchant stands, after the tutorial, before the run is underway. -->
+                    <ui:Button name="progress-belt-merchant" text="#ui.hub.progress-belt-merchant" class="cd-inv-tab cd-camp-mode hub-entry__belt-merchant" />
                 </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement class="hub-lotpanel__actions hub-entry__actions">
@@ -368,7 +371,6 @@
                 <ui:VisualElement name="inventory-tabs" class="cd-inv-tabs">
                     <ui:Button name="tab-equipment" text="#ui.hub.tab-equipment" class="cd-inv-tab cd-inv-tab--active" />
                     <ui:Button name="tab-spells" text="#ui.hub.tab-spells" class="cd-inv-tab" />
-                    <ui:Button name="tab-consumables" text="#ui.hub.tab-consumables" class="cd-inv-tab" />
                     <ui:Button name="tab-materials" text="#ui.hub.tab-materials" class="cd-inv-tab" />
                 </ui:VisualElement>
                 <ui:Button name="inventory-close" text="#ui.common.back" class="cd-inv-close" />

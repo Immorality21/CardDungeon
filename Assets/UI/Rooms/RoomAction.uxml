@@ -76,9 +76,10 @@
             <ui:VisualElement name="party-status-rows" class="cd-party-status__rows" />
         </ui:VisualElement>
 
-        <!-- Hero turn command menu, left of the band: a cursor-driven list in two columns -->
+        <!-- Hero turn command menu, left of the band: a cursor-driven list in two columns. No
+             "<Hero>'s turn" title: the arrow and the turn order already say whose turn it is
+             (playtest 2026-11-28 finding 7). -->
         <ui:VisualElement name="hero-bar" class="cd-command-window cd-dock-band cd-hidden">
-            <ui:Label name="hero-title" text="" class="cd-command-window__header" />
             <!-- The list, and on a summon's turn what the highlighted action does beside it (playtest 4
                  finding 6; beside rather than above since playtest 2026-11-22, as the ability picker
                  lays out its list and description). RoomActionUI.RenderCommandDetail. -->
@@ -320,6 +321,9 @@
             </ui:VisualElement>
             </ui:ScrollView>
 
+            <!-- Gives up the run (owner, 2026-11-28): the floor's gains are lost, the run ends, back to
+                 town. Armed by a first press like Quit. RoomActionUI.OnSurrender. -->
+            <ui:Button name="pause-surrender" text="#ui.room.pause-surrender" class="cd-button cd-button--wide" />
             <ui:Button name="pause-quit" text="#ui.room.pause-quit" class="cd-button cd-button--wide" />
         </ui:VisualElement>
 

@@ -174,6 +174,8 @@ namespace Assets.Scripts.Dungeon.Editor
             _view = new SphereGridView
             {
                 PanButtons = (1 << 1) | (1 << 2),
+                // Nodes get placed out in the empty space, so the view pans freely.
+                BoundPan = false,
                 StateClassNames = CampaignPresenter.StateClasses,
                 EdgeStrongStateClass = CampaignPresenter.CompletedClass,
                 EdgeOpenStateClass = CampaignPresenter.AvailableClass,

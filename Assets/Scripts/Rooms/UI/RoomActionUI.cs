@@ -40,6 +40,8 @@ namespace Assets.Scripts.Rooms
         private Button _pauseOpen;
         private Button _pauseResume;
         private Button _pauseQuit;
+        private Button _pauseSurrender;
+        private bool _surrenderArmed;
         private Button _pauseMap;
         private Button _pausePotions;
         private UI.PotionWindow _potions;
@@ -71,7 +73,6 @@ namespace Assets.Scripts.Rooms
         private Label _detailChip;
         private VisualElement _detailRows;
 
-        private Label _heroTitle;
         private Label _detailTitle;
         private Label _detailMessage;
 
@@ -236,6 +237,7 @@ namespace Assets.Scripts.Rooms
             _pauseOpen = root.Q<Button>("pause-open");
             _pauseResume = root.Q<Button>("pause-resume");
             _pauseQuit = root.Q<Button>("pause-quit");
+            _pauseSurrender = root.Q<Button>("pause-surrender");
             _pauseMap = root.Q<Button>("pause-map");
             _pausePotions = root.Q<Button>("pause-potions");
             _mapWindow = root.Q<VisualElement>("map-window");
@@ -268,7 +270,6 @@ namespace Assets.Scripts.Rooms
             _levelNextLevel = root.Q<Button>("level-clear-next-level");
             _navHint = root.Q<Label>("nav-hint");
 
-            _heroTitle = root.Q<Label>("hero-title");
             _detailTitle = root.Q<Label>("detail-title");
             _detailMessage = root.Q<Label>("detail-message");
 
@@ -361,6 +362,10 @@ namespace Assets.Scripts.Rooms
             if (_pauseQuit != null)
             {
                 _pauseQuit.clicked += OnQuitToTitle;
+            }
+            if (_pauseSurrender != null)
+            {
+                _pauseSurrender.clicked += OnSurrender;
             }
             if (_pauseMap != null)
             {

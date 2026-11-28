@@ -211,14 +211,16 @@
     -unity-slice-scale: 3px;
 }
 
-/* Rules below the generic window ones, so the band's sizes win. */
+/* Rules below the generic window ones, so the band's sizes win. The left window takes 56% and the
+   party the rest (playtest 2026-11-28 findings 6/7: at 36% a phone left an ability's description
+   narrower than one word, while the party window sat half empty). */
 .cd-dock-band,
 .cd-window--combat.cd-dock-band {
     position: absolute;
     left: 0;
     bottom: 0;
-    width: 36%;
-    max-width: 36%;
+    width: 56%;
+    max-width: 56%;
     height: 27%;
     max-height: 27%;
     margin: 0;
@@ -242,32 +244,63 @@
     max-height: 40%;
 }
 
-/* The band is low, so the list gets all of it: Back moves up beside the title, rows tighten. */
+/* The band is low, so the list gets all of it: a slim title bar with Back beside the title, tight
+   rows, no padding under the list (playtest 2026-11-28 finding 7: a phone showed two rows). */
+.cd-window--picker {
+    padding-bottom: 0;
+}
+
+.cd-window--picker .cd-command-window__header {
+    font-size: 14px;
+    padding: 3px 10px;
+}
+
 .cd-window--picker .cd-button--narrow {
     position: absolute;
-    top: 4px;
-    right: 8px;
-    width: 96px;
-    height: 30px;
+    top: 0;
+    right: 6px;
+    width: 88px;
+    height: 24px;
     margin: 0;
     padding: 0;
+    font-size: 14px;
+}
+
+.cd-window--picker .cd-select-scroll {
+    padding: 2px 2px 0 2px;
 }
 
 .cd-window--picker .cd-sel-row {
-    height: 34px;
-    margin: 1px 0;
+    height: 30px;
+    margin: 0;
+}
+
+.cd-window--picker .cd-sel-row__icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 6px;
+}
+
+.cd-window--picker .cd-sel-row__name {
+    font-size: 16px;
+}
+
+.cd-window--picker .cd-sel-row__meta {
+    font-size: 15px;
 }
 
 /* List and description side by side, so the picker stays as low as the command menu. */
 .cd-picker-body {
     flex-direction: row;
+    flex-grow: 1;
     flex-shrink: 1;
     min-height: 0;
 }
 
-/* Doubled so it beats .cd-select-scroll's flex-grow, which otherwise hands the list the width. */
+/* Doubled so it beats .cd-select-scroll's flex-grow, which otherwise hands the list the width.
+   A share, not pixels: a fixed 320px list left the description a sliver on a phone. */
 .cd-select-scroll.cd-picker-list {
-    width: 320px;
+    width: 46%;
     flex-grow: 0;
     flex-shrink: 0;
 }
@@ -276,6 +309,7 @@
     flex-grow: 1;
     flex-shrink: 1;
     min-width: 0;
+    font-size: 15px;
     margin: 4px 10px 4px 4px;
     border-top-width: 0;
     border-left-width: 1px;
@@ -313,7 +347,7 @@
 .cd-party-status--band,
 .cd-party-status.cd-party-status--band.cd-dock-bottom-right {
     position: absolute;
-    left: 36%;
+    left: 56%;
     right: 0;
     bottom: 0;
     height: 27%;
@@ -343,14 +377,16 @@
 }
 
 .cd-party-status--band .cd-party-row__top {
-    width: 300px;
-    flex-shrink: 0;
-    margin-right: 20px;
+    flex-grow: 1;
+    flex-basis: 0;
+    min-width: 0;
+    max-width: 260px;
+    margin-right: 14px;
 }
 
 .cd-party-status--band .cd-party-row__name,
 .cd-party-status--band .cd-party-row__hp {
-    font-size: 19px;
+    font-size: 18px;
 }
 
 .cd-party-status--band .cd-party-row__bars {
@@ -495,18 +531,23 @@
 }
 
 /* ---- Command menu: cursor-driven vertical selection list (FFX-style) ---- */
-/* Two columns, top to bottom then across, so the list fits the band however many commands a hero
-   knows. Four rows a column: RoomActionUI.CommandRowsPerColumn. */
+/* One column down the left half of the window, the rows sharing its height so every command fits
+   the band on any screen (playtest 2026-11-28: two columns read as two menus). The right half is
+   empty, or on a summon's turn says what the highlighted action does. */
 .cd-command-list {
     flex-direction: column;
-    flex-wrap: wrap;
-    height: 136px;
-    padding: 4px 6px 6px 4px;
+    flex-wrap: nowrap;
+    padding: 3px 6px 4px 4px;
     min-width: 170px;
 }
 
 .cd-command-list .cd-cmd-row {
-    width: 50%;
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+    height: auto;
+    min-height: 0;
+    max-height: 34px;
 }
 
 /* The command list and, on a summon's turn, what the highlighted action does beside it (playtest
@@ -519,14 +560,10 @@
 }
 
 .cd-command-body .cd-command-list {
-    flex-grow: 1;
-    overflow: hidden;
-}
-
-.cd-command-body--detail .cd-command-list {
     flex-grow: 0;
     width: 50%;
     min-width: 0;
+    overflow: hidden;
 }
 
 .cd-sel-desc.cd-command-desc {
@@ -922,13 +959,13 @@
 
 .cd-nameplate {
     align-items: center;
-    padding: 1px 6px;
+    padding: 0 5px;
     background-color: rgba(6, 3, 14, 0.72);
     border-radius: 3px;
 }
 
 .cd-nameplate__name {
-    font-size: 16px;
+    font-size: 14px;
     color: var(--cd-text-light);
     -unity-font-style: bold;
     -unity-text-align: middle-center;
@@ -944,7 +981,7 @@
     top: 0;
     right: 0;
     bottom: 0;
-    font-size: 18px;
+    font-size: 15px;
     -unity-font-style: bold;
     color: rgb(255, 255, 255);
     -unity-text-outline-width: 1px;
@@ -962,10 +999,12 @@
 /* The enemy's HP bar lives in its plate (2026-09-30): one readout per unit, under its feet. The
    floating world bar above the head sat nearer the unit above it than its own, and doubled the
    plate's number. The low colour matches the number's. */
+/* Slim (playtest 2026-11-28): on a phone the rows of a formation stand close, and a 24px bar under
+   a name still reached into the enemy below. */
 .cd-nameplate__bar {
     width: 96px;
-    height: 24px;
-    margin: 2px 0 2px 0;
+    height: 18px;
+    margin: 1px 0 2px 0;
     background-color: rgb(16, 12, 24);
     border-width: 1px;
     border-color: rgba(217, 204, 242, 0.75);
@@ -3334,8 +3373,6 @@
 .cd-scan-window {
     width: 760px;
     max-width: 72%;
-    /* Ends above the menu band, which draws over this document; the body scrolls past that. */
-    max-height: 64%;
 }
 
 /* Docked left, not centred: the enemies stand in the right half of the stage, and a centred page
@@ -3345,11 +3382,24 @@
     position: absolute;
     left: 16px;
     top: 72px;
+    /* Ends above the menu band (27%, which draws over this document) with a little air, on any
+       screen; the body scrolls past that. A max-height share ran under the band on a phone
+       (playtest 2026-11-28 finding 8). */
+    bottom: 29%;
+    max-height: none;
 }
 
 .cd-scan-window .cd-scan__body {
     max-height: none;
     flex-shrink: 1;
+}
+
+/* A slim Back, so a phone's short page gives its height to the body. */
+.cd-scan-window .cd-button--narrow {
+    height: 34px;
+    width: 30%;
+    margin-top: 2px;
+    flex-shrink: 0;
 }
 
 /* Inspect: how to learn what is still "???" (playtest 4 finding 34). */
@@ -4135,6 +4185,34 @@
     margin-top: 6px;
 }
 
+/* A filled slot: the potion's icon and how many (playtest 2026-11-28 finding 5). */
+.hub-entry__belt-slot--icon {
+    width: 104px;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.hub-entry__belt-icon {
+    width: 32px;
+    height: 32px;
+    margin-right: 6px;
+    flex-shrink: 0;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.hub-entry__belt-count {
+    font-size: 18px;
+    -unity-font-style: bold;
+    margin: 0;
+    padding: 0;
+}
+
+.hub-entry__belt-merchant {
+    align-self: center;
+    margin-top: 6px;
+}
+
 /* Doubled: .hub-lotpanel__actions' padding shorthand sits later in the file and would win. */
 .hub-lotpanel__actions.hub-entry__actions {
     padding: 0 18px 18px 18px;
@@ -4502,9 +4580,10 @@
     overflow: visible;
 }
 
+/* Sized by HubView.PlaceBackdrop to the whole image, bleed included, so it is drawn as is. */
 .hub-backdrop {
     background-color: rgb(18, 10, 34);
-    -unity-background-scale-mode: scale-and-crop;
+    -unity-background-scale-mode: stretch-to-fill;
 }
 
 /* One building's sprite. Its own layer beneath the hit boxes, so silhouettes may overlap

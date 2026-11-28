@@ -3072,7 +3072,7 @@ MonoBehaviour:
     Note: 
   - Key: run.tutorial-run.level-1.name
     Values:
-    - Dungeon Entrance
+    - Ruined Passage
     Reviewed: 0
     Note: 
   - Key: run.tutorial-run.level-2.name
@@ -3693,7 +3693,7 @@ MonoBehaviour:
     Note: 
   - Key: tutorial.open-merchant-in-town.text
     Values:
-    - 'Visit the Merchant: your potion belt can carry more.'
+    - 'Visit the Merchant: you can carry more potions.'
     Reviewed: 0
     Note: 
   - Key: tutorial.enter-merchant-on-panel.text
@@ -3719,24 +3719,24 @@ MonoBehaviour:
     Note: 
   - Key: tutorial.pack-potion-on-map.text
     Values:
-    - Choose where to go next. The belt is packed before you go in.
+    - Choose where to go next. Potions are packed before you go in.
     Reviewed: 0
     Note: 
   - Key: tutorial.equip-potion.text
     Values:
-    - Click the empty belt slot to pack Energy. It restores an ability charge in
-      a fight.
+    - Click the empty potion slot to pack Energy. It restores an ability charge
+      in a fight.
     Reviewed: 0
     Note: 
   - Key: tutorial.belt-packed.text
     Values:
-    - Packed. The belt refills at the start of each level. Enter the dungeon when
+    - Packed. Potions refill at the start of each level. Enter the dungeon when
       you are ready.
     Reviewed: 0
     Note: 
   - Key: tutorial.belt-ready.text
     Values:
-    - Your belt is ready. Choose The Story to carry on.
+    - Your potions are packed. Choose The Story to carry on.
     Reviewed: 0
     Note: 
   - Key: tutorial.go-on.text
@@ -4357,7 +4357,7 @@ MonoBehaviour:
     Note: 
   - Key: ui.hub.merchant-tab-belt
     Values:
-    - Potion Belt
+    - Potions
     Reviewed: 0
     Note: 
   - Key: ui.hub.merchant-tab-buy
@@ -4392,7 +4392,7 @@ MonoBehaviour:
     Note: 
   - Key: ui.hub.potion-belt
     Values:
-    - Potion belt
+    - Potions
     Reviewed: 0
     Note: 
   - Key: ui.hub.progress-party-btn
@@ -4428,11 +4428,6 @@ MonoBehaviour:
   - Key: ui.hub.sphere-grid
     Values:
     - Sphere Grid
-    Reviewed: 0
-    Note: 
-  - Key: ui.hub.tab-consumables
-    Values:
-    - Consumables
     Reviewed: 0
     Note: 
   - Key: ui.hub.tab-equipment
@@ -4660,6 +4655,11 @@ MonoBehaviour:
     - Map
     Reviewed: 0
     Note: 
+  - Key: ui.room.pause-surrender
+    Values:
+    - Surrender
+    Reviewed: 0
+    Note: Pause menu button (markup default; the code sets room.pause.surrender)
   - Key: ui.room.pause-quit
     Values:
     - Quit to Title
@@ -5537,6 +5537,11 @@ MonoBehaviour:
     - Cleared every floor
     Reviewed: 0
     Note: Run history, end of a cleared run
+  - Key: dungeon.history.end.surrendered
+    Values:
+    - Surrendered on {floor}
+    Reviewed: 0
+    Note: Run history, end of a run given up from the pause menu; {floor} = dungeon.history.floor text
   - Key: dungeon.history.end.fell
     Values:
     - Fell on {floor}
@@ -5821,11 +5826,6 @@ MonoBehaviour:
       {lines}'
     Reviewed: 0
     Note: Refuge result dialog; {lines} = result lines, one per line
-  - Key: room.combat.turn-title
-    Values:
-    - '{hero}''s Turn'
-    Reviewed: 0
-    Note: Combat command window title; {hero} = acting unit name
   - Key: room.command.attack
     Values:
     - Attack
@@ -5932,6 +5932,16 @@ MonoBehaviour:
     - No safe way there
     Reviewed: 0
     Note: Floating text when a clicked map room cannot be reached
+  - Key: room.pause.surrender
+    Values:
+    - Surrender
+    Reviewed: 0
+    Note: Pause menu button; ends the level, this floor's gains are lost
+  - Key: room.pause.surrender-armed
+    Values:
+    - 'Surrender: lose this floor?'
+    Reviewed: 0
+    Note: Pause menu Surrender button after the first press
   - Key: room.pause.leave
     Values:
     - Quit to Title
@@ -8199,6 +8209,21 @@ MonoBehaviour:
     - "{potion} \xD7{count}"
     Reviewed: 0
     Note: potion belt slot button; potion = potion name, count = per-run capacity
+  - Key: hub.camp.belt-slot-count
+    Values:
+    - "\xD7{count}"
+    Reviewed: 0
+    Note: potion slot with an icon, the amount beside it; count = per-level capacity
+  - Key: hub.camp.belt-slot-tip
+    Values:
+    - '{potion}: {effect}'
+    Reviewed: 0
+    Note: tooltip on a potion slot; potion = potion name, effect = what it does
+  - Key: ui.hub.progress-belt-merchant
+    Values:
+    - Upgrade at the Merchant
+    Reviewed: 0
+    Note: level-entry screen, under the potions; opens the Merchant's potions tab
   - Key: hub.camp.belt-empty
     Values:
     - Empty
@@ -8216,7 +8241,7 @@ MonoBehaviour:
     Note: potion belt description
   - Key: hub.camp.belt-packed-feedback
     Values:
-    - The belt is packed for this level.
+    - Potions are packed for this level.
     Reviewed: 0
     Note: feedback when clicking a belt slot mid-run
   - Key: hub.camp.choose-mentored
@@ -8322,12 +8347,12 @@ MonoBehaviour:
     Note: merchant empty sell list
   - Key: hub.merchant.tab.belt
     Values:
-    - Potion belt
+    - Potions
     Reviewed: 0
     Note: merchant list title (belt tab)
   - Key: hub.merchant.empty.no-belt
     Values:
-    - No belt upgrades available.
+    - No potion upgrades available.
     Reviewed: 0
     Note: merchant empty belt list
   - Key: hub.merchant.price-max
@@ -8342,7 +8367,7 @@ MonoBehaviour:
     Note: merchant row price; price = gold
   - Key: hub.merchant.belt.another-slot
     Values:
-    - Another belt slot
+    - Another potion slot
     Reviewed: 0
     Note: belt offer row name
   - Key: hub.merchant.belt.learn
@@ -8402,7 +8427,7 @@ MonoBehaviour:
     Note: belt slot upgrade maxed; now = slots
   - Key: hub.merchant.belt.new-potion
     Values:
-    - A new potion for the belt
+    - A new potion
     Reviewed: 0
     Note: belt recipe offer subtitle
   - Key: hub.merchant.belt.capacity-change
@@ -8453,7 +8478,7 @@ MonoBehaviour:
     Note: belt slot offer description
   - Key: hub.merchant.belt.recipe-desc
     Values:
-    - Once learned, put it in a belt slot at the campfire.
+    - Once learned, put it in a potion slot at the campfire.
     Reviewed: 0
     Note: belt recipe offer description, after the potion's effect line (code adds
       the space)
@@ -8520,12 +8545,12 @@ MonoBehaviour:
     Note: merchant feedback
   - Key: hub.merchant.feedback.belt-slots
     Values:
-    - The belt has {slots} slots now. Fill them at the campfire.
+    - You can carry {slots} potions now. Fill them at the campfire.
     Reviewed: 0
     Note: merchant feedback; slots = belt slots
   - Key: hub.merchant.feedback.learned
     Values:
-    - Learned the {potion}. Put it in a belt slot at the campfire.
+    - Learned the {potion}. Put it in a potion slot at the campfire.
     Reviewed: 0
     Note: merchant feedback; potion = potion item name
   - Key: hub.merchant.feedback.capacity
@@ -8696,31 +8721,11 @@ MonoBehaviour:
     - Not equipped
     Reviewed: 0
     Note: known ability row caption / detail subtitle
-  - Key: items.inv.title.party-pouch
-    Values:
-    - Party pouch
-    Reviewed: 0
-    Note: inventory left column title, consumables tab
-  - Key: items.inv.title.consumables
-    Values:
-    - Consumables
-    Reviewed: 0
-    Note: inventory list title
   - Key: items.inv.kinds-summary
     Values:
     - "{kinds} kinds \xB7 {total} in all"
     Reviewed: 0
     Note: consumables/materials summary; kinds = distinct items, total = count
-  - Key: items.inv.consumables-note
-    Values:
-    - Shared by the whole party. Use them with the Item command in a fight.
-    Reviewed: 0
-    Note: consumables tab note
-  - Key: items.inv.empty.no-consumables
-    Values:
-    - No consumables.
-    Reviewed: 0
-    Note: consumables tab empty list
   - Key: items.inv.quantity
     Values:
     - x{count}
@@ -10123,7 +10128,7 @@ MonoBehaviour:
     Note: 
   - Key: run.threshold-entrance.name
     Values:
-    - Dungeon Entrance
+    - Ruined Passage
     Reviewed: 0
     Note: 'Story map: the Threshold''s first run (one floor)'
   - Key: run.threshold-entrance.description

@@ -110,6 +110,19 @@ namespace Tests.EditMode
         }
 
         [Test]
+        public void Surrendered_EndsTheAttempt_AndLosesTheFloor()
+        {
+            var data = Started();
+            RunHistoryOps.XpEarned(data, 25);
+
+            RunHistoryOps.Surrendered(data, Now);
+
+            Assert.IsFalse(data.HasCurrent);
+            Assert.AreEqual(RunOutcome.Surrendered, data.Records[0].Outcome);
+            Assert.AreEqual(0, data.Records[0].XpKept);
+        }
+
+        [Test]
         public void FloorCleared_LastFloor_FinishesAsCleared()
         {
             var data = Started("TheWarrens", 1);

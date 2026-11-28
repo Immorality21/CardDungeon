@@ -179,6 +179,14 @@ namespace Assets.Scripts.Heroes.UI
         /// the editor sets middle+right so left stays free for drag/connect.</summary>
         public int PanButtons { get; set; } = (1 << 0) | (1 << 2);
 
+        /// <summary>
+        /// Keeps the graph from being dragged off screen (playtest 2026-11-28 finding 3): the middle of
+        /// the viewport always stays over the graph's bounds, so at most half a screen of empty space
+        /// shows past any edge. On by default; the editor windows turn it off, since a designer places
+        /// nodes out in the empty space.
+        /// </summary>
+        public bool BoundPan { get; set; } = true;
+
         public float Zoom
         {
             get { return _zoom; }
@@ -1048,6 +1056,7 @@ namespace Assets.Scripts.Heroes.UI
 
         private void ApplyTransform()
         {
+            ClampPanToGraph();
             _content.style.translate = new Translate(_pan.x, _pan.y);
             _content.style.scale = new Scale(new Vector2(_zoom, _zoom));
             _backdrop.style.translate = _content.style.translate;
@@ -1059,6 +1068,52 @@ namespace Assets.Scripts.Heroes.UI
                 _stars.style.backgroundPositionY = new BackgroundPosition(BackgroundPositionKeyword.Top, new Length(_pan.y * StarParallax));
             }
             _content.MarkDirtyRepaint();
+        }
+
+        private void ClampPanToGraph()
+        {
+            if (!BoundPan || _nodes.Count == 0)
+            {
+                return;
+            }
+            float width = resolvedStyle.width;
+            float height = resolvedStyle.height;
+            if (width <= 0f || height <= 0f || float.IsNaN(width) || float.IsNaN(height))
+            {
+                return;
+            }
+
+            var min = new Vector2(float.MaxValue, float.MaxValue);
+            var max = new Vector2(float.MinValue, float.MinValue);
+            bool captions = false;
+            foreach (var node in _nodes.Values)
+            {
+                min = Vector2.Min(min, node.Position);
+                max = Vector2.Max(max, node.Position);
+                captions |= !string.IsNullOrEmpty(node.Caption);
+            }
+            min -= new Vector2(NodeRadius * 2f, NodeRadius * 2f);
+            max += new Vector2(NodeRadius * 2f, NodeRadius * 2f);
+            if (captions)
+            {
+                min.x -= CaptionFramePad.x;
+                max.x += CaptionFramePad.x;
+                max.y += CaptionFramePad.y;
+            }
+            _pan = ClampedPan(_pan, _zoom, min, max, new Vector2(width, height));
+        }
+
+        /// <summary>
+        /// The nearest pan to <paramref name="pan"/> that keeps the viewport's centre inside the graph
+        /// bounds <paramref name="min"/>..<paramref name="max"/> (grid space) at <paramref name="zoom"/>.
+        /// Pure.
+        /// </summary>
+        public static Vector2 ClampedPan(Vector2 pan, float zoom, Vector2 min, Vector2 max, Vector2 viewport)
+        {
+            var centre = viewport * 0.5f;
+            return new Vector2(
+                Mathf.Clamp(pan.x, centre.x - max.x * zoom, centre.x - min.x * zoom),
+                Mathf.Clamp(pan.y, centre.y - max.y * zoom, centre.y - min.y * zoom));
         }
 
         // --- input ---------------------------------------------------------------
@@ -1121,6 +1176,10 @@ namespace Assets.Scripts.Heroes.UI
                 var delta = (Vector2)(evt.position - _panStartPointer);
                 _pan = _panStartValue + delta;
                 ApplyTransform();
+                // Re-anchor on the clamped pan, so dragging back from past an edge moves the graph at
+                // once instead of first unwinding the overshoot.
+                _panStartValue = _pan;
+                _panStartPointer = evt.position;
             }
         }
 

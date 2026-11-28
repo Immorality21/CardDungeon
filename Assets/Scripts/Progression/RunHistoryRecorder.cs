@@ -174,6 +174,10 @@ namespace Assets.Scripts.Progression
             {
                 RunHistoryOps.Fell(Data, _lastFoes, Now);
             }
+            else if (e.Reason == ForfeitReason.Surrendered)
+            {
+                RunHistoryOps.Surrendered(Data, Now);
+            }
             else
             {
                 RunHistoryOps.Retreated(Data);

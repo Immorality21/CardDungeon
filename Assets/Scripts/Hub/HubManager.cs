@@ -158,6 +158,8 @@ namespace Assets.Scripts.Hub
 
         // Which view the party screen was opened from, so Back goes where the player came from.
         private bool _partyOpenedFromProgress;
+        private bool _merchantOpenedFromProgress;
+        private Button _progressMerchantButton;
 
         // The lot whose panel is open, so Build/Upgrade knows what it is acting on.
         private BuildingSO _selectedLot;
@@ -284,6 +286,7 @@ namespace Assets.Scripts.Hub
             // It takes the keyboard itself while open, so no screen here needs a branch for it.
             Assets.Scripts.Tutorial.ControlsPanel.Attach(root, openWithF1: true)?.AddOpener(root.Q<Button>("hub-controls-btn"));
             _progressPartyButton = root.Q<Button>("progress-party-btn");
+            _progressMerchantButton = root.Q<Button>("progress-belt-merchant");
             _backButton = root.Q<Button>("back-btn");
             _enterButton = root.Q<Button>("enter-btn");
             _returnButton = root.Q<Button>("return-btn");
@@ -319,6 +322,10 @@ namespace Assets.Scripts.Hub
             _backButton.clicked += OnBack;
             _returnButton.clicked += OnRunCompleteReturn;
             _progressPartyButton.clicked += OnChangePartyFromProgress;
+            if (_progressMerchantButton != null)
+            {
+                _progressMerchantButton.clicked += OnMerchantFromProgress;
+            }
             _lotActionButton.clicked += OnLotAction;
             _lotEnterButton.clicked += OnLotEnter;
             _lotCloseButton.clicked += ShowTown;
@@ -344,7 +351,7 @@ namespace Assets.Scripts.Hub
                 _campaignMap.OnClosed += ShowTown;
                 _campaignMap.OnRunChosen += OnRunChosen;
             }
-            _merchant.OnClosed += ShowTown;
+            _merchant.OnClosed += OnMerchantClosed;
             _merchant.CanClose = () => AllowsOrNudges(_tutorialStep != TutorialStep.UpgradeBelt);
             _merchant.BeltBought += OnBeltBought;
             _partySelect.OnClosed += OnPartyClosed;
@@ -428,7 +435,7 @@ namespace Assets.Scripts.Hub
             _town.SetBackdropAmbience(_hub.GlowSprite, _hub.BackdropLights, _hub.TwinklingStars, _hub.StarField);
             var lots = new List<HubView.LotInfo>();
             HubPresenter.BuildViewModel(_hub, Progress(), lots);
-            _town.SetTown(_hub.ReferenceSize, _hub.Backdrop, lots);
+            _town.SetTown(_hub.ReferenceSize, _hub.Backdrop, lots, _hub.BackdropSafeArea);
             RefreshTown();
         }
 
@@ -1459,6 +1466,7 @@ namespace Assets.Scripts.Hub
                 _belt.Refresh(locked);
             }
             SetShown(_progressPartyButton, !locked);
+            SetShown(_progressMerchantButton, !locked && CanVisitMerchantFromProgress());
             if (locked && _progressParty != null && string.IsNullOrEmpty(_progressParty.text))
             {
                 _progressParty.text = Loc.Get("hub.progress.party-locked");
@@ -2291,6 +2299,7 @@ namespace Assets.Scripts.Hub
 
         private void OnVisitMerchant()
         {
+            _merchantOpenedFromProgress = false;
             CoverTown();
             SetShown(_lotView, false);
             _merchant.Show();
@@ -2334,6 +2343,42 @@ namespace Assets.Scripts.Hub
             SetShown(_lotView, false);
             _partySelect.Show(PartyLockedReason());
             ResetKeyboardNavigation();
+        }
+
+        /// <summary>
+        /// The level-entry screen's way to the Merchant's potions (playtest 2026-11-28 finding 5): only
+        /// once it stands, and not while the tutorial runs, whose Merchant step comes from the town.
+        /// </summary>
+        private bool CanVisitMerchantFromProgress()
+        {
+            if (!MetaProgressManager.Instance.TutorialFinished || _hub == null)
+            {
+                return false;
+            }
+            var merchant = _hub.Find(HubService.Merchant);
+            return merchant != null && BuildingOps.IsBuilt(merchant, Progress());
+        }
+
+        private void OnMerchantFromProgress()
+        {
+            _merchantOpenedFromProgress = true;
+            SetShown(_progressView, false);
+            CoverTown();
+            _merchant.ShowPotions();
+            ResetKeyboardNavigation();
+        }
+
+        /// <summary>Back out of the Merchant: to the level entry if it was opened from there, else the town.</summary>
+        private void OnMerchantClosed()
+        {
+            if (_merchantOpenedFromProgress)
+            {
+                _merchantOpenedFromProgress = false;
+                SetShown(_merchantView, false);
+                ShowRunProgressPanel();
+                return;
+            }
+            ShowTown();
         }
 
         private void OnChangePartyFromProgress()

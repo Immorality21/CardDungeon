@@ -34,6 +34,12 @@ namespace Assets.Scripts.Hub
                  "enough to play against before any art exists.")]
         public Sprite Backdrop;
 
+        [Tooltip("The part of the Backdrop image, in its own pixels from the top left, that fills " +
+                 "ReferenceSize - the town's box. The rest is bleed: painted past the box so a wider or " +
+                 "taller screen shows more scenery instead of black bars, and cropped on screens that " +
+                 "match the box. Width 0 means the whole image is the box (no bleed).")]
+        public Rect BackdropSafeArea;
+
         // --- ambience (presentation only; HubView draws it) ------------------------
 
         [Tooltip("The soft light every HubAmbientLight paints with: a white glow, tinted per light.")]
